@@ -7,6 +7,7 @@ See [README.md](./README.md). Add handoffs, study-docs, and dev-log rows as you 
 | Date | Slug | Summary |
 |------|------|---------|
 | 2026-06-10 | hosted-hermes-private-ai | Hosting/integration handoff for Hermes, private AI server, Supabase, Railway backend, and Vercel frontend |
+| 2026-06-10 | backend-hostable-mvp | Narrow execution handoff for making the Hades MVP backend-hostable |
 
 ## Sessions
 
