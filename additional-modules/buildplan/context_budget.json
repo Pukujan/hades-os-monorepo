@@ -1,0 +1,13 @@
+{
+  "hardLimit": 28000,
+  "currentUsage": 0,
+  "remaining": 28000,
+  "warningAt": 22000,
+  "compactAt": 24000,
+  "stopAt": 27000,
+  "lastCompactedAt": null,
+  "compactionStrategy": "summarize completed work, preserve current phase, target files, failing tests, blockers",
+  "sessionStart": "2026-06-10T04:11:47.956+00:00",
+  "sessionEnd": null,
+  "history": []
+}

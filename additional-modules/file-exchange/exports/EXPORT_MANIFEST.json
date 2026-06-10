@@ -1,0 +1,76 @@
+{
+  "exportedAt": "2026-06-01T16:33:06.989Z",
+  "sourceRepo": "legal-prmpt-eng",
+  "description": "Architecture-only starter — no domain modules, no build artifacts",
+  "included": {
+    "backendModules": [
+      "_reference",
+      "model-condenser"
+    ],
+    "frontendModules": [
+      "_reference"
+    ],
+    "docs": [
+      "docs/architecture/**",
+      "docs/API.md (starter)",
+      "docs/model-condenser/API.md"
+    ],
+    "scripts": [
+      "new-module.mjs",
+      "sync-cli-template.mjs",
+      "export-architecture-starter.mjs",
+      "check-api-docs.mjs",
+      "lint-contracts.mjs",
+      "lint-repo-artifacts.mjs",
+      "condense-models.mjs",
+      "condense-prompts.mjs",
+      "condense-file-structure.mjs",
+      "condense-all.mjs",
+      "consolidated-output.mjs",
+      "write-pre-push-dev-log.mjs",
+      "verify-dev-log.mjs",
+      "plan-finalize.mjs",
+      "plan-gate.mjs",
+      "lint-pipeline-agent-mini-modules.mjs",
+      "import-to-file-exchange.mjs",
+      "resolve-import-stamp.mjs",
+      "export-consolidated-models.mjs",
+      "run-module-evals.mjs",
+      "scripts/lib/**",
+      "scripts/git-hooks/**"
+    ],
+    "other": [
+      "file-exchange/",
+      "work-log/ (structure)",
+      ".agents/",
+      "backend/src/core",
+      "backend/src/shared",
+      "frontend/src/core",
+      "frontend/src/shared"
+    ]
+  },
+  "excluded": {
+    "dirs": [
+      "node_modules",
+      ".git",
+      "dist",
+      "build",
+      "coverage",
+      "packages",
+      "data",
+      "eval-bundles",
+      "case-exports",
+      "evals"
+    ],
+    "backendModules": "case-filing-ai, court-rules, case-workflow, filing-*, human-review, task-docketing",
+    "data": "runtime batches, golden fixtures, PDFs",
+    "scripts": "ingest-golden-*, rerun-batch-evals, run-module-evals"
+  },
+  "nextSteps": [
+    "Review file-exchange/exports/architecture-starter/ARCHITECTURE_EXPORT_README.md",
+    "npm install in backend/ and frontend/",
+    "npm run lint:contracts && npm run lint:architecture",
+    "node scripts/new-module.mjs my-feature --label \"My Feature\"",
+    "Copy into packages/create-modular-monolith/template or publish CLI"
+  ]
+}

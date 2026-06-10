@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeShellExecution": [
+      {
+        "command": "node .agents/hooks/before-agent-push.mjs",
+        "matcher": "git\\s+.*\\bpush\\b",
+        "failClosed": true
+      }
+    ]
+  }
+}

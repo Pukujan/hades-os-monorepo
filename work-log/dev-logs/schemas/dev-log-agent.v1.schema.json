@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://legal-prmpt-eng.local/schemas/dev-log-agent.v1.json",
+  "title": "Agent audit dev log",
+  "description": "Machine-readable pre-push audit log for Cursor agents. Pair with human dev-log in work-log/dev-logs/human/.",
+  "type": "object",
+  "required": ["meta", "summary", "apis", "git", "tests", "repositoryTree", "changes", "decisions", "iterations", "tradeoffs", "improvements", "regressions", "risks", "followUps"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": ["schemaVersion", "entryId", "slug", "generatedAt", "humanLogPath", "audience"],
+      "properties": {
+        "schemaVersion": { "const": "1.0.0" },
+        "entryId": { "type": "string", "pattern": "^[0-9]{3}$" },
+        "slug": { "type": "string" },
+        "generatedAt": { "type": "string", "format": "date-time" },
+        "humanLogPath": { "type": "string" },
+        "audience": { "const": "agent" },
+        "filledBy": { "type": "string", "enum": ["script", "agent", "human"] },
+        "handoffRefs": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "summary": { "type": "string" },
+    "apis": {
+      "type": "object",
+      "description": "HTTP routes, versioned contracts, deprecated surfaces",
+      "properties": {
+        "capturedAt": { "type": "string" },
+        "sourceDocs": { "type": "array", "items": { "type": "string" } },
+        "http": {
+          "type": "object",
+          "properties": {
+            "active": { "type": "array" },
+            "stub": { "type": "array" },
+            "deprecated": { "type": "array" }
+          }
+        },
+        "moduleStatus": { "type": "array" },
+        "versioned": { "type": "object" },
+        "deprecated": { "type": "object" },
+        "cli": { "type": "array" }
+      }
+    },
+    "git": {
+      "type": "object",
+      "properties": {
+        "branch": { "type": "string" },
+        "sha": { "type": "string" },
+        "shortSha": { "type": "string" },
+        "changedFiles": { "type": "array" },
+        "diffStatAgainstHead": { "type": "string" },
+        "recentCommits": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "tests": {
+      "type": "object",
+      "properties": {
+        "ran": { "type": "boolean" },
+        "exitCode": { "type": ["integer", "null"] },
+        "summary": { "type": "string" },
+        "passed": { "type": "array", "items": { "type": "string" } },
+        "failed": { "type": "array", "items": { "type": "string" } },
+        "commands": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "repositoryTree": {
+      "type": "object",
+      "properties": {
+        "capturedAt": { "type": "string" },
+        "excludeDirs": { "type": "array", "items": { "type": "string" } },
+        "treeIgnoreFlag": { "type": "string" },
+        "stats": { "type": "object" },
+        "treeText": { "type": "string" },
+        "flatPathCount": { "type": "integer" }
+      }
+    },
+    "changes": {
+      "type": "object",
+      "properties": {
+        "byArea": { "type": "object", "additionalProperties": { "type": "array", "items": { "type": "string" } } },
+        "added": { "type": "array", "items": { "type": "string" } },
+        "modified": { "type": "array", "items": { "type": "string" } },
+        "deleted": { "type": "array", "items": { "type": "string" } },
+        "narrative": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "decision", "rationale"],
+        "properties": {
+          "id": { "type": "string" },
+          "decision": { "type": "string" },
+          "rationale": { "type": "string" },
+          "alternativesRejected": { "type": "array", "items": { "type": "string" } },
+          "tradeoff": { "type": "string" }
+        }
+      }
+    },
+    "iterations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "attempt": { "type": "integer" },
+          "action": { "type": "string" },
+          "outcome": { "type": "string" },
+          "blockedBy": { "type": "string" }
+        }
+      }
+    },
+    "tradeoffs": { "type": "array", "items": { "type": "string" } },
+    "improvements": { "type": "array", "items": { "type": "string" } },
+    "regressions": { "type": "array", "items": { "type": "string" } },
+    "risks": { "type": "array", "items": { "type": "string" } },
+    "followUps": { "type": "array", "items": { "type": "string" } }
+  }
+}

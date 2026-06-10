@@ -1,0 +1,22 @@
+{"time":"2026-05-23T15:45:00Z","contract":"repoArtifactLayout","from":null,"to":"v001","reason":"Initial REPO_ARTIFACT_LAYOUT and file-exchange","author":"agent"}
+{"time":"2026-05-23T15:45:00Z","contract":"fileExchange","from":null,"to":"v001","reason":"file-exchange/ imports and exports dated folders","author":"agent"}
+{"time":"2026-05-23T15:46:00Z","contract":"caseFilingStorageLayout","from":null,"to":"v001","reason":"storageLayout.contract.js and storagePaths.js","author":"agent"}
+{"time":"2026-05-23T15:46:00Z","contract":"parsedDocumentArtifacts","from":null,"to":"v001","reason":"parsed-documents artifact names and audit events","author":"agent"}
+{"time":"2026-05-23T17:00:00Z","contract":"pipelineVersions","from":"case_001-v0-wiped","to":"case_001-v1-parsed-synthetic","reason":"Ingested synthetic golden parsed baseline (14 docs)","author":"agent"}
+{"time":"2026-05-23T17:00:00Z","contract":"ruleAuthority","from":null,"to":"v001","reason":"Court rules services and authority rank enum","author":"agent"}
+{"time":"2026-05-23T18:00:00Z","contract":"pipelineVersions","from":"case_001-v1-parsed-synthetic","to":"case_001-v2-full-expected","reason":"Ingested full doc/snapshot golden from bundle ground_truth.json","author":"agent"}
+{"time":"2026-05-23T19:00:00Z","contract":"fileExchange","from":"v001","to":"v001","reason":"AGENTS.md + alwaysApply file-exchange-inbox rule; import:file-exchange script","author":"agent"}
+{"time":"2026-05-23T20:00:00Z","contract":"consolidatedExports","from":null,"to":"v001","reason":"file-exchange/exports consolidated-*.json + models/ mirror; condense:all","author":"agent"}
+{"time":"2026-05-23T20:00:00Z","contract":"prePushDevLog","from":null,"to":"v001","reason":"Paired human MD + agent JSON pre-push logs; API/tree/test audits","author":"agent"}
+{"time":"2026-05-23T20:00:00Z","contract":"apiDocumentationRegistry","from":null,"to":"v001","reason":"docs/API.md registry contract for dev-log api inventory","author":"agent"}
+{"time":"2026-05-23T20:01:00Z","contract":"fileExchange","from":"v001","to":"v001","reason":"Human-readable stamps; consolidated exports at exports root; contract doc","author":"agent"}
+{"time":"2026-05-24T01:30:00Z","contract":"consolidatedExports","from":"v001","to":"v001","reason":"Rename models/ mirror to consolidated-files/; dated {stamp}_consolidated audit folders","author":"agent"}
+{"time":"2026-05-24T01:30:00Z","contract":"repoArtifactLayout","from":"v001","to":"v001","reason":"consolidated-files/ replaces models/ for latest consolidated JSON mirror","author":"agent"}
+{"time":"2026-05-24T02:00:00Z","contract":"fileExchange","from":"v001","to":"v001","reason":"POST /api/file-exchange/clear and clear-file-exchange CLI for dated folder cleanup","author":"agent"}
+{"time":"2026-05-24T15:00:00Z","contract":"architecturePushDevLog","from":null,"to":"v001","reason":"Paired arch-push logs for create-modular-monolith/npm; formatHumanReadableUtc headers","author":"agent"}
+{"time":"2026-05-29T13:45:00Z","contract":"documentPersistence","from":null,"to":"v001","reason":"Runtime upload + DB persistence contract; templates; separate from file-exchange","author":"agent"}
+{"time":"2026-05-29T14:00:00Z","contract":"moduleAgentStateMachine","from":null,"to":"v001","reason":"Per-module agent FSM controller contract, shared runtime, implementation templates","author":"agent"}
+{"time":"2026-05-29T14:30:00Z","contract":"asyncJobQueue","from":null,"to":"v001","reason":"BullMQ + Redis for async jobs; SQL remains source of truth","author":"agent"}
+{"time":"2026-05-29T15:30:00Z","contract":"architecturePushDevLog","from":"v001","to":"v001","reason":"Documented as maintainer-repo-only; omitted from starter manifest.json until arch-log scripts ship in template","author":"agent"}
+{"time":"2026-05-30T12:00:00Z","contract":"monorepoDeploy","from":null,"to":"v001","reason":"Railway backend + Vercel frontend layout; lint-deploy.mjs enforces root dirs and forbidden root start script","author":"agent"}
+{"time":"2026-06-01T12:00:00Z","contract":"pipelineAgentMiniModules","from":null,"to":"v001","reason":"Mirrored FE/BE pipeline agent and assigner mini-module registry + lint","author":"agent"}

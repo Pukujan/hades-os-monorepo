@@ -1,0 +1,72 @@
+{
+  "repoArtifactLayout": {
+    "version": "v001",
+    "doc": "docs/architecture/REPO_ARTIFACT_LAYOUT.md",
+    "overview": "docs/architecture/CONTRACTS_OVERVIEW.md"
+  },
+  "fileExchange": {
+    "version": "v001",
+    "doc": "docs/architecture/contracts/fileExchange.contract.md",
+    "userDoc": "file-exchange/README.md",
+    "timestampHelper": "backend/src/shared/utils/formatExchangeTimestamp.js",
+    "importScript": "scripts/import-to-file-exchange.mjs"
+  },
+  "consolidatedExports": {
+    "version": "v001",
+    "doc": "docs/architecture/contracts/consolidatedExports.contract.md",
+    "file": "backend/src/shared/contracts/consolidatedExports.contract.js",
+    "utility": "backend/src/shared/utils/consolidatedExport.js"
+  },
+  "planningPhase": {
+    "version": "v003",
+    "doc": "docs/architecture/contracts/planningPhase.contract.md",
+    "file": "backend/src/shared/contracts/planningPhase.contract.js",
+    "finalize": "scripts/plan-finalize.mjs",
+    "gate": "scripts/plan-gate.mjs",
+    "artifacts": "scripts/lib/plan-artifacts.mjs",
+    "studyLogCommand": ".agents/commands/planning-study-log.md",
+    "planPackageCommand": ".agents/commands/planning-plan-package.md",
+    "studyDocsDir": "work-log/study-docs",
+    "planningDir": "work-log/planning"
+  },
+  "prePushDevLog": {
+    "version": "v001",
+    "doc": "docs/architecture/contracts/prePushDevLog.contract.md",
+    "file": "backend/src/shared/contracts/prePushDevLog.contract.js",
+    "schema": "work-log/dev-logs/schemas/dev-log-agent.v1.schema.json",
+    "generator": "scripts/write-pre-push-dev-log.mjs",
+    "humanFormat": "scripts/lib/dev-log-human-format.mjs",
+    "verify": "scripts/verify-dev-log.mjs",
+    "apiInventory": "scripts/lib/api-inventory.mjs",
+    "repoTree": "scripts/lib/repo-tree.mjs",
+    "workLogReadme": "work-log/dev-logs/README.md"
+  },
+  "apiDocumentationRegistry": {
+    "version": "v001",
+    "doc": "docs/architecture/contracts/apiDocumentationRegistry.contract.md",
+    "registry": "docs/API.md",
+    "lintScript": "scripts/check-api-docs.mjs",
+    "architectureDoc": "docs/architecture/API_DOCUMENTATION_CONTRACT.md"
+  },
+  "moduleAgentStateMachine": {
+    "version": "v001",
+    "doc": "docs/architecture/contracts/moduleAgentStateMachine.contract.md",
+    "file": "backend/src/shared/contracts/moduleAgentStateMachine.contract.js",
+    "utility": "backend/src/shared/agent-runtime/createAgentRuntime.js",
+    "userDoc": "docs/architecture/templates/module-agent-state-machine/README.md",
+    "schema": "docs/architecture/templates/module-agent-state-machine/migrations/001_agent_state_machine.sql"
+  },
+  "asyncJobQueue": {
+    "version": "v001",
+    "doc": "docs/architecture/contracts/asyncJobQueue.contract.md",
+    "file": "backend/src/shared/contracts/asyncJobQueue.contract.js",
+    "userDoc": "docs/architecture/templates/async-job-queue/README.md"
+  },
+  "monorepoDeploy": {
+    "version": "v001",
+    "doc": "docs/architecture/contracts/monorepoDeploy.contract.md",
+    "file": "backend/src/shared/contracts/monorepoDeploy.contract.js",
+    "lintScript": "scripts/lint-deploy.mjs",
+    "userDoc": "docs/DEPLOY.md"
+  }
+}

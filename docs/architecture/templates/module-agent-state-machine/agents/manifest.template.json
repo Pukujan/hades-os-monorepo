@@ -1,0 +1,12 @@
+{
+  "module": "<module-name>",
+  "version": "v001",
+  "agents": [
+    {
+      "id": "example-assistant",
+      "version": "v001",
+      "file": "example-assistant.machine.js",
+      "description": "Example agent — replace with your module's first agent"
+    }
+  ]
+}

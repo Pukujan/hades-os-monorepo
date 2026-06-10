@@ -1,0 +1,35 @@
+{
+  "name": "modular-monolith-backend",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/core/server.js",
+    "start": "node src/core/server.js",
+    "lint:boundaries": "node scripts/check-module-boundaries.mjs",
+    "lint:layers": "node scripts/check-module-layers.mjs",
+    "lint:api-docs": "node ../scripts/check-api-docs.mjs",
+    "lint:architecture": "npm run lint:boundaries && npm run lint:layers && npm run lint:api-docs",
+    "test": "node --test && node --test scripts/boundary-lint.test.mjs",
+    "condense-models": "node ../scripts/condense-models.mjs",
+    "condense-prompts": "node ../scripts/condense-prompts.mjs",
+    "condense-file-structure": "node ../scripts/condense-file-structure.mjs",
+    "test:evals": "node ../scripts/run-module-evals.mjs"
+  },
+  "dependencies": {
+    "@napi-rs/canvas": "0.1.100",
+    "@neondatabase/serverless": "^1.1.0",
+    "archiver": "^7.0.1",
+    "better-sqlite3": "^11.10.0",
+    "bullmq": "^5.77.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "ioredis": "^5.11.0",
+    "mammoth": "^1.12.0",
+    "multer": "^2.1.1",
+    "pdf-parse": "^2.4.5",
+    "pdfjs-dist": "5.4.296",
+    "word-extractor": "^1.0.4"
+  }
+}

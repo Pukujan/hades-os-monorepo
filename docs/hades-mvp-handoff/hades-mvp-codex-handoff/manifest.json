@@ -1,0 +1,18 @@
+{
+  "name": "hades-mvp-codex-handoff",
+  "version": "0.1",
+  "purpose": "Codex-ready handoff for Hades OS MVP interactive UI and implementation scope",
+  "prototype": "prototype/hades-mvp-interactive.html",
+  "docs": [
+    "README.md",
+    "docs/ux-direction.md",
+    "docs/mvp-scope.md",
+    "docs/bot-creator-chat-pattern.md",
+    "docs/route-map.md",
+    "docs/data-model.md",
+    "implementation/suggested-react-structure.md",
+    "implementation/component-breakdown.md",
+    "implementation/test-checklist.md",
+    "implementation/codex-implementation-handoff.md"
+  ]
+}

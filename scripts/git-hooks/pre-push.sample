@@ -1,0 +1,17 @@
+#!/bin/sh
+# Install: npm run dev-log:install-hook
+# Or manually: cp scripts/git-hooks/pre-push.sample .git/hooks/pre-push && chmod +x .git/hooks/pre-push
+#
+# Strict push gate — blocks push unless paired dev logs exist and verify passes.
+
+export DEVLOG_STRICT=1
+
+if [ "$DEVLOG_STRICT" = "1" ]; then
+  npm run dev-log:verify || exit 1
+  npm run dev-log:pre-push -- --check || exit 1
+else
+  echo "pre-push: consider npm run dev-log:pre-push -- --slug <topic> (human + agent audit)"
+  echo "pre-push: strict check: DEVLOG_STRICT=1 (set in hook or env)"
+fi
+
+exit 0

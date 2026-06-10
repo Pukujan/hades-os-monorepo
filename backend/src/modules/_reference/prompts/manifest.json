@@ -1,0 +1,14 @@
+{
+  "module": "_reference",
+  "prompts": [
+    {
+      "id": "example-assistant",
+      "version": "1.0.0",
+      "file": "templates/example.prompt.js",
+      "description": "Example prompt for ${title}",
+      "variables": [
+        "matterId"
+      ]
+    }
+  ]
+}

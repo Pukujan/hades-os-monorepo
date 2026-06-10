@@ -1,0 +1,74 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2026-06-08",
+  "branch": "main",
+  "latestCommit": "4849fe0",
+  "projectDescription": "Describe your project here.",
+  "activeModule": {
+    "slug": "control-platform",
+    "kind": "domain",
+    "parentModule": "none",
+    "startedAt": "2026-06-08",
+    "phase": "implementation",
+    "backendStatus": "scaffolded",
+    "frontendStatus": "scaffolded",
+    "tasks": {
+      "completed": [
+        "Phase 1: scaffold backend",
+        "Phase 1: scaffold frontend"
+      ],
+      "inProgress": [],
+      "next": [
+        "Phase 2: backend API routes",
+        "Phase 2: frontend components",
+        "Phase 2: integration tests"
+      ]
+    }
+  },
+  "modules": {
+    "control-platform": {
+      "slug": "control-platform",
+      "kind": "domain",
+      "parentModule": "none",
+      "backendStatus": "scaffolded",
+      "frontendStatus": "scaffolded",
+      "phase": "implementation",
+      "tasks": {
+        "completed": [
+          "Phase 1: scaffold backend",
+          "Phase 1: scaffold frontend"
+        ],
+        "inProgress": [],
+        "next": [
+          "Phase 2: backend API routes",
+          "Phase 2: frontend components",
+          "Phase 2: integration tests"
+        ]
+      }
+    }
+  },
+  "architecture": {
+    "registryPath": "backend/src/shared/contracts/registry.json",
+    "registryVersion": "v001",
+    "miniModuleCount": 0,
+    "implemented": 0,
+    "planned": 0,
+    "gate": 0
+  },
+  "lint": {
+    "lastRun": null,
+    "lastResult": null,
+    "lastPass": false
+  },
+  "sessions": {
+    "currentId": null,
+    "lastSessionId": null,
+    "archive": []
+  },
+  "contextBudget": {
+    "hardLimit": 28000,
+    "currentUsage": 0,
+    "remaining": 28000,
+    "sessionStart": null
+  }
+}
