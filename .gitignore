@@ -8,4 +8,6 @@ file-exchange/exports/consolidated-models.json
 .DS_Store
 .env
 .env.*
+!backend/.env.example
+!frontend/.env.example
 *.log

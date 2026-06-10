@@ -11,12 +11,14 @@ This monorepo deploys as **two independent targets**:
 
 - Entry: `npm run start` in `backend/`
 - Config: `backend/railway.toml`
+- Local env template: `backend/.env.example`
 
 ## Frontend
 
 - Build: `npm run build` → `frontend/dist/`
 - SPA rewrites: `frontend/vercel.json`
 - Set `VITE_API_BASE_URL` to your public API origin (no trailing slash).
+- Local env template: `frontend/.env.example` copied to `frontend/.env.local`
 
 ## Root package.json
 
