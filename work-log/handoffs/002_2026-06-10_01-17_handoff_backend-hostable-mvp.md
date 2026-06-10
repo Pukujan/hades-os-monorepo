@@ -80,6 +80,112 @@ That first slice should:
 - return a normalized draft and assistant response
 - let the UI test, save, and assign through backend calls
 
+## Test-Driven Development Contract
+
+This pass must be test-driven. Add the failing tests first, confirm they fail for the expected missing behavior, then implement the smallest production code needed to make them pass.
+
+Use the existing Node test runner style already present in the repo. Follow the current module layout:
+
+```txt
+backend/src/modules/_reference/tests/
+backend/src/modules/model-condenser/tests/
+frontend/src/modules/hades/*.test.js
+```
+
+### Required Test Files
+
+Create these before implementing the Hades backend module:
+
+```txt
+backend/src/modules/hades/tests/integration/hades.routes.test.js
+backend/src/modules/hades/tests/unit/hermes.service.test.js
+backend/src/modules/hades/tests/unit/hades.repository.test.js
+backend/src/modules/hades/tests/unit/hades.schema.test.js
+frontend/src/modules/hades/hadesApi.test.js
+```
+
+### Route Tests
+
+`backend/src/modules/hades/tests/integration/hades.routes.test.js`
+
+Cover:
+
+- `GET /api/health` still returns `{ status: "ok" }`
+- `POST /api/hades/chat` accepts a valid message and returns `conversationId`, `userMessage`, `assistantMessage`, `draft`, `missingFields`, `suggestions`, and `source`
+- `POST /api/hades/chat` returns `source: "local_fallback"` when private AI env vars are absent
+- `POST /api/hades/minions/test` rejects incomplete drafts
+- `POST /api/hades/minions/test` returns a stable simulated test run for a complete draft
+- `POST /api/hades/minions` saves a valid ready or tested draft
+- `POST /api/hades/assignments` saves a minion assignment to a placeholder social
+- repeated requests with the same `idempotencyKey` do not create duplicate saved minions, assignments, messages, or test runs
+
+### Hermes Service Tests
+
+`backend/src/modules/hades/tests/unit/hermes.service.test.js`
+
+Cover:
+
+- calls private AI client when `PRIVATE_AI_BASE_URL` and `PRIVATE_AI_API_KEY` are configured
+- falls back to local parser when private AI config is missing
+- falls back to local parser when private AI throws a recoverable network/service error
+- merges `draftPatch` into `currentDraft` without losing existing valid fields
+- rejects unsafe or unknown `category`, `triggerType`, and `targetSocial` values
+- strips or escapes assistant HTML before it reaches the route response
+- never returns an instruction that deploys to a social platform or creates external side effects
+
+### Repository Tests
+
+`backend/src/modules/hades/tests/unit/hades.repository.test.js`
+
+Cover:
+
+- creates or reuses a conversation for a local MVP user
+- stores user and assistant messages in order
+- stores draft snapshots as plain JSON
+- saves minions with stable IDs and timestamps
+- saves social assignments with stable IDs and timestamps
+- saves test runs with input, output, status, and draft snapshot
+- enforces idempotency for write-heavy methods
+- exposes an in-memory adapter so local tests can pass without Supabase credentials
+
+### Schema Tests
+
+`backend/src/modules/hades/tests/unit/hades.schema.test.js`
+
+Cover:
+
+- valid chat request passes
+- empty message fails
+- missing `idempotencyKey` fails on write routes
+- unknown `targetSocial` fails
+- unknown `triggerType` fails
+- unknown `category` fails
+- valid complete draft passes
+- incomplete draft reports missing fields in deterministic order
+
+### Frontend API Tests
+
+`frontend/src/modules/hades/hadesApi.test.js`
+
+Cover:
+
+- chat API posts to `/api/hades/chat` with `clientMessageId`, `idempotencyKey`, message text, and current draft
+- minion test API posts to `/api/hades/minions/test`
+- save API posts to `/api/hades/minions`
+- assignment API posts to `/api/hades/assignments`
+- API wrapper preserves backend error messages for UI fallback states
+- local parser remains available as a development fallback when backend calls fail
+
+### Red-Green Rule
+
+For each feature:
+
+1. Add or update the failing test.
+2. Run the narrow test file and confirm the expected failure.
+3. Implement the smallest production change.
+4. Re-run the narrow test file.
+5. Re-run the related package suite before moving to the next route or service.
+
 ## Backend Module Shape
 
 Suggested files:
@@ -258,20 +364,17 @@ HERMES_MODE=private_ai_with_fallback
 CORS_ORIGIN=https://<vercel-domain>
 ```
 
-## Test Plan
+## Verification Plan
 
 Before handing the slice off again, verify:
 
-1. Backend unit tests for Hermes fallback and validation.
-2. Backend route tests for `/api/hades/chat` and `/api/hades/minions/test`.
-3. Frontend build passes.
-4. Hosted smoke test covers:
-   - send message
-   - receive draft update
-   - test draft
-   - save minion
-   - assign minion
-   - refresh and confirm persistence
+1. Narrow backend route tests pass.
+2. Narrow Hermes, schema, and repository unit tests pass.
+3. Frontend Hades API tests pass.
+4. Full backend test suite passes.
+5. Full frontend test suite passes.
+6. Frontend production build passes.
+7. Hosted smoke test covers send message, receive draft update, test draft, save minion, assign minion, refresh, and confirm persistence.
 
 ## Acceptance Criteria
 
@@ -298,11 +401,14 @@ multi-user billing
 
 ## Recommended Execution Order For 5.4 Mini
 
-1. Add backend Hades module skeleton.
-2. Add route + schema validation.
-3. Add Hermes/private AI adapter with fallback.
-4. Add repository layer and Supabase wiring.
-5. Wire frontend API calls.
-6. Add tests.
-7. Verify hosted smoke test.
-
+1. Add the required failing backend tests.
+2. Add the required failing frontend API tests.
+3. Implement backend Hades module skeleton.
+4. Implement schema validation.
+5. Implement in-memory repository and idempotency behavior.
+6. Implement Hermes/private AI adapter with local fallback.
+7. Implement Hades routes.
+8. Wire frontend API calls while preserving local fallback behavior.
+9. Add Supabase repository adapter after in-memory behavior is green.
+10. Run full test/build verification.
+11. Run hosted smoke test.
