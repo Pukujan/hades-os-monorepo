@@ -2,6 +2,9 @@ node_modules/
 frontend/dist/
 backend/dist/
 coverage/
+consolidated-files/
+file-exchange/exports/*_consolidated/
+file-exchange/exports/consolidated-models.json
 .DS_Store
 .env
 .env.*

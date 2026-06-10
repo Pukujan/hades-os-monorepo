@@ -34,7 +34,14 @@ import {
   formatSocialLabel,
   getSocialIcon
 } from "./hadesData.js";
-import { buildAssistantReply, buildTestOutput, createDraftFromMessage, missingDraftFields } from "./parser.js";
+import { buildAssistantReply, buildTestOutput, missingDraftFields } from "./parser.js";
+import {
+  buildLocalDraftFallback,
+  postHadesAssignment,
+  postHadesChat,
+  postHadesMinion,
+  postHadesMinionTest
+} from "./hadesApi.js";
 
 const HadesContext = React.createContext(null);
 
@@ -161,6 +168,7 @@ function HadesProvider({ children }) {
   const [inbox, setInbox] = usePersistentState("hades.inboxAlerts", createInitialInbox());
   const [assignments, setAssignments] = usePersistentState("hades.assignments", []);
   const [levelState, setLevelState] = usePersistentState("hades.levelState", deriveLevelState(createStarterOwnedMinions().length));
+  const [conversationId, setConversationId] = usePersistentState("hades.conversationId", null);
   const [toast, setToast] = React.useState(null);
   const [composerText, setComposerText] = React.useState("");
   const [selectedStarterId, setSelectedStarterId] = React.useState("task-helper");
@@ -259,7 +267,7 @@ function HadesProvider({ children }) {
     }
   }
 
-  function sendMessage(messageText) {
+  async function sendMessage(messageText) {
     const text = messageText.trim();
     if (!text) return;
 
@@ -274,11 +282,33 @@ function HadesProvider({ children }) {
     appendMessage(userMessage);
     setComposerText("");
 
-    const parsed = createDraftFromMessage(text, draft);
-    updateDraft(parsed.draft);
+    try {
+      const response = await postHadesChat({
+        conversationId: conversationId || undefined,
+        clientMessageId: userMessageId,
+        idempotencyKey: userMessageId,
+        message: text,
+        currentDraft: draft
+      });
 
-    const assistantReply = buildAssistantReply(parsed);
-    const timeoutId = window.setTimeout(() => {
+      if (response?.conversationId) {
+        setConversationId(response.conversationId);
+      }
+
+      setMessages((current) =>
+        current.map((entry) => (entry.id === userMessageId ? { ...entry, status: "completed" } : entry)).concat({
+          id: response.assistantMessage?.id || createId("msg"),
+          role: "assistant",
+          content: response.assistantMessage?.content || "Draft updated.",
+          status: response.assistantMessage?.status || "completed",
+          suggestions: response.assistantMessage?.suggestions || []
+        })
+      );
+      updateDraft(response.draft);
+    } catch (error) {
+      const parsed = buildLocalDraftFallback(text, draft);
+      updateDraft(parsed.draft);
+      const assistantReply = buildAssistantReply(parsed);
       setMessages((current) =>
         current.map((entry) => (entry.id === userMessageId ? { ...entry, status: "completed" } : entry)).concat({
           id: createId("msg"),
@@ -288,12 +318,11 @@ function HadesProvider({ children }) {
           suggestions: assistantReply.suggestions
         })
       );
-    }, 260);
-
-    timersRef.current.push(timeoutId);
+      showToast(error?.message ? `Using local fallback: ${error.message}` : "Using local fallback.");
+    }
   }
 
-  function runDraftTest() {
+  async function runDraftTest() {
     const missing = missingDraftFields(draft);
     if (missing.length > 0) {
       showToast(`Need: ${missing.join(", ")}.`);
@@ -306,61 +335,100 @@ function HadesProvider({ children }) {
       return;
     }
 
-    const output = buildTestOutput(draft);
-    const testedDraft = { ...draft, status: "tested", testInput: draft.commandName ? `User types: ${draft.commandName}` : "Simulated input" };
-    updateDraft(testedDraft);
-    pushInbox("sparkles", "Test completed", output, "success");
-    appendMessage({
-      id: createId("msg"),
-      role: "assistant",
-      content: `Simulation result: ${output}`,
-      status: "completed"
-    });
-    showToast("Simulated test passed.");
+    try {
+      const response = await postHadesMinionTest({
+        draft,
+        testInput: draft.testInput,
+        idempotencyKey: createId("test")
+      });
+      updateDraft(response.draft);
+      pushInbox("sparkles", "Test completed", response.testRun.output, "success");
+      appendMessage({
+        id: createId("msg"),
+        role: "assistant",
+        content: `Simulation result: ${response.testRun.output}`,
+        status: "completed"
+      });
+      showToast("Simulated test passed.");
+    } catch {
+      const output = buildTestOutput(draft);
+      const testedDraft = { ...draft, status: "tested", testInput: draft.commandName ? `User types: ${draft.commandName}` : "Simulated input" };
+      updateDraft(testedDraft);
+      pushInbox("sparkles", "Test completed", output, "success");
+      appendMessage({
+        id: createId("msg"),
+        role: "assistant",
+        content: `Simulation result: ${output}`,
+        status: "completed"
+      });
+      showToast("Simulated test passed.");
+    }
   }
 
-  function saveDraft() {
+  async function saveDraft() {
     const missing = missingDraftFields(draft);
     if (missing.length > 0) {
       showToast(`Need: ${missing.join(", ")}.`);
       return;
     }
 
-    const now = new Date().toISOString();
-    const id = createId("minion");
-    const saved = {
-      id,
-      userId: "local-user",
-      icon: draft.category === "fun" ? "cat" : draft.category === "chat" ? "chat" : draft.category === "shopping" ? "shopping" : draft.category === "dev" ? "github" : "task",
-      name: draft.name,
-      description: draft.description,
-      instructions: draft.action,
-      category: draft.category,
-      triggerType: draft.triggerType,
-      commandName: draft.commandName,
-      status: "active",
-      targetSocial: draft.targetSocial,
-      createdAt: now,
-      updatedAt: now
-    };
+    try {
+      const response = await postHadesMinion({
+        draft,
+        idempotencyKey: createId("minion")
+      });
+      const saved = response.minion;
+      setMinions((current) => {
+        const filtered = current.filter((entry) => entry.name !== saved.name || entry.commandName !== saved.commandName);
+        return [...filtered, saved];
+      });
+      setSelectedMinionId(saved.id);
+      updateDraft({ ...draft, status: "saved" });
+      pushInbox("sparkles", "Minion saved", `${saved.name} was added to your inventory.`, "success");
+      appendMessage({
+        id: createId("msg"),
+        role: "assistant",
+        content: `Saved. ${saved.name} is now in your minion inventory. You can assign it to ${formatSocialLabel(saved.targetSocial)} next.`,
+        status: "completed"
+      });
+      showToast(`${saved.name} saved.`);
+    } catch {
+      const now = new Date().toISOString();
+      const id = createId("minion");
+      const saved = {
+        id,
+        userId: "local-user",
+        icon: draft.category === "fun" ? "cat" : draft.category === "chat" ? "chat" : draft.category === "shopping" ? "shopping" : draft.category === "dev" ? "github" : "task",
+        name: draft.name,
+        description: draft.description,
+        instructions: draft.action,
+        category: draft.category,
+        triggerType: draft.triggerType,
+        commandName: draft.commandName,
+        status: "active",
+        targetSocial: draft.targetSocial,
+        createdAt: now,
+        updatedAt: now
+      };
 
-    setMinions((current) => {
-      const filtered = current.filter((entry) => entry.name !== saved.name || entry.commandName !== saved.commandName);
-      return [...filtered, saved];
-    });
-    setSelectedMinionId(id);
-    updateDraft({ ...draft, status: "saved" });
-    pushInbox("sparkles", "Minion saved", `${saved.name} was added to your inventory.`, "success");
-    appendMessage({
-      id: createId("msg"),
-      role: "assistant",
-      content: `Saved. ${saved.name} is now in your minion inventory. You can assign it to ${formatSocialLabel(saved.targetSocial)} next.`,
-      status: "completed"
-    });
-    showToast(`${saved.name} saved.`);
+      setMinions((current) => {
+        const filtered = current.filter((entry) => entry.name !== saved.name || entry.commandName !== saved.commandName);
+        return [...filtered, saved];
+      });
+      setSelectedMinionId(id);
+      updateDraft({ ...draft, status: "saved" });
+      pushInbox("sparkles", "Minion saved", `${saved.name} was added to your inventory.`, "success");
+      appendMessage({
+        id: createId("msg"),
+        role: "assistant",
+        content: `Saved. ${saved.name} is now in your minion inventory. You can assign it to ${formatSocialLabel(saved.targetSocial)} next.`,
+        status: "completed"
+      });
+      showToast(`${saved.name} saved.`);
+    }
   }
 
-  function assignSelectedMinion() {
+  async function assignSelectedMinion() {
     const minion = minions.find((entry) => entry.id === selectedMinionId);
     const social = SOCIAL_LINKS.find((entry) => entry.id === selectedSocialId);
     if (!minion) {
@@ -368,28 +436,48 @@ function HadesProvider({ children }) {
       return;
     }
 
-    const assignment = {
-      id: createId("assignment"),
-      userId: "local-user",
-      minionId: minion.id,
-      socialLinkId: social?.id || null,
-      scope: social?.provider === "private" ? "private" : "social",
-      commandName: assignmentCommand.trim() || minion.commandName || draft.commandName || null,
-      status: "active",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
+    try {
+      const response = await postHadesAssignment({
+        minionId: minion.id,
+        socialLinkId: social?.id || null,
+        commandName: assignmentCommand.trim() || minion.commandName || draft.commandName || null,
+        idempotencyKey: createId("assignment")
+      });
 
-    setAssignments((current) => [...current, assignment]);
-    pushInbox("socials", "Minion assigned", `${minion.name} is now assigned to ${social?.displayName || "a social placeholder"}.`, "info");
-    appendMessage({
-      id: createId("msg"),
-      role: "assistant",
-      content: `${minion.name} assigned to ${social?.displayName || "the selected social"} as a preview. ${social?.status === "connected" ? "That connection is live." : "The connection is not live yet."}`,
-      status: "completed"
-    });
-    showToast(`${minion.name} assigned.`);
-    setAssignmentCommand("");
+      setAssignments((current) => [...current, response.assignment]);
+      pushInbox("socials", "Minion assigned", `${minion.name} is now assigned to ${social?.displayName || "a social placeholder"}.`, "info");
+      appendMessage({
+        id: createId("msg"),
+        role: "assistant",
+        content: `${minion.name} assigned to ${social?.displayName || "the selected social"} as a preview. ${social?.status === "connected" ? "That connection is live." : "The connection is not live yet."}`,
+        status: "completed"
+      });
+      showToast(`${minion.name} assigned.`);
+      setAssignmentCommand("");
+    } catch {
+      const assignment = {
+        id: createId("assignment"),
+        userId: "local-user",
+        minionId: minion.id,
+        socialLinkId: social?.id || null,
+        scope: social?.provider === "private" ? "private" : "social",
+        commandName: assignmentCommand.trim() || minion.commandName || draft.commandName || null,
+        status: "active",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      setAssignments((current) => [...current, assignment]);
+      pushInbox("socials", "Minion assigned", `${minion.name} is now assigned to ${social?.displayName || "a social placeholder"}.`, "info");
+      appendMessage({
+        id: createId("msg"),
+        role: "assistant",
+        content: `${minion.name} assigned to ${social?.displayName || "the selected social"} as a preview. ${social?.status === "connected" ? "That connection is live." : "The connection is not live yet."}`,
+        status: "completed"
+      });
+      showToast(`${minion.name} assigned.`);
+      setAssignmentCommand("");
+    }
   }
 
   return (
