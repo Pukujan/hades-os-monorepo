@@ -23,7 +23,7 @@ export function createHadesService({ repository, hermes }) {
       userId: "local-user"
     });
 
-    const userMessage = repository.appendMessage({
+    const userMessage = await repository.appendMessage({
       conversationId: conversation.id,
       idempotencyKey: `${payload.idempotencyKey}:user`,
       message: createMessage("user", payload.message, {
@@ -40,7 +40,7 @@ export function createHadesService({ repository, hermes }) {
       currentDraft
     });
 
-    const assistantMessage = repository.appendMessage({
+    const assistantMessage = await repository.appendMessage({
       conversationId: conversation.id,
       idempotencyKey: `${payload.idempotencyKey}:assistant`,
       message: createMessage("assistant", hermesResult.assistantMessage.content, {
@@ -49,7 +49,7 @@ export function createHadesService({ repository, hermes }) {
       })
     });
 
-    repository.saveConversationDraft({
+    await repository.saveConversationDraft({
       conversationId: conversation.id,
       draftSnapshot: hermesResult.draft
     });
@@ -67,7 +67,7 @@ export function createHadesService({ repository, hermes }) {
 
   async function testMinion(body) {
     const payload = validateTestRequest(body);
-    const testRun = repository.saveTestRun({
+    const testRun = await repository.saveTestRun({
       idempotencyKey: payload.idempotencyKey,
       run: {
         draftSnapshot: JSON.parse(JSON.stringify(payload.draft)),
@@ -88,7 +88,7 @@ export function createHadesService({ repository, hermes }) {
 
   async function saveMinion(body) {
     const payload = validateSaveRequest(body);
-    const minion = repository.saveMinion({
+    const minion = await repository.saveMinion({
       idempotencyKey: payload.idempotencyKey,
       minion: {
         userId: "local-user",
@@ -117,7 +117,7 @@ export function createHadesService({ repository, hermes }) {
     }
 
     const social = getSocialById(payload.socialLinkId);
-    const assignment = repository.saveAssignment({
+    const assignment = await repository.saveAssignment({
       idempotencyKey: payload.idempotencyKey,
       assignment: {
         userId: "local-user",
@@ -140,4 +140,3 @@ export function createHadesService({ repository, hermes }) {
 
   return { chat, testMinion, saveMinion, assignMinion };
 }
-
