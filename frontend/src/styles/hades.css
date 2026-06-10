@@ -174,6 +174,9 @@ button {
   position: relative;
   z-index: 2;
   height: 100vh;
+  height: 100dvh;
+  min-height: 100vh;
+  min-height: 100dvh;
   display: grid;
   place-items: stretch center;
 }
@@ -216,7 +219,9 @@ button {
 .desktop-shell {
   width: min(100%, 450px);
   height: 100vh;
+  height: 100dvh;
   min-height: 100vh;
+  min-height: 100dvh;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -229,10 +234,18 @@ button {
   box-shadow: var(--shadow);
 }
 
+.frame {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 .screen {
   flex: 1;
   min-height: 0;
-  padding: max(16px, env(safe-area-inset-top)) 14px calc(var(--navH) + 26px);
+  padding: max(16px, env(safe-area-inset-top)) 14px calc(var(--navH) + 26px + env(safe-area-inset-bottom));
   overflow: auto;
   animation: fade 0.22s ease both;
 }
