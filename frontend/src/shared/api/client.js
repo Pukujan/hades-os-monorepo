@@ -1,4 +1,14 @@
 const BASE_URL = import.meta?.env?.VITE_API_BASE_URL || "http://localhost:3001";
+const ACCESS_TOKEN_KEY = "hades.auth.accessToken";
+
+function getAuthHeaders() {
+  if (typeof window === "undefined") return {};
+  const token = window.localStorage.getItem(ACCESS_TOKEN_KEY);
+  if (!token) return {};
+  return {
+    authorization: `Bearer ${token}`
+  };
+}
 
 async function readResponseBody(response) {
   const raw = await response.text();
@@ -38,14 +48,16 @@ async function parseResponse(response) {
 }
 
 export async function apiGet(path) {
-  const response = await fetch(`${BASE_URL}${path}`);
+  const response = await fetch(`${BASE_URL}${path}`, {
+    headers: getAuthHeaders()
+  });
   return parseResponse(response);
 }
 
 export async function apiPost(path, body) {
   const response = await fetch(`${BASE_URL}${path}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...getAuthHeaders() },
     body: JSON.stringify(body)
   });
   return parseResponse(response);
@@ -54,6 +66,7 @@ export async function apiPost(path, body) {
 export async function apiPostForm(path, formData) {
   const response = await fetch(`${BASE_URL}${path}`, {
     method: "POST",
+    headers: getAuthHeaders(),
     body: formData
   });
   return parseResponse(response);
@@ -62,7 +75,7 @@ export async function apiPostForm(path, formData) {
 export async function apiPatch(path, body) {
   const response = await fetch(`${BASE_URL}${path}`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...getAuthHeaders() },
     body: JSON.stringify(body)
   });
   return parseResponse(response);
@@ -71,7 +84,7 @@ export async function apiPatch(path, body) {
 export async function apiDelete(path, body) {
   const response = await fetch(`${BASE_URL}${path}`, {
     method: "DELETE",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...getAuthHeaders() },
     body: JSON.stringify(body ?? {})
   });
   return parseResponse(response);

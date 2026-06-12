@@ -13,17 +13,17 @@ test("infers a discord cat meme command and asks only for the command name", () 
   assert.deepEqual(result.missing, ["command name"]);
 
   const reply = buildAssistantReply(result);
-  assert.equal(reply.content, "Nice — I can make that. What command should trigger it?");
-  assert.deepEqual(reply.suggestions, ["!catmeme", "!sendcatmeme", "!catgif"]);
+  assert.equal(reply.content, "Nice - I can make that. What command should trigger it?");
+  assert.deepEqual(reply.suggestions, ["!catmeme", "!sendcat", "!catgif"]);
 });
 
 test("fully specified command request becomes ready to test", () => {
-  const result = createDraftFromMessage("Make me a Discord command called !sendcatmeme that sends a random cat meme gif.");
+  const result = createDraftFromMessage("Make me a Discord command called !sendcat that sends a random cat meme gif.");
 
   assert.equal(result.draft.name, "Cat Meme Minion");
   assert.equal(result.draft.targetSocial, "discord");
   assert.equal(result.draft.triggerType, "command");
-  assert.equal(result.draft.commandName, "!sendcatmeme");
+  assert.equal(result.draft.commandName, "!sendcat");
   assert.equal(result.draft.action, "send a random cat meme GIF");
   assert.equal(result.draft.status, "ready_to_test");
   assert.deepEqual(result.missing, []);

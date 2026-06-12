@@ -1,6 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { createHadesRepository } from "../../repositories/hades.repository.js";
 import { createHermesService } from "../../services/hermes.service.js";
+import { createHadesService } from "../../services/hades.service.js";
 import { createEmptyDraft } from "../../data.js";
 
 test("Hermes runtime response is used and sanitized", async () => {
@@ -86,6 +88,54 @@ test("Hermes runtime failure bubbles instead of falling back", async () => {
         message: "I want a command to send cat memes in Discord",
         currentDraft: createEmptyDraft()
       }),
-    /runtime down/i
+      /runtime down/i
   );
+});
+
+test("Hades service chat uses backend-authenticated user context when provided", async () => {
+  const repository = createHadesRepository({ now: () => "2026-06-12T00:00:00.000Z" });
+  const hermes = createHermesService({
+    hermesRuntime: {
+      async generateDraft(input) {
+        assert.equal(input.userId, "user_123");
+        return {
+          source: "hermes_runtime",
+          sessionId: "session-auth-1",
+          assistantText: "Updated",
+          draftPatch: {
+            name: "Task Helper",
+            category: "task",
+            targetSocial: "private",
+            triggerType: "manual",
+            action: "turn messy instructions into simple task cards"
+          },
+          missingFields: [],
+          suggestions: []
+        };
+      }
+    }
+  });
+  const service = createHadesService({ repository, hermes });
+
+  const result = await service.chat(
+    {
+      clientMessageId: "msg-auth-1",
+      idempotencyKey: "idem-auth-1",
+      message: "Make a task helper",
+      currentDraft: createEmptyDraft()
+    },
+    {
+      userId: "user_123",
+      tenantId: "tenant_123",
+      discordAccountId: "discord_456",
+      provider: "discord"
+    }
+  );
+
+  assert.equal(result.sessionId, "session-auth-1");
+  assert.equal(result.userMessage.userId, "user_123");
+  assert.equal(result.assistantMessage.role, "assistant");
+  const snapshot = repository.getSnapshot();
+  assert.equal(snapshot.conversations[0].userId, "user_123");
+  assert.equal(snapshot.agentExecutions[0].userId, "user_123");
 });

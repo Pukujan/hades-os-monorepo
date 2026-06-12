@@ -33,6 +33,9 @@ Describe your project here.
 - Phase 2: backend API routes
 - Phase 2: frontend components
 - Phase 2: integration tests
+- Implement Supabase-backed live Hades repository wiring
+- Implement Discord command adapter and GIF provider flow behind TDD contract
+- Implement reusable minion assignment runtime for command and automation triggers
 
 ---
 

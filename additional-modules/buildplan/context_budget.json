@@ -1,13 +1,26 @@
 {
   "hardLimit": 28000,
-  "currentUsage": 0,
-  "remaining": 28000,
+  "currentUsage": 3500,
+  "remaining": 24500,
   "warningAt": 22000,
   "compactAt": 24000,
   "stopAt": 27000,
   "lastCompactedAt": null,
   "compactionStrategy": "summarize completed work, preserve current phase, target files, failing tests, blockers",
   "sessionStart": "2026-06-10T04:11:47.956+00:00",
-  "sessionEnd": null,
-  "history": []
+  "sessionEnd": "2026-06-12T16:41:44.840+00:00",
+  "history": [
+    {
+      "endedAt": "2026-06-12T16:33:56.160+00:00",
+      "peakUsage": 4500,
+      "reason": "archive_session",
+      "slug": "hermes-discord-gif-runtime-handoff"
+    },
+    {
+      "endedAt": "2026-06-12T16:41:44.840+00:00",
+      "peakUsage": 3500,
+      "reason": "archive_session",
+      "slug": "hermes-discord-gif-minion-runtime-plan-docs"
+    }
+  ]
 }

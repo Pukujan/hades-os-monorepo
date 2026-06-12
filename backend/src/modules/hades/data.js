@@ -8,7 +8,7 @@ export const SOCIAL_LINKS = [
     provider: "discord",
     displayName: "Discord",
     status: "not_connected",
-    commandName: "!sendcatmeme"
+    commandName: "!sendcat"
   },
   {
     id: "telegram",

@@ -24,6 +24,7 @@ export function createHadesRepository({ now = () => new Date().toISOString(), st
   const messages = new Map();
   const minions = new Map();
   const assignments = new Map();
+  const outboundDeliveries = new Map();
   const testRuns = new Map();
   const agentExecutions = new Map();
   const idempotency = new Map();
@@ -106,6 +107,11 @@ export function createHadesRepository({ now = () => new Date().toISOString(), st
       if (!row?.id) continue;
       agentExecutions.set(row.id, clone(row));
     }
+
+    for (const row of readTableRows("outbound_deliveries")) {
+      if (!row?.id) continue;
+      outboundDeliveries.set(row.id, clone(row));
+    }
   }
 
   async function persistTable(client, name, mode, row) {
@@ -148,6 +154,10 @@ export function createHadesRepository({ now = () => new Date().toISOString(), st
 
   async function persistAgentExecution(client, execution) {
     await persistTable(client, "agent_executions", "upsert", execution);
+  }
+
+  async function persistOutboundDelivery(client, delivery) {
+    await persistTable(client, "outbound_deliveries", "upsert", delivery);
   }
 
   function getOrCreateConversation({ conversationId, userId = "local-user" } = {}) {
@@ -281,6 +291,42 @@ export function createHadesRepository({ now = () => new Date().toISOString(), st
     return remember("agentExecution", idempotencyKey, record);
   }
 
+  async function saveOutboundDelivery({ idempotencyKey, delivery }) {
+    hydrateFromSupabase();
+    const cached = recall("outboundDelivery", idempotencyKey);
+    if (cached) return cached;
+
+    const record = {
+      ...delivery,
+      id: delivery.id || createId("delivery"),
+      createdAt: delivery.createdAt || nowIso(now),
+      updatedAt: delivery.updatedAt || nowIso(now),
+      idempotencyKey
+    };
+    outboundDeliveries.set(record.id, record);
+    const client = storage === "supabase" ? supabaseClient : null;
+    await persistOutboundDelivery(client, record);
+    return remember("outboundDelivery", idempotencyKey, record);
+  }
+
+  function findActiveAssignment({ userId, tenantId, provider, channelId, commandName = null, triggerType = "command" } = {}) {
+    hydrateFromSupabase();
+    const matches = [...assignments.values()].filter((assignment) => {
+      if (!assignment || assignment.status !== "active") return false;
+      if (userId && assignment.userId !== userId) return false;
+      if (tenantId && assignment.tenantId && assignment.tenantId !== tenantId) return false;
+      const assignmentProvider = assignment.provider || assignment.socialLinkId;
+      if (provider && assignmentProvider !== provider) return false;
+      if (channelId && assignment.channelId && assignment.channelId !== channelId) return false;
+      if (triggerType && assignment.triggerType && assignment.triggerType !== triggerType) return false;
+      if (commandName !== undefined && commandName !== null && assignment.commandName !== commandName) return false;
+      if (commandName === null && assignment.commandName !== null && assignment.commandName !== undefined) return false;
+      return true;
+    });
+
+    return matches[0] || null;
+  }
+
   function listMessages(conversationId) {
     hydrateFromSupabase();
     return [...(messages.get(conversationId) || [])];
@@ -360,12 +406,14 @@ export function createHadesRepository({ now = () => new Date().toISOString(), st
     saveMinion,
     saveAssignment,
     saveAgentExecution,
+    saveOutboundDelivery,
     listMessages,
     listMinions,
     listAssignments,
     listAgentExecutions,
     listTestRuns,
     getMinion,
+    findActiveAssignment,
     getBootstrapState,
     getSnapshot
   };

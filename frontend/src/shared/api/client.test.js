@@ -17,3 +17,8 @@ test("frontend API client uses VITE_API_BASE_URL as the only backend origin env"
 test("frontend API client keeps the local backend fallback explicit", () => {
   assert.match(source, /http:\/\/localhost:3001|http:\/\/127\.0\.0\.1:3001/);
 });
+
+test("frontend API client includes the auth token bridge", () => {
+  assert.match(source, /hades\.auth\.accessToken/);
+  assert.match(source, /authorization: `Bearer \$\{token\}`/);
+});

@@ -61,7 +61,7 @@ test("Supabase-backed repository can hydrate MVP state from stored rows", async 
     idempotencyKey: "msg-1",
     message: {
       role: "user",
-      content: "Make me a Discord command called !sendcatmeme",
+      content: "Make me a Discord command called !sendcat",
       status: "completed",
       userId: "local-user"
     }
@@ -73,7 +73,7 @@ test("Supabase-backed repository can hydrate MVP state from stored rows", async 
       category: "fun",
       targetSocial: "discord",
       triggerType: "command",
-      commandName: "!sendcatmeme",
+      commandName: "!sendcat",
       action: "send a random cat meme GIF",
       status: "ready_to_test"
     }
@@ -84,7 +84,7 @@ test("Supabase-backed repository can hydrate MVP state from stored rows", async 
       userId: "local-user",
       name: "Cat Meme Minion",
       targetSocial: "discord",
-      commandName: "!sendcatmeme",
+      commandName: "!sendcat",
       status: "active"
     }
   });
@@ -101,7 +101,7 @@ test("Supabase-backed repository can hydrate MVP state from stored rows", async 
     idempotencyKey: "test-1",
     run: {
       minionId: minion.id,
-      testInput: "!sendcatmeme",
+      testInput: "!sendcat",
       output: "random cat meme sent.",
       status: "passed"
     }

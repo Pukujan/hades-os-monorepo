@@ -1,0 +1,17 @@
+{
+  "id": "007_2026-06-12_discord-auth-bot-bridge",
+  "slug": "discord-auth-bot-bridge",
+  "status": "planned",
+  "createdAt": "2026-06-12T15:30:00-04:00",
+  "artifacts": {
+    "planLogMd": "work-log/planning/007_2026-06-12_discord-auth-bot-bridge/plan-log.md",
+    "auditLogMd": "work-log/planning/007_2026-06-12_discord-auth-bot-bridge/audit-log.md",
+    "handoffMd": "work-log/planning/007_2026-06-12_discord-auth-bot-bridge/handoff.md"
+  },
+  "gates": [
+    "npm run test:auth-discord-connection-contract",
+    "npm run test:hades-discord-bot-runtime-contract",
+    "npm run test:discord-login-bot-contracts"
+  ]
+}
+

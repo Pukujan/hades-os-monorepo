@@ -205,7 +205,7 @@ test("POST /api/hades/chat can use Hermes runtime without leaking server secrets
       body: {
         clientMessageId: "msg-runtime-1",
         idempotencyKey: "idem-runtime-chat-1",
-        message: "Make a Discord command called !sendcatmeme that sends random cat meme gifs",
+        message: "Make a Discord command called !sendcat that sends random cat meme gifs",
         currentDraft: {
           name: null,
           description: null,
@@ -286,7 +286,7 @@ test("write routes validate and persist", async () => {
     body: {
       minionId: saveBody.minion.id,
       socialLinkId: "discord",
-      commandName: "!sendcatmeme",
+      commandName: "!sendcat",
       idempotencyKey: "assign-1"
     }
   });

@@ -230,8 +230,8 @@ export function buildAssistantReply(result) {
 
   if (missing.includes("command name")) {
     return {
-      content: "Nice — I can make that. What command should trigger it?",
-      suggestions: ["!catmeme", "!sendcatmeme", "!catgif"],
+      content: "Nice - I can make that. What command should trigger it?",
+      suggestions: ["!catmeme", "!sendcat", "!catgif"],
       status: "completed"
     };
   }
@@ -246,7 +246,7 @@ export function buildAssistantReply(result) {
 
   return {
     content: `I still need: ${missing.join(", ")}.`,
-    suggestions: draft.triggerType === "command" ? ["!sendcatmeme"] : [],
+    suggestions: draft.triggerType === "command" ? ["!sendcat"] : [],
     status: "completed"
   };
 }

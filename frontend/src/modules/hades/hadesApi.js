@@ -1,4 +1,4 @@
-import { apiPost } from "../../shared/api/client.js";
+import { apiGet, apiPost } from "../../shared/api/client.js";
 import { createDraftFromMessage } from "./parser.js";
 import {
   SOCIAL_LINKS,
@@ -9,15 +9,7 @@ import {
 } from "./hadesData.js";
 
 export async function getHadesBootstrap() {
-  const response = await fetch(`${import.meta?.env?.VITE_API_BASE_URL || "http://localhost:3001"}/api/hades/bootstrap`);
-  const body = await response.text();
-  const parsed = body ? JSON.parse(body) : null;
-
-  if (!response.ok) {
-    throw new Error(parsed?.error || parsed?.message || `Request failed: ${response.status}`);
-  }
-
-  return parsed;
+  return apiGet("/api/hades/bootstrap");
 }
 
 export async function postHadesChat(payload) {

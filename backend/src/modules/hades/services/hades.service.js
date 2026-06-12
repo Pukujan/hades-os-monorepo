@@ -9,6 +9,7 @@ function createMessage(role, content, extra = {}) {
     id: extra.id || `msg-${randomUUID().slice(0, 8)}`,
     role,
     content,
+    userId: extra.userId,
     status: extra.status || "completed",
     suggestions: extra.suggestions || [],
     createdAt: extra.createdAt || new Date().toISOString()
@@ -16,6 +17,10 @@ function createMessage(role, content, extra = {}) {
 }
 
 export function createHadesService({ repository, hermes, config = {} }) {
+  function resolveUserId(authContext) {
+    return authContext?.userId || "local-user";
+  }
+
   async function readiness() {
     return config.readiness || {
       status: "ok",
@@ -27,15 +32,19 @@ export function createHadesService({ repository, hermes, config = {} }) {
     };
   }
 
-  async function bootstrap({ conversationId = null, userId = "local-user" } = {}) {
-    return repository.getBootstrapState({ conversationId, userId });
+  async function bootstrap({ conversationId = null, userId = "local-user" } = {}, authContext = null) {
+    return repository.getBootstrapState({
+      conversationId,
+      userId: authContext?.userId || userId
+    });
   }
 
-  async function chat(body) {
+  async function chat(body, authContext = null) {
     const payload = validateChatRequest(body);
+    const userId = resolveUserId(authContext);
     const conversation = repository.getOrCreateConversation({
       conversationId: payload.conversationId,
-      userId: "local-user"
+      userId
     });
 
     const userMessage = await repository.appendMessage({
@@ -43,13 +52,14 @@ export function createHadesService({ repository, hermes, config = {} }) {
       idempotencyKey: `${payload.idempotencyKey}:user`,
       message: createMessage("user", payload.message, {
         id: payload.clientMessageId,
-        status: "queued"
+        status: "queued",
+        userId
       })
     });
 
     const currentDraft = payload.currentDraft || repository.getSnapshot().conversations.find((entry) => entry.id === conversation.id)?.draftSnapshot || createEmptyDraft();
     const hermesResult = await hermes.buildResponse({
-      userId: "local-user",
+      userId,
       conversationId: conversation.id,
       message: payload.message,
       currentDraft
@@ -60,7 +70,7 @@ export function createHadesService({ repository, hermes, config = {} }) {
         idempotencyKey: `${payload.idempotencyKey}:agent`,
         execution: {
           conversationId: conversation.id,
-          userId: "local-user",
+          userId,
           sessionId: hermesResult.sessionId || null,
           source: hermesResult.source,
           status: hermesResult.source === "hermes_runtime" ? "completed" : "fallback",
@@ -95,11 +105,13 @@ export function createHadesService({ repository, hermes, config = {} }) {
     };
   }
 
-  async function testMinion(body) {
+  async function testMinion(body, authContext = null) {
     const payload = validateTestRequest(body);
+    const userId = resolveUserId(authContext);
     const testRun = await repository.saveTestRun({
       idempotencyKey: payload.idempotencyKey,
       run: {
+        userId,
         draftSnapshot: JSON.parse(JSON.stringify(payload.draft)),
         testInput: payload.testInput || payload.draft.testInput || null,
         output: buildTestOutput(payload.draft),
@@ -116,12 +128,13 @@ export function createHadesService({ repository, hermes, config = {} }) {
     return { testRun, draft };
   }
 
-  async function saveMinion(body) {
+  async function saveMinion(body, authContext = null) {
     const payload = validateSaveRequest(body);
+    const userId = resolveUserId(authContext);
     const minion = await repository.saveMinion({
       idempotencyKey: payload.idempotencyKey,
       minion: {
-        userId: "local-user",
+        userId,
         icon: payload.draft.category === "fun" ? "cat" : payload.draft.category === "chat" ? "chat" : payload.draft.category === "shopping" ? "shopping" : payload.draft.category === "dev" ? "github" : "task",
         name: payload.draft.name,
         description: payload.draft.description,
@@ -139,8 +152,9 @@ export function createHadesService({ repository, hermes, config = {} }) {
     return { minion };
   }
 
-  async function assignMinion(body) {
+  async function assignMinion(body, authContext = null) {
     const payload = validateAssignmentRequest(body);
+    const userId = resolveUserId(authContext);
     const minion = repository.getMinion(payload.minionId);
     if (!minion) {
       throw new AppError("Minion not found", 404);
@@ -150,7 +164,7 @@ export function createHadesService({ repository, hermes, config = {} }) {
     const assignment = await repository.saveAssignment({
       idempotencyKey: payload.idempotencyKey,
       assignment: {
-        userId: "local-user",
+        userId,
         minionId: minion.id,
         socialLinkId: social?.id || payload.socialLinkId,
         scope: social?.provider === "private" ? "private" : "social",

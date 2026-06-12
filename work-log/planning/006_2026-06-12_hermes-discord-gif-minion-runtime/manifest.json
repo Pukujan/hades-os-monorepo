@@ -1,0 +1,16 @@
+{
+  "id": "006_2026-06-12_hermes-discord-gif-minion-runtime",
+  "slug": "hermes-discord-gif-minion-runtime",
+  "status": "planned",
+  "createdAt": "2026-06-12T12:45:00-04:00",
+  "artifacts": {
+    "planLogMd": "work-log/planning/006_2026-06-12_hermes-discord-gif-minion-runtime/plan-log.md",
+    "auditLogMd": "work-log/planning/006_2026-06-12_hermes-discord-gif-minion-runtime/audit-log.md",
+    "handoffMd": "work-log/planning/006_2026-06-12_hermes-discord-gif-minion-runtime/handoff.md"
+  },
+  "gates": [
+    "npm run test:hades-discord-gif-contract",
+    "npm run test:hades-minion-assignment-runtime-contract",
+    "npm run test:hades-runtime-contracts"
+  ]
+}
