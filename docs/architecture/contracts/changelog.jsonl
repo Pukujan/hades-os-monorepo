@@ -19,4 +19,6 @@
 {"time":"2026-05-29T14:30:00Z","contract":"asyncJobQueue","from":null,"to":"v001","reason":"BullMQ + Redis for async jobs; SQL remains source of truth","author":"agent"}
 {"time":"2026-05-29T15:30:00Z","contract":"architecturePushDevLog","from":"v001","to":"v001","reason":"Documented as maintainer-repo-only; omitted from starter manifest.json until arch-log scripts ship in template","author":"agent"}
 {"time":"2026-05-30T12:00:00Z","contract":"monorepoDeploy","from":null,"to":"v001","reason":"Railway backend + Vercel frontend layout; lint-deploy.mjs enforces root dirs and forbidden root start script","author":"agent"}
+{"time":"2026-06-10T02:05:00Z","contract":"monorepoDeploy","from":"v001","to":"v002","reason":"Explicitly enforce Railway backend-only and Vercel frontend-only ownership, env templates, and deploy tests","author":"agent"}
+{"time":"2026-06-10T02:20:00Z","contract":"monorepoDeploy","from":"v002","to":"v003","reason":"Swap backend AI hosting envs from private AI server to OpenRouter DeepSeek V4 Flash and update deploy contract","author":"agent"}
 {"time":"2026-06-01T12:00:00Z","contract":"pipelineAgentMiniModules","from":null,"to":"v001","reason":"Mirrored FE/BE pipeline agent and assigner mini-module registry + lint","author":"agent"}

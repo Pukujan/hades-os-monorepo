@@ -15,7 +15,22 @@ function createMessage(role, content, extra = {}) {
   };
 }
 
-export function createHadesService({ repository, hermes }) {
+export function createHadesService({ repository, hermes, config = {} }) {
+  async function readiness() {
+    return config.readiness || {
+      status: "ok",
+      mode: "local",
+      storage: { mode: "memory", configured: false },
+      ai: { provider: "openrouter", model: "deepseek/deepseek-v4-flash", configured: false },
+      cors: { origin: null },
+      deploy: { backendPlatform: "railway", frontendPlatform: "vercel" }
+    };
+  }
+
+  async function bootstrap({ conversationId = null, userId = "local-user" } = {}) {
+    return repository.getBootstrapState({ conversationId, userId });
+  }
+
   async function chat(body) {
     const payload = validateChatRequest(body);
     const conversation = repository.getOrCreateConversation({
@@ -40,6 +55,20 @@ export function createHadesService({ repository, hermes }) {
       currentDraft
     });
 
+    if (typeof repository.saveAgentExecution === "function") {
+      await repository.saveAgentExecution({
+        idempotencyKey: `${payload.idempotencyKey}:agent`,
+        execution: {
+          conversationId: conversation.id,
+          userId: "local-user",
+          sessionId: hermesResult.sessionId || null,
+          source: hermesResult.source,
+          status: hermesResult.source === "hermes_runtime" ? "completed" : "fallback",
+          errorMessage: null
+        }
+      });
+    }
+
     const assistantMessage = await repository.appendMessage({
       conversationId: conversation.id,
       idempotencyKey: `${payload.idempotencyKey}:assistant`,
@@ -61,7 +90,8 @@ export function createHadesService({ repository, hermes }) {
       draft: hermesResult.draft,
       missingFields: hermesResult.missingFields,
       suggestions: hermesResult.suggestions,
-      source: hermesResult.source
+      source: hermesResult.source,
+      sessionId: hermesResult.sessionId || null
     };
   }
 
@@ -138,5 +168,5 @@ export function createHadesService({ repository, hermes }) {
     };
   }
 
-  return { chat, testMinion, saveMinion, assignMinion };
+  return { readiness, bootstrap, chat, testMinion, saveMinion, assignMinion };
 }

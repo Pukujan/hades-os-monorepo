@@ -56,6 +56,63 @@ export function createEmptyDraft() {
   };
 }
 
+export function createInitialMessages() {
+  return [
+    {
+      id: "welcome-assistant",
+      userId: "local-user",
+      conversationId: null,
+      clientMessageId: null,
+      idempotencyKey: null,
+      sequenceNumber: 1,
+      role: "assistant",
+      content:
+        "Tell me what kind of minion you want. You can say it directly, like: I want a command to send cat memes in Discord.",
+      status: "completed",
+      suggestions: [],
+      createdAt: "2026-06-10T00:00:00.000Z",
+      updatedAt: "2026-06-10T00:00:00.000Z"
+    }
+  ];
+}
+
+export function createStarterOwnedMinions(now = new Date().toISOString()) {
+  return [
+    {
+      id: "task-helper",
+      userId: "local-user",
+      icon: "task",
+      name: "Task Helper",
+      description: "Turns messy notes into clean task cards.",
+      instructions: "Turn messy notes into clean task cards.",
+      category: "task",
+      triggerType: "manual",
+      commandName: null,
+      status: "active",
+      targetSocial: "private",
+      createdAt: now,
+      updatedAt: now
+    }
+  ];
+}
+
+export function deriveLevelState(minionCount, now = new Date().toISOString()) {
+  const hasFirstSave = minionCount > 1;
+
+  return {
+    id: "local-level",
+    userId: "local-user",
+    level: hasFirstSave ? 2 : 1,
+    title: hasFirstSave ? "Helper Tamer" : "New Summoner",
+    xp: hasFirstSave ? 78 : 42,
+    nextLevelXp: hasFirstSave ? 200 : 100,
+    completedMilestones: hasFirstSave ? ["first_saved_minion"] : [],
+    unlockedFeatures: hasFirstSave ? ["second_minion_slot"] : ["second_minion_slot_preview"],
+    createdAt: "2026-06-10T00:00:00.000Z",
+    updatedAt: now
+  };
+}
+
 export function missingDraftFields(draft) {
   const missing = [];
 
@@ -88,4 +145,3 @@ export function formatSocialLabel(provider) {
 export function getSocialById(id) {
   return SOCIAL_LINKS.find((entry) => entry.id === id) || null;
 }
-

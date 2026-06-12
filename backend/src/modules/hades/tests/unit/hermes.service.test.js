@@ -3,12 +3,15 @@ import assert from "node:assert/strict";
 import { createHermesService } from "../../services/hermes.service.js";
 import { createEmptyDraft } from "../../data.js";
 
-test("private AI response is used when configured and sanitized", async () => {
+test("Hermes runtime response is used and sanitized", async () => {
+  let runtimeCalls = 0;
   const hermes = createHermesService({
-    config: { privateAiBaseUrl: "https://private.ai", privateAiApiKey: "secret" },
-    privateAiClient: {
+    hermesRuntime: {
       async generateDraft() {
+        runtimeCalls += 1;
         return {
+          source: "hermes_runtime",
+          sessionId: "20260611_runtime",
           assistantText: "<strong>Done</strong>",
           draftPatch: {
             name: "Task Helper",
@@ -30,38 +33,59 @@ test("private AI response is used when configured and sanitized", async () => {
     currentDraft: createEmptyDraft()
   });
 
-  assert.equal(result.source, "private_ai");
+  assert.equal(runtimeCalls, 1);
+  assert.equal(result.source, "hermes_runtime");
+  assert.equal(result.sessionId, "20260611_runtime");
   assert.equal(result.assistantMessage.content, "Done");
   assert.equal(result.draft.name, "Task Helper");
 });
 
-test("missing private AI config falls back to the local parser", async () => {
-  const hermes = createHermesService({ config: {}, privateAiClient: null });
-  const result = await hermes.buildResponse({
-    message: "I want a command to send cat memes in Discord",
-    currentDraft: createEmptyDraft()
-  });
-
-  assert.equal(result.source, "local_fallback");
-  assert.ok(result.draft.name);
-  assert.ok(result.assistantMessage.content.length > 0);
-});
-
-test("private AI failure falls back to local parser", async () => {
+test("Hermes runtime invalid enum output fails fast", async () => {
   const hermes = createHermesService({
-    config: { privateAiBaseUrl: "https://private.ai", privateAiApiKey: "secret" },
-    privateAiClient: {
+    hermesRuntime: {
       async generateDraft() {
-        throw new Error("network down");
+        return {
+          source: "hermes_runtime",
+          assistantText: "Invalid draft",
+          draftPatch: {
+            name: "Unsafe Minion",
+            category: "unknown",
+            targetSocial: "discord",
+            triggerType: "command"
+          },
+          missingFields: [],
+          suggestions: []
+        };
       }
     }
   });
 
-  const result = await hermes.buildResponse({
-    message: "I want a command to send cat memes in Discord",
-    currentDraft: createEmptyDraft()
-  });
-
-  assert.equal(result.source, "local_fallback");
+  await assert.rejects(
+    () =>
+      hermes.buildResponse({
+        conversationId: "conv-1",
+        message: "I want a command to send cat memes in Discord",
+        currentDraft: createEmptyDraft()
+      }),
+    /Invalid draft patch from Hermes runtime/i
+  );
 });
 
+test("Hermes runtime failure bubbles instead of falling back", async () => {
+  const hermes = createHermesService({
+    hermesRuntime: {
+      async generateDraft() {
+        throw new Error("runtime down");
+      }
+    }
+  });
+
+  await assert.rejects(
+    () =>
+      hermes.buildResponse({
+        message: "I want a command to send cat memes in Discord",
+        currentDraft: createEmptyDraft()
+      }),
+    /runtime down/i
+  );
+});

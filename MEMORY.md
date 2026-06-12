@@ -1,6 +1,6 @@
 # MEMORY.md - Persistent Context
 
-**Last updated:** 2026-06-10
+**Last updated:** 2026-06-12
 **Branch:** `main`
 **Latest commit:** `4849fe0`
 **Active module:** `control-platform`

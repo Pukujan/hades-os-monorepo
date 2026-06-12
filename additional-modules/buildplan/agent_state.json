@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-06-08",
+  "lastUpdated": "2026-06-12",
   "branch": "main",
   "latestCommit": "4849fe0",
   "projectDescription": "Describe your project here.",
@@ -15,7 +15,11 @@
     "tasks": {
       "completed": [
         "Phase 1: scaffold backend",
-        "Phase 1: scaffold frontend"
+        "Phase 1: scaffold frontend",
+        "Implement Hermes runtime wrapper service",
+        "Wire Hades chat to Hermes runtime first",
+        "Persist agent execution metadata",
+        "Make Hermes runtime smoke pass"
       ],
       "inProgress": [],
       "next": [
@@ -36,7 +40,11 @@
       "tasks": {
         "completed": [
           "Phase 1: scaffold backend",
-          "Phase 1: scaffold frontend"
+          "Phase 1: scaffold frontend",
+          "Implement Hermes runtime wrapper service",
+          "Wire Hades chat to Hermes runtime first",
+          "Persist agent execution metadata",
+          "Make Hermes runtime smoke pass"
         ],
         "inProgress": [],
         "next": [

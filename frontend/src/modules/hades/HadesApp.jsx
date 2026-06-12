@@ -37,6 +37,8 @@ import {
 import { buildAssistantReply, buildTestOutput, missingDraftFields } from "./parser.js";
 import {
   buildLocalDraftFallback,
+  getHadesBootstrap,
+  mapBootstrapToHadesState,
   postHadesAssignment,
   postHadesChat,
   postHadesMinion,
@@ -177,11 +179,32 @@ function HadesProvider({ children }) {
   const [assignmentCommand, setAssignmentCommand] = usePersistentState("hades.assignmentCommand", "");
   const timersRef = React.useRef([]);
   const toastTimerRef = React.useRef(null);
+  const hydratedRef = React.useRef(false);
 
   React.useEffect(() => {
     document.documentElement.dataset.theme = theme;
     writeJson("hades.theme", theme);
   }, [theme]);
+
+  React.useEffect(() => {
+    if (hydratedRef.current) return;
+    hydratedRef.current = true;
+
+    getHadesBootstrap()
+      .then((payload) => {
+        const state = mapBootstrapToHadesState(payload);
+        if (state.conversationId) setConversationId(state.conversationId);
+        setMessages(state.messages);
+        setDraft(state.draft);
+        setMinions(state.minions);
+        setInbox((current) => current);
+        setAssignments(state.assignments);
+        setLevelState(state.levelState);
+      })
+      .catch(() => {
+        hydratedRef.current = true;
+      });
+  }, []);
 
   React.useEffect(() => {
     const nextLevel = deriveLevelState(minions.length);

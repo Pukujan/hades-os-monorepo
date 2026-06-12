@@ -43,3 +43,48 @@ test("repository supports conversation, messages, minions, assignments, and idem
   assert.equal(repo.listAssignments().length, 1);
   assert.equal(assignment.socialLinkId, "discord");
 });
+
+test("repository persists Hermes agent execution records with idempotency", async () => {
+  const repo = createHadesRepository({ now: () => "2026-06-11T00:00:00.000Z" });
+  const conversation = repo.getOrCreateConversation({ userId: "local-user" });
+
+  const execution = await repo.saveAgentExecution({
+    idempotencyKey: "agent-1",
+    execution: {
+      conversationId: conversation.id,
+      sessionId: "20260611_runtime",
+      source: "hermes_runtime",
+      status: "completed",
+      errorMessage: null
+    }
+  });
+  const duplicate = await repo.saveAgentExecution({
+    idempotencyKey: "agent-1",
+    execution: {
+      conversationId: conversation.id,
+      sessionId: "different",
+      source: "hermes_runtime",
+      status: "failed",
+      errorMessage: "should not replace idempotent record"
+    }
+  });
+
+  assert.equal(execution.id, duplicate.id);
+  assert.equal(duplicate.sessionId, "20260611_runtime");
+
+  const fallbackExecution = await repo.saveAgentExecution({
+    idempotencyKey: "agent-2",
+    execution: {
+      conversationId: conversation.id,
+      sessionId: null,
+      source: "local_fallback",
+      status: "fallback",
+      errorMessage: "Hermes runtime returned invalid JSON"
+    }
+  });
+
+  const snapshot = repo.getSnapshot();
+  assert.equal(snapshot.agentExecutions.length, 2);
+  assert.equal(snapshot.agentExecutions.some((entry) => entry.id === execution.id), true);
+  assert.equal(snapshot.agentExecutions.some((entry) => entry.id === fallbackExecution.id), true);
+});
