@@ -1,6 +1,6 @@
-# Dev logs
+# Dev logs gate
 
-Session **what we shipped** notes — written **before each push** as a paired human + agent audit.
+Session **what we shipped** notes — written **before each push** as a paired human + agent audit. This folder is the repo's release gate for visible work: if the pair is missing or incomplete, the push is not ready.
 
 ## Two types (required before push)
 
@@ -16,13 +16,15 @@ Same timestamp prefix on both files so they stay paired:
 005_2026-05-23_17-30_dev-log-agent_consolidated-exports.json  ← agent/
 ```
 
-## Pre-push workflow
+## Pre-push gate
+
+Use this workflow before any push that changes product behavior, docs, prompts, or architecture.
 
 ```bash
 # 1. Generate pair (git + npm test + full repo tree auto-filled)
 npm run dev-log:pre-push -- --slug <kebab-topic> --program 005
 
-# 2. Fill FILL sections in agent JSON, then human markdown
+# 2. Fill the FILL sections in agent JSON first, then the human markdown
 
 # 3. Verify filled logs
 npm run dev-log:verify
@@ -37,6 +39,15 @@ npm run dev-log:pre-push -- --check
 ```
 
 Agent: use command **Pre-push dev log** (`.agents/commands/pre-push-dev-log.md`).
+
+### Gate rules
+
+- Every shipped change should have a paired `human/` and `agent/` log.
+- The human log is the reviewable narrative.
+- The agent log is the machine-readable audit for resume/recovery.
+- `dev-log:verify` must pass before the work is considered complete.
+- `dev-log:pre-push --check` should fail if the current `HEAD` has no matching agent log.
+- Update [`../INDEX.md`](../INDEX.md) after each new log pair so the repo map stays current.
 
 ### Human log (two-part markdown)
 
@@ -57,6 +68,19 @@ Generator: `scripts/lib/dev-log-human-format.mjs`
 - `tradeoffs`, `improvements`, `regressions`, `risks`, `followUps`
 
 Agents should read the **JSON** first when resuming work; humans read **markdown**.
+
+### What belongs here
+
+- Completed implementation work
+- Architecture decisions that affect what was shipped
+- Test evidence and regressions
+- Final states of documented features
+
+### What does not belong here
+
+- Draft ideas that have not shipped
+- Secret values or credentials
+- Long-term planning that belongs in `study-docs/` or `planning/`
 
 ## vs other work-log folders
 
