@@ -3,6 +3,7 @@ import { useAuth } from "./AuthProvider.jsx";
 import { buildDiscordRedirectTo } from "./supabaseClient.js";
 import { extractLoginTemplateParts } from "./loginTemplateParts.js";
 import loginTemplate from "./loginTemplate.html?raw";
+import "../styles/login.css";
 
 const LOGIN_THEMES = [
   {
@@ -25,7 +26,7 @@ const LOGIN_THEMES = [
   }
 ];
 
-function usePersistentTheme() {
+function usePersistentTheme(rootRef) {
   const [theme, setTheme] = React.useState(() => {
     if (typeof window === "undefined") return "ember";
     return window.localStorage.getItem("hades.theme") || "ember";
@@ -34,8 +35,8 @@ function usePersistentTheme() {
   React.useEffect(() => {
     if (typeof window === "undefined") return;
     window.localStorage.setItem("hades.theme", theme);
-    document.documentElement.dataset.theme = theme;
-  }, [theme]);
+    if (rootRef.current) rootRef.current.dataset.theme = theme;
+  }, [theme, rootRef]);
 
   return [theme, setTheme];
 }
@@ -44,12 +45,7 @@ export function LoginPage() {
   const { supabase } = useAuth();
   const rootRef = React.useRef(null);
   const parts = React.useMemo(() => extractLoginTemplateParts(loginTemplate), []);
-  const [theme, setTheme] = usePersistentTheme();
-
-  React.useEffect(() => {
-    if (typeof window === "undefined") return;
-    document.documentElement.dataset.theme = theme;
-  }, [theme]);
+  const [theme, setTheme] = usePersistentTheme(rootRef);
 
   React.useEffect(() => {
     if (!rootRef.current) return undefined;
@@ -214,7 +210,6 @@ export function LoginPage() {
 
   return (
     <div ref={rootRef} className="login-root">
-      <style dangerouslySetInnerHTML={{ __html: parts.style }} />
       <div dangerouslySetInnerHTML={{ __html: parts.body }} />
     </div>
   );

@@ -20,11 +20,10 @@ export const THEME_CHOICES = [
 ];
 
 export const MOBILE_NAV = [
-  { id: "home", label: "Home", icon: "home", to: "/app/home" },
   { id: "minions", label: "Minions", icon: "minions", to: "/app/minions" },
+  { id: "forge", label: "Forge", icon: "hammer", to: "/forge" },
   { id: "socials", label: "Socials", icon: "socials", to: "/app/socials" },
-  { id: "inbox", label: "Inbox", icon: "inbox", to: "/app/inbox" },
-  { id: "settings", label: "Me", icon: "settings", to: "/app/settings" }
+  { id: "settings", label: "Settings", icon: "settings", to: "/app/settings" }
 ];
 
 export const STARTER_PROMPTS = [
@@ -36,37 +35,100 @@ export const STARTER_PROMPTS = [
 
 export const STARTER_MINIONS = [
   {
-    id: "task-helper",
-    icon: "task",
-    name: "Task Helper",
-    description: "Turns messy instructions into simple task cards.",
-    category: "task",
+    id: "cat-courier",
+    avatar: "🔥",
+    icon: "cat",
+    name: "Cat Courier",
+    description: "Manual summon · Discord + chat",
+    category: "discord",
     triggerType: "manual",
-    commandName: null,
+    commandName: "!sendcat",
     status: "active",
-    targetSocial: "private"
+    targetSocial: "discord",
+    destination: {
+      provider: "discord",
+      channelName: "#cat-chaos"
+    }
   },
   {
-    id: "chat-summarizer",
+    id: "price-imp",
+    avatar: "🪙",
+    icon: "shopping",
+    name: "Price Imp",
+    description: "Automatic · every 5 hours",
+    category: "shopping",
+    triggerType: "automatic",
+    commandName: "price tracker <product link> <target price>",
+    status: "active",
+    targetSocial: "email",
+    destination: {
+      provider: "gmail",
+      channelName: "Gmail alert"
+    }
+  },
+  {
+    id: "scroll-reader",
+    avatar: "📜",
     icon: "chat",
-    name: "Chat Summarizer",
-    description: "Summarizes long chats into clean notes.",
+    name: "Scroll Reader",
+    description: "Needs approval before sending",
     category: "chat",
     triggerType: "manual",
-    commandName: null,
-    status: "locked",
-    targetSocial: "private"
+    commandName: "!summarize <how much detail>",
+    status: "active",
+    targetSocial: "email",
+    destination: {
+      provider: "gmail",
+      channelName: "Gmail draft"
+    }
   },
   {
-    id: "deal-watcher",
-    icon: "shopping",
-    name: "Deal Watcher",
-    description: "Finds discounts and price drops. Locked.",
-    category: "shopping",
+    id: "episode-watcher",
+    avatar: "📺",
+    icon: "sparkles",
+    name: "Episode Watcher",
+    description: "Automatic · nightly scan",
+    category: "watchlist",
     triggerType: "watcher",
-    commandName: null,
+    commandName: "track episode <show name>",
+    status: "active",
+    targetSocial: "socials",
+    destination: {
+      provider: "social",
+      channelName: "Socials watchlist"
+    }
+  },
+  {
+    id: "night-watch",
+    avatar: "🌙",
+    icon: "locked",
+    name: "Night Watch",
+    description: "Paused until reactivated",
+    category: "topic watch",
+    triggerType: "automatic",
+    commandName: "night watch <topic>",
     status: "locked",
-    targetSocial: "private"
+    targetSocial: "private",
+    destination: {
+      provider: "hades",
+      channelName: "Hades Chat"
+    }
+  },
+  {
+    id: "inbox-broom",
+    avatar: "🧹",
+    icon: "locked",
+    name: "Inbox Broom",
+    description: "Inactive · Gmail cleanup",
+    category: "draft only",
+    triggerType: "manual",
+    commandName: "!hades cleanup inbox",
+    status: "locked",
+    targetSocial: "email",
+    destination: {
+      provider: "gmail",
+      channelName: "Gmail cleanup"
+    }
   }
 ];
 
@@ -171,23 +233,22 @@ export function createInitialMessages() {
 }
 
 export function createStarterOwnedMinions(now = new Date().toISOString()) {
-  return [
-    {
-      id: "task-helper",
-      userId: "local-user",
-      icon: "task",
-      name: "Task Helper",
-      description: "Turns messy notes into clean task cards.",
-      instructions: "Turn messy notes into clean task cards.",
-      category: "task",
-      triggerType: "manual",
-      commandName: null,
-      status: "active",
-      targetSocial: "private",
-      createdAt: now,
-      updatedAt: now
-    }
-  ];
+  return STARTER_MINIONS.map((minion) => ({
+    ...minion,
+    userId: "local-user",
+    instructions: minion.description,
+    status: minion.status === "locked" ? "paused" : minion.status,
+    createdAt: now,
+    updatedAt: now,
+    activityLog: [
+      {
+        id: `${minion.id}-log-1`,
+        title: minion.status === "locked" ? "Paused by user" : "Created",
+        location: minion.destination?.channelName || formatSocialLabel(minion.targetSocial),
+        createdAt: "Jun 13, 2026 · 9:18 AM"
+      }
+    ]
+  }));
 }
 
 export function deriveLevelState(minionCount) {

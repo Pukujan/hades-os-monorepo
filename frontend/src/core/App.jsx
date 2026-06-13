@@ -1,5 +1,5 @@
 import React from "react";
-import { HadesApp } from "../modules/hades/HadesApp.jsx";
+import { HadesPrototypeApp } from "../modules/hades/HadesPrototypeApp.jsx";
 import { AuthProvider, useAuth } from "../auth/AuthProvider.jsx";
 import { LoginPage } from "../auth/LoginPage.jsx";
 
@@ -10,7 +10,7 @@ function AuthSwitch() {
     return null;
   }
 
-  return session ? <HadesApp /> : <LoginPage />;
+  return session ? <HadesPrototypeApp /> : <LoginPage />;
 }
 
 export function App() {

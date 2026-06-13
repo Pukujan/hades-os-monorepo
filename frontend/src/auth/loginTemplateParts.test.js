@@ -12,6 +12,5 @@ test("login template keeps the approved forge portal structure", () => {
   assert.match(parts.body, /HADES OS/);
   assert.match(parts.body, /START THE FORGE/);
   assert.match(parts.body, /Continue with Discord/);
-  assert.match(parts.style, /\.bg-frame/);
-  assert.match(parts.style, /mix-blend-mode:screen/);
+  assert.equal(parts.style, "");
 });
