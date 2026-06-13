@@ -23,13 +23,14 @@ function ensureRuntime(hermesRuntime) {
 }
 
 export function createHermesService({ hermesRuntime = null } = {}) {
-  async function buildResponse({ userId = "local-user", conversationId, message, currentDraft = createEmptyDraft() }) {
+  async function buildResponse({ userId = "local-user", conversationId, message, currentDraft = createEmptyDraft(), context = "forge" }) {
     const runtime = ensureRuntime(hermesRuntime);
     const result = await runtime.generateDraft({
       userId,
       conversationId,
       message,
-      currentDraft
+      currentDraft,
+      context
     });
 
     if (

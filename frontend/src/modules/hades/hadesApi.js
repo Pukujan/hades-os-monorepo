@@ -1,4 +1,4 @@
-import { apiGet, apiPost } from "../../shared/api/client.js";
+import { apiGet, apiPost, apiDelete } from "../../shared/api/client.js";
 import { createDraftFromMessage } from "./parser.js";
 import {
   SOCIAL_LINKS,
@@ -26,6 +26,10 @@ export async function postHadesMinion(payload) {
 
 export async function postHadesAssignment(payload) {
   return apiPost("/api/hades/assignments", payload);
+}
+
+export async function deleteHadesMessages(conversationId) {
+  return apiDelete(`/api/hades/conversations/${conversationId}/messages`);
 }
 
 export function buildLocalDraftFallback(message, currentDraft) {

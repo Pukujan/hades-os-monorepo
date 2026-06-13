@@ -34,3 +34,27 @@ test("hades api posts chat payload to the backend route", async () => {
   }
 });
 
+test("hades api deleteHadesMessages calls DELETE on the backend route", async () => {
+  const calls = [];
+  const originalFetch = global.fetch;
+  global.fetch = async (url, options) => {
+    calls.push({ url, options });
+    return new Response(JSON.stringify({ ok: true }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" }
+    });
+  };
+
+  try {
+    const { deleteHadesMessages } = await import("./hadesApi.js");
+    const result = await deleteHadesMessages("conv-123");
+
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0].options.method, "DELETE");
+    assert.ok(calls[0].url.includes("/api/hades/conversations/conv-123/messages"));
+    assert.ok(result.ok);
+  } finally {
+    global.fetch = originalFetch;
+  }
+});
+

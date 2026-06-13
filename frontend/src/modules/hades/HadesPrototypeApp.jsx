@@ -37,6 +37,7 @@ import {
 import { buildAssistantReply, buildTestOutput, missingDraftFields } from "./parser.js";
 import {
   buildLocalDraftFallback,
+  deleteHadesMessages,
   getHadesBootstrap,
   mapBootstrapToHadesState,
   postHadesAssignment,
@@ -456,7 +457,7 @@ function HadesProvider({ children }) {
     }
   }
 
-  async function sendMessage(messageText) {
+  async function sendMessage(messageText, context = "forge") {
     const text = messageText.trim();
     if (!text) return;
 
@@ -478,7 +479,8 @@ function HadesProvider({ children }) {
         clientMessageId: userMessageId,
         idempotencyKey: userMessageId,
         message: text,
-        currentDraft: draft
+        currentDraft: draft,
+        context
       });
 
       if (response?.conversationId) {
@@ -511,6 +513,15 @@ function HadesProvider({ children }) {
       showToast(error?.message ? `Using local fallback: ${error.message}` : "Using local fallback.");
     }
     setSending(false);
+  }
+
+  async function clearMessages() {
+    if (conversationId) {
+      try {
+        await deleteHadesMessages(conversationId);
+      } catch { /* best effort */ }
+    }
+    setMessages([]);
   }
 
   async function runDraftTest() {
@@ -765,6 +776,7 @@ function HadesProvider({ children }) {
         composerText,
         setComposerText,
         sendMessage,
+        clearMessages,
         draft,
         updateDraft,
         runDraftTest,
@@ -1288,13 +1300,13 @@ function MinionsScreen() {
   const [activeTab, setActiveTab] = React.useState("active");
   const [chatFocused, setChatFocused] = React.useState(false);
   const [chatExpanded, setChatExpanded] = React.useState(false);
-  const { minions, messages, sending, composerText, setComposerText, sendMessage, openMinionDetail } = useHades();
+  const { minions, messages, sending, composerText, setComposerText, sendMessage, clearMessages, openMinionDetail } = useHades();
   const view = buildMinionScreenViewModel({ minions });
   const visibleMinions = activeTab === "active" ? view.active : view.inactive;
   const chatClass = chatExpanded ? "card chat-card expanded" : `card chat-card${chatFocused ? " focused" : ""}`;
 
   function handleSend() {
-    sendMessage(composerText);
+    sendMessage(composerText, "minions");
     setChatFocused(false);
     setChatExpanded(true);
   }
@@ -1306,7 +1318,9 @@ function MinionsScreen() {
       <ScreenHead title="Minions" subtitle="Speak to Hades, then inspect your minions and slots." />
       <div className="scroll">
         <section className={chatClass} id="hadesChatCard">
-          <p className="kicker">Speak to Hades</p>
+          <p className="kicker">Speak to Hades
+            {messages.length > 0 ? <button className="tiny" type="button" style={{ float: "right" }} onClick={clearMessages}>Clear</button> : null}
+          </p>
           {!chatExpanded ? <h3 className="bigline chat-intro">Hades awaits your message.</h3> : null}
           <div className="chat-log" id="minionsChat">
             {recentMessages.map((message) => (
@@ -1316,7 +1330,7 @@ function MinionsScreen() {
                   <div className="suggest">
                     {message.suggestions.map((s, i) => {
                       const label = typeof s === "string" ? s : s.label;
-                      return <button key={label || i} type="button" onClick={() => sendMessage(s)}>{label}</button>;
+                      return <button key={label || i} type="button" onClick={() => { const t = typeof s === "string" ? s : s.text || s.label || ""; sendMessage(t, "minions"); }}>{label}</button>;
                     })}
                   </div>
                 ) : null}
@@ -1501,7 +1515,7 @@ function SettingsScreen() {
 }
 
 function ForgeScreen() {
-  const { messages, draft, sending, composerText, setComposerText, sendMessage, runDraftTest, saveDraft, minions, openMinionDetail } = useHades();
+  const { messages, draft, sending, composerText, setComposerText, sendMessage, clearMessages, runDraftTest, saveDraft, minions, openMinionDetail } = useHades();
   const visibleSummons = minions.filter((minion) => minion.status === "active").slice(0, 4);
   const templateChips = [
     { id: "sendcat", label: "SEND CAT", text: "Create a command called !sendcat that sends cat memes in Discord." },
@@ -1519,7 +1533,9 @@ function ForgeScreen() {
       <ScreenHead title="Forge" subtitle="Create a helper from plain English." />
       <div className="scroll">
         <section className="card chat-card expanded">
-          <p className="kicker">Forge your minion</p>
+          <p className="kicker">Forge your minion
+            {messages.length > 0 ? <button className="tiny" type="button" style={{ float: "right" }} onClick={clearMessages}>Clear</button> : null}
+          </p>
           <div className="chips">
           {templateChips.map((chip) => (
             <button key={chip.id} type="button" className="chip" onClick={() => sendMessage(chip.text)}>

@@ -9,11 +9,12 @@
     "lint:boundaries": "node scripts/check-module-boundaries.mjs",
     "lint:layers": "node scripts/check-module-layers.mjs",
     "lint:api-docs": "node ../scripts/check-api-docs.mjs",
-    "lint:architecture": "npm run lint:boundaries && npm run lint:layers && npm run lint:api-docs",
-    "test": "node --test && node --test scripts/boundary-lint.test.mjs",
+    "lint:architecture": "npm run lint:boundaries && npm run lint:layers && npm run lint:api-docs && npm run test:contracts",
+    "test": "node --test && npm run test:contracts && node --test scripts/boundary-lint.test.mjs",
     "condense-models": "node ../scripts/condense-models.mjs",
     "condense-prompts": "node ../scripts/condense-prompts.mjs",
     "condense-file-structure": "node ../scripts/condense-file-structure.mjs",
+    "test:contracts": "node --test src/**/*.contract.mjs",
     "test:evals": "node ../scripts/run-module-evals.mjs"
   },
   "dependencies": {

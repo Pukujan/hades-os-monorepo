@@ -8,10 +8,10 @@
     "slug": "control-platform",
     "kind": "domain",
     "parentModule": "none",
-    "startedAt": "2026-06-08",
+    "startedAt": "2026-06-13T21:00:12.266+00:00",
     "phase": "implementation",
-    "backendStatus": "scaffolded",
-    "frontendStatus": "scaffolded",
+    "backendStatus": "implementing",
+    "frontendStatus": "implementing",
     "tasks": {
       "completed": [
         "Phase 1: scaffold backend",
@@ -36,7 +36,14 @@
         "Implement prototype-aligned post-login shell and screens",
         "Create a separate prototype-root post-login app entrypoint and stylesheet",
         "Swap the authenticated route to the new prototype implementation",
-        "Clean out unused legacy post-login imports/files after prototype swap"
+        "Clean out unused legacy post-login imports/files after prototype swap",
+        "Implement RED→GREEN for giphyProvider, botTokenProvider, discordClient services (15 tests)",
+        "Implement forge god voice + context branching in Hermes runtime (5 tests)",
+        "Automate contract tests via npm run test:contracts + lint:architecture gate",
+        "Write 5 new RED test files (21 tests) for telegramClient, chatClearing, triggers, supabase wiring",
+        "Implement GREEN for all 21 tests: telegramClient, clearMessages, deleteConversationMessages, triggers route",
+        "Wire giphyApiKey config, update frontend to pass context (forge vs minions)",
+        "Update HadesPrototypeApp.jsx to pass context to backend chat API"
       ],
       "inProgress": [],
       "next": [
@@ -106,13 +113,13 @@
     "gate": 0
   },
   "lint": {
-    "lastRun": null,
-    "lastResult": null,
-    "lastPass": false
+    "lastRun": "2026-06-13T21:00:12.266+00:00",
+    "lastResult": "passed",
+    "lastPass": true
   },
   "sessions": {
-    "currentId": "ses_2026-06-13-clean-legacy-post-login",
-    "lastSessionId": "ses_2026-06-13-clean-legacy-post-login",
+    "currentId": "ses_2026-06-13-wire-hades-context-frontend",
+    "lastSessionId": "ses_2026-06-13-wire-hades-context-frontend",
     "archive": []
   },
   "contextBudget": {
