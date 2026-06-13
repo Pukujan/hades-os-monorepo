@@ -1,8 +1,8 @@
 # MEMORY.md - Persistent Context
 
 **Last updated:** 2026-06-13
-**Branch:** `main`
-**Latest commit:** `4849fe0`
+**Branch:** `codex/issue-1-hermes-discord-minion-runtime`
+**Latest commit:** `0cd071f`
 **Active module:** `control-platform`
 **State file:** `buildplan/agent_state.json`
 
@@ -10,7 +10,7 @@
 
 ## PROJECT OVERVIEW
 
-Describe your project here.
+Hades OS — multi-user auth isolation for shared Hermes runtime. Backend owns identity, isolation, memory retrieval. Hermes is shared; user context is not shared.
 
 ---
 
@@ -29,14 +29,20 @@ Describe your project here.
 | Frontend | `implementing` |
 | Started | `2026-06-13T21:00:12.266+00:00` |
 
+### In Progress
+- [ ] Implement multi-user auth + Hermes isolation via TDD (14 test files, ~60+ tests)
+
 ### Next
-- Phase 2: backend API routes
-- Phase 2: frontend components
-- Phase 2: integration tests
-- Implement Supabase-backed live Hades repository wiring
-- Implement Discord command adapter and GIF provider flow behind TDD contract
-- Implement reusable minion assignment runtime for command and automation triggers
-- Implement post-login UX v4 visual alignment with frontend-only TDD gates
+- Phase 1: auth middleware — requireHadesAuth() (6 tests)
+- Phase 2: tenant-scoped repositories (6 files, 5 tests each)
+- Phase 3: social connection isolation — verifySocialAccount (8 tests)
+- Phase 4: Telegram token encryption/decryption
+- Phase 5: Hermes scoped context builder (8 tests)
+- Phase 6: runtime trigger isolation (8 tests)
+- Phase 7: Hermes output validator (7 tests)
+- Phase 8: execution logs (7 tests)
+- Phase 9: cross-user regression tests (10 tests)
+- Phase 10: frontend auth/state safety (10 tests)
 
 ---
 

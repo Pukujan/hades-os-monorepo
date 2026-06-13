@@ -11,6 +11,8 @@
 | POST | `/api/hades/minions/test` | hades | Run a test of the current minion draft |
 | POST | `/api/hades/minions` | hades | Save a new minion |
 | POST | `/api/hades/assignments` | hades | Assign a minion to a social channel |
+| POST | `/api/hades/triggers` | hades | Handle an incoming social trigger (Discord, Telegram) |
+| DELETE | `/api/hades/conversations/:id/messages` | hades | Clear all messages from a conversation |
 | GET | `/api/_reference/health` | _reference | Example module health check |
 | GET | `/api/model-condenser/health` | model-condenser | Module health and config summary |
 | POST | `/api/model-condenser/condense` | model-condenser | Regenerate consolidated-models.json |
