@@ -16,24 +16,6 @@ export const THEME_CHOICES = [
     label: "Grove",
     description: "Green nature realm.",
     swatch: "grove"
-  },
-  {
-    id: "petal",
-    label: "Petal Mist",
-    description: "Soft pastel rose and cream.",
-    swatch: "petal"
-  },
-  {
-    id: "coast",
-    label: "Coastline",
-    description: "Airy pastel blue with warm sand.",
-    swatch: "coast"
-  },
-  {
-    id: "slate",
-    label: "Slate Pro",
-    description: "Clean professional navy and slate.",
-    swatch: "slate"
   }
 ];
 
@@ -49,7 +31,7 @@ export const STARTER_PROMPTS = [
   { id: "task-helper", label: "Task helper", icon: "task", text: "Make a private helper that turns messy notes into task cards" },
   { id: "chat-summarizer", label: "Chat summarizer", icon: "chat", text: "Make a bot that summarizes long chats" },
   { id: "github-packet", label: "GitHub packet", icon: "github", text: "Make a GitHub task packet helper for repo work" },
-  { id: "cat-memes", label: "Cat memes", icon: "cat", text: "I want a command to send cat memes in Discord" }
+  { id: "cat-memes", label: "Cat memes", icon: "cat", text: "I want a command called !sendcat that sends cat memes in Discord" }
 ];
 
 export const STARTER_MINIONS = [
@@ -109,7 +91,7 @@ export const SOCIAL_LINKS = [
     provider: "discord",
     displayName: "Discord",
     status: "not_connected",
-    commandName: "!sendcatmeme"
+    commandName: "!sendcat"
   },
   {
     id: "telegram",

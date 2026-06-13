@@ -109,11 +109,13 @@ test("GET /api/health returns ok", async () => {
   assert.equal(body.status, "ok");
 });
 
-test("POST /api/hades/chat returns draft and fallback source", async () => {
-  const prevBase = process.env.PRIVATE_AI_BASE_URL;
-  const prevKey = process.env.PRIVATE_AI_API_KEY;
-  delete process.env.PRIVATE_AI_BASE_URL;
-  delete process.env.PRIVATE_AI_API_KEY;
+test("POST /api/hades/chat returns draft and Hermes runtime source", async () => {
+  const hadBase = Object.hasOwn(process.env, "OPENROUTER_BASE_URL");
+  const hadKey = Object.hasOwn(process.env, "OPENROUTER_API_KEY");
+  const prevBase = process.env.OPENROUTER_BASE_URL;
+  const prevKey = process.env.OPENROUTER_API_KEY;
+  delete process.env.OPENROUTER_BASE_URL;
+  delete process.env.OPENROUTER_API_KEY;
 
   try {
     const { app } = await createApp();
@@ -142,14 +144,16 @@ test("POST /api/hades/chat returns draft and fallback source", async () => {
 
     assert.equal(response.status, 200);
     const body = JSON.parse(response.body);
-    assert.equal(body.source, "local_fallback");
+    assert.equal(body.source, "hermes_runtime");
     assert.ok(body.conversationId);
     assert.equal(body.userMessage.role, "user");
     assert.equal(body.assistantMessage.role, "assistant");
     assert.ok(body.draft.name);
   } finally {
-    if (prevBase) process.env.PRIVATE_AI_BASE_URL = prevBase;
-    if (prevKey) process.env.PRIVATE_AI_API_KEY = prevKey;
+    if (hadBase) process.env.OPENROUTER_BASE_URL = prevBase;
+    else delete process.env.OPENROUTER_BASE_URL;
+    if (hadKey) process.env.OPENROUTER_API_KEY = prevKey;
+    else delete process.env.OPENROUTER_API_KEY;
   }
 });
 
@@ -181,6 +185,57 @@ test("POST /api/hades/chat is idempotent for repeated keys", async () => {
 
   assert.equal(firstBody.userMessage.id, secondBody.userMessage.id);
   assert.equal(firstBody.assistantMessage.id, secondBody.assistantMessage.id);
+});
+
+test("POST /api/hades/chat can use Hermes runtime without leaking server secrets", async () => {
+  const previous = {
+    HERMES_RUNTIME_ENABLED: process.env.HERMES_RUNTIME_ENABLED,
+    OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
+    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY
+  };
+  process.env.HERMES_RUNTIME_ENABLED = "true";
+  delete process.env.OPENROUTER_API_KEY;
+  process.env.SUPABASE_SERVICE_ROLE_KEY = "server-only-supabase-secret";
+
+  try {
+    const { app } = await createApp();
+    const response = await invoke(app, {
+      method: "POST",
+      path: "/api/hades/chat",
+      body: {
+        clientMessageId: "msg-runtime-1",
+        idempotencyKey: "idem-runtime-chat-1",
+        message: "Make a Discord command called !sendcat that sends random cat meme gifs",
+        currentDraft: {
+          name: null,
+          description: null,
+          category: null,
+          targetSocial: null,
+          triggerType: null,
+          commandName: null,
+          action: null,
+          responseStyle: "helpful",
+          safetyMode: "ask_first",
+          testInput: null,
+          status: "incomplete"
+        }
+      }
+    });
+
+    assert.equal(response.status, 200);
+    const body = JSON.parse(response.body);
+    assert.equal(body.source, "hermes_runtime");
+    assert.ok(body.conversationId);
+    assert.equal(body.userMessage.role, "user");
+    assert.equal(body.assistantMessage.role, "assistant");
+    assert.ok(body.draft.name);
+    assert.equal(response.body.includes("server-only-supabase-secret"), false);
+  } finally {
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  }
 });
 
 test("write routes validate and persist", async () => {
@@ -231,7 +286,7 @@ test("write routes validate and persist", async () => {
     body: {
       minionId: saveBody.minion.id,
       socialLinkId: "discord",
-      commandName: "!sendcatmeme",
+      commandName: "!sendcat",
       idempotencyKey: "assign-1"
     }
   });
@@ -239,4 +294,3 @@ test("write routes validate and persist", async () => {
   const assignmentBody = JSON.parse(assignmentRes.body);
   assert.equal(assignmentBody.assignment.socialLinkId, "discord");
 });
-

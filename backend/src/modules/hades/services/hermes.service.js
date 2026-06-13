@@ -1,5 +1,5 @@
-import { createDraftFromMessage, buildAssistantReply, sanitizeAssistantText } from "../parser.js";
 import { createEmptyDraft, missingDraftFields, VALID_CATEGORIES, VALID_TARGET_SOCIALS, VALID_TRIGGER_TYPES } from "../data.js";
+import { sanitizeAssistantText } from "../parser.js";
 
 function isValidEnum(value, allowed) {
   return value == null || allowed.includes(value);
@@ -15,69 +15,48 @@ function normalizePatch(draft, patch = {}) {
   return next;
 }
 
-export function createHermesService({ config = {}, privateAiClient = null } = {}) {
+function ensureRuntime(hermesRuntime) {
+  if (!hermesRuntime?.generateDraft) {
+    throw new Error("Hermes runtime is not configured");
+  }
+  return hermesRuntime;
+}
+
+export function createHermesService({ hermesRuntime = null } = {}) {
   async function buildResponse({ userId = "local-user", conversationId, message, currentDraft = createEmptyDraft() }) {
-    const allowPrivateAi = Boolean(config.privateAiBaseUrl && config.privateAiApiKey);
+    const runtime = ensureRuntime(hermesRuntime);
+    const result = await runtime.generateDraft({
+      userId,
+      conversationId,
+      message,
+      currentDraft
+    });
 
-    if (allowPrivateAi && privateAiClient?.generateDraft) {
-      try {
-        const remote = await privateAiClient.generateDraft({
-          userId,
-          conversationId,
-          message,
-          currentDraft,
-          allowedProviders: VALID_TARGET_SOCIALS,
-          mode: "minion_draft"
-        });
-
-        if (
-          !isValidEnum(remote?.draftPatch?.category, VALID_CATEGORIES) ||
-          !isValidEnum(remote?.draftPatch?.triggerType, VALID_TRIGGER_TYPES) ||
-          !isValidEnum(remote?.draftPatch?.targetSocial, VALID_TARGET_SOCIALS)
-        ) {
-          throw new Error("Invalid draft patch from private AI");
-        }
-
-        const draft = normalizePatch(currentDraft, remote.draftPatch || {});
-        const missing = remote.missingFields?.length ? remote.missingFields : missingDraftFields(draft);
-        draft.status = missing.length ? "incomplete" : "ready_to_test";
-
-        return {
-          assistantMessage: {
-            role: "assistant",
-            content: sanitizeAssistantText(remote.assistantText || "Draft updated."),
-            status: "completed",
-            suggestions: remote.suggestions || []
-          },
-          draft,
-          missingFields: missing,
-          suggestions: remote.suggestions || [],
-          source: "private_ai"
-        };
-      } catch (error) {
-        if (error?.status && error.status < 500) {
-          throw error;
-        }
-      }
+    if (
+      !isValidEnum(result?.draftPatch?.category, VALID_CATEGORIES) ||
+      !isValidEnum(result?.draftPatch?.triggerType, VALID_TRIGGER_TYPES) ||
+      !isValidEnum(result?.draftPatch?.targetSocial, VALID_TARGET_SOCIALS)
+    ) {
+      throw new Error("Invalid draft patch from Hermes runtime");
     }
-
-    const parsed = createDraftFromMessage(message, currentDraft);
-    const assistantReply = buildAssistantReply(parsed);
+    const draft = normalizePatch(currentDraft, result.draftPatch || {});
+    const missing = result.missingFields?.length ? result.missingFields : missingDraftFields(draft);
+    draft.status = missing.length ? "incomplete" : "ready_to_test";
 
     return {
       assistantMessage: {
         role: "assistant",
-        content: sanitizeAssistantText(assistantReply.content),
-        status: assistantReply.status,
-        suggestions: assistantReply.suggestions || []
+        content: sanitizeAssistantText(result.assistantText || "Draft updated."),
+        status: "completed",
+        suggestions: result.suggestions || []
       },
-      draft: parsed.draft,
-      missingFields: parsed.missing,
-      suggestions: assistantReply.suggestions || [],
-      source: "local_fallback"
+      draft,
+      missingFields: missing,
+      suggestions: result.suggestions || [],
+      source: result.source || "hermes_runtime",
+      sessionId: result.sessionId || null
     };
   }
 
   return { buildResponse };
 }
-

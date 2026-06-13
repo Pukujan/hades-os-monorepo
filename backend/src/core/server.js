@@ -8,8 +8,9 @@ const backendRoot = join(dirname(fileURLToPath(import.meta.url)), "../..");
 dotenv.config({ path: join(backendRoot, ".env") });
 
 const port = process.env.PORT || 3001;
+const host = process.env.HOST || "0.0.0.0";
 const { app, loadedModules } = await createApp();
 
-app.listen(port, () => {
+app.listen(port, host, () => {
   logStartupSummary(loadedModules, port);
 });

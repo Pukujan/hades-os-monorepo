@@ -1,5 +1,6 @@
 import React from "react";
 import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../../auth/AuthProvider.jsx";
 import {
   Bot,
   Building2,
@@ -12,7 +13,6 @@ import {
   Palette,
   Plug2,
   GitFork,
-  Send,
   Settings2,
   Shield,
   ShoppingBag,
@@ -37,6 +37,8 @@ import {
 import { buildAssistantReply, buildTestOutput, missingDraftFields } from "./parser.js";
 import {
   buildLocalDraftFallback,
+  getHadesBootstrap,
+  mapBootstrapToHadesState,
   postHadesAssignment,
   postHadesChat,
   postHadesMinion,
@@ -59,8 +61,8 @@ const ICONS = {
   market: ShoppingBag,
   locked: Shield,
   sparkles: Sparkles,
-  discord: Plug2,
-  telegram: Send,
+  discord: DiscordBrandIcon,
+  telegram: TelegramBrandIcon,
   email: Mail,
   private: Shield,
   hammer: Hammer,
@@ -112,6 +114,22 @@ function AppIcon({ name, className = "", size = 18, strokeWidth = 2.2, title }) 
   }
 
   return <Icon className={className} size={size} strokeWidth={strokeWidth} aria-hidden={title ? undefined : true} title={title} />;
+}
+
+function DiscordBrandIcon({ className = "", size = 18, title }) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden={title ? undefined : true} title={title}>
+      <path d="M19.54 5.34A16.6 16.6 0 0 0 15.4 4l-.2.4c1.57.38 2.29.92 2.29.92a8.11 8.11 0 0 0-2.59-.8 8.82 8.82 0 0 0-5.8 0 8.1 8.1 0 0 0-2.59.8s.76-.57 2.44-.95L8.76 4a16.64 16.64 0 0 0-4.16 1.35C1.97 9.22 1.26 13 1.61 16.72A16.86 16.86 0 0 0 6.7 19.3l1.1-1.5c-.62-.24-1.22-.56-1.78-.95.15.11 1.9 1.47 5.98 1.47 4.08 0 5.82-1.36 5.98-1.47-.56.39-1.15.71-1.78.95l1.1 1.5a16.76 16.76 0 0 0 5.09-2.58c.41-4.3-.69-8.04-2.85-11.38ZM9.7 14.45c-.86 0-1.56-.8-1.56-1.78 0-.98.69-1.78 1.56-1.78.87 0 1.57.8 1.56 1.78 0 .98-.69 1.78-1.56 1.78Zm4.6 0c-.86 0-1.56-.8-1.56-1.78 0-.98.69-1.78 1.56-1.78.87 0 1.57.8 1.56 1.78 0 .98-.69 1.78-1.56 1.78Z" />
+    </svg>
+  );
+}
+
+function TelegramBrandIcon({ className = "", size = 18, title }) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden={title ? undefined : true} title={title}>
+      <path d="M21.44 4.54a1.5 1.5 0 0 0-1.52-.23L3.8 10.88a1.5 1.5 0 0 0 .14 2.83l4.03 1.33 1.49 4.64a1.5 1.5 0 0 0 2.64.46l2.26-3.08 3.84 2.83a1.5 1.5 0 0 0 2.36-.9l2.22-12.95a1.5 1.5 0 0 0-.34-1.5ZM9.48 14.26l8.86-5.52-6.9 6.99-.42 2.83-1.54-4.3Z" />
+    </svg>
+  );
 }
 
 function toTitleCase(text) {
@@ -175,13 +193,54 @@ function HadesProvider({ children }) {
   const [selectedMinionId, setSelectedMinionId] = usePersistentState("hades.selectedMinionId", "task-helper");
   const [selectedSocialId, setSelectedSocialId] = usePersistentState("hades.selectedSocialId", "discord");
   const [assignmentCommand, setAssignmentCommand] = usePersistentState("hades.assignmentCommand", "");
+  const [futurePlanCache, setFuturePlanCache] = usePersistentState("hades.futurePlanCache", [
+    {
+      id: "plan-auth",
+      title: "Wire backend auth verification",
+      description: "Confirm Supabase session checks before Hermes execution."
+    },
+    {
+      id: "plan-discord",
+      title: "Finish Discord send runtime",
+      description: "Resolve assigned minions and send actual messages or GIFs."
+    }
+  ]);
+  const [futurePlanDraft, setFuturePlanDraft] = React.useState("");
   const timersRef = React.useRef([]);
   const toastTimerRef = React.useRef(null);
+  const hydratedRef = React.useRef(false);
+  const { signOut } = useAuth();
 
   React.useEffect(() => {
     document.documentElement.dataset.theme = theme;
     writeJson("hades.theme", theme);
   }, [theme]);
+
+  React.useEffect(() => {
+    if (!THEME_CHOICES.some((choice) => choice.id === theme)) {
+      setThemeState("ember");
+    }
+  }, [setThemeState, theme]);
+
+  React.useEffect(() => {
+    if (hydratedRef.current) return;
+    hydratedRef.current = true;
+
+    getHadesBootstrap()
+      .then((payload) => {
+        const state = mapBootstrapToHadesState(payload);
+        if (state.conversationId) setConversationId(state.conversationId);
+        setMessages(state.messages);
+        setDraft(state.draft);
+        setMinions(state.minions);
+        setInbox((current) => current);
+        setAssignments(state.assignments);
+        setLevelState(state.levelState);
+      })
+      .catch(() => {
+        hydratedRef.current = true;
+      });
+  }, []);
 
   React.useEffect(() => {
     const nextLevel = deriveLevelState(minions.length);
@@ -234,6 +293,77 @@ function HadesProvider({ children }) {
     setThemeState(nextTheme);
     showToast(`${THEME_CHOICES.find((choice) => choice.id === nextTheme)?.label || nextTheme} applied.`);
   }, [showToast]);
+
+  const cacheFuturePlan = React.useCallback(() => {
+    const text = futurePlanDraft.trim();
+    if (!text) {
+      showToast("Add a future plan note first.");
+      return;
+    }
+
+    const note = {
+      id: createId("plan"),
+      title: text,
+      description: "Locally cached for the next implementation phase."
+    };
+    setFuturePlanCache((current) => [note, ...current].slice(0, 6));
+    setFuturePlanDraft("");
+    showToast("Future plan cached locally.");
+  }, [futurePlanDraft, setFuturePlanCache, showToast]);
+
+  const clearFuturePlans = React.useCallback(() => {
+    setFuturePlanCache([]);
+    showToast("Future plan cache cleared.");
+  }, [setFuturePlanCache, showToast]);
+
+  const getAssignmentCommand = React.useCallback(
+    () => assignmentCommand.trim() || draft.commandName || null,
+    [assignmentCommand, draft.commandName]
+  );
+
+  const persistAssignmentForSocial = React.useCallback(
+    async (social, minion) => {
+      if (!social || !minion) return null;
+      const commandName = getAssignmentCommand() || minion.commandName || null;
+      const existing = assignments.find(
+        (entry) =>
+          entry.minionId === minion.id &&
+          entry.socialLinkId === social.id &&
+          (entry.commandName || null) === (commandName || null)
+      );
+
+      if (existing) {
+        return existing;
+      }
+
+      try {
+        const response = await postHadesAssignment({
+          minionId: minion.id,
+          socialLinkId: social.id,
+          commandName,
+          idempotencyKey: createId(`assignment-${social.id}`)
+        });
+        const nextAssignment = response.assignment;
+        setAssignments((current) => [...current.filter((entry) => entry.id !== nextAssignment.id), nextAssignment]);
+        return nextAssignment;
+      } catch {
+        const assignment = {
+          id: createId(`assignment-${social.id}`),
+          userId: "local-user",
+          minionId: minion.id,
+          socialLinkId: social.id,
+          scope: social.provider === "private" ? "private" : "social",
+          commandName,
+          status: "active",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        setAssignments((current) => [...current.filter((entry) => entry.id !== assignment.id), assignment]);
+        return assignment;
+      }
+    },
+    [assignments, getAssignmentCommand]
+  );
 
   function selectStarterCard(starterId) {
     const starter = STARTER_MINIONS.find((entry) => entry.id === starterId);
@@ -436,47 +566,51 @@ function HadesProvider({ children }) {
       return;
     }
 
-    try {
-      const response = await postHadesAssignment({
-        minionId: minion.id,
-        socialLinkId: social?.id || null,
-        commandName: assignmentCommand.trim() || minion.commandName || draft.commandName || null,
-        idempotencyKey: createId("assignment")
-      });
+    const result = await persistAssignmentForSocial(social, minion);
+    if (!result) {
+      showToast("Choose a connected social first.");
+      return;
+    }
 
-      setAssignments((current) => [...current, response.assignment]);
-      pushInbox("socials", "Minion assigned", `${minion.name} is now assigned to ${social?.displayName || "a social placeholder"}.`, "info");
+    pushInbox("socials", "Minion assigned", `${minion.name} is now assigned to ${social?.displayName || "a social placeholder"}.`, "info");
+    appendMessage({
+      id: createId("msg"),
+      role: "assistant",
+      content: `${minion.name} assigned to ${social?.displayName || "the selected social"} as a preview. ${social?.status === "connected" ? "That connection is live." : "The connection is not live yet."}`,
+      status: "completed"
+    });
+    showToast(`${minion.name} assigned.`);
+    setAssignmentCommand("");
+  }
+
+  async function assignSelectedMinionToAllConnected() {
+    const minion = minions.find((entry) => entry.id === selectedMinionId);
+    if (!minion) {
+      showToast("Choose a minion first.");
+      return;
+    }
+
+    const connectedSocials = SOCIAL_LINKS.filter((entry) => entry.status === "connected");
+    if (!connectedSocials.length) {
+      showToast("No connected socials yet.");
+      return;
+    }
+
+    const results = [];
+    for (const social of connectedSocials) {
+      const assignment = await persistAssignmentForSocial(social, minion);
+      if (assignment) results.push({ social, assignment });
+    }
+
+    if (results.length) {
+      pushInbox("socials", "Assigned to all", `${minion.name} was assigned to ${results.length} connected social${results.length === 1 ? "" : "s"}.`, "success");
       appendMessage({
         id: createId("msg"),
         role: "assistant",
-        content: `${minion.name} assigned to ${social?.displayName || "the selected social"} as a preview. ${social?.status === "connected" ? "That connection is live." : "The connection is not live yet."}`,
+        content: `${minion.name} assigned to all connected socials.`,
         status: "completed"
       });
-      showToast(`${minion.name} assigned.`);
-      setAssignmentCommand("");
-    } catch {
-      const assignment = {
-        id: createId("assignment"),
-        userId: "local-user",
-        minionId: minion.id,
-        socialLinkId: social?.id || null,
-        scope: social?.provider === "private" ? "private" : "social",
-        commandName: assignmentCommand.trim() || minion.commandName || draft.commandName || null,
-        status: "active",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-
-      setAssignments((current) => [...current, assignment]);
-      pushInbox("socials", "Minion assigned", `${minion.name} is now assigned to ${social?.displayName || "a social placeholder"}.`, "info");
-      appendMessage({
-        id: createId("msg"),
-        role: "assistant",
-        content: `${minion.name} assigned to ${social?.displayName || "the selected social"} as a preview. ${social?.status === "connected" ? "That connection is live." : "The connection is not live yet."}`,
-        status: "completed"
-      });
-      showToast(`${minion.name} assigned.`);
-      setAssignmentCommand("");
+      showToast(`Assigned to ${results.length} connected social${results.length === 1 ? "" : "s"}.`);
     }
   }
 
@@ -504,6 +638,12 @@ function HadesProvider({ children }) {
         setAssignmentCommand,
         assignments,
         assignSelectedMinion,
+        assignSelectedMinionToAllConnected,
+        futurePlanCache,
+        futurePlanDraft,
+        setFuturePlanDraft,
+        cacheFuturePlan,
+        clearFuturePlans,
         inbox,
         levelState,
         selectedStarterId,
@@ -674,7 +814,7 @@ function ScreenHeader({ icon, title, subtitle, actionLabel, onAction }) {
         </div>
       </div>
       {actionLabel ? (
-        <button className="tiny-btn" onClick={onAction}>
+        <button className="tiny-btn" type="button" onClick={onAction}>
           {actionLabel}
         </button>
       ) : (
@@ -845,50 +985,25 @@ function MinionCard({ minion }) {
 }
 
 function SocialCard({ social }) {
-  const { assignments, setSelectedSocialId, minions } = useHades();
+  const { assignments, setSelectedSocialId, selectedSocialId } = useHades();
   const assigned = assignments.filter((entry) => entry.socialLinkId === social.id);
-  const slotUsage = `${assigned.length} / 3 slots`;
-  const assignedNames = assigned.map((entry) => minions.find((minion) => minion.id === entry.minionId)?.name || entry.minionId);
-  const emptyCopy = social.status === "locked" ? "Locked preview." : "No assigned minion yet.";
+  const slotUsage = `${Math.min(assigned.length, 3)}/3`;
+  const active = social.status === "connected";
 
   return (
-    <article className="social-card">
-      <div className="social-top">
-        <div className="avatar"><AppIcon name={getSocialIcon(social.provider)} /></div>
-        <div>
-          <h4>{social.displayName}</h4>
-          <p>{assigned.length ? assignedNames.join(", ") : emptyCopy}</p>
-        </div>
-        <span className={`badge ${social.status === "connected" ? "active" : social.status === "locked" ? "locked" : ""}`}>
-          {social.status === "connected" ? "Connected" : social.status === "locked" ? "Locked" : "Preview"}
-        </span>
-      </div>
-      <div className="subrow">
-        <div className="slot">
-          <b>Connection</b>
-          {social.status === "connected" ? "Live preview" : "Not connected"}
-        </div>
-        <div className="slot">
-          <b>Slots</b>
-          {slotUsage}
-        </div>
-      </div>
-      {assigned.length ? (
-        <div className="subrow">
-          {assigned.map((entry) => (
-            <div key={entry.id} className="slot">
-              <b>Assigned</b>
-              {minions.find((minion) => minion.id === entry.minionId)?.name || entry.minionId}
-            </div>
-          ))}
-        </div>
-      ) : null}
-      <div style={{ marginTop: 10 }}>
-        <button className="btn ghost" type="button" onClick={() => setSelectedSocialId(social.id)}>
-          Select
-        </button>
-      </div>
-    </article>
+    <button
+      type="button"
+      className={`social-tile ${selectedSocialId === social.id ? "selected" : ""}`}
+      aria-label={`${social.displayName} ${active ? "connected" : "not connected"} ${slotUsage}`}
+      onClick={() => setSelectedSocialId(social.id)}
+    >
+      <span className={`social-status-dot ${active ? "live" : "offline"}`} aria-hidden="true" />
+      <span className={`social-tile-icon provider-${social.provider}`}>
+        <AppIcon name={getSocialIcon(social.provider)} size={24} />
+      </span>
+      <span className={`social-slot-count ${assigned.length ? "filled" : ""}`}>{slotUsage}</span>
+      <span className="sr-only">{social.displayName}</span>
+    </button>
   );
 }
 
@@ -1026,21 +1141,25 @@ function SocialsScreen() {
     minions,
     draft,
     assignSelectedMinion,
+    assignSelectedMinionToAllConnected,
     assignmentCommand,
     setAssignmentCommand
   } = useHades();
 
   return (
     <>
-      <ScreenHeader icon="socials" title="Social Links" subtitle="Assign minions to places they can work." actionLabel="Connect" onAction={() => null} />
-      <article className="hero-card">
-        <div className="eyebrow">
-          <span className="pulse" />
-          Social placeholders
+      <ScreenHeader icon="socials" title="Social Links" subtitle="Assign minions to connected bots." actionLabel="Assign all" onAction={assignSelectedMinionToAllConnected} />
+      <section className="panel socials-rail" style={{ padding: 14 }}>
+        <div className="socials-toolbar">
+          <div>
+            <h3>Assign to all</h3>
+            <p>Send the selected minion to every connected social runtime.</p>
+          </div>
+          <button className="btn secondary" type="button" onClick={assignSelectedMinionToAllConnected}>
+            Assign to all
+          </button>
         </div>
-        <h2>Keep the first assignment simple.</h2>
-        <p>For MVP, socials are safe placeholders. You can assign minions and command names before live Discord or Telegram deployment exists.</p>
-      </article>
+      </section>
 
       <div className="social-list">
         {SOCIAL_LINKS.map((social) => (
@@ -1049,7 +1168,7 @@ function SocialsScreen() {
       </div>
 
       <SectionTitle title="Assign a minion" subtitle="Preview assignment" />
-      <section className="panel" style={{ padding: 14 }}>
+      <section className="panel socials-rail" style={{ padding: 14 }}>
         <div className="assign-panel">
           <select className="selectish" value={selectedMinionId} onChange={(event) => setSelectedMinionId(event.target.value)}>
             {minions.map((minion) => (
@@ -1104,6 +1223,13 @@ function InboxScreen() {
 }
 
 function SettingsScreen() {
+  const { futurePlanCache, futurePlanDraft, setFuturePlanDraft, cacheFuturePlan, clearFuturePlans } = useHades();
+  const { signOut } = useAuth();
+
+  const handleLogout = React.useCallback(async () => {
+    await signOut();
+  }, [signOut]);
+
   return (
     <>
       <ScreenHeader icon="settings" title="Settings" subtitle="Theme, profile card, and future route previews." />
@@ -1127,6 +1253,59 @@ function SettingsScreen() {
           <ThemeCard key={choice.id} choice={choice} />
         ))}
       </div>
+
+      <SectionTitle title="Session" subtitle="Local auth controls" />
+      <section className="panel" style={{ padding: 14 }}>
+        <div className="space" style={{ marginBottom: 10 }}>
+          <div>
+            <h4 style={{ margin: 0, color: "var(--text)" }}>Signed in session</h4>
+            <p className="muted" style={{ marginTop: 4, fontSize: 12 }}>
+              Logout clears the Supabase session bridge and returns you to the login surface.
+            </p>
+          </div>
+          <button className="btn secondary" type="button" onClick={handleLogout}>
+            Logout
+          </button>
+        </div>
+      </section>
+
+      <SectionTitle title="Future plan cache" subtitle="Local notes for the next phase" />
+      <section className="panel" style={{ padding: 14 }}>
+        <div className="assign-panel" style={{ gridTemplateColumns: "1fr" }}>
+          <textarea
+            className="inputish"
+            style={{ minHeight: 84, resize: "vertical" }}
+            placeholder="Cache a next-step plan locally..."
+            value={futurePlanDraft}
+            onChange={(event) => setFuturePlanDraft(event.target.value)}
+          />
+          <div className="draft-actions" style={{ marginTop: 0 }}>
+            <button className="btn" type="button" onClick={cacheFuturePlan}>
+              Cache note
+            </button>
+            <button className="btn secondary" type="button" onClick={clearFuturePlans}>
+              Clear cache
+            </button>
+          </div>
+        </div>
+        <div className="alert-list" style={{ marginTop: 12 }}>
+          {futurePlanCache.length ? futurePlanCache.map((entry) => (
+            <article key={entry.id} className="alert">
+              <div className="alert-top">
+                <div className="avatar"><AppIcon name="sparkles" /></div>
+                <div>
+                  <h4>{entry.title}</h4>
+                  <p>{entry.description}</p>
+                </div>
+              </div>
+            </article>
+          )) : (
+            <p className="muted" style={{ fontSize: 12, margin: 0 }}>
+              No cached plan notes yet.
+            </p>
+          )}
+        </div>
+      </section>
 
       <SectionTitle title="Future previews" subtitle="Locked routes" />
       <div className="quick-grid">

@@ -1,20 +1,36 @@
 /** @readonly Monorepo deploy layout — Railway backend + Vercel frontend. */
 
-export const MONOREPO_DEPLOY_VERSION = "v001";
+export const MONOREPO_DEPLOY_VERSION = "v003";
 
 /** @type {Record<string, { root: string, platform: string, requiredFiles: string[], envVars: string[] }>} */
 export const DEPLOY_TARGETS = {
   backend: {
     root: "backend",
     platform: "railway",
-    requiredFiles: ["backend/package.json", "backend/railway.toml"],
+    requiredFiles: ["backend/package.json", "backend/railway.toml", "backend/.env.example"],
+    forbiddenFiles: ["backend/vercel.json"],
     startScript: "start",
-    envVars: ["DATABASE_URL", "QUEUE_DISABLED"]
+    envVars: [
+      "PORT",
+      "NODE_ENV",
+      "HADES_USER_ID",
+      "HERMES_MODE",
+      "SUPABASE_URL",
+      "SUPABASE_SERVICE_ROLE_KEY",
+      "SUPABASE_ANON_KEY",
+      "OPENROUTER_BASE_URL",
+      "OPENROUTER_API_KEY",
+      "OPENROUTER_MODEL",
+      "OPENROUTER_HTTP_REFERER",
+      "OPENROUTER_APP_TITLE",
+      "CORS_ORIGIN"
+    ]
   },
   frontend: {
     root: "frontend",
     platform: "vercel",
-    requiredFiles: ["frontend/package.json", "frontend/vercel.json"],
+    requiredFiles: ["frontend/package.json", "frontend/vercel.json", "frontend/.env.example"],
+    forbiddenFiles: ["frontend/railway.toml"],
     buildScript: "build",
     buildOutputDir: "dist",
     envVars: ["VITE_API_BASE_URL"]

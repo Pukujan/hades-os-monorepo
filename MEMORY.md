@@ -1,6 +1,6 @@
 # MEMORY.md - Persistent Context
 
-**Last updated:** 2026-06-10
+**Last updated:** 2026-06-13
 **Branch:** `main`
 **Latest commit:** `4849fe0`
 **Active module:** `control-platform`
@@ -33,6 +33,10 @@ Describe your project here.
 - Phase 2: backend API routes
 - Phase 2: frontend components
 - Phase 2: integration tests
+- Implement Supabase-backed live Hades repository wiring
+- Implement Discord command adapter and GIF provider flow behind TDD contract
+- Implement reusable minion assignment runtime for command and automation triggers
+- Implement post-login UX v4 visual alignment with frontend-only TDD gates
 
 ---
 

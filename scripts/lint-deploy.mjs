@@ -19,6 +19,12 @@ for (const target of Object.values(DEPLOY_TARGETS)) {
       failures.push(`Missing deploy artifact: ${rel}`);
     }
   }
+
+  for (const rel of target.forbiddenFiles || []) {
+    if (existsSync(join(repoRoot, rel))) {
+      failures.push(`Forbidden deploy artifact for ${target.platform} target: ${rel}`);
+    }
+  }
 }
 
 const rootPkgPath = join(repoRoot, "package.json");
@@ -49,6 +55,14 @@ if (existsSync(frontendPkgPath)) {
 
 if (!existsSync(join(repoRoot, DEPLOY_DOC))) {
   failures.push(`Missing deploy guide: ${DEPLOY_DOC}`);
+} else {
+  const deployDoc = readFileSync(join(repoRoot, DEPLOY_DOC), "utf8");
+  if (!deployDoc.includes("Railway hosts `backend/` only")) {
+    failures.push(`${DEPLOY_DOC} must explicitly state Railway hosts backend only`);
+  }
+  if (!deployDoc.includes("Vercel hosts `frontend/` only")) {
+    failures.push(`${DEPLOY_DOC} must explicitly state Vercel hosts frontend only`);
+  }
 }
 
 const apiClientPath = join(repoRoot, FRONTEND_API_CLIENT);
@@ -59,6 +73,19 @@ if (existsSync(apiClientPath)) {
   }
 } else {
   failures.push(`Missing API client: ${FRONTEND_API_CLIENT}`);
+}
+
+for (const target of Object.values(DEPLOY_TARGETS)) {
+  for (const envVar of target.envVars || []) {
+    const envPath = join(repoRoot, target.root, ".env.example");
+    if (!existsSync(envPath)) {
+      continue;
+    }
+    const envText = readFileSync(envPath, "utf8");
+    if (!envText.includes(`${envVar}=`)) {
+      failures.push(`${target.root}/.env.example must document ${envVar}`);
+    }
+  }
 }
 
 if (failures.length) {

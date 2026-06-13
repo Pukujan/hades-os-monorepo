@@ -63,7 +63,7 @@
     "userDoc": "docs/architecture/templates/async-job-queue/README.md"
   },
   "monorepoDeploy": {
-    "version": "v001",
+    "version": "v003",
     "doc": "docs/architecture/contracts/monorepoDeploy.contract.md",
     "file": "backend/src/shared/contracts/monorepoDeploy.contract.js",
     "lintScript": "scripts/lint-deploy.mjs",

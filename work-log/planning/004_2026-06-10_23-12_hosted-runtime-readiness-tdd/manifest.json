@@ -1,0 +1,19 @@
+{
+  "id": "004_2026-06-10_23-12_hosted-runtime-readiness-tdd",
+  "slug": "hosted-runtime-readiness-tdd",
+  "status": "planned",
+  "createdAt": "2026-06-10T23:12:00-04:00",
+  "artifacts": {
+    "planLogMd": "work-log/planning/004_2026-06-10_23-12_hosted-runtime-readiness-tdd/plan-log.md",
+    "auditLogMd": "work-log/planning/004_2026-06-10_23-12_hosted-runtime-readiness-tdd/audit-log.md",
+    "handoffMd": "work-log/handoffs/004_2026-06-10_23-12_handoff_hosted-runtime-readiness-tdd.md"
+  },
+  "gates": [
+    "npm --prefix backend test",
+    "npm --prefix frontend test",
+    "npm --prefix frontend run build",
+    "npm run lint:deploy",
+    "npm run test:deploy",
+    "npm run smoke:hades"
+  ]
+}
