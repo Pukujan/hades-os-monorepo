@@ -1,0 +1,30 @@
+{
+  "id": "008_2026-06-13_post-login-ux-v4-visual-alignment",
+  "slug": "post-login-ux-v4-visual-alignment",
+  "status": "planned",
+  "createdAt": "2026-06-13T00:00:00-04:00",
+  "scope": "frontend-post-login-visual-alignment",
+  "sourcePrototype": "/Users/teresaguajardo/Downloads/june 2026/june 12/hades_os_post_login_ux_v4.html",
+  "sourceContract": "/Users/teresaguajardo/.codex/attachments/1edfab93-df14-4069-92e7-afdec84791bd/pasted-text.txt",
+  "artifacts": {
+    "readmeMd": "work-log/planning/008_2026-06-13_post-login-ux-v4-visual-alignment/README.md",
+    "planLogMd": "work-log/planning/008_2026-06-13_post-login-ux-v4-visual-alignment/plan-log.md",
+    "testPlanMd": "work-log/planning/008_2026-06-13_post-login-ux-v4-visual-alignment/test-plan.md",
+    "auditLogMd": "work-log/planning/008_2026-06-13_post-login-ux-v4-visual-alignment/audit-log.md",
+    "handoffMd": "work-log/planning/008_2026-06-13_post-login-ux-v4-visual-alignment/handoff.md"
+  },
+  "protectedAreas": [
+    "frontend/src/auth/loginTemplate.html",
+    "frontend/src/auth/LoginPage.jsx",
+    "frontend/src/auth/AuthProvider.jsx",
+    "backend/**"
+  ],
+  "gates": [
+    "npm --prefix frontend test",
+    "npm --prefix frontend run build",
+    "npm run test:discord-login-bot-contracts",
+    "npm run test:hades-runtime-contracts"
+  ],
+  "autoContinue": true
+}
+

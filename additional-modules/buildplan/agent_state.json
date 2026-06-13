@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-06-12",
+  "lastUpdated": "2026-06-13",
   "branch": "main",
   "latestCommit": "4849fe0",
   "projectDescription": "Describe your project here.",
@@ -30,7 +30,8 @@
         "Write TDD handoff and isolated contract tests for Discord auth bot bridge",
         "Implement Discord bot connection bridge service",
         "Implement Discord bot runtime service",
-        "Surface Discord connected state in socials UI"
+        "Surface Discord connected state in socials UI",
+        "Review accepted post-login UX v4 prototype and write safe TDD handoff for 5.4 mini"
       ],
       "inProgress": [],
       "next": [
@@ -39,7 +40,8 @@
         "Phase 2: integration tests",
         "Implement Supabase-backed live Hades repository wiring",
         "Implement Discord command adapter and GIF provider flow behind TDD contract",
-        "Implement reusable minion assignment runtime for command and automation triggers"
+        "Implement reusable minion assignment runtime for command and automation triggers",
+        "Implement post-login UX v4 visual alignment with frontend-only TDD gates"
       ]
     }
   },
@@ -69,7 +71,8 @@
         "Write TDD handoff and isolated contract tests for Discord auth bot bridge",
         "Implement Discord bot connection bridge service",
         "Implement Discord bot runtime service",
-        "Surface Discord connected state in socials UI"
+        "Surface Discord connected state in socials UI",
+        "Review accepted post-login UX v4 prototype and write safe TDD handoff for 5.4 mini"
       ],
         "inProgress": [],
         "next": [
@@ -78,7 +81,8 @@
         "Phase 2: integration tests",
         "Implement Supabase-backed live Hades repository wiring",
         "Implement Discord command adapter and GIF provider flow behind TDD contract",
-        "Implement reusable minion assignment runtime for command and automation triggers"
+        "Implement reusable minion assignment runtime for command and automation triggers",
+        "Implement post-login UX v4 visual alignment with frontend-only TDD gates"
       ]
       }
     }
