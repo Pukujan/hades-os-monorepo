@@ -18,7 +18,7 @@ test("minion screen view model splits active and inactive minions without mutati
 
   assert.deepEqual(view.active.map((minion) => minion.id), ["cat"]);
   assert.deepEqual(view.inactive.map((minion) => minion.id), ["price"]);
-  assert.equal(view.slots.length, 3);
+  assert.equal(view.slots.length, 4);
   assert.equal(view.slots[1].name, "Empty Slot");
   assert.equal(apiState.minions[0].destinationLabel, undefined);
 });
@@ -68,4 +68,3 @@ test("notification view model preserves exact location metadata and open labels"
   assert.equal(view.automated[0].locationLabel, "Gmail · pujan@gmail.com · to: alex@example.com · subject: Summary Draft");
   assert.equal(view.automated[0].openLabel, "Open Gmail thread");
 });
-

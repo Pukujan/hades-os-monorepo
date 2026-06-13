@@ -72,6 +72,7 @@ Session start: `None`
 ## SESSION ARCHIVES
 
 Index: `additional-modules/work-log/sessions/INDEX.md`
+**Active:** `ses_2026-06-13-clean-legacy-post-login`
 
 ---
 

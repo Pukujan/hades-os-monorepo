@@ -31,7 +31,12 @@
         "Implement Discord bot connection bridge service",
         "Implement Discord bot runtime service",
         "Surface Discord connected state in socials UI",
-        "Review accepted post-login UX v4 prototype and write safe TDD handoff for 5.4 mini"
+        "Review accepted post-login UX v4 prototype and write safe TDD handoff for 5.4 mini",
+        "Restore notification dropdown in Hades shell and keep socials cards ordered below the existing cards",
+        "Implement prototype-aligned post-login shell and screens",
+        "Create a separate prototype-root post-login app entrypoint and stylesheet",
+        "Swap the authenticated route to the new prototype implementation",
+        "Clean out unused legacy post-login imports/files after prototype swap"
       ],
       "inProgress": [],
       "next": [
@@ -59,31 +64,36 @@
           "Phase 1: scaffold frontend",
           "Implement Hermes runtime wrapper service",
           "Wire Hades chat to Hermes runtime first",
-        "Persist agent execution metadata",
-        "Make Hermes runtime smoke pass",
-        "Add frontend Supabase auth bridge",
-        "Mount the hosted login portal as the pre-auth gate",
-        "Forward session tokens into backend API requests",
-        "Load browser Supabase config from backend runtime endpoint",
-        "Review Hermes Discord GIF minion runtime gap",
-        "Write TDD handoff and isolated contract tests for Discord command to Hermes to GIF delivery",
-        "Extend handoff with reusable minion assignment runtime and automation trigger contracts",
-        "Write TDD handoff and isolated contract tests for Discord auth bot bridge",
-        "Implement Discord bot connection bridge service",
-        "Implement Discord bot runtime service",
-        "Surface Discord connected state in socials UI",
-        "Review accepted post-login UX v4 prototype and write safe TDD handoff for 5.4 mini"
-      ],
+          "Persist agent execution metadata",
+          "Make Hermes runtime smoke pass",
+          "Add frontend Supabase auth bridge",
+          "Mount the hosted login portal as the pre-auth gate",
+          "Forward session tokens into backend API requests",
+          "Load browser Supabase config from backend runtime endpoint",
+          "Review Hermes Discord GIF minion runtime gap",
+          "Write TDD handoff and isolated contract tests for Discord command to Hermes to GIF delivery",
+          "Extend handoff with reusable minion assignment runtime and automation trigger contracts",
+          "Write TDD handoff and isolated contract tests for Discord auth bot bridge",
+          "Implement Discord bot connection bridge service",
+          "Implement Discord bot runtime service",
+          "Surface Discord connected state in socials UI",
+          "Review accepted post-login UX v4 prototype and write safe TDD handoff for 5.4 mini",
+          "Restore notification dropdown in Hades shell and keep socials cards ordered below the existing cards",
+          "Implement prototype-aligned post-login shell and screens",
+          "Create a separate prototype-root post-login app entrypoint and stylesheet",
+          "Swap the authenticated route to the new prototype implementation",
+          "Clean out unused legacy post-login imports/files after prototype swap"
+        ],
         "inProgress": [],
         "next": [
-        "Phase 2: backend API routes",
-        "Phase 2: frontend components",
-        "Phase 2: integration tests",
-        "Implement Supabase-backed live Hades repository wiring",
-        "Implement Discord command adapter and GIF provider flow behind TDD contract",
-        "Implement reusable minion assignment runtime for command and automation triggers",
-        "Implement post-login UX v4 visual alignment with frontend-only TDD gates"
-      ]
+          "Phase 2: backend API routes",
+          "Phase 2: frontend components",
+          "Phase 2: integration tests",
+          "Implement Supabase-backed live Hades repository wiring",
+          "Implement Discord command adapter and GIF provider flow behind TDD contract",
+          "Implement reusable minion assignment runtime for command and automation triggers",
+          "Implement post-login UX v4 visual alignment with frontend-only TDD gates"
+        ]
       }
     }
   },
@@ -101,8 +111,8 @@
     "lastPass": false
   },
   "sessions": {
-    "currentId": null,
-    "lastSessionId": null,
+    "currentId": "ses_2026-06-13-clean-legacy-post-login",
+    "lastSessionId": "ses_2026-06-13-clean-legacy-post-login",
     "archive": []
   },
   "contextBudget": {

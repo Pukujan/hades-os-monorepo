@@ -3,6 +3,16 @@
   "compaction": {
     "auto": true,
     "prune": true,
-    "reserved": 3472
+    "reserved": 4000,
+    "tail_turns": 2
+  },
+  "provider": {
+    "opencode": {
+      "models": {
+        "big-pickle": {
+          "limit": { "context": 40000, "output": 16384 }
+        }
+      }
+    }
   }
 }

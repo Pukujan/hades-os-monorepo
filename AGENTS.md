@@ -13,7 +13,7 @@
 4. **Archive session** — run `python3 additional-modules/scripts/measure_context.py --archive-session --slug <slug> --tokens <count>`
 
 ### Context Budget
-- **Ceiling:** 28,000 tokens per session (warn-only — never aborts the agent)
+- **Ceiling:** 40,000 tokens per session (warn-only — never aborts the agent)
 - **Tracked by:** `additional-modules/scripts/measure_context.py`
 - **Tracker:** `additional-modules/buildplan/context_budget.json`
 - **Check status:** `python3 additional-modules/scripts/measure_context.py --status`
@@ -37,7 +37,7 @@
 | `lint:layers` | Intra-module layer rules |
 
 ## Memory Rules
-- ~28k token ceiling with warn-only procedure (compact + archive, do not stop work)
+- ~40k token ceiling with warn-only procedure (compact + archive, do not stop work)
 - Session memory: read MEMORY.md on start, archive + prune on end
 - Terse bullets, no prose
 
@@ -52,7 +52,7 @@ They are parallel — OpenCode does not call `measure_context.py` unless you run
 
 **Setup:** `node additional-modules/context-engineering/bin/context-eng.js init --opencode`
 
-**Policy alignment:** 28k ceiling everywhere — compact around 25.2k (90%). Set `provider.<name>.models.<id>.limit.context` to **28672** (28k) in `additional-modules/context-engineering/opencode.json`; shipped `compaction.reserved: 3472` triggers compaction before the cap.
+**Policy alignment:** 40k ceiling everywhere — compact around 36k (90%). Set `provider.<name>.models.<id>.limit.context` to **40000** (40k) in `additional-modules/context-engineering/opencode.json`; `compaction.reserved: 4000` triggers compaction before the cap.
 
 **OpenCode discovery:** OpenCode loads `opencode.json` from the project root by default. Point it at this file with `export OPENCODE_CONFIG="$PWD/additional-modules/context-engineering/opencode.json"`, or symlink: `ln -sf additional-modules/context-engineering/opencode.json opencode.json`.
 

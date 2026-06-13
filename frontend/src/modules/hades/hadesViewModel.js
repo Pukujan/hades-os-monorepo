@@ -131,7 +131,7 @@ export function buildMinionScreenViewModel(state = {}) {
     commandSyntax: minion.commandSyntax
   }));
 
-  while (slots.length < 3) {
+  while (slots.length < 4) {
     slots.push({
       id: `empty-${slots.length}`,
       name: "Empty Slot",
@@ -220,4 +220,3 @@ function buildNotificationOpenLabel(notification = {}) {
   if (provider === "social") return "Open social location";
   return "Open Hades chat";
 }
-
