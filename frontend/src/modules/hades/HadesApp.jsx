@@ -34,6 +34,11 @@ import {
   formatSocialLabel,
   getSocialIcon
 } from "./hadesData.js";
+import {
+  buildMinionDetailViewModel,
+  buildMinionScreenViewModel,
+  buildNotificationViewModel
+} from "./hadesViewModel.js";
 import { buildAssistantReply, buildTestOutput, missingDraftFields } from "./parser.js";
 import {
   buildLocalDraftFallback,
@@ -206,6 +211,32 @@ function HadesProvider({ children }) {
     }
   ]);
   const [futurePlanDraft, setFuturePlanDraft] = React.useState("");
+  const [notifications, setNotifications] = usePersistentState("hades.notifications", [
+    {
+      id: "note-discord",
+      mode: "manual",
+      provider: "discord",
+      server: "Hades Test Server",
+      channel: "#cat-chaos",
+      messageId: "1042",
+      label: "Cat Courier",
+      detail: "!sendcat lawyer cat",
+      createdAt: "2026-06-13T12:00:00-04:00"
+    },
+    {
+      id: "note-gmail",
+      mode: "automated",
+      provider: "gmail",
+      account: "pujan@gmail.com",
+      recipient: "alex@example.com",
+      subject: "Summary Draft",
+      label: "Scroll Reader",
+      detail: "Created summary draft",
+      createdAt: "2026-06-13T11:15:00-04:00"
+    }
+  ]);
+  const [detailMinionId, setDetailMinionId] = React.useState(null);
+  const [notificationOpen, setNotificationOpen] = React.useState(false);
   const timersRef = React.useRef([]);
   const toastTimerRef = React.useRef(null);
   const hydratedRef = React.useRef(false);
@@ -285,6 +316,10 @@ function HadesProvider({ children }) {
     ]);
   }, [setInbox]);
 
+  const pushNotification = React.useCallback((notification) => {
+    setNotifications((current) => [notification, ...current].slice(0, 12));
+  }, [setNotifications]);
+
   const appendMessage = React.useCallback((message) => {
     setMessages((current) => [...current, message]);
   }, [setMessages]);
@@ -315,6 +350,18 @@ function HadesProvider({ children }) {
     setFuturePlanCache([]);
     showToast("Future plan cache cleared.");
   }, [setFuturePlanCache, showToast]);
+
+  const openMinionDetail = React.useCallback((minionId) => {
+    setDetailMinionId(minionId);
+  }, []);
+
+  const closeMinionDetail = React.useCallback(() => {
+    setDetailMinionId(null);
+  }, []);
+
+  const toggleNotificationDropdown = React.useCallback(() => {
+    setNotificationOpen((current) => !current);
+  }, []);
 
   const getAssignmentCommand = React.useCallback(
     () => assignmentCommand.trim() || draft.commandName || null,
@@ -473,6 +520,18 @@ function HadesProvider({ children }) {
       });
       updateDraft(response.draft);
       pushInbox("sparkles", "Test completed", response.testRun.output, "success");
+      pushNotification({
+        id: createId("note"),
+        mode: "manual",
+        provider: "discord",
+        server: "Hades Test Server",
+        channel: "#forge-tests",
+        messageId: createId("message"),
+        label: response.draft.name || "Draft",
+        detail: response.testRun.output,
+        minionId: selectedMinionId,
+        createdAt: new Date().toISOString()
+      });
       appendMessage({
         id: createId("msg"),
         role: "assistant",
@@ -485,6 +544,18 @@ function HadesProvider({ children }) {
       const testedDraft = { ...draft, status: "tested", testInput: draft.commandName ? `User types: ${draft.commandName}` : "Simulated input" };
       updateDraft(testedDraft);
       pushInbox("sparkles", "Test completed", output, "success");
+      pushNotification({
+        id: createId("note"),
+        mode: "manual",
+        provider: "discord",
+        server: "Hades Test Server",
+        channel: "#forge-tests",
+        messageId: createId("message"),
+        label: testedDraft.name || "Draft",
+        detail: output,
+        minionId: selectedMinionId,
+        createdAt: new Date().toISOString()
+      });
       appendMessage({
         id: createId("msg"),
         role: "assistant",
@@ -515,6 +586,21 @@ function HadesProvider({ children }) {
       setSelectedMinionId(saved.id);
       updateDraft({ ...draft, status: "saved" });
       pushInbox("sparkles", "Minion saved", `${saved.name} was added to your inventory.`, "success");
+      pushNotification({
+        id: createId("note"),
+        mode: "automated",
+        provider: saved.targetSocial === "email" ? "gmail" : "discord",
+        account: "pujan@gmail.com",
+        recipient: "approval@example.com",
+        subject: `${saved.name} saved`,
+        server: "Hades Test Server",
+        channel: "#cat-chaos",
+        messageId: createId("message"),
+        label: saved.name,
+        detail: `${saved.name} was added to your inventory.`,
+        minionId: saved.id,
+        createdAt: now
+      });
       appendMessage({
         id: createId("msg"),
         role: "assistant",
@@ -548,6 +634,21 @@ function HadesProvider({ children }) {
       setSelectedMinionId(id);
       updateDraft({ ...draft, status: "saved" });
       pushInbox("sparkles", "Minion saved", `${saved.name} was added to your inventory.`, "success");
+      pushNotification({
+        id: createId("note"),
+        mode: "automated",
+        provider: saved.targetSocial === "email" ? "gmail" : "discord",
+        account: "pujan@gmail.com",
+        recipient: "approval@example.com",
+        subject: `${saved.name} saved`,
+        server: "Hades Test Server",
+        channel: "#cat-chaos",
+        messageId: createId("message"),
+        label: saved.name,
+        detail: `${saved.name} was added to your inventory.`,
+        minionId: id,
+        createdAt: now
+      });
       appendMessage({
         id: createId("msg"),
         role: "assistant",
@@ -573,6 +674,18 @@ function HadesProvider({ children }) {
     }
 
     pushInbox("socials", "Minion assigned", `${minion.name} is now assigned to ${social?.displayName || "a social placeholder"}.`, "info");
+    pushNotification({
+      id: createId("note"),
+      mode: "manual",
+      provider: social?.provider || "discord",
+      server: "Hades Test Server",
+      channel: social?.provider === "telegram" ? "@hades-test" : "#cat-chaos",
+      messageId: createId("message"),
+      label: minion.name,
+      detail: `Assigned to ${social?.displayName || "social placeholder"}.`,
+      minionId: minion.id,
+      createdAt: new Date().toISOString()
+    });
     appendMessage({
       id: createId("msg"),
       role: "assistant",
@@ -604,6 +717,18 @@ function HadesProvider({ children }) {
 
     if (results.length) {
       pushInbox("socials", "Assigned to all", `${minion.name} was assigned to ${results.length} connected social${results.length === 1 ? "" : "s"}.`, "success");
+      pushNotification({
+        id: createId("note"),
+        mode: "automated",
+        provider: "discord",
+        server: "Hades Test Server",
+        channel: "#cat-chaos",
+        messageId: createId("message"),
+        label: minion.name,
+        detail: `Assigned to ${results.length} connected social${results.length === 1 ? "" : "s"}.`,
+        minionId: minion.id,
+        createdAt: new Date().toISOString()
+      });
       appendMessage({
         id: createId("msg"),
         role: "assistant",
@@ -644,6 +769,15 @@ function HadesProvider({ children }) {
         setFuturePlanDraft,
         cacheFuturePlan,
         clearFuturePlans,
+        notifications,
+        pushNotification,
+        notificationOpen,
+        setNotificationOpen,
+        toggleNotificationDropdown,
+        detailMinionId,
+        setDetailMinionId,
+        openMinionDetail,
+        closeMinionDetail,
         inbox,
         levelState,
         selectedStarterId,
@@ -659,7 +793,7 @@ function HadesProvider({ children }) {
 function AppShell() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { toast, assignments, minions, draft, levelState } = useHades();
+  const { toast, assignments, minions, draft, levelState, detailMinionId, closeMinionDetail, notifications, notificationOpen } = useHades();
   const screen = getScreenFromPath(location.pathname);
   const activeAssignments = assignments.filter((entry) => entry.socialLinkId === "discord");
   const currentDraft = draft.name ? draft : null;
@@ -736,6 +870,10 @@ function AppShell() {
             ))}
           </nav>
 
+          <NotificationDropdown />
+
+          {detailMinionId ? <MinionDetailView minionId={detailMinionId} onClose={closeMinionDetail} /> : null}
+
           <div className={`toast ${toast ? "show" : ""}`}>{toast}</div>
         </section>
 
@@ -804,6 +942,8 @@ function AppShell() {
 }
 
 function ScreenHeader({ icon, title, subtitle, actionLabel, onAction }) {
+  const { toggleNotificationDropdown } = useHades();
+
   return (
     <header className="topbar">
       <div className="brand">
@@ -813,13 +953,16 @@ function ScreenHeader({ icon, title, subtitle, actionLabel, onAction }) {
           <p>{subtitle}</p>
         </div>
       </div>
-      {actionLabel ? (
-        <button className="tiny-btn" type="button" onClick={onAction}>
-          {actionLabel}
+      <div className="top-actions">
+        <button className="icon-btn" type="button" onClick={toggleNotificationDropdown} aria-label="Toggle notifications">
+          <AppIcon name="inbox" size={16} />
         </button>
-      ) : (
-        <div className="top-actions" />
-      )}
+        {actionLabel ? (
+          <button className="tiny-btn" type="button" onClick={onAction}>
+            {actionLabel}
+          </button>
+        ) : null}
+      </div>
     </header>
   );
 }
@@ -951,7 +1094,7 @@ function DraftCard() {
 }
 
 function MinionCard({ minion }) {
-  const { selectedMinionId, setSelectedMinionId } = useHades();
+  const { selectedMinionId, setSelectedMinionId, openMinionDetail } = useHades();
 
   return (
     <article className={`minion ${selectedMinionId === minion.id ? "selected" : ""}`}>
@@ -976,9 +1119,14 @@ function MinionCard({ minion }) {
         </div>
       </div>
       <div style={{ marginTop: 10 }}>
-        <button className="btn ghost" type="button" onClick={() => setSelectedMinionId(minion.id)}>
-          Select
-        </button>
+        <div className="draft-actions">
+          <button className="btn ghost" type="button" onClick={() => setSelectedMinionId(minion.id)}>
+            Select
+          </button>
+          <button className="btn secondary" type="button" onClick={() => openMinionDetail(minion.id)}>
+            Detail
+          </button>
+        </div>
       </div>
     </article>
   );
@@ -1021,6 +1169,135 @@ function AlertCard({ alert }) {
         </span>
       </div>
     </article>
+  );
+}
+
+function NotificationDropdown() {
+  const { notifications, notificationOpen, toggleNotificationDropdown, setNotificationOpen, openMinionDetail } = useHades();
+  const [tab, setTab] = React.useState("manual");
+  const view = buildNotificationViewModel(notifications);
+  const visible = tab === "manual" ? view.manual : view.automated;
+
+  return (
+    <aside className={`notification-menu ${notificationOpen ? "open" : ""}`} aria-hidden={!notificationOpen}>
+      <div className="space" style={{ marginBottom: 10 }}>
+        <strong style={{ color: "var(--text)" }}>Notifications</strong>
+        <button className="tiny-btn" type="button" onClick={toggleNotificationDropdown}>
+          Close
+        </button>
+      </div>
+      <div className="tabs">
+        <button type="button" className={`tab ${tab === "manual" ? "active" : ""}`} onClick={() => setTab("manual")}>
+          Manual
+        </button>
+        <button type="button" className={`tab ${tab === "automated" ? "active" : ""}`} onClick={() => setTab("automated")}>
+          Auto
+        </button>
+      </div>
+      <div className="notification-log-scroll">
+        {visible.map((entry) => (
+          <article key={entry.id} className="notification-item">
+            <div className="space" style={{ alignItems: "start" }}>
+              <div>
+                <h4>{entry.label || "Notification"}</h4>
+                <p>{entry.locationLabel}</p>
+              </div>
+              <span className="badge">{entry.mode === "automated" ? "Auto" : "Manual"}</span>
+            </div>
+            <div className="draft-actions">
+              <button className="btn secondary" type="button" onClick={() => openMinionDetail(entry.minionId || "task-helper")}>
+                Open detail
+              </button>
+              <button className="btn ghost" type="button" onClick={() => setNotificationOpen(false)}>
+                Close
+              </button>
+            </div>
+          </article>
+        ))}
+        {!visible.length ? <p className="muted" style={{ margin: 0, fontSize: 12 }}>No notifications yet.</p> : null}
+      </div>
+    </aside>
+  );
+}
+
+function MinionDetailView({ minionId, onClose }) {
+  const { minions } = useHades();
+  const minion = minions.find((entry) => entry.id === minionId) || minions[0];
+  const detail = buildMinionDetailViewModel(minion || {});
+
+  return (
+    <aside className="detail-sheet">
+      <div className="space" style={{ marginBottom: 10 }}>
+        <strong style={{ color: "var(--text)" }}>Minion Detail</strong>
+        <button className="tiny-btn" type="button" onClick={onClose}>
+          Close
+        </button>
+      </div>
+
+      <div className="detail-scroll">
+        <section className="panel" style={{ padding: 14 }}>
+          <div className="minion-top">
+            <div className="avatar"><AppIcon name={detail.icon} /></div>
+            <div>
+              <h4>{detail.name}</h4>
+              <p>{detail.plainDescription.split("\n")[0]}</p>
+            </div>
+            <span className="badge active">{detail.statusMode.statusLabel}</span>
+          </div>
+          <div className="subrow">
+            <div className="slot">
+              <b>Mode</b>
+              {detail.statusMode.modeLabel}
+            </div>
+            <div className="slot">
+              <b>Destination</b>
+              {detail.statusMode.destinationLabel}
+            </div>
+          </div>
+          <div className="slot" style={{ marginTop: 10 }}>
+            <b>Source / Channel</b>
+            {detail.sourceLabel}
+          </div>
+        </section>
+
+        <section className="panel" style={{ padding: 14, marginTop: 10 }}>
+          <div className="eyebrow">Destination Preview</div>
+          <div className="preview-card">
+            <strong>{detail.destinationPreview.title}</strong>
+            <p>{detail.destinationPreview.label}</p>
+            {detail.destinationPreview.previewMessages.map((line, index) => (
+              <div key={`${line.sender}-${index}`} className="preview-line">
+                <span>{line.sender}</span>
+                <p>{line.text}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="panel" style={{ padding: 14, marginTop: 10 }}>
+          <div className="eyebrow">Command Syntax</div>
+          <p className="muted" style={{ fontSize: 12, marginBottom: 10 }}>{detail.commandSyntax}</p>
+          <div className="eyebrow">Plain Description</div>
+          <p style={{ whiteSpace: "pre-line", color: "var(--muted)", fontSize: 12, lineHeight: 1.5 }}>{detail.plainDescription}</p>
+        </section>
+
+        <section className="panel" style={{ padding: 14, marginTop: 10 }}>
+          <div className="eyebrow">Activity Log</div>
+          <div className="activity-log-scroll">
+            {(detail.activityLog.length ? detail.activityLog : [
+              { id: "activity-1", title: "Created", createdAt: "Jun 13, 2026 · 9:12 AM", location: "Hades Chat" },
+              { id: "activity-2", title: "Test run", createdAt: "Jun 13, 2026 · 9:18 AM", location: "Discord #cat-chaos" }
+            ]).map((entry) => (
+              <article key={entry.id} className="notification-item">
+                <h4>{entry.title}</h4>
+                <p>{entry.location}</p>
+                <span className="badge">{entry.createdAt}</span>
+              </article>
+            ))}
+          </div>
+        </section>
+      </div>
+    </aside>
   );
 }
 
@@ -1102,31 +1379,83 @@ function HomeScreen() {
 }
 
 function MinionsScreen() {
-  const { minions } = useHades();
+  const { minions, messages, sendMessage, composerText, setComposerText, draft, openMinionDetail } = useHades();
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = React.useState("active");
+  const view = buildMinionScreenViewModel({ minions });
+  const visibleMinions = activeTab === "active" ? view.active : view.inactive;
 
   return (
     <>
-      <ScreenHeader icon="minions" title="Minions" subtitle="Inventory, slots, and locked previews." actionLabel="+ Create" onAction={() => navigate("/app/home")} />
+      <ScreenHeader icon="minions" title="Minions" subtitle="Speak to Hades, then inspect your minions and slots." actionLabel="+ Create" onAction={() => navigate("/app/home")} />
       <LevelCard />
-      <SectionTitle title="Owned minions" subtitle={`${minions.length} owned`} />
-      <div className="minion-list">
-        {minions.map((minion) => (
-          <MinionCard key={minion.id} minion={minion} />
-        ))}
-      </div>
-      <SectionTitle title="Locked previews" subtitle="Future minions" />
+
+      <SectionTitle title="Speak to Hades" subtitle="Natural language minion builder" />
+      <section className="panel" style={{ padding: 14 }}>
+        <div className="chat-wrap" id="minionsChat">
+          {messages.slice(-3).map((message) => (
+            <Bubble key={message.id} message={message} />
+          ))}
+        </div>
+        <div className="suggestions">
+          <button className="suggestion" type="button" onClick={() => sendMessage("Make a command called !sendcat that sends cat memes in Discord.")}>
+            <AppIcon name="cat" size={16} /> Cat memes
+          </button>
+          <button className="suggestion" type="button" onClick={() => sendMessage("Create a minion that summarizes chats and drafts the result.")}>
+            <AppIcon name="chat" size={16} /> Chat summarizer
+          </button>
+        </div>
+        <div className="composer">
+          <textarea
+            id="minionsChatInput"
+            rows={1}
+            value={composerText}
+            placeholder="Ask Hades to forge or adjust a minion..."
+            onChange={(event) => setComposerText(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage(composerText);
+              }
+            }}
+          />
+          <button className="btn" type="button" onClick={() => sendMessage(composerText)}>
+            Send
+          </button>
+        </div>
+      </section>
+
+      <SectionTitle title="Your Minions" subtitle={`${minions.length} owned`} />
+      <section className="panel" style={{ padding: 14 }}>
+        <div className="tabs">
+          <button type="button" className={`tab ${activeTab === "active" ? "active" : ""}`} onClick={() => setActiveTab("active")}>
+            Active
+          </button>
+          <button type="button" className={`tab ${activeTab === "inactive" ? "active" : ""}`} onClick={() => setActiveTab("inactive")}>
+            Inactive
+          </button>
+        </div>
+        <div className="minion-list-scroll">
+          {visibleMinions.map((minion) => (
+            <MinionCard key={minion.id} minion={minion} />
+          ))}
+          {!visibleMinions.length ? (
+            <p className="muted" style={{ margin: 0, fontSize: 12 }}>
+              No {activeTab} minions yet.
+            </p>
+          ) : null}
+        </div>
+      </section>
+
+      <SectionTitle title="Minion Slots" subtitle="Compact inventory" />
       <div className="quick-grid">
-        <button className="card locked" type="button">
-          <div className="icon"><AppIcon name="cat" /></div>
-          <h4>Cat Meme</h4>
-          <p>Command minion for Discord or Telegram.</p>
-        </button>
-        <button className="card locked" type="button">
-          <div className="icon"><AppIcon name="chat" /></div>
-          <h4>Meeting Notes</h4>
-          <p>Transcribe and summarize later.</p>
-        </button>
+        {view.slots.map((slot) => (
+          <button key={slot.id} type="button" className={`card ${slot.commandSyntax ? "" : "locked"}`} onClick={() => slot.id.startsWith("empty") ? navigate("/forge") : openMinionDetail(slot.id)}>
+            <div className="icon"><AppIcon name={slot.commandSyntax ? "sparkles" : "locked"} /></div>
+            <h4>{slot.name}</h4>
+            <p>{slot.commandSyntax || "Empty Slot"}</p>
+          </button>
+        ))}
       </div>
     </>
   );
@@ -1334,23 +1663,110 @@ function SettingsScreen() {
   );
 }
 
-function ForgePreviewScreen() {
+function ForgeScreen() {
+  const { messages, draft, composerText, setComposerText, sendMessage, runDraftTest, saveDraft, minions, openMinionDetail } = useHades();
+  const templateChips = [
+    { id: "sendcat", label: "Send cat", text: "Create a command called !sendcat that sends cat memes in Discord." },
+    { id: "summarize", label: "Summarize", text: "Make a minion that summarizes chats into a clean note." },
+    { id: "tracker", label: "Track price", text: "Make a minion that checks product prices every 5 hours." }
+  ];
+
   return (
     <>
-      <ScreenHeader icon="hammer" title="Private Forge" subtitle="Founder-only tools stay minimal in MVP." />
+      <ScreenHeader icon="hammer" title="Forge" subtitle="Forge your minion, test it, and keep past summons visible." actionLabel="Test" onAction={runDraftTest} />
       <article className="hero-card">
         <div className="eyebrow">
           <span className="pulse" />
-          Founder's layer
+          Forge your minion
         </div>
-        <h2>Minimal, private, and intentionally hidden.</h2>
-        <p>The Forge preview is visible for context but does not dominate the user flow.</p>
+        <h2>Shape a minion from a natural request.</h2>
+        <p>Use a template chip or describe the task in plain language. Hades fills the draft as you go.</p>
       </article>
-      <div className="alert-list">
-        <AlertCard alert={{ id: "forge-tools", icon: "github", title: "GitHub task packet helper", description: "Preview only. Manual automation stays locked.", status: "info" }} />
-        <AlertCard alert={{ id: "forge-logs", icon: "task", title: "Task logs", description: "Task logs and worker traces are preview-only in MVP.", status: "info" }} />
-        <AlertCard alert={{ id: "forge-locks", icon: "locked", title: "Workers and approvals", description: "Execution, approvals, and deploys unlock later.", status: "locked" }} />
+      <SectionTitle title="Template chips" subtitle="Quick starts" />
+      <div className="chips">
+        {templateChips.map((chip) => (
+          <button key={chip.id} type="button" className="chip" onClick={() => sendMessage(chip.text)}>
+            {chip.label}
+          </button>
+        ))}
       </div>
+
+      <SectionTitle title="Forge chat" subtitle="Fill missing details" />
+      <section className="panel" style={{ padding: 14 }}>
+        <div className="chat-wrap" id="forgeChat">
+          {messages.slice(-4).map((message) => (
+            <Bubble key={message.id} message={message} />
+          ))}
+        </div>
+        <div className="composer">
+          <textarea
+            id="forgeChatInput"
+            rows={1}
+            value={composerText}
+            placeholder="Describe the minion you want to forge..."
+            onChange={(event) => setComposerText(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage(composerText);
+              }
+            }}
+          />
+          <button className="btn" type="button" onClick={() => sendMessage(composerText)}>
+            Send
+          </button>
+        </div>
+        <DraftCard />
+        <div className="draft-actions">
+          <button className="btn secondary" type="button" onClick={runDraftTest}>
+            Test run
+          </button>
+          <button className="btn secondary" type="button" onClick={saveDraft}>
+            Forge minion
+          </button>
+        </div>
+      </section>
+
+      <SectionTitle title="Required details" subtitle="Current draft" />
+      <div className="alert-list">
+        <AlertCard alert={{ id: "forge-draft", icon: "task", title: draft.name || "No draft yet", description: draft.description || "Type a request to fill the forge draft.", status: draft.status === "saved" ? "success" : "info" }} />
+        <AlertCard alert={{ id: "forge-minions", icon: "sparkles", title: "Past summons", description: `${minions.length} saved minion${minions.length === 1 ? "" : "s"} ready to inspect.`, status: "info" }} />
+      </div>
+
+      <SectionTitle title="Your Past Summons" subtitle="Bounded scroll panel" />
+      <section className="panel" style={{ padding: 14 }}>
+        <div className="past-summons-scroll">
+          {minions.map((minion) => (
+            <article key={minion.id} className="minion">
+              <div className="minion-top">
+                <div className="avatar"><AppIcon name={minion.icon} /></div>
+                <div>
+                  <h4>{minion.name}</h4>
+                  <p>{minion.description}</p>
+                </div>
+                <span className={`badge ${minion.status === "active" ? "active" : "locked"}`}>
+                  {toTitleCase(minion.triggerType || "manual")}
+                </span>
+              </div>
+              <div className="subrow">
+                <div className="slot">
+                  <b>Destination</b>
+                  {formatSocialLabel(minion.targetSocial)}
+                </div>
+                <div className="slot">
+                  <b>Command</b>
+                  {minion.commandName || "!hades"}
+                </div>
+              </div>
+              <div style={{ marginTop: 10 }}>
+                <button className="btn secondary" type="button" onClick={() => openMinionDetail(minion.id)}>
+                  Detail
+                </button>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
     </>
   );
 }
@@ -1381,7 +1797,7 @@ function HadesRoutes() {
         <Route path="app/socials" element={<SocialsScreen />} />
         <Route path="app/inbox" element={<InboxScreen />} />
         <Route path="app/settings" element={<SettingsScreen />} />
-        <Route path="forge" element={<ForgePreviewScreen />} />
+        <Route path="forge" element={<ForgeScreen />} />
         <Route path="market" element={<LockedPreviewScreen title="Marketplace" icon="market" description="Creator minions, credits, skins, and rentals unlock later." />} />
         <Route path="creator" element={<LockedPreviewScreen title="Creator" icon="palette" description="Creator publishing is not in the MVP." />} />
         <Route path="business" element={<LockedPreviewScreen title="Business" icon="building" description="Business workspaces and approvals unlock later." />} />

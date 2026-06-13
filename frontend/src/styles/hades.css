@@ -824,11 +824,134 @@ button {
   font-size: 12px;
 }
 
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.tab {
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.tab.active {
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--ember) 60%, var(--line));
+  background: color-mix(in srgb, var(--ember) 18%, transparent);
+}
+
 .minion-list,
 .social-list,
-.alert-list {
+.alert-list,
+.minion-list-scroll,
+.past-summons-scroll,
+.notification-log-scroll,
+.detail-scroll,
+.activity-log-scroll {
   display: grid;
   gap: 10px;
+}
+
+.minion-list-scroll,
+.past-summons-scroll,
+.notification-log-scroll,
+.detail-scroll,
+.activity-log-scroll {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.minion-list-scroll,
+.past-summons-scroll {
+  max-height: 44vh;
+}
+
+.notification-log-scroll {
+  max-height: 34vh;
+}
+
+.detail-scroll {
+  max-height: 60vh;
+}
+
+.activity-log-scroll {
+  max-height: 26vh;
+}
+
+.notification-menu,
+.detail-sheet {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  z-index: 25;
+  border: 1px solid var(--line2);
+  border-radius: 26px;
+  background: rgba(8, 5, 4, 0.94);
+  box-shadow: 0 22px 80px rgba(0, 0, 0, 0.58);
+  padding: 14px;
+}
+
+.notification-menu {
+  top: 72px;
+  max-height: 58vh;
+  overflow: hidden;
+  display: none;
+}
+
+.notification-menu.open {
+  display: block;
+}
+
+.detail-sheet {
+  top: 72px;
+  bottom: calc(var(--navH) + 18px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-card,
+.notification-item {
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 18px;
+  padding: 12px;
+}
+
+.preview-card strong,
+.notification-item h4 {
+  display: block;
+  margin: 0 0 4px;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.preview-card p,
+.notification-item p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.preview-line {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.preview-line span {
+  display: block;
+  color: var(--gold);
+  font-size: 11px;
+  margin-bottom: 4px;
+  font-weight: 850;
 }
 
 .social-list {
