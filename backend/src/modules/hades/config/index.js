@@ -37,6 +37,8 @@ export function getHadesConfig() {
     openRouterAppTitle: process.env.OPENROUTER_APP_TITLE || "Hades OS",
     hermesMode: process.env.HERMES_MODE || "openrouter_with_fallback",
     userId: process.env.HADES_USER_ID || "local-user",
+    giphyApiKey: process.env.GIPHY_API_KEY || "",
+    telegramBotToken: process.env.TELEGRAM_BOT_TOKEN || "",
     readiness: buildReadiness()
   };
 }

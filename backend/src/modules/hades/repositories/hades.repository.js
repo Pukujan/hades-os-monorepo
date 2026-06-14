@@ -182,6 +182,11 @@ export function createHadesRepository({ now = () => new Date().toISOString(), st
     return record;
   }
 
+  function getConversation(conversationId) {
+    hydrateFromSupabase();
+    return conversations.get(conversationId) || null;
+  }
+
   async function appendMessage({ conversationId, idempotencyKey, message }) {
     hydrateFromSupabase();
     const cached = recall("message", idempotencyKey);
@@ -332,6 +337,11 @@ export function createHadesRepository({ now = () => new Date().toISOString(), st
     return [...(messages.get(conversationId) || [])];
   }
 
+  function deleteConversationMessages(conversationId) {
+    messages.set(conversationId, []);
+    return { deleted: true, conversationId };
+  }
+
   function getMinion(id) {
     hydrateFromSupabase();
     return minions.get(id) || null;
@@ -400,6 +410,7 @@ export function createHadesRepository({ now = () => new Date().toISOString(), st
 
   return {
     getOrCreateConversation,
+    getConversation,
     appendMessage,
     saveConversationDraft,
     saveTestRun,
@@ -408,6 +419,7 @@ export function createHadesRepository({ now = () => new Date().toISOString(), st
     saveAgentExecution,
     saveOutboundDelivery,
     listMessages,
+    deleteConversationMessages,
     listMinions,
     listAssignments,
     listAgentExecutions,

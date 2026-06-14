@@ -52,6 +52,30 @@ test("Hades config exposes hosted readiness flags without leaking secret values"
   );
 });
 
+test("Hades config exposes telegramBotToken without leaking", () => {
+  withEnv(
+    {
+      TELEGRAM_BOT_TOKEN: "telegram-secret-123"
+    },
+    () => {
+      const config = getHadesConfig();
+      assert.equal(config.telegramBotToken, "telegram-secret-123");
+    }
+  );
+});
+
+test("Hades config defaults telegramBotToken to empty string", () => {
+  withEnv(
+    {
+      TELEGRAM_BOT_TOKEN: undefined
+    },
+    () => {
+      const config = getHadesConfig();
+      assert.equal(config.telegramBotToken, "");
+    }
+  );
+});
+
 test("Hades config keeps local development usable when hosted secrets are missing", () => {
   withEnv(
     {

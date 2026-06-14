@@ -59,5 +59,21 @@ export function createHadesRoutes({ service }) {
     })
   );
 
+  router.post(
+    "/triggers",
+    asyncRoute(async (req, res) => {
+      const result = await service.handleTrigger(req.body, req.authContext || null);
+      res.status(200).json(result);
+    })
+  );
+
+  router.delete(
+    "/conversations/:id/messages",
+    asyncRoute(async (req, res) => {
+      const result = await service.clearMessages(req.params.id);
+      res.status(200).json(result);
+    })
+  );
+
   return router;
 }

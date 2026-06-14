@@ -16,7 +16,7 @@ function createMessage(role, content, extra = {}) {
   };
 }
 
-export function createHadesService({ repository, hermes, config = {} }) {
+export function createHadesService({ repository, hermes, config = {}, minionAssignmentRuntime } = {}) {
   function resolveUserId(authContext) {
     return authContext?.userId || "local-user";
   }
@@ -182,5 +182,20 @@ export function createHadesService({ repository, hermes, config = {} }) {
     };
   }
 
-  return { readiness, bootstrap, chat, testMinion, saveMinion, assignMinion };
+  async function clearMessages(conversationId) {
+    const conversation = repository.getConversation(conversationId);
+    if (!conversation) {
+      throw new AppError("Conversation not found", 404);
+    }
+    return repository.deleteConversationMessages(conversationId);
+  }
+
+  async function handleTrigger(body, authContext = null) {
+    if (!minionAssignmentRuntime) {
+      throw new AppError("Minion assignment runtime is not configured", 501);
+    }
+    return minionAssignmentRuntime.handleSocialTrigger(body);
+  }
+
+  return { readiness, bootstrap, chat, testMinion, saveMinion, assignMinion, clearMessages, handleTrigger };
 }

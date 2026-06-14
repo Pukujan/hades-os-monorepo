@@ -1,17 +1,17 @@
 {
   "version": "1.0.0",
   "lastUpdated": "2026-06-13",
-  "branch": "main",
-  "latestCommit": "4849fe0",
-  "projectDescription": "Describe your project here.",
+  "branch": "codex/issue-1-hermes-discord-minion-runtime",
+  "latestCommit": "0cd071f",
+  "projectDescription": "Hades OS — multi-user auth isolation for shared Hermes runtime. Backend owns identity, isolation, memory retrieval. Hermes is shared; user context is not shared.",
   "activeModule": {
     "slug": "control-platform",
     "kind": "domain",
     "parentModule": "none",
-    "startedAt": "2026-06-08",
+    "startedAt": "2026-06-13T21:00:12.266+00:00",
     "phase": "implementation",
-    "backendStatus": "scaffolded",
-    "frontendStatus": "scaffolded",
+    "backendStatus": "implementing",
+    "frontendStatus": "implementing",
     "tasks": {
       "completed": [
         "Phase 1: scaffold backend",
@@ -36,17 +36,33 @@
         "Implement prototype-aligned post-login shell and screens",
         "Create a separate prototype-root post-login app entrypoint and stylesheet",
         "Swap the authenticated route to the new prototype implementation",
-        "Clean out unused legacy post-login imports/files after prototype swap"
+        "Clean out unused legacy post-login imports/files after prototype swap",
+        "Implement RED→GREEN for giphyProvider, botTokenProvider, discordClient services (15 tests)",
+        "Implement forge god voice + context branching in Hermes runtime (5 tests)",
+        "Automate contract tests via npm run test:contracts + lint:architecture gate",
+        "Write 5 new RED test files (21 tests) for telegramClient, chatClearing, triggers, supabase wiring",
+        "Implement GREEN for all 21 tests: telegramClient, clearMessages, deleteConversationMessages, triggers route",
+        "Wire giphyApiKey config, update frontend to pass context (forge vs minions)",
+        "Update HadesPrototypeApp.jsx to pass context to backend chat API",
+        "Write 104 passing tests (76 backend + 28 frontend, 0 failures)",
+        "Push branch codex/issue-1-hermes-discord-minion-runtime (0cd071f)",
+        "Write auth isolation plan + unit test pack + handoff documents",
+        "Save multi-user auth handoff to work-log sessions"
       ],
-      "inProgress": [],
+      "inProgress": [
+        "Implement multi-user auth + Hermes isolation via TDD (14 test files, ~60+ tests)"
+      ],
       "next": [
-        "Phase 2: backend API routes",
-        "Phase 2: frontend components",
-        "Phase 2: integration tests",
-        "Implement Supabase-backed live Hades repository wiring",
-        "Implement Discord command adapter and GIF provider flow behind TDD contract",
-        "Implement reusable minion assignment runtime for command and automation triggers",
-        "Implement post-login UX v4 visual alignment with frontend-only TDD gates"
+        "Phase 1: auth middleware — requireHadesAuth() (6 tests)",
+        "Phase 2: tenant-scoped repositories (6 files, 5 tests each)",
+        "Phase 3: social connection isolation — verifySocialAccount (8 tests)",
+        "Phase 4: Telegram token encryption/decryption",
+        "Phase 5: Hermes scoped context builder (8 tests)",
+        "Phase 6: runtime trigger isolation (8 tests)",
+        "Phase 7: Hermes output validator (7 tests)",
+        "Phase 8: execution logs (7 tests)",
+        "Phase 9: cross-user regression tests (10 tests)",
+        "Phase 10: frontend auth/state safety (10 tests)"
       ]
     }
   },
@@ -106,13 +122,13 @@
     "gate": 0
   },
   "lint": {
-    "lastRun": null,
-    "lastResult": null,
-    "lastPass": false
+    "lastRun": "2026-06-13T21:00:12.266+00:00",
+    "lastResult": "passed",
+    "lastPass": true
   },
   "sessions": {
-    "currentId": "ses_2026-06-13-clean-legacy-post-login",
-    "lastSessionId": "ses_2026-06-13-clean-legacy-post-login",
+    "currentId": "ses_2026-06-13-wire-hades-context-frontend",
+    "lastSessionId": "ses_2026-06-13-wire-hades-context-frontend",
     "archive": []
   },
   "contextBudget": {
