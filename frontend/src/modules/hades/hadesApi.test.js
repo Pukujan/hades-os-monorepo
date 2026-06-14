@@ -1,6 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
+const TEST_TOKEN = "test-access-token";
+
 test("hades api posts chat payload to the backend route", async () => {
   const calls = [];
   const originalFetch = global.fetch;
@@ -19,9 +21,11 @@ test("hades api posts chat payload to the backend route", async () => {
       idempotencyKey: "idem-1",
       message: "hello",
       currentDraft: { name: null }
-    });
+    }, TEST_TOKEN);
 
+    assert.equal(calls.length, 1);
     assert.equal(calls[0].url.endsWith("/api/hades/chat"), true);
+    assert.equal(calls[0].options.headers.authorization, `Bearer ${TEST_TOKEN}`);
     const body = JSON.parse(calls[0].options.body);
     assert.equal(body.clientMessageId, "msg-1");
 
@@ -47,14 +51,14 @@ test("hades api deleteHadesMessages calls DELETE on the backend route", async ()
 
   try {
     const { deleteHadesMessages } = await import("./hadesApi.js");
-    const result = await deleteHadesMessages("conv-123");
+    const result = await deleteHadesMessages("conv-123", TEST_TOKEN);
 
     assert.equal(calls.length, 1);
     assert.equal(calls[0].options.method, "DELETE");
+    assert.equal(calls[0].options.headers.authorization, `Bearer ${TEST_TOKEN}`);
     assert.ok(calls[0].url.includes("/api/hades/conversations/conv-123/messages"));
     assert.ok(result.ok);
   } finally {
     global.fetch = originalFetch;
   }
 });
-

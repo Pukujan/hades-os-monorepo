@@ -1,3 +1,5 @@
+import { persistTable, readTableRows } from "./_supabase.js";
+
 function createId(prefix) {
   return `${prefix}-${Math.random().toString(36).slice(2, 10)}`;
 }
@@ -7,16 +9,40 @@ function last4(token) {
   return token.slice(-4);
 }
 
-export function createTelegramConnectionRepository({ storage = "memory", crypto = null } = {}) {
+export function createTelegramConnectionRepository({ storage = "memory", supabaseClient, tableName = "hades_telegram_connections", crypto = null } = {}) {
   const connections = new Map();
   const byTelegramUserId = new Map();
+  let hydrated = false;
+
+  function hydrate() {
+    if (storage !== "supabase" || hydrated) return;
+    hydrated = true;
+    for (const row of readTableRows(supabaseClient, tableName)) {
+      if (!row?.id) continue;
+      connections.set(row.id, { ...row });
+      if (row.telegram_user_id) {
+        byTelegramUserId.set(row.telegram_user_id, connections.get(row.id));
+      }
+    }
+  }
+
+  async function persist(row, mode = "upsert") {
+    if (storage === "supabase") {
+      await persistTable(supabaseClient, tableName, mode, row);
+    }
+  }
 
   async function createOrUpdate({ userId, tenantId, telegramUserId, botToken, botUsername, status }) {
+    hydrate();
+    if (!crypto || typeof crypto.encrypt !== "function") {
+      throw Object.assign(
+        new Error("Crypto dependency is required to store Telegram bot tokens"),
+        { code: "missing_crypto" }
+      );
+    }
     const existing = byTelegramUserId.get(telegramUserId);
     const id = existing?.id || createId("tgconn");
-    const encrypted = crypto && typeof crypto.encrypt === "function"
-      ? crypto.encrypt(botToken)
-      : `encrypted:${botToken}`;
+    const encrypted = crypto.encrypt(botToken);
 
     const record = {
       id,
@@ -32,10 +58,12 @@ export function createTelegramConnectionRepository({ storage = "memory", crypto 
     };
     connections.set(id, record);
     byTelegramUserId.set(telegramUserId, record);
+    await persist(record);
     return record;
   }
 
   async function findPublicByUser({ userId, tenantId }) {
+    hydrate();
     for (const record of connections.values()) {
       if (record.user_id === userId && record.tenant_id === tenantId) {
         const { encrypted_bot_token, bot_token, ...rest } = record;
@@ -46,15 +74,20 @@ export function createTelegramConnectionRepository({ storage = "memory", crypto 
   }
 
   async function findRuntimeTokenByTelegramUserId({ telegramUserId }) {
+    hydrate();
     const record = byTelegramUserId.get(telegramUserId) || null;
     if (!record) return null;
-    const decrypted = crypto && typeof crypto.decrypt === "function"
-      ? crypto.decrypt(record.encrypted_bot_token)
-      : record.encrypted_bot_token.replace("encrypted:", "");
-    return { botToken: decrypted };
+    if (!crypto || typeof crypto.decrypt !== "function") {
+      throw Object.assign(
+        new Error("Crypto dependency is required to decrypt Telegram bot tokens"),
+        { code: "missing_crypto" }
+      );
+    }
+    return { botToken: crypto.decrypt(record.encrypted_bot_token) };
   }
 
   async function findByTelegramUserId({ telegramUserId }) {
+    hydrate();
     return byTelegramUserId.get(telegramUserId) || null;
   }
 

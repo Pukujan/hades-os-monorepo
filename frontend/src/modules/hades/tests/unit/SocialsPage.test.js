@@ -31,14 +31,15 @@ describe("SocialsPage data", () => {
     assert.equal(connectedLink.status, "token_testing");
   });
 
-  test("Telegram token_valid state includes botUsername", () => {
+  test("Telegram connected state includes botUsername", () => {
+    const telegram = SOCIAL_LINKS.find((s) => s.provider === "telegram");
     const connectedLink = {
-      ...SOCIAL_LINKS.find((s) => s.provider === "telegram"),
-      status: "token_valid",
-      botUsername: "hades_bot",
+      ...telegram,
+      status: "connected",
+      botUsername: "hades_test_bot"
     };
-    assert.equal(connectedLink.status, "token_valid");
-    assert.equal(connectedLink.botUsername, "hades_bot");
+    assert.equal(connectedLink.status, "connected");
+    assert.equal(connectedLink.botUsername, "hades_test_bot");
   });
 
   test("Telegram token_invalid state", () => {

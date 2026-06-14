@@ -9,12 +9,60 @@ import { createMinionAssignmentRuntime } from "./services/minionAssignmentRuntim
 import { createGiphyProvider } from "./services/giphyProvider.service.js";
 import { createTelegramClient } from "./services/telegramClient.js";
 import { createBotTokenProvider } from "./services/botTokenProvider.js";
+import { requireHadesAuth } from "../auth/services/authMiddleware.js";
+import { createMinionRepository } from "./repositories/minionRepository.js";
+import { createAssignmentRepository } from "./repositories/assignmentRepository.js";
+import { createConversationRepository } from "./repositories/conversationRepository.js";
+import { createTelegramConnectionRepository } from "./repositories/telegramConnectionRepository.js";
+import { createDiscordConnectionRepository } from "./repositories/discordConnectionRepository.js";
+import { createAgentExecutionRepository } from "./repositories/agentExecutionRepository.js";
+import { createVerifySocialAccount } from "./runtime/verifySocialAccount.js";
+import { createTokenCrypto } from "./security/tokenCrypto.js";
+
+function createSupabaseClient() {
+  const url = process.env.SUPABASE_URL;
+  const anonKey = process.env.SUPABASE_ANON_KEY;
+  if (!url || !anonKey) return null;
+  return {
+    _url: url,
+    _anonKey: anonKey,
+    tables: {},
+    table(name) {
+      return {
+        upsert: async (row) => {
+          this.tables[name] = this.tables[name] || [];
+          const idx = this.tables[name].findIndex((r) => r.id === row.id);
+          if (idx >= 0) this.tables[name][idx] = { ...this.tables[name][idx], ...row };
+          else this.tables[name].push({ ...row });
+        },
+        insert: async (row) => {
+          this.tables[name] = this.tables[name] || [];
+          this.tables[name].push({ ...row });
+        },
+      };
+    },
+  };
+}
 
 export async function register(app, context) {
+  const overrides = context?.overrides || {};
   const config = getHadesConfig();
   const repository = createHadesRepository();
-  const hermesRuntime = createHermesRuntimeService();
+  const hermesRuntime = overrides.runtimeService || createHermesRuntimeService();
   const hermes = createHermesService({ hermesRuntime });
+
+  const supabaseConfigured = Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
+  const supabaseClient = overrides.supabaseClient || (supabaseConfigured ? createSupabaseClient() : null);
+  const storageMode = supabaseClient ? "supabase" : "memory";
+
+  let tokenCrypto = null;
+  if (overrides.crypto) {
+    tokenCrypto = overrides.crypto;
+  } else if (process.env.ENCRYPTION_KEY) {
+    try {
+      tokenCrypto = createTokenCrypto({ encryptionKey: process.env.ENCRYPTION_KEY });
+    } catch { tokenCrypto = null; }
+  }
 
   let giphyProvider = null;
   try {
@@ -32,14 +80,57 @@ export async function register(app, context) {
     findSocialConnection: async () => null,
   });
 
-  const minionAssignmentRuntime = createMinionAssignmentRuntime({
-    verifySocialAccount: null,
-    repository,
-    hermesRuntime: null,
-    socialClient: null,
+  const minions = overrides.minions || createMinionRepository({ storage: storageMode, supabaseClient });
+  const assignments = overrides.assignments || createAssignmentRepository({ storage: storageMode, supabaseClient });
+  const conversations = overrides.conversations || createConversationRepository({ storage: storageMode, supabaseClient });
+  const telegramConnections = overrides.telegramConnections || createTelegramConnectionRepository({ storage: storageMode, supabaseClient, crypto: tokenCrypto });
+  const discordConnections = overrides.discordConnections || createDiscordConnectionRepository({ storage: storageMode, supabaseClient });
+  const executions = overrides.executions || createAgentExecutionRepository({ storage: storageMode, supabaseClient });
+
+  const verifySocialAccount = overrides.verifySocialAccount || createVerifySocialAccount({
+    discordConnections,
+    telegramConnections,
   });
-  const service = createHadesService({ repository, hermes, config, minionAssignmentRuntime, context });
-  const router = createHadesRoutes({ service });
+
+  const runtimeHermes = overrides.hermesRuntime || null;
+  const runtimeSocialClient = overrides.socialClient || null;
+
+  const scopedRepos = {
+    minions,
+    assignments,
+    conversations,
+    telegramConnections,
+    discordConnections,
+    executions,
+    verifySocialAccount,
+  };
+
+  const minionAssignmentRuntime = createMinionAssignmentRuntime({
+    verifySocialAccount,
+    repository,
+    hermesRuntime: runtimeHermes,
+    socialClient: runtimeSocialClient,
+    scopedRepos,
+  });
+
+  const authImpl = overrides.auth?.requireHadesAuth || requireHadesAuth;
+
+  const service = createHadesService({
+    repository,
+    scopedRepos,
+    hermes,
+    config,
+    minionAssignmentRuntime,
+    context,
+    telegramClientFactory: overrides.telegramClientFactory || null,
+  });
+
+  const router = createHadesRoutes({
+    service,
+    requireHadesAuth: authImpl,
+    config,
+    scopedRepos,
+  });
 
   app.use("/api/hades", router);
 

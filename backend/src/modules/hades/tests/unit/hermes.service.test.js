@@ -32,7 +32,8 @@ test("Hermes runtime response is used and sanitized", async () => {
   const result = await hermes.buildResponse({
     conversationId: "conv-1",
     message: "Make a task helper",
-    currentDraft: createEmptyDraft()
+    currentDraft: createEmptyDraft(),
+    context: "forge"
   });
 
   assert.equal(runtimeCalls, 1);
@@ -67,7 +68,8 @@ test("Hermes runtime invalid enum output fails fast", async () => {
       hermes.buildResponse({
         conversationId: "conv-1",
         message: "I want a command to send cat memes in Discord",
-        currentDraft: createEmptyDraft()
+        currentDraft: createEmptyDraft(),
+        context: "forge"
       }),
     /Invalid draft patch from Hermes runtime/i
   );

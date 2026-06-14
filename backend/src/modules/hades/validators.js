@@ -47,12 +47,19 @@ export function validateChatRequest(body) {
     validateDraft(body.currentDraft, { requireComplete: false });
   }
 
+  const VALID_CONVERSATION_TYPES = ["general", "forge", "minions"];
+  const conversationType = body.conversationType || body.context || "general";
+  if (!VALID_CONVERSATION_TYPES.includes(conversationType)) {
+    throw new AppError(`Unknown conversationType: ${conversationType}`, 400);
+  }
+
   return {
     conversationId: typeof body.conversationId === "string" && body.conversationId.trim() ? body.conversationId.trim() : null,
     clientMessageId: body.clientMessageId.trim(),
     idempotencyKey: body.idempotencyKey.trim(),
     message: body.message.trim(),
-    currentDraft: body.currentDraft || null
+    currentDraft: body.currentDraft || null,
+    conversationType
   };
 }
 

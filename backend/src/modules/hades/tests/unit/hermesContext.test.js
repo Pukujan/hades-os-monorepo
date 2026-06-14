@@ -73,7 +73,7 @@ describe("Hermes context branching", () => {
     assert.equal(receivedContext, "minions");
   });
 
-  test("buildResponse defaults context to forge when not provided", async () => {
+  test("buildResponse defaults context to general when not provided", async () => {
     const { createHermesService } = await loadHermesService();
     let receivedContext = null;
 
@@ -99,6 +99,6 @@ describe("Hermes context branching", () => {
       message: "hello",
     });
 
-    assert.equal(receivedContext, "forge");
+    assert.equal(receivedContext, "general");
   });
 });

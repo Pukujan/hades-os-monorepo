@@ -45,6 +45,7 @@ test("verifySupabaseSession calls Supabase user endpoint with bearer token", asy
     accept: "application/json"
   });
   assert.deepEqual(session, {
+    id: "user_123",
     userId: "user_123",
     tenantId: "tenant_user_123",
     email: "user@example.com",
@@ -83,6 +84,7 @@ test("verifySupabaseSession accepts sb-access-token cookies", async () => {
 
   assert.equal(calls, 1);
   assert.deepEqual(session, {
+    id: "user_abc",
     userId: "user_abc",
     tenantId: "tenant_user_abc",
     email: "user@site.com",

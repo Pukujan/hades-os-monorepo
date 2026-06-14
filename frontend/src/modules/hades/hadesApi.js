@@ -8,28 +8,52 @@ import {
   deriveLevelState
 } from "./hadesData.js";
 
-export async function getHadesBootstrap() {
-  return apiGet("/api/hades/bootstrap");
+export async function getHadesBootstrap(accessToken) {
+  return apiGet("/api/hades/bootstrap", { accessToken });
 }
 
-export async function postHadesChat(payload) {
-  return apiPost("/api/hades/chat", payload);
+export async function postHadesChat(payload, accessToken) {
+  return apiPost("/api/hades/chat", payload, { accessToken });
 }
 
-export async function postHadesMinionTest(payload) {
-  return apiPost("/api/hades/minions/test", payload);
+export async function sendGeneralChat({ message, conversationId, idempotencyKey, clientMessageId, currentDraft } = {}, accessToken) {
+  return apiPost("/api/hades/chat/general", {
+    clientMessageId: clientMessageId || idempotencyKey,
+    idempotencyKey,
+    message,
+    conversationId: conversationId || null,
+    currentDraft: currentDraft || null,
+  }, { accessToken });
 }
 
-export async function postHadesMinion(payload) {
-  return apiPost("/api/hades/minions", payload);
+export async function sendForgeChat({ message, conversationId, idempotencyKey, clientMessageId, currentDraft } = {}, accessToken) {
+  return apiPost("/api/hades/chat/forge", {
+    clientMessageId: clientMessageId || idempotencyKey,
+    idempotencyKey,
+    message,
+    conversationId: conversationId || null,
+    currentDraft: currentDraft || null,
+  }, { accessToken });
 }
 
-export async function postHadesAssignment(payload) {
-  return apiPost("/api/hades/assignments", payload);
+export async function postHadesMinionTest(payload, accessToken) {
+  return apiPost("/api/hades/minions/test", payload, { accessToken });
 }
 
-export async function deleteHadesMessages(conversationId) {
-  return apiDelete(`/api/hades/conversations/${conversationId}/messages`);
+export async function postHadesMinion(payload, accessToken) {
+  return apiPost("/api/hades/minions", payload, { accessToken });
+}
+
+export async function postHadesAssignment(payload, accessToken) {
+  return apiPost("/api/hades/assignments", payload, { accessToken });
+}
+
+export async function deleteHadesMessages(conversationId, accessToken) {
+  return apiDelete(`/api/hades/conversations/${conversationId}/messages`, null, { accessToken });
+}
+
+export async function saveTelegramToken({ token }, accessToken) {
+  return apiPost("/api/hades/socials/telegram/token", { token }, { accessToken });
 }
 
 export function buildLocalDraftFallback(message, currentDraft) {

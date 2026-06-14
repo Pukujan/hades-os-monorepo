@@ -1,12 +1,34 @@
+import { persistTable, readTableRows } from "./_supabase.js";
+
 function createId(prefix) {
   return `${prefix}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
-export function createDiscordConnectionRepository({ storage = "memory" } = {}) {
+export function createDiscordConnectionRepository({ storage = "memory", supabaseClient, tableName = "hades_discord_connections" } = {}) {
   const connections = new Map();
   const byDiscordUserId = new Map();
+  let hydrated = false;
+
+  function hydrate() {
+    if (storage !== "supabase" || hydrated) return;
+    hydrated = true;
+    for (const row of readTableRows(supabaseClient, tableName)) {
+      if (!row?.id) continue;
+      connections.set(row.id, { ...row });
+      if (row.discord_user_id) {
+        byDiscordUserId.set(row.discord_user_id, connections.get(row.id));
+      }
+    }
+  }
+
+  async function persist(row, mode = "upsert") {
+    if (storage === "supabase") {
+      await persistTable(supabaseClient, tableName, mode, row);
+    }
+  }
 
   async function createOrUpdate({ userId, tenantId, discordUserId, guildId, channelId, status }) {
+    hydrate();
     const existing = byDiscordUserId.get(discordUserId);
     const id = existing?.id || createId("dconn");
     const record = {
@@ -22,10 +44,12 @@ export function createDiscordConnectionRepository({ storage = "memory" } = {}) {
     };
     connections.set(id, record);
     byDiscordUserId.set(discordUserId, record);
+    await persist(record);
     return record;
   }
 
   async function findPublicByUser({ userId, tenantId }) {
+    hydrate();
     for (const record of connections.values()) {
       if (record.user_id === userId && record.tenant_id === tenantId) {
         return record;
@@ -35,6 +59,7 @@ export function createDiscordConnectionRepository({ storage = "memory" } = {}) {
   }
 
   async function findByDiscordUserId({ discordUserId }) {
+    hydrate();
     return byDiscordUserId.get(discordUserId) || null;
   }
 

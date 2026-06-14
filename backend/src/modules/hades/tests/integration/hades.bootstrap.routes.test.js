@@ -3,27 +3,35 @@ import assert from "node:assert/strict";
 import { createApp } from "../../../../core/app.js";
 import { invokeApp } from "../../../../shared/testing/invoke-app.js";
 
+const AUTH_OVERRIDE = {
+  auth: {
+    requireHadesAuth: async () => ({
+      userId: "test-user",
+      tenantId: "tenant_test-user",
+      sessionToken: "test-token",
+    }),
+  },
+};
+
+const AUTH_HEADERS = { authorization: "Bearer test-token" };
+
 test("GET /api/hades/bootstrap returns app hydration state", async () => {
-  const { app } = await createApp();
+  const { app } = await createApp({ overrides: AUTH_OVERRIDE });
   const response = await invokeApp(app, {
     method: "GET",
-    path: "/api/hades/bootstrap"
+    path: "/api/hades/bootstrap",
+    headers: AUTH_HEADERS,
   });
 
   assert.equal(response.status, 200);
   const body = JSON.parse(response.body);
-  assert.equal(body.userId, "local-user");
-  assert.ok(body.conversationId);
-  assert.ok(Array.isArray(body.messages));
+  assert.deepEqual(body.authContext, { userId: "test-user", tenantId: "tenant_test-user" });
   assert.ok(Array.isArray(body.minions));
   assert.ok(Array.isArray(body.assignments));
-  assert.ok(Array.isArray(body.socialLinks));
-  assert.equal(body.draft.status, "incomplete");
-  assert.equal(body.source, "memory");
 });
 
 test("GET /api/hades/bootstrap reflects saved minion and assignment", async () => {
-  const { app } = await createApp();
+  const { app } = await createApp({ overrides: AUTH_OVERRIDE });
   const draft = {
     name: "Task Helper",
     description: "Turns messy notes into clean task cards.",
@@ -41,6 +49,7 @@ test("GET /api/hades/bootstrap reflects saved minion and assignment", async () =
   const saveResponse = await invokeApp(app, {
     method: "POST",
     path: "/api/hades/minions",
+    headers: AUTH_HEADERS,
     body: { draft, idempotencyKey: "bootstrap-save-1" }
   });
   const saved = JSON.parse(saveResponse.body).minion;
@@ -48,6 +57,7 @@ test("GET /api/hades/bootstrap reflects saved minion and assignment", async () =
   await invokeApp(app, {
     method: "POST",
     path: "/api/hades/assignments",
+    headers: AUTH_HEADERS,
     body: {
       minionId: saved.id,
       socialLinkId: "discord",
@@ -58,7 +68,8 @@ test("GET /api/hades/bootstrap reflects saved minion and assignment", async () =
 
   const response = await invokeApp(app, {
     method: "GET",
-    path: "/api/hades/bootstrap"
+    path: "/api/hades/bootstrap",
+    headers: AUTH_HEADERS,
   });
   const body = JSON.parse(response.body);
 

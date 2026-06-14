@@ -9,13 +9,13 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
  * @typedef {{ name: string, detail?: string, children?: Array<{ id: string, role?: string, mount?: string }> }} LoadedModule
  */
 
-export async function loadModules(app) {
+export async function loadModules(app, overrides = {}) {
   const modulesDir = join(__dirname, "../modules");
   /** @type {LoadedModule[]} */
   const loaded = [];
   if (!existsSync(modulesDir)) return loaded;
 
-  const moduleContext = { eventBus: getEventBus() };
+  const moduleContext = { eventBus: getEventBus(), overrides };
   const names = readdirSync(modulesDir, { withFileTypes: true })
     .filter((d) => d.isDirectory())
     .filter((d) => !d.name.startsWith("_"))

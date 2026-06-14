@@ -29,6 +29,9 @@ import {
   formatSocialLabel,
   getSocialIcon
 } from "./hadesData.js";
+import { saveTelegramToken } from "./hadesApi.js";
+import { getPendingCopy } from "./chatPendingCopy.js";
+import { TelegramSetupCard } from "./TelegramSetupCard.jsx";
 import {
   buildMinionDetailViewModel,
   buildMinionScreenViewModel,
@@ -41,7 +44,8 @@ import {
   getHadesBootstrap,
   mapBootstrapToHadesState,
   postHadesAssignment,
-  postHadesChat,
+  sendForgeChat,
+  sendGeneralChat,
   postHadesMinion,
   postHadesMinionTest
 } from "./hadesApi.js";
@@ -128,6 +132,20 @@ function TelegramBrandIcon({ className = "", size = 18, title }) {
   );
 }
 
+function escapeHtml(text) {
+  return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function renderMarkdown(text) {
+  const html = escapeHtml(text);
+  return html
+    .replace(/```([\s\S]*?)```/g, "<pre><code>$1</code></pre>")
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*([^*]+)\*/g, "<em>$1</em>")
+    .replace(/\n/g, "<br>");
+}
+
 function toTitleCase(text) {
   return text
     .split(/\s+/)
@@ -179,12 +197,14 @@ function getScreenTitle(screen) {
 function HadesProvider({ children }) {
   const [theme, setThemeState] = usePersistentState("hades.theme", "ember");
   const [messages, setMessages] = usePersistentState("hades.chatMessages", createInitialMessages());
+  const [forgeMessages, setForgeMessages] = usePersistentState("hades.forgeMessages", createInitialMessages());
   const [draft, setDraft] = usePersistentState("hades.draft", createEmptyDraft());
   const [minions, setMinions] = usePersistentState("hades.minions", createStarterOwnedMinions());
   const [inbox, setInbox] = usePersistentState("hades.inboxAlerts", createInitialInbox());
   const [assignments, setAssignments] = usePersistentState("hades.assignments", []);
   const [levelState, setLevelState] = usePersistentState("hades.levelState", deriveLevelState(createStarterOwnedMinions().length));
   const [conversationId, setConversationId] = usePersistentState("hades.conversationId", null);
+  const [forgeConversationId, setForgeConversationId] = usePersistentState("hades.forgeConversationId", null);
   const [toast, setToast] = React.useState(null);
   const [composerText, setComposerText] = React.useState("");
   const [selectedStarterId, setSelectedStarterId] = React.useState("task-helper");
@@ -230,11 +250,13 @@ function HadesProvider({ children }) {
   ]);
   const [detailMinionId, setDetailMinionId] = React.useState(null);
   const [sending, setSending] = React.useState(false);
+  const [pendingCopy, setPendingCopy] = React.useState("Hades is thinking.");
   const [notificationOpen, setNotificationOpen] = React.useState(false);
   const timersRef = React.useRef([]);
   const toastTimerRef = React.useRef(null);
   const hydratedRef = React.useRef(false);
-  const { signOut } = useAuth();
+  const { session, signOut } = useAuth();
+  const accessToken = session?.access_token;
 
   React.useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -267,10 +289,10 @@ function HadesProvider({ children }) {
   }, [minions, setLevelState, setMinions, setSelectedMinionId]);
 
   React.useEffect(() => {
-    if (hydratedRef.current) return;
+    if (hydratedRef.current || !accessToken) return;
     hydratedRef.current = true;
 
-    getHadesBootstrap()
+    getHadesBootstrap(accessToken)
       .then((payload) => {
         const state = mapBootstrapToHadesState(payload);
         if (state.conversationId) setConversationId(state.conversationId);
@@ -284,7 +306,7 @@ function HadesProvider({ children }) {
       .catch(() => {
         hydratedRef.current = true;
       });
-  }, []);
+  }, [accessToken]);
 
   React.useEffect(() => {
     const nextLevel = deriveLevelState(minions.length);
@@ -402,7 +424,7 @@ function HadesProvider({ children }) {
           socialLinkId: social.id,
           commandName,
           idempotencyKey: createId(`assignment-${social.id}`)
-        });
+        }, accessToken);
         const nextAssignment = response.assignment;
         setAssignments((current) => [...current.filter((entry) => entry.id !== nextAssignment.id), nextAssignment]);
         return nextAssignment;
@@ -461,6 +483,12 @@ function HadesProvider({ children }) {
     const text = messageText.trim();
     if (!text) return;
 
+    const isForge = context === "forge";
+    const currentConvId = isForge ? forgeConversationId : conversationId;
+    const setConvId = isForge ? setForgeConversationId : setConversationId;
+    const setMsgs = isForge ? setForgeMessages : setMessages;
+    const chatEndpoint = isForge ? sendForgeChat : sendGeneralChat;
+
     const userMessageId = createId("msg");
     const userMessage = {
       id: userMessageId,
@@ -469,31 +497,40 @@ function HadesProvider({ children }) {
       status: "queued"
     };
 
-    appendMessage(userMessage);
+    setMsgs((current) => [...current, userMessage]);
     setComposerText("");
+    const conversationType = isForge ? "forge" : "general";
+    setPendingCopy(getPendingCopy(text, conversationType));
     setSending(true);
 
     try {
-      const response = await postHadesChat({
-        conversationId: conversationId || undefined,
+      const response = await chatEndpoint({
+        conversationId: currentConvId || undefined,
         clientMessageId: userMessageId,
         idempotencyKey: userMessageId,
         message: text,
         currentDraft: draft,
-        context
-      });
+      }, accessToken);
 
       if (response?.conversationId) {
-        setConversationId(response.conversationId);
+        setConvId(response.conversationId);
       }
 
-      setMessages((current) =>
+      if (response?.pendingCopy) {
+        setPendingCopy(response.pendingCopy);
+      }
+
+      const msgActions = response.actions || response.assistantMessage?.actions || [];
+      const msgCards = response.cards || [];
+      setMsgs((current) =>
         current.map((entry) => (entry.id === userMessageId ? { ...entry, status: "completed" } : entry)).concat({
           id: response.assistantMessage?.id || createId("msg"),
           role: "assistant",
           content: response.assistantMessage?.content || "Draft updated.",
           status: response.assistantMessage?.status || "completed",
-          suggestions: response.assistantMessage?.suggestions || []
+          suggestions: response.assistantMessage?.suggestions || [],
+          actions: msgActions,
+          cards: msgCards,
         })
       );
       updateDraft(response.draft);
@@ -501,7 +538,7 @@ function HadesProvider({ children }) {
       const parsed = buildLocalDraftFallback(text, draft);
       updateDraft(parsed.draft);
       const assistantReply = buildAssistantReply(parsed);
-      setMessages((current) =>
+      setMsgs((current) =>
         current.map((entry) => (entry.id === userMessageId ? { ...entry, status: "completed" } : entry)).concat({
           id: createId("msg"),
           role: "assistant",
@@ -515,13 +552,17 @@ function HadesProvider({ children }) {
     setSending(false);
   }
 
-  async function clearMessages() {
-    if (conversationId) {
+  async function clearMessages(context = "general") {
+    const isForge = context === "forge";
+    const currentConvId = isForge ? forgeConversationId : conversationId;
+    const setMsgs = isForge ? setForgeMessages : setMessages;
+
+    if (currentConvId) {
       try {
-        await deleteHadesMessages(conversationId);
+        await deleteHadesMessages(currentConvId, accessToken);
       } catch { /* best effort */ }
     }
-    setMessages([]);
+    setMsgs([]);
   }
 
   async function runDraftTest() {
@@ -542,7 +583,7 @@ function HadesProvider({ children }) {
         draft,
         testInput: draft.testInput,
         idempotencyKey: createId("test")
-      });
+      }, accessToken);
       updateDraft(response.draft);
       pushInbox("sparkles", "Test completed", response.testRun.output, "success");
       pushNotification({
@@ -602,7 +643,7 @@ function HadesProvider({ children }) {
       const response = await postHadesMinion({
         draft,
         idempotencyKey: createId("minion")
-      });
+      }, accessToken);
       const saved = response.minion;
       setMinions((current) => {
         const filtered = current.filter((entry) => entry.name !== saved.name || entry.commandName !== saved.commandName);
@@ -772,6 +813,7 @@ function HadesProvider({ children }) {
         toast,
         showToast,
         messages,
+        forgeMessages,
         sending,
         composerText,
         setComposerText,
@@ -809,7 +851,8 @@ function HadesProvider({ children }) {
         levelState,
         selectedStarterId,
         setSelectedStarterId,
-        selectStarterCard
+        selectStarterCard,
+        pendingCopy
       }}
     >
       {children}
@@ -926,23 +969,98 @@ function ScreenHead({ title, subtitle }) {
   );
 }
 
+function ProductCard({ card }) {
+  return (
+    <article className="hades-product-card">
+      <div className="hades-product-card__title">{card.title}</div>
+      <div className="hades-product-card__meta">
+        {card.price ? <span>{card.price}</span> : null}
+        {card.seller ? <span>{card.seller}</span> : null}
+        {card.condition ? <span>{card.condition}</span> : null}
+      </div>
+      <div className="hades-product-card__details">
+        {card.size ? <div>Size: {card.size}</div> : null}
+        {card.width ? <div>Width: {card.width}</div> : null}
+        {card.notes ? <div>{card.notes}</div> : null}
+      </div>
+      {card.url ? (
+        <a href={card.url} target="_blank" rel="noreferrer noopener" className="hades-action-button">Open listing</a>
+      ) : null}
+    </article>
+  );
+}
+
+function ComparisonCard({ card }) {
+  return (
+    <article className="hades-comparison-card">
+      <div className="hades-comparison-card__title">{card.title}</div>
+      <dl>
+        {card.fields.map((field) => (
+          <div key={field.label}>
+            <dt>{field.label}</dt>
+            <dd>{field.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </article>
+  );
+}
+
 function Bubble({ message, showStamp = true }) {
   const { sendMessage } = useHades();
+  const navigate = useNavigate();
   const className = `bubble ${message.role === "user" ? "user" : "hades"} ${message.status === "queued" ? "pending" : ""}`;
 
   return (
     <div className={className}>
-      <span dangerouslySetInnerHTML={{ __html: message.content }} />
+      <span dangerouslySetInnerHTML={{ __html: renderMarkdown(message.content) }} />
       {showStamp ? <span className="stamp">{message.createdAt || "Just now"}</span> : null}
       {message.status === "queued" ? <small>Pending sync</small> : null}
+      {message.cards?.length > 0 ? (
+        <div className="hades-message-cards">
+          {message.cards.map((card, i) => {
+            if (card.type === "product_result") return <ProductCard key={`card-${i}`} card={card} />;
+            if (card.type === "comparison_row") return <ComparisonCard key={`card-${i}`} card={card} />;
+            return null;
+          })}
+        </div>
+      ) : null}
+      {message.actions?.length > 0 ? (
+        <div className="hades-message-actions">
+          {message.actions.map((action, i) => {
+            if (action.type === "route") {
+              return (
+                <button key={`action-${i}`} type="button" className="hades-action-button" onClick={() => navigate(action.to)}>
+                  {action.label}
+                </button>
+              );
+            }
+            if (action.type === "external_link") {
+              return (
+                <a key={`action-${i}`} className="hades-action-button" href={action.url} target="_blank" rel="noreferrer noopener">
+                  {action.label}
+                </a>
+              );
+            }
+            if (action.type === "command") {
+              return (
+                <button key={`action-${i}`} type="button" className="hades-action-button" onClick={() => sendMessage(`/${action.command}`)}>
+                  {action.label}
+                </button>
+              );
+            }
+            return null;
+          })}
+        </div>
+      ) : null}
     </div>
   );
 }
 
-function LoadingDots() {
+function LoadingDots({ pendingCopy }) {
   return (
     <div className="loading">
-      Your message is sent. Hades is replying
+      {pendingCopy || "Hades is thinking."}
       <span className="spark" />
       <span className="spark" />
       <span className="spark" />
@@ -1300,10 +1418,18 @@ function MinionsScreen() {
   const [activeTab, setActiveTab] = React.useState("active");
   const [chatFocused, setChatFocused] = React.useState(false);
   const [chatExpanded, setChatExpanded] = React.useState(false);
-  const { minions, messages, sending, composerText, setComposerText, sendMessage, clearMessages, openMinionDetail } = useHades();
+  const navigate = useNavigate();
+  const { minions, messages, sending, pendingCopy, composerText, setComposerText, sendMessage, clearMessages, openMinionDetail } = useHades();
   const view = buildMinionScreenViewModel({ minions });
   const visibleMinions = activeTab === "active" ? view.active : view.inactive;
   const chatClass = chatExpanded ? "card chat-card expanded" : `card chat-card${chatFocused ? " focused" : ""}`;
+  const suggestionButtons = [
+    { label: "What is this place?", action: () => sendMessage("What is this place?", "minions") },
+    { label: "Open Forge", action: () => navigate("/forge") },
+    { label: "Connect Telegram", action: () => navigate("/app/socials") },
+    { label: "Show Socials", action: () => navigate("/app/socials") },
+    { label: "Open Settings", action: () => navigate("/app/settings") },
+  ];
 
   function handleSend() {
     sendMessage(composerText, "minions");
@@ -1311,19 +1437,24 @@ function MinionsScreen() {
     setChatExpanded(true);
   }
 
-  const recentMessages = messages.slice(-3);
-
   return (
     <>
       <ScreenHead title="Minions" subtitle="Speak to Hades, then inspect your minions and slots." />
       <div className="scroll">
         <section className={chatClass} id="hadesChatCard">
           <p className="kicker">Speak to Hades
-            {messages.length > 0 ? <button className="tiny" type="button" style={{ float: "right" }} onClick={clearMessages}>Clear</button> : null}
+            {messages.length > 0 ? <button className="tiny" type="button" style={{ float: "right" }} onClick={() => clearMessages("general")}>Clear</button> : null}
           </p>
-          {!chatExpanded ? <h3 className="bigline chat-intro">Hades awaits your message.</h3> : null}
+          {!chatExpanded && messages.length === 0 ? <h3 className="bigline chat-intro">Hades is listening. Speak, ask, or choose a door.</h3> : null}
+          {messages.length === 0 ? (
+            <div className="suggest">
+              {suggestionButtons.map((btn) => (
+                <button key={btn.label} type="button" onClick={btn.action}>{btn.label}</button>
+              ))}
+            </div>
+          ) : null}
           <div className="chat-log" id="minionsChat">
-            {recentMessages.map((message) => (
+            {messages.map((message) => (
               <React.Fragment key={message.id}>
                 <Bubble message={message} />
                 {message.suggestions?.length ? (
@@ -1336,7 +1467,7 @@ function MinionsScreen() {
                 ) : null}
               </React.Fragment>
             ))}
-            {sending ? <LoadingDots /> : null}
+            {sending ? <LoadingDots pendingCopy={pendingCopy} /> : null}
           </div>
           <div className="input-row">
             <textarea
@@ -1427,6 +1558,23 @@ function PermissionsCard({ social }) {
 }
 
 function SocialsScreen() {
+  const { session } = useAuth();
+  const currentUser = session?.user || { id: "local-user" };
+  const [telegramConnection, setTelegramConnection] = React.useState({
+    status: SOCIAL_LINKS.find((s) => s.provider === "telegram")?.status || "disconnected"
+  });
+
+  async function handleSaveTelegramToken({ token }) {
+    const result = await saveTelegramToken({ token }, session?.access_token);
+    const connection = result?.connection || result;
+    setTelegramConnection({
+      status: connection?.status || "connected",
+      botUsername: connection?.botUsername || connection?.bot_username || null,
+      tokenLast4: connection?.tokenLast4 || connection?.token_last4 || null
+    });
+    return result;
+  }
+
   return (
     <>
       <ScreenHead title="Socials" subtitle="Connect channels only when minions need them." />
@@ -1437,9 +1585,19 @@ function SocialsScreen() {
           <p className="task">Connected services stay visible and easy to pause.</p>
         </section>
 
-        {SOCIAL_LINKS.map((social) => (
-          <PermissionsCard key={social.id} social={social} />
-        ))}
+        {SOCIAL_LINKS.map((social) => {
+          if (social.provider === "telegram") {
+            return (
+              <TelegramSetupCard
+                key={social.id}
+                connection={telegramConnection}
+                currentUser={currentUser}
+                onSaveToken={handleSaveTelegramToken}
+              />
+            );
+          }
+          return <PermissionsCard key={social.id} social={social} />;
+        })}
       </div>
     </>
   );
@@ -1515,7 +1673,7 @@ function SettingsScreen() {
 }
 
 function ForgeScreen() {
-  const { messages, draft, sending, composerText, setComposerText, sendMessage, clearMessages, runDraftTest, saveDraft, minions, openMinionDetail } = useHades();
+  const { forgeMessages: messages, draft, sending, pendingCopy, composerText, setComposerText, sendMessage, clearMessages, runDraftTest, saveDraft, minions, openMinionDetail } = useHades();
   const visibleSummons = minions.filter((minion) => minion.status === "active").slice(0, 4);
   const templateChips = [
     { id: "sendcat", label: "SEND CAT", text: "Create a command called !sendcat that sends cat memes in Discord." },
@@ -1526,15 +1684,13 @@ function ForgeScreen() {
     { id: "episode", label: "TRACK EPISODE", text: "Make a minion that tracks new episodes of a show." }
   ];
 
-  const recentMessages = messages.slice(-4);
-
   return (
     <>
       <ScreenHead title="Forge" subtitle="Create a helper from plain English." />
       <div className="scroll">
         <section className="card chat-card expanded">
           <p className="kicker">Forge your minion
-            {messages.length > 0 ? <button className="tiny" type="button" style={{ float: "right" }} onClick={clearMessages}>Clear</button> : null}
+            {messages.length > 0 ? <button className="tiny" type="button" style={{ float: "right" }} onClick={() => clearMessages("forge")}>Clear</button> : null}
           </p>
           <div className="chips">
           {templateChips.map((chip) => (
@@ -1544,7 +1700,7 @@ function ForgeScreen() {
           ))}
           </div>
           <div className="chat-log" id="forgeChat">
-            {recentMessages.map((message) => (
+            {messages.map((message) => (
               <React.Fragment key={message.id}>
                 <Bubble message={message} />
                 {message.suggestions?.length ? (
@@ -1557,7 +1713,7 @@ function ForgeScreen() {
                 ) : null}
               </React.Fragment>
             ))}
-            {sending ? <LoadingDots /> : null}
+            {sending ? <LoadingDots pendingCopy={pendingCopy} /> : null}
           </div>
           <div className="input-row">
             <textarea

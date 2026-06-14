@@ -1,9 +1,9 @@
 const BASE_URL = import.meta?.env?.VITE_API_BASE_URL || "http://localhost:3001";
 const ACCESS_TOKEN_KEY = "hades.auth.accessToken";
 
-function getAuthHeaders() {
-  if (typeof window === "undefined") return {};
-  const token = window.localStorage.getItem(ACCESS_TOKEN_KEY);
+function getAuthHeaders(accessToken) {
+  const storage = typeof window !== "undefined" ? window.localStorage : null;
+  const token = accessToken || storage?.getItem(ACCESS_TOKEN_KEY);
   if (!token) return {};
   return {
     authorization: `Bearer ${token}`
@@ -47,44 +47,44 @@ async function parseResponse(response) {
   return body;
 }
 
-export async function apiGet(path) {
+export async function apiGet(path, { accessToken } = {}) {
   const response = await fetch(`${BASE_URL}${path}`, {
-    headers: getAuthHeaders()
+    headers: getAuthHeaders(accessToken)
   });
   return parseResponse(response);
 }
 
-export async function apiPost(path, body) {
+export async function apiPost(path, body, { accessToken } = {}) {
   const response = await fetch(`${BASE_URL}${path}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+    headers: { "Content-Type": "application/json", ...getAuthHeaders(accessToken) },
     body: JSON.stringify(body)
   });
   return parseResponse(response);
 }
 
-export async function apiPostForm(path, formData) {
+export async function apiPostForm(path, formData, { accessToken } = {}) {
   const response = await fetch(`${BASE_URL}${path}`, {
     method: "POST",
-    headers: getAuthHeaders(),
+    headers: getAuthHeaders(accessToken),
     body: formData
   });
   return parseResponse(response);
 }
 
-export async function apiPatch(path, body) {
+export async function apiPatch(path, body, { accessToken } = {}) {
   const response = await fetch(`${BASE_URL}${path}`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+    headers: { "Content-Type": "application/json", ...getAuthHeaders(accessToken) },
     body: JSON.stringify(body)
   });
   return parseResponse(response);
 }
 
-export async function apiDelete(path, body) {
+export async function apiDelete(path, body, { accessToken } = {}) {
   const response = await fetch(`${BASE_URL}${path}`, {
     method: "DELETE",
-    headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+    headers: { "Content-Type": "application/json", ...getAuthHeaders(accessToken) },
     body: JSON.stringify(body ?? {})
   });
   return parseResponse(response);

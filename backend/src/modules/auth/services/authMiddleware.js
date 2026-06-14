@@ -21,7 +21,7 @@ export async function requireHadesAuth(req, { supabaseAuth } = {}) {
   }
 
   const userId = user.id;
-  const tenantId = user.app_metadata?.tenant_id || userId;
+  const tenantId = user.tenantId || user.app_metadata?.tenant_id || userId;
 
   return {
     userId,

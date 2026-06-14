@@ -76,11 +76,13 @@ export async function verifySupabaseSession(
   });
 
   if (!response?.ok) {
+    console.warn(`[auth] Supabase session verification failed: ${response?.status} ${response?.statusText}`);
     return null;
   }
 
   const user = await response.json();
   if (!user?.id) {
+    console.warn("[auth] Supabase response missing user.id");
     return null;
   }
 
@@ -90,6 +92,7 @@ export async function verifySupabaseSession(
     "discord";
 
   return {
+    id: user.id,
     userId: user.id,
     tenantId: buildTenantId(user.id),
     email: typeof user.email === "string" ? user.email : null,

@@ -1,14 +1,14 @@
 {
   "hardLimit": 40000,
-  "currentUsage": 35000,
-  "remaining": 5000,
+  "currentUsage": 0,
+  "remaining": 40000,
   "warningAt": 32000,
   "compactAt": 36000,
   "stopAt": 39000,
   "lastCompactedAt": null,
   "compactionStrategy": "summarize completed work, preserve current phase, target files, failing tests, blockers",
   "sessionStart": "2026-06-13T19:38:41.101+00:00",
-  "sessionEnd": "2026-06-13T22:31:12.782+00:00",
+  "sessionEnd": "2026-06-14T13:10:48.704+00:00",
   "history": [
     {
       "endedAt": "2026-06-12T16:33:56.160+00:00",
@@ -51,6 +51,48 @@
       "peakUsage": 35000,
       "reason": "archive_session",
       "slug": "multi-user-auth-tdd"
+    },
+    {
+      "endedAt": "2026-06-13T23:20:16.165+00:00",
+      "peakUsage": 35000,
+      "reason": "archive_session",
+      "slug": "wire-auth-isolation"
+    },
+    {
+      "endedAt": "2026-06-14T01:28:53.292+00:00",
+      "peakUsage": 35000,
+      "reason": "archive_session",
+      "slug": "wire-supabase-chat-scoped-repos"
+    },
+    {
+      "endedAt": "2026-06-14T02:23:45.078+00:00",
+      "peakUsage": 38000,
+      "reason": "archive_session",
+      "slug": "telegram-crypto-frontend-auth-supabase-ops"
+    },
+    {
+      "endedAt": "2026-06-14T02:49:54.118+00:00",
+      "peakUsage": 12936,
+      "reason": "archive_session",
+      "slug": "telegram-setup-card-frontend"
+    },
+    {
+      "endedAt": "2026-06-14T02:56:24.477+00:00",
+      "peakUsage": 2348,
+      "reason": "archive_session",
+      "slug": "telegram-socials-layout-fix"
+    },
+    {
+      "endedAt": "2026-06-14T03:02:43.811+00:00",
+      "peakUsage": 4543,
+      "reason": "archive_session",
+      "slug": "fix-frontend-api-auth-wiring"
+    },
+    {
+      "endedAt": "2026-06-14T13:10:48.704+00:00",
+      "peakUsage": 0,
+      "reason": "archive_session",
+      "slug": "chat-cards-pending-voice"
     }
   ]
 }

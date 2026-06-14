@@ -226,7 +226,7 @@ export function createInitialMessages() {
       id: "welcome-assistant",
       role: "assistant",
       content:
-        "Tell me what kind of minion you want. You can say it directly, like: “I want a command to send cat memes in Discord.”",
+        "Hades is listening. Speak, ask, or choose a door.",
       status: "completed"
     }
   ];

@@ -104,6 +104,23 @@ describe("telegramConnectionRepository", () => {
     assert.equal(record.status, "token_invalid");
   });
 
+  test("fails safely when crypto dependency is missing", async () => {
+    const mod = await loadRepo();
+    const unsafeRepo = mod.createTelegramConnectionRepository({ storage: "memory", crypto: null });
+
+    await assert.rejects(
+      unsafeRepo.createOrUpdate({
+        userId: "user_a",
+        tenantId: "tenant_a",
+        telegramUserId: "tg_123",
+        botToken: "123456:SECRET",
+        botUsername: "hades_bot",
+        status: "connected",
+      }),
+      (err) => err.code === "missing_crypto"
+    );
+  });
+
   test("does not return User B connection for User A", async () => {
     await repo.createOrUpdate({
       userId: "user_b",

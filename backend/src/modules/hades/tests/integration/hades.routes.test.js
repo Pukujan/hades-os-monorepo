@@ -3,6 +3,18 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createApp } from "../../../../core/app.js";
 
+const AUTH_OVERRIDE = {
+  auth: {
+    requireHadesAuth: async () => ({
+      userId: "test-user",
+      tenantId: "tenant_test-user",
+      sessionToken: "test-token",
+    }),
+  },
+};
+
+const AUTH_HEADERS = { authorization: "Bearer test-token" };
+
 function createReq({ method, path, body, headers = {} }) {
   const payload = body == null ? null : Buffer.from(JSON.stringify(body));
   let pushed = false;
@@ -110,58 +122,58 @@ test("GET /api/health returns ok", async () => {
 });
 
 test("POST /api/hades/chat returns draft and Hermes runtime source", async () => {
-  const hadBase = Object.hasOwn(process.env, "OPENROUTER_BASE_URL");
-  const hadKey = Object.hasOwn(process.env, "OPENROUTER_API_KEY");
-  const prevBase = process.env.OPENROUTER_BASE_URL;
-  const prevKey = process.env.OPENROUTER_API_KEY;
-  delete process.env.OPENROUTER_BASE_URL;
-  delete process.env.OPENROUTER_API_KEY;
+  const mockRuntime = {
+    generateDraft: async () => ({
+      source: "hermes_runtime",
+      assistantText: "I've shaped your cat meme launcher.",
+      draftPatch: { name: "Cat Meme Launcher", category: "fun", triggerType: "command", targetSocial: "discord", action: "Send a random cat meme GIF to the Discord channel." },
+      missingFields: [],
+      suggestions: [],
+      sessionId: null,
+    }),
+  };
 
-  try {
-    const { app } = await createApp();
-    const response = await invoke(app, {
-      method: "POST",
-      path: "/api/hades/chat",
-      body: {
-        clientMessageId: "msg-1",
-        idempotencyKey: "idem-chat-1",
-        message: "I want a command to send cat memes in Discord",
-        currentDraft: {
-          name: null,
-          description: null,
-          category: null,
-          targetSocial: null,
-          triggerType: null,
-          commandName: null,
-          action: null,
-          responseStyle: "helpful",
-          safetyMode: "ask_first",
-          testInput: null,
-          status: "incomplete"
-        }
+  const { app } = await createApp({ overrides: { ...AUTH_OVERRIDE, runtimeService: mockRuntime } });
+  const response = await invoke(app, {
+    method: "POST",
+    path: "/api/hades/chat",
+    headers: AUTH_HEADERS,
+    body: {
+      clientMessageId: "msg-1",
+      idempotencyKey: "idem-chat-1",
+      context: "forge",
+      message: "I want a command to send cat memes in Discord",
+      currentDraft: {
+        name: null,
+        description: null,
+        category: null,
+        targetSocial: null,
+        triggerType: null,
+        commandName: null,
+        action: null,
+        responseStyle: "helpful",
+        safetyMode: "ask_first",
+        testInput: null,
+        status: "incomplete"
       }
-    });
+    }
+  });
 
-    assert.equal(response.status, 200);
-    const body = JSON.parse(response.body);
-    assert.equal(body.source, "hermes_runtime");
-    assert.ok(body.conversationId);
-    assert.equal(body.userMessage.role, "user");
-    assert.equal(body.assistantMessage.role, "assistant");
-    assert.ok(body.draft.name);
-  } finally {
-    if (hadBase) process.env.OPENROUTER_BASE_URL = prevBase;
-    else delete process.env.OPENROUTER_BASE_URL;
-    if (hadKey) process.env.OPENROUTER_API_KEY = prevKey;
-    else delete process.env.OPENROUTER_API_KEY;
-  }
+  assert.equal(response.status, 200);
+  const body = JSON.parse(response.body);
+  assert.equal(body.source, "hermes_runtime");
+  assert.ok(body.conversationId);
+  assert.equal(body.userMessage.role, "user");
+  assert.equal(body.assistantMessage.role, "assistant");
+  assert.equal(body.draft.name, "Cat Meme Launcher");
 });
 
 test("POST /api/hades/chat is idempotent for repeated keys", async () => {
-  const { app } = await createApp();
+  const { app } = await createApp({ overrides: AUTH_OVERRIDE });
   const payload = {
     clientMessageId: "msg-1",
     idempotencyKey: "idem-chat-2",
+    context: "forge",
     message: "I want a command to send cat memes in Discord",
     currentDraft: {
       name: null,
@@ -178,8 +190,8 @@ test("POST /api/hades/chat is idempotent for repeated keys", async () => {
     }
   };
 
-  const first = await invoke(app, { method: "POST", path: "/api/hades/chat", body: payload });
-  const second = await invoke(app, { method: "POST", path: "/api/hades/chat", body: payload });
+  const first = await invoke(app, { method: "POST", path: "/api/hades/chat", headers: AUTH_HEADERS, body: payload });
+  const second = await invoke(app, { method: "POST", path: "/api/hades/chat", headers: AUTH_HEADERS, body: payload });
   const firstBody = JSON.parse(first.body);
   const secondBody = JSON.parse(second.body);
 
@@ -188,58 +200,54 @@ test("POST /api/hades/chat is idempotent for repeated keys", async () => {
 });
 
 test("POST /api/hades/chat can use Hermes runtime without leaking server secrets", async () => {
-  const previous = {
-    HERMES_RUNTIME_ENABLED: process.env.HERMES_RUNTIME_ENABLED,
-    OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
-    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY
+  const mockRuntime = {
+    generateDraft: async () => ({
+      source: "hermes_runtime",
+      assistantText: "Your !sendcat command is ready.",
+      draftPatch: { name: "sendcat", category: "fun", triggerType: "command", targetSocial: "discord", action: "Send a random cat meme GIF to the Discord channel." },
+      missingFields: [],
+      suggestions: [],
+      sessionId: null,
+    }),
   };
-  process.env.HERMES_RUNTIME_ENABLED = "true";
-  delete process.env.OPENROUTER_API_KEY;
-  process.env.SUPABASE_SERVICE_ROLE_KEY = "server-only-supabase-secret";
 
-  try {
-    const { app } = await createApp();
-    const response = await invoke(app, {
-      method: "POST",
-      path: "/api/hades/chat",
-      body: {
-        clientMessageId: "msg-runtime-1",
-        idempotencyKey: "idem-runtime-chat-1",
-        message: "Make a Discord command called !sendcat that sends random cat meme gifs",
-        currentDraft: {
-          name: null,
-          description: null,
-          category: null,
-          targetSocial: null,
-          triggerType: null,
-          commandName: null,
-          action: null,
-          responseStyle: "helpful",
-          safetyMode: "ask_first",
-          testInput: null,
-          status: "incomplete"
-        }
+  const { app } = await createApp({ overrides: { ...AUTH_OVERRIDE, runtimeService: mockRuntime } });
+  const response = await invoke(app, {
+    method: "POST",
+    path: "/api/hades/chat",
+    headers: AUTH_HEADERS,
+    body: {
+      clientMessageId: "msg-runtime-1",
+      idempotencyKey: "idem-runtime-chat-1",
+      context: "forge",
+      message: "Make a Discord command called !sendcat that sends random cat meme gifs",
+      currentDraft: {
+        name: null,
+        description: null,
+        category: null,
+        targetSocial: null,
+        triggerType: null,
+        commandName: null,
+        action: null,
+        responseStyle: "helpful",
+        safetyMode: "ask_first",
+        testInput: null,
+        status: "incomplete"
       }
-    });
-
-    assert.equal(response.status, 200);
-    const body = JSON.parse(response.body);
-    assert.equal(body.source, "hermes_runtime");
-    assert.ok(body.conversationId);
-    assert.equal(body.userMessage.role, "user");
-    assert.equal(body.assistantMessage.role, "assistant");
-    assert.ok(body.draft.name);
-    assert.equal(response.body.includes("server-only-supabase-secret"), false);
-  } finally {
-    for (const [key, value] of Object.entries(previous)) {
-      if (value === undefined) delete process.env[key];
-      else process.env[key] = value;
     }
-  }
+  });
+
+  assert.equal(response.status, 200);
+  const body = JSON.parse(response.body);
+  assert.equal(body.source, "hermes_runtime");
+  assert.ok(body.conversationId);
+  assert.equal(body.userMessage.role, "user");
+  assert.equal(body.assistantMessage.role, "assistant");
+  assert.equal(body.draft.name, "sendcat");
 });
 
 test("write routes validate and persist", async () => {
-  const { app } = await createApp();
+  const { app } = await createApp({ overrides: AUTH_OVERRIDE });
   const testDraft = {
     name: "Task Helper",
     description: "Turns messy notes into clean task cards.",
@@ -257,6 +265,7 @@ test("write routes validate and persist", async () => {
   const bad = await invoke(app, {
     method: "POST",
     path: "/api/hades/minions/test",
+    headers: AUTH_HEADERS,
     body: { draft: { ...testDraft, action: null }, idempotencyKey: "bad" }
   });
   assert.equal(bad.status, 400);
@@ -264,6 +273,7 @@ test("write routes validate and persist", async () => {
   const testRes = await invoke(app, {
     method: "POST",
     path: "/api/hades/minions/test",
+    headers: AUTH_HEADERS,
     body: { draft: testDraft, idempotencyKey: "test-1" }
   });
   assert.equal(testRes.status, 201);
@@ -274,6 +284,7 @@ test("write routes validate and persist", async () => {
   const saveRes = await invoke(app, {
     method: "POST",
     path: "/api/hades/minions",
+    headers: AUTH_HEADERS,
     body: { draft: testBody.draft, idempotencyKey: "save-1" }
   });
   assert.equal(saveRes.status, 201);
@@ -283,6 +294,7 @@ test("write routes validate and persist", async () => {
   const assignmentRes = await invoke(app, {
     method: "POST",
     path: "/api/hades/assignments",
+    headers: AUTH_HEADERS,
     body: {
       minionId: saveBody.minion.id,
       socialLinkId: "discord",

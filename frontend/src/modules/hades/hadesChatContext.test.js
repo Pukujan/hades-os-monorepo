@@ -1,12 +1,14 @@
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
 
+const TEST_TOKEN = "test-access-token";
+
 describe("frontend chat context", () => {
   test("postHadesChat forwards context field in POST body", async () => {
     const calls = [];
     const originalFetch = global.fetch;
     global.fetch = async (url, options) => {
-      calls.push({ url, body: JSON.parse(options.body) });
+      calls.push({ url, headers: options.headers, body: JSON.parse(options.body) });
       return new Response(JSON.stringify({ ok: true }), {
         status: 200,
         headers: { "Content-Type": "application/json" },
@@ -21,9 +23,10 @@ describe("frontend chat context", () => {
         idempotencyKey: "idem-ctx-1",
         message: "create a task minion",
         context: "forge",
-      });
+      }, TEST_TOKEN);
 
       assert.equal(calls.length, 1);
+      assert.equal(calls[0].headers.authorization, `Bearer ${TEST_TOKEN}`);
       assert.equal(
         calls[0].body.context,
         "forge",
@@ -38,7 +41,7 @@ describe("frontend chat context", () => {
     const calls = [];
     const originalFetch = global.fetch;
     global.fetch = async (url, options) => {
-      calls.push({ body: JSON.parse(options.body) });
+      calls.push({ headers: options.headers, body: JSON.parse(options.body) });
       return new Response(JSON.stringify({ ok: true }), {
         status: 200,
         headers: { "Content-Type": "application/json" },
@@ -52,9 +55,10 @@ describe("frontend chat context", () => {
         clientMessageId: "msg-noctx-1",
         idempotencyKey: "idem-noctx-1",
         message: "hello",
-      });
+      }, TEST_TOKEN);
 
       assert.equal(calls.length, 1);
+      assert.equal(calls[0].headers.authorization, `Bearer ${TEST_TOKEN}`);
       assert.equal(calls[0].body.message, "hello");
       assert.equal(calls[0].body.context, undefined, "context should be optional");
     } finally {

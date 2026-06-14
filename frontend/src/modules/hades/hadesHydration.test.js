@@ -1,11 +1,13 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
+const TEST_TOKEN = "test-access-token";
+
 test("bootstrap api calls the backend hydration route", async () => {
   const calls = [];
   const originalFetch = global.fetch;
-  global.fetch = async (url) => {
-    calls.push(url);
+  global.fetch = async (url, options) => {
+    calls.push({ url, headers: options.headers });
     return new Response(
       JSON.stringify({
         userId: "local-user",
@@ -27,8 +29,9 @@ test("bootstrap api calls the backend hydration route", async () => {
 
   try {
     const { getHadesBootstrap } = await import("./hadesApi.js");
-    await getHadesBootstrap();
-    assert.equal(calls[0].endsWith("/api/hades/bootstrap"), true);
+    await getHadesBootstrap(TEST_TOKEN);
+    assert.equal(calls[0].url.endsWith("/api/hades/bootstrap"), true);
+    assert.equal(calls[0].headers.authorization, `Bearer ${TEST_TOKEN}`);
   } finally {
     global.fetch = originalFetch;
   }
@@ -61,4 +64,3 @@ test("bootstrap mapper preserves backend state and fills safe defaults", async (
   assert.ok(fallback.minions.length > 0);
   assert.equal(fallback.draft.status, "incomplete");
 });
-

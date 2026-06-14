@@ -1,5 +1,8 @@
 import { createEmptyDraft, missingDraftFields, VALID_CATEGORIES, VALID_TARGET_SOCIALS, VALID_TRIGGER_TYPES } from "../data.js";
 import { sanitizeAssistantText } from "../parser.js";
+import { guardGeneralChatScope } from "./chatModeGuard.js";
+import { normalizeChatActions } from "./chatActions.js";
+import { normalizeChatCards } from "./chatCards.js";
 
 function isValidEnum(value, allowed) {
   return value == null || allowed.includes(value);
@@ -22,16 +25,48 @@ function ensureRuntime(hermesRuntime) {
   return hermesRuntime;
 }
 
+function wrapGeneralResult(result) {
+  const rawActions = Array.isArray(result.actions) ? result.actions : [];
+  const normalized = normalizeChatActions(rawActions);
+  const cards = normalizeChatCards(result.cards);
+  const response = {
+    reply: result.assistantText || result.reply || "",
+    actions: normalized,
+  };
+  const guarded = guardGeneralChatScope(response);
+  return {
+    assistantMessage: {
+      role: "assistant",
+      content: guarded.reply,
+      status: "completed",
+      suggestions: [],
+      actions: Array.isArray(guarded.actions) ? guarded.actions : [],
+    },
+    cards,
+    draft: createEmptyDraft(),
+    missingFields: [],
+    suggestions: [],
+    source: result.source || "hermes_runtime",
+    sessionId: result.sessionId || null,
+    guard: guarded.guard || null,
+  };
+}
+
 export function createHermesService({ hermesRuntime = null } = {}) {
-  async function buildResponse({ userId = "local-user", conversationId, message, currentDraft = createEmptyDraft(), context = "forge" }) {
+  async function buildResponse({ userId = "local-user", conversationId, message, messages = [], currentDraft = createEmptyDraft(), context = "general" }) {
     const runtime = ensureRuntime(hermesRuntime);
     const result = await runtime.generateDraft({
       userId,
       conversationId,
       message,
+      messages,
       currentDraft,
       context
     });
+
+    if (context === "general" || context === "minions") {
+      return wrapGeneralResult(result);
+    }
 
     if (
       !isValidEnum(result?.draftPatch?.category, VALID_CATEGORIES) ||

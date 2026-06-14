@@ -1,6 +1,6 @@
 # MEMORY.md - Persistent Context
 
-**Last updated:** 2026-06-13
+**Last updated:** 2026-06-14
 **Branch:** `codex/issue-1-hermes-discord-minion-runtime`
 **Latest commit:** `0cd071f`
 **Active module:** `control-platform`
@@ -29,20 +29,11 @@ Hades OS — multi-user auth isolation for shared Hermes runtime. Backend owns i
 | Frontend | `implementing` |
 | Started | `2026-06-13T21:00:12.266+00:00` |
 
-### In Progress
-- [ ] Implement multi-user auth + Hermes isolation via TDD (14 test files, ~60+ tests)
-
 ### Next
-- Phase 1: auth middleware — requireHadesAuth() (6 tests)
-- Phase 2: tenant-scoped repositories (6 files, 5 tests each)
-- Phase 3: social connection isolation — verifySocialAccount (8 tests)
-- Phase 4: Telegram token encryption/decryption
-- Phase 5: Hermes scoped context builder (8 tests)
-- Phase 6: runtime trigger isolation (8 tests)
-- Phase 7: Hermes output validator (7 tests)
-- Phase 8: execution logs (7 tests)
-- Phase 9: cross-user regression tests (10 tests)
-- Phase 10: frontend auth/state safety (10 tests)
+- Create Supabase tables from migration SQL 001_hades_tables.sql in production Supabase project
+- Deploy: set SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, ENCRYPTION_KEY env vars
+- Run ops schema tests against production Supabase
+- Deploy: set ENCRYPTION_KEY env var for AES-256-GCM token encryption
 
 ---
 
@@ -79,7 +70,8 @@ Session start: `None`
 ## SESSION ARCHIVES
 
 Index: `additional-modules/work-log/sessions/INDEX.md`
-**Active:** `ses_2026-06-13-wire-hades-context-frontend`
+- `2026-06-14-chat-cards-pending-voice`
+**Active:** `ses_2026-06-14-chat-cards-pending-voice`
 
 ---
 

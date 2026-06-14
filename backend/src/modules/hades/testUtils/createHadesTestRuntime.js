@@ -12,7 +12,13 @@ export async function createHadesTestRuntime() {
   const minions = createMinionRepository({ storage: "memory" });
   const assignments = createAssignmentRepository({ storage: "memory" });
   const conversations = createConversationRepository({ storage: "memory" });
-  const telegramConnections = createTelegramConnectionRepository({ storage: "memory", crypto: null });
+  const telegramConnections = createTelegramConnectionRepository({
+    storage: "memory",
+    crypto: {
+      encrypt: (value) => `encrypted:${value}`,
+      decrypt: (value) => value.replace("encrypted:", ""),
+    },
+  });
   const discordConnections = createDiscordConnectionRepository({ storage: "memory" });
   const executions = createAgentExecutionRepository({ storage: "memory" });
 

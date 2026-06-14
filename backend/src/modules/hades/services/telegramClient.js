@@ -42,5 +42,10 @@ export async function createTelegramClient({ botToken, api } = {}) {
     return result.result === true;
   }
 
-  return { sendMessage, setWebhook };
+  async function getMe() {
+    const result = await httpClient.post("getMe", {});
+    return result.result || result;
+  }
+
+  return { sendMessage, setWebhook, getMe };
 }

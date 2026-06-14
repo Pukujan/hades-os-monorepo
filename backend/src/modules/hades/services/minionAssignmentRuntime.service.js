@@ -20,7 +20,8 @@ export function createMinionAssignmentRuntime({
   verifySocialAccount,
   repository = {},
   hermesRuntime,
-  socialClient
+  socialClient,
+  scopedRepos
 } = {}) {
   async function handleSocialTrigger({
     provider,
@@ -36,12 +37,27 @@ export function createMinionAssignmentRuntime({
       accountId
     });
 
-    if (!session) {
-      throw new Error("Social account is not connected or unauthenticated");
+    if (!session || session.ok === false) {
+      throw Object.assign(
+        new Error(session?.code === "unknown_social_account" ? "Social account not found" : "Social account is not connected or unauthenticated"),
+        { code: session?.code || "unauthenticated", status: session?.code === "unknown_social_account" ? 404 : 401 }
+      );
     }
 
     const commandName = triggerType === "schedule" ? null : extractCommandName(content);
-    const assignment = await ensureFunction(repository?.findActiveAssignment, "Active assignment lookup")({
+
+    const activeAssignment = scopedRepos?.assignments
+      ? await scopedRepos.assignments.findActiveAssignment({
+          userId: session.userId,
+          tenantId: session.tenantId,
+          provider,
+          channelId,
+          commandName,
+          triggerType
+        })
+      : null;
+
+    const assignment = activeAssignment || await ensureFunction(repository?.findActiveAssignment, "Active assignment lookup")({
       userId: session.userId,
       tenantId: session.tenantId,
       provider,
@@ -54,7 +70,12 @@ export function createMinionAssignmentRuntime({
       return { status: "unassigned", reason: "no_active_assignment" };
     }
 
-    const minion = await ensureFunction(repository?.getMinion, "Minion lookup")(assignment.minionId);
+    const minion = await (async () => {
+      if (scopedRepos?.minions?.findById) {
+        return scopedRepos.minions.findById({ id: assignment.minion_id || assignment.minionId, userId: session.userId, tenantId: session.tenantId });
+      }
+      return ensureFunction(repository?.getMinion, "Minion lookup")(assignment.minionId);
+    })();
     if (!minion) {
       return { status: "unassigned", reason: "missing_minion" };
     }
