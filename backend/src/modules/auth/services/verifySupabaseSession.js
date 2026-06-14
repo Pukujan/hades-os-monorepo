@@ -43,10 +43,6 @@ function extractDiscordAccountId(user) {
   );
 }
 
-function buildTenantId(userId) {
-  return `tenant_${userId}`;
-}
-
 export async function verifySupabaseSession(
   headers,
   {
@@ -94,7 +90,7 @@ export async function verifySupabaseSession(
   return {
     id: user.id,
     userId: user.id,
-    tenantId: buildTenantId(user.id),
+    tenantId: user.id,
     email: typeof user.email === "string" ? user.email : null,
     provider,
     discordAccountId: extractDiscordAccountId(user),

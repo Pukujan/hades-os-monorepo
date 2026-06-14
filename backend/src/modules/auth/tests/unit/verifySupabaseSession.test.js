@@ -47,7 +47,7 @@ test("verifySupabaseSession calls Supabase user endpoint with bearer token", asy
   assert.deepEqual(session, {
     id: "user_123",
     userId: "user_123",
-    tenantId: "tenant_user_123",
+    tenantId: "user_123",
     email: "user@example.com",
     provider: "discord",
     discordAccountId: "discord_456",
@@ -86,7 +86,7 @@ test("verifySupabaseSession accepts sb-access-token cookies", async () => {
   assert.deepEqual(session, {
     id: "user_abc",
     userId: "user_abc",
-    tenantId: "tenant_user_abc",
+    tenantId: "user_abc",
     email: "user@site.com",
     provider: "discord",
     discordAccountId: null,

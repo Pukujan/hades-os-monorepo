@@ -55,5 +55,5 @@ test("full auth chain: valid Supabase session can access protected route", async
     `Expected 200 from protected route with valid JWT, got ${res.status} ${res.body}`);
   const body = JSON.parse(res.body);
   assert.equal(body.userId, "user_42");
-  assert.equal(body.tenantId, "tenant_user_42");
+  assert.equal(body.tenantId, "user_42");
 });

@@ -13,7 +13,7 @@ test("attachAuthContext middleware writes verified context onto req", async () =
         assert.equal(headers.authorization, "Bearer valid-supabase-jwt");
         return {
           userId: "user_123",
-          tenantId: "tenant_user_123",
+          tenantId: "user_123",
           email: "user@example.com",
           provider: "discord",
           discordAccountId: "discord_456",
@@ -38,7 +38,7 @@ test("attachAuthContext middleware writes verified context onto req", async () =
   assert.deepEqual(JSON.parse(response.body), {
     authContext: {
       userId: "user_123",
-      tenantId: "tenant_user_123",
+      tenantId: "user_123",
       email: "user@example.com",
       provider: "discord",
       discordAccountId: "discord_456",

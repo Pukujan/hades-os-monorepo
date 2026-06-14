@@ -1,6 +1,6 @@
 import React from "react";
 import { useAuth } from "./AuthProvider.jsx";
-import { buildDiscordRedirectTo } from "./supabaseClient.js";
+import { signInWithEmail, signUpWithEmail, signInWithDiscord } from "./authClient.js";
 import { extractLoginTemplateParts } from "./loginTemplateParts.js";
 import loginTemplate from "./loginTemplate.html?raw";
 import "../styles/login.css";
@@ -116,21 +116,16 @@ export function LoginPage() {
       toggleSheet(false);
     };
 
-    const signInWithDiscord = async () => {
+    const handleDiscordSignIn = async () => {
       if (!supabase) {
         window.alert("Supabase auth is not configured yet.");
         return;
       }
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "discord",
-        options: {
-          redirectTo: buildDiscordRedirectTo()
-        }
-      });
+      const { error } = await signInWithDiscord(supabase);
       if (error) window.alert(error.message);
     };
 
-    const signInWithEmail = async () => {
+    const handleEmailSignIn = async () => {
       if (!supabase) {
         window.alert("Supabase auth is not configured yet.");
         return;
@@ -141,11 +136,11 @@ export function LoginPage() {
         window.alert("Enter an email and password first.");
         return;
       }
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { error } = await signInWithEmail(supabase, email, password);
       if (error) window.alert(error.message);
     };
 
-    const signUpWithEmail = async (event) => {
+    const handleEmailSignUp = async (event) => {
       event.preventDefault();
       if (!supabase) {
         window.alert("Supabase auth is not configured yet.");
@@ -157,7 +152,7 @@ export function LoginPage() {
         window.alert("Enter an email and password first.");
         return;
       }
-      const { error } = await supabase.auth.signUp({ email, password });
+      const { error } = await signUpWithEmail(supabase, email, password);
       if (error) window.alert(error.message);
     };
 
@@ -182,7 +177,7 @@ export function LoginPage() {
     const onKeydown = (event) => {
       if (event.key === "Enter" && event.target && (event.target.matches('input[type="email"]') || event.target.matches('input[type="password"]'))) {
         event.preventDefault();
-        void signInWithEmail();
+        void handleEmailSignIn();
       }
     };
 
@@ -195,11 +190,11 @@ export function LoginPage() {
       if (event.target === sheet) closeThemeSheet();
     }, { signal: controller.signal });
     options.forEach((option) => option.addEventListener("click", () => setThemeChoice(option.dataset.themeChoice || "ember"), { signal: controller.signal }));
-    cta?.addEventListener("click", signInWithEmail, { signal: controller.signal });
-    discordButton?.addEventListener("click", signInWithDiscord, { signal: controller.signal });
+    cta?.addEventListener("click", handleEmailSignIn, { signal: controller.signal });
+    discordButton?.addEventListener("click", handleDiscordSignIn, { signal: controller.signal });
     comingSoonButtons.forEach((button) => button.addEventListener("click", () => window.alert("This provider will be enabled later."), { signal: controller.signal }));
     forgotLink?.addEventListener("click", resetPassword, { signal: controller.signal });
-    signupLink?.addEventListener("click", signUpWithEmail, { signal: controller.signal });
+    signupLink?.addEventListener("click", handleEmailSignUp, { signal: controller.signal });
     root.addEventListener("keydown", onKeydown, { signal: controller.signal });
 
     return () => {

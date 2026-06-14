@@ -53,7 +53,7 @@ describe("requireHadesAuth", () => {
     const result = await requireHadesAuth(req, { supabaseAuth });
 
     assert.equal(result.userId, "user_a");
-    assert.equal(result.tenantId, "tenant_a");
+    assert.equal(result.tenantId, "user_a");
     assert.equal(result.sessionToken, "valid-token");
   });
 
@@ -86,6 +86,6 @@ describe("requireHadesAuth", () => {
     const result = await requireHadesAuth(req, { supabaseAuth });
 
     assert.equal(result.userId, "user_a");
-    assert.equal(result.tenantId, "tenant_a");
+    assert.equal(result.tenantId, "user_a");
   });
 });

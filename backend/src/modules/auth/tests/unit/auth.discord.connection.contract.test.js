@@ -19,7 +19,7 @@ async function loadBridgeFactory() {
 function createVerifiedSession() {
   return {
     userId: "user_123",
-    tenantId: "tenant_personal_user_123",
+    tenantId: "user_123",
     email: "user@example.com",
     provider: "discord",
     discordAccountId: "discord_456",
@@ -73,7 +73,7 @@ test("Discord OAuth login can link a backend-verified Discord identity without e
     connected: true,
     provider: "discord",
     userId: "user_123",
-    tenantId: "tenant_personal_user_123",
+    tenantId: "user_123",
     discordAccountId: "discord_456",
     botConnected: true,
     botUserId: "bot_789"

@@ -6,7 +6,7 @@ import { createHermesJobFromRequest } from "../../../auth/services/createHermesJ
 function createSession() {
   return {
     userId: "user_123",
-    tenantId: "tenant_personal_user_123",
+    tenantId: "user_123",
     email: "user@example.com",
     provider: "discord",
     discordAccountId: "discord_456",
@@ -75,7 +75,7 @@ test("creates a Hermes job only after backend verifies a valid Supabase-authenti
   assert.equal(received.length, 1);
   assert.deepEqual(received[0], {
     userId: "user_123",
-    tenantId: "tenant_personal_user_123",
+    tenantId: "user_123",
     discordAccountId: "discord_456",
     authProvider: "discord",
     input: {
@@ -87,7 +87,7 @@ test("creates a Hermes job only after backend verifies a valid Supabase-authenti
 test("does not allow client-supplied userId, tenantId, or discordAccountId to override backend-verified identity", async () => {
   const verifiedSession = {
     userId: "real_user_123",
-    tenantId: "real_tenant_123",
+    tenantId: "real_user_123",
     email: "real@example.com",
     provider: "discord",
     discordAccountId: "real_discord_456",
@@ -119,7 +119,7 @@ test("does not allow client-supplied userId, tenantId, or discordAccountId to ov
   assert.equal(result.status, 202);
   assert.deepEqual(receivedContext, {
     userId: "real_user_123",
-    tenantId: "real_tenant_123",
+    tenantId: "real_user_123",
     discordAccountId: "real_discord_456",
     authProvider: "discord",
     input: {
