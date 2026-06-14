@@ -12,9 +12,9 @@ This monorepo deploys as **two independent targets**. Railway hosts `backend/` o
 - Entry: `npm run start` in `backend/`
 - Config: `backend/railway.toml`
 - Local env template: `backend/.env.example`
-- Railway must be configured with `rootDirectory = "backend"` so Railpack analyzes the correct `package.json`.
+- **Railway dashboard:** Set `Root Directory` to `backend/`. Without this, Railway builds from the repo root and skips backend deps.
 - Do not add `backend/vercel.json`.
-- Required Railway env vars: `NODE_ENV`, `PORT`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `OPENROUTER_API_KEY`, `OPENROUTER_MODEL`, `CORS_ORIGIN`.
+- Required Railway env vars: `NODE_ENV`, `PORT`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_ANON_KEY`, `OPENROUTER_API_KEY`, `OPENROUTER_MODEL`, `ENCRYPTION_KEY`, `HERMES_REQUIRED`, `CORS_ORIGIN`.
 
 ### Hermes CLI on Railway
 
@@ -35,12 +35,12 @@ Environment variables:
 - Set `VITE_API_BASE_URL` to your public API origin (no trailing slash).
 - Local env template: `frontend/.env.example` copied to `frontend/.env.local`
 - Do not add `frontend/railway.toml`.
-- Vercel project root must be `frontend/`.
+- **Vercel dashboard:** Set `Root Directory` to `frontend/`. Without this, Vercel builds from the repo root and runs `echo 'Build handled by Dockerfile'` instead of `vite build`.
 - Required Vercel env var: `VITE_API_BASE_URL`.
 
 ## Root package.json
 
-The repo root orchestrates lint, tests, and scaffolding scripts only. It must **not** define a `start` script.
+The repo root orchestrates lint, tests, and scaffolding scripts only. It defines `start` as a local-dev convenience (`npm --prefix backend run start`). Railway ignores root scripts entirely because `Root Directory` is set to `backend/`.
 
 ## Verify
 

@@ -1,8 +1,8 @@
 {
   "version": "1.0.0",
   "lastUpdated": "2026-06-14",
-  "branch": "codex/issue-1-hermes-discord-minion-runtime",
-  "latestCommit": "ce09854",
+  "branch": "master",
+  "latestCommit": "374b623",
   "projectDescription": "Hades OS — multi-user auth isolation for shared Hermes runtime. Backend owns identity, isolation, memory retrieval. Hermes is shared; user context is not shared.",
   "activeModule": {
     "slug": "control-platform",
@@ -225,7 +225,19 @@
         "Fix nonHermesFallback.test.js: hermesMode→hermesRequired, fs import, no assert.source",
         "All 321 backend + 121 frontend + 9 contract + 5 boundary tests pass, 0 failures",
         "Frontend builds clean (vite build)",
-        "npm run lint:architecture passes"
+        "npm run lint:architecture passes",
+        "Railway root fix: created root railway.toml with rootDirectory=backend, removed orphan [railway] from backend/railway.toml, added root package.json start/build scripts",
+        "Add ENCRYPTION_KEY to backend .env.example, committed + pushed to master (374b623)",
+        "Issue A: dotenv lockfile verified up-to-date (dotenv@16.6.1, already consistent)",
+        "Issue B2: Created backend/.gitignore with Hermes safety patterns (.env, .env.*, auth.json, .hermes_history, audio_cache, Python venvs)",
+        "Issue B2: Updated backend/.dockerignore (venv, .venv, .cache, *.so)",
+        "Issue C: HERMES_REQUIRED defaults to true in config/index.js — confirmed via code search",
+        "Issue C: Added HERMES_REQUIRED=true, ENCRYPTION_KEY, GIPHY_API_KEY, TELEGRAM_BOT_TOKEN to backend/.env.example",
+        "Issue E: Removed start from ROOT_FORBIDDEN_SCRIPTS in monorepoDeploy.contract.js (now [])",
+        "Issue D: Updated DEPLOY.md with Vercel/Railway Root Directory instructions and corrected required-env-vars lists",
+        "Added ENCRYPTION_KEY to contract envVars as required; GIPHY_API_KEY and TELEGRAM_BOT_TOKEN documented as optional",
+        "Fixed hermesRuntime.writableState.test.js: pass backendEnvPath to createHermesRuntimeService to avoid backend/.env interference",
+        "All 321 backend + 9 contract + 5 boundary tests pass, 0 failures"
       ],
       "inProgress": [],
       "next": []
@@ -333,8 +345,8 @@
     "lastPass": true
   },
   "sessions": {
-    "currentId": "ses_2026-06-14-railway-hermes-runtime-fix-greened-tests",
-    "lastSessionId": "ses_2026-06-14-context-budget-tooling-fixes",
+    "currentId": "ses_2026-06-14-deploy-readiness-audit-issues",
+    "lastSessionId": "ses_2026-06-14-railway-root-env-example-fix",
     "archive": [
       "2026-06-14-runtime-compaction-smoke-test",
       "2026-06-14-stabilize-agents-md-cache",

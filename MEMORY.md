@@ -1,8 +1,8 @@
 # MEMORY.md - Persistent Context
 
 **Last updated:** 2026-06-14
-**Branch:** `codex/issue-1-hermes-discord-minion-runtime`
-**Latest commit:** `ce09854`
+**Branch:** `master`
+**Latest commit:** `374b623`
 **Active module:** `control-platform`
 **State file:** `buildplan/agent_state.json`
 
@@ -69,7 +69,7 @@ Index: `additional-modules/work-log/sessions/INDEX.md`
 - `2026-06-14-context-budget-tooling-fixes`
 - `2026-06-14-minions-ui-port`
 - `2026-06-14-chat-cards-pending-voice`
-**Active:** `ses_2026-06-14-railway-hermes-runtime-fix-greened-tests`
+**Active:** `ses_2026-06-14-deploy-readiness-audit-issues`
 
 ---
 

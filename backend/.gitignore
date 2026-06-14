@@ -1,0 +1,17 @@
+# === Secrets & local config ===
+.env
+.env.*
+!.env.example
+
+# === Hermes local artifacts (auth, history, caches) ===
+auth.json
+.hermes_history
+audio_cache/
+.skills_prompt_snapshot.json
+
+# === Python venvs ===
+venv/
+.venv/
+__pycache__/
+*.pyc
+.cache/

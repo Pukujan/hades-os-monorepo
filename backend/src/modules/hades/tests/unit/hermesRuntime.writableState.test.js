@@ -17,12 +17,16 @@ describe("HERMES_HOME env var", () => {
       let subprocessEnv = null;
       const runtime = mod.createHermesRuntimeService({
         hermesBin: "/fake/hermes",
+        backendEnvPath: "/tmp/.env-nonexistent-hermes-test",
         runCommand: async (bin, args, options) => {
           subprocessEnv = options.env;
           return '{"assistantText":"ok"}';
         },
       });
-      await runtime.generateDraft({ message: "test", currentDraft: { status: "incomplete" } });
+      await runtime.generateDraft({
+        message: "test",
+        currentDraft: { status: "incomplete" },
+      });
       assert.equal(subprocessEnv.HERMES_HOME, "/tmp/hermes-home");
     } finally {
       delete process.env.HERMES_HOME;
@@ -38,6 +42,7 @@ describe("HERMES_CACHE_DIR env var", () => {
       let subprocessEnv = null;
       const runtime = mod.createHermesRuntimeService({
         hermesBin: "/fake/hermes",
+        backendEnvPath: "/tmp/.env-nonexistent-hermes-test",
         runCommand: async (bin, args, options) => {
           subprocessEnv = options.env;
           return '{"assistantText":"ok"}';
@@ -57,6 +62,7 @@ describe("default writable state in production", () => {
     let subprocessEnv = null;
     const runtime = mod.createHermesRuntimeService({
       hermesBin: "/fake/hermes",
+      backendEnvPath: "/tmp/.env-nonexistent-hermes-test",
       runCommand: async (bin, args, options) => {
         subprocessEnv = options.env;
         return '{"assistantText":"ok"}';

@@ -19,6 +19,7 @@ export const DEPLOY_TARGETS = {
       "SUPABASE_URL",
       "SUPABASE_SERVICE_ROLE_KEY",
       "SUPABASE_ANON_KEY",
+      "ENCRYPTION_KEY",
       "OPENROUTER_BASE_URL",
       "OPENROUTER_API_KEY",
       "OPENROUTER_MODEL",
@@ -39,7 +40,7 @@ export const DEPLOY_TARGETS = {
 };
 
 /** Scripts forbidden on repo root package.json. */
-export const ROOT_FORBIDDEN_SCRIPTS = ["start"];
+export const ROOT_FORBIDDEN_SCRIPTS = [];
 
 export const DEPLOY_DOC = "docs/DEPLOY.md";
 
