@@ -4,6 +4,3 @@ builder = "NIXPACKS"
 [deploy]
 startCommand = "npm run start"
 restartPolicyType = "ON_FAILURE"
-
-[railway]
-rootDirectory = "backend"
