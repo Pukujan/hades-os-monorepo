@@ -17,29 +17,13 @@ export async function loadSupabaseBrowserConfig({
   apiBaseUrl = import.meta?.env?.VITE_API_BASE_URL || "",
   envConfig = getSupabaseBrowserConfig()
 } = {}) {
-  if (typeof fetchImpl === "function") {
-    try {
-      const relativeResponse = await fetchImpl("/api/auth/browser-config", {
-        method: "GET",
-        headers: { accept: "application/json" }
-      });
-
-      if (relativeResponse?.ok) {
-        const runtimeConfig = await relativeResponse.json();
-        return {
-          supabaseUrl: runtimeConfig?.supabaseUrl || envConfig.supabaseUrl || "",
-          supabaseAnonKey: runtimeConfig?.supabaseAnonKey || envConfig.supabaseAnonKey || "",
-          appUrl: runtimeConfig?.appUrl || envConfig.appUrl || ""
-        };
-      }
-    } catch {
-      // Fall back to the explicit backend origin below.
-    }
+  if (typeof fetchImpl !== "function") {
+    return envConfig;
   }
 
   const normalizedApiBaseUrl = normalizeBaseUrl(apiBaseUrl);
 
-  if (normalizedApiBaseUrl && typeof fetchImpl === "function") {
+  if (normalizedApiBaseUrl) {
     try {
       const response = await fetchImpl(`${normalizedApiBaseUrl}/api/auth/browser-config`, {
         method: "GET",
@@ -55,8 +39,26 @@ export async function loadSupabaseBrowserConfig({
         };
       }
     } catch {
-      // Fall back to local env config below.
+      // Fall back to relative URL below.
     }
+  }
+
+  try {
+    const relativeResponse = await fetchImpl("/api/auth/browser-config", {
+      method: "GET",
+      headers: { accept: "application/json" }
+    });
+
+    if (relativeResponse?.ok) {
+      const runtimeConfig = await relativeResponse.json();
+      return {
+        supabaseUrl: runtimeConfig?.supabaseUrl || envConfig.supabaseUrl || "",
+        supabaseAnonKey: runtimeConfig?.supabaseAnonKey || envConfig.supabaseAnonKey || "",
+        appUrl: runtimeConfig?.appUrl || envConfig.appUrl || ""
+      };
+    }
+  } catch {
+    // Fall back to local env config below.
   }
 
   return envConfig;

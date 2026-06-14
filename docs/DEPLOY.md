@@ -40,7 +40,8 @@ Environment variables:
 - Set `VITE_API_BASE_URL` to your public API origin (no trailing slash).
 - Local env template: `frontend/.env.example` copied to `frontend/.env.local`
 - Do not add `frontend/railway.toml`.
-- **Vercel dashboard settings:**
+- Root `vercel.json` sets `rootDirectory: "frontend"` so Vercel treats `frontend/` as the project root.
+- **Vercel dashboard settings (optional if root vercel.json is present):**
   - `Root Directory`: `frontend`
   - `Framework Preset`: `Vite`
   - `Build Command`: `npm run build`

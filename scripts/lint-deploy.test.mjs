@@ -115,8 +115,10 @@ test("frontend npm ci && npm run build produces dist/", { skip: !isCI, timeout: 
 //   (all already green — config is correct for Vercel)
 // ===================================================================
 
-test("no root vercel.json exists — Vercel must deploy from frontend/", () => {
-  assert.equal(existsSync(join(repoRoot, "vercel.json")), false, "root vercel.json must not exist");
+test("root vercel.json sets rootDirectory to frontend", () => {
+  assert.equal(existsSync(join(repoRoot, "vercel.json")), true, "root vercel.json must exist");
+  const rootVercel = JSON.parse(readFileSync(join(repoRoot, "vercel.json"), "utf8"));
+  assert.equal(rootVercel.rootDirectory, "frontend", "root vercel.json must set rootDirectory to frontend");
 });
 
 test("frontend vercel.json has SPA rewrite to /index.html", () => {
