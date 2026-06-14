@@ -255,10 +255,21 @@
         "All 130 frontend + 321 backend + 9 contract + 5 boundary tests pass, 0 failures",
         "Production build clean + smoke test passes (Railway URL baked, no import.meta?.env in bundle)",
         "Gate passed (lint:architecture clean)",
-        "Committed and pushed (0ceb5ec)"
+        "Committed and pushed (0ceb5ec)",
+        "Fix Supabase persist 500 errors: createMessage() randomUUID + clientMessageId + created_at",
+        "Fix persistMsg to send only schema columns (no blind spread of app-layer fields)",
+        "Replace custom createId('msg')/createId('conv') with randomUUID() in conversationRepository",
+        "Add .vercel to .gitignore",
+        "Write handoff 012: App Login MVP + production routing + UUID persistence fix",
+        "Write dev-log pair 006: supabase-persist-fix (human + agent JSON)"
       ],
       "inProgress": [],
-      "next": []
+      "next": [
+        "Implement App Login MVP (email/password signup/login, Google OAuth, logout, protected routes, session restore)",
+        "Fix frontend API URL resolver for production chat routing to Railway",
+        "Fix backend tenant_id UUID mapping (remove tenant_<uuid> prefix)",
+        "Add Supabase dashboard configuration docs (Email + Google OAuth)"
+      ]
     }
   },
   "modules": {

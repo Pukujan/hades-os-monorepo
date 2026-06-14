@@ -1,8 +1,5 @@
+import { randomUUID } from "crypto";
 import { persistTable, readTableRows } from "./_supabase.js";
-
-function createId(prefix) {
-  return `${prefix}-${Math.random().toString(36).slice(2, 10)}`;
-}
 
 export function createConversationRepository({ storage = "memory", supabaseClient, tableName = "hades_conversations", messagesTableName = "hades_messages" } = {}) {
   const conversations = new Map();
@@ -46,7 +43,7 @@ export function createConversationRepository({ storage = "memory", supabaseClien
     await hydrate();
     const record = {
       ...data,
-      id: data.id || createId("conv"),
+      id: data.id || randomUUID(),
       user_id: userId,
       tenant_id: tenantId,
       context_type: contextType || data.context_type || "general",
@@ -80,7 +77,7 @@ export function createConversationRepository({ storage = "memory", supabaseClien
     }
     const record = {
       ...data,
-      id: data.id || createId("msg"),
+      id: data.id || randomUUID(),
       conversation_id: conversationId,
       user_id: userId,
       tenant_id: tenantId,
@@ -90,7 +87,15 @@ export function createConversationRepository({ storage = "memory", supabaseClien
     const msgs = messagesByConversation.get(conversationId) || [];
     msgs.push(record);
     messagesByConversation.set(conversationId, msgs);
-    await persistMsg(record);
+    await persistMsg({
+      id: record.id,
+      conversation_id: record.conversation_id,
+      user_id: record.user_id,
+      tenant_id: record.tenant_id,
+      role: record.role,
+      content: record.content,
+      created_at: record.created_at,
+    });
     return record;
   }
 

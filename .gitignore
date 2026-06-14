@@ -11,3 +11,4 @@ file-exchange/exports/consolidated-models.json
 !backend/.env.example
 !frontend/.env.example
 *.log
+.vercel

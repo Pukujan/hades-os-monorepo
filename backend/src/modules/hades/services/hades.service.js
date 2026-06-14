@@ -6,14 +6,15 @@ import { validateAssignmentRequest, validateChatRequest, validateSaveRequest, va
 
 function createMessage(role, content, extra = {}) {
   return {
-    id: extra.id || `msg-${randomUUID().slice(0, 8)}`,
+    id: randomUUID(),
     role,
     content,
     userId: extra.userId,
+    clientMessageId: extra.clientMessageId || null,
     status: extra.status || "completed",
     suggestions: extra.suggestions || [],
     actions: extra.actions || [],
-    createdAt: extra.createdAt || new Date().toISOString()
+    created_at: extra.created_at || new Date().toISOString()
   };
 }
 
@@ -90,7 +91,7 @@ export function createHadesService({ repository, scopedRepos, hermes, config = {
       ? await convRepo.addMessage({
           userId, tenantId,
           conversationId: conversation.id,
-          data: createMessage("user", payload.message, { id: payload.clientMessageId, status: "queued", userId }),
+          data: createMessage("user", payload.message, { clientMessageId: payload.clientMessageId, status: "queued", userId }),
           idempotencyKey: userKey,
         })
       : await repository.appendMessage({

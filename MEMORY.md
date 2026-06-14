@@ -29,6 +29,12 @@ Hades OS — multi-user auth isolation for shared Hermes runtime. Backend owns i
 | Frontend | `implementing` |
 | Started | `2026-06-13T21:00:12.266+00:00` |
 
+### Next
+- Implement App Login MVP (email/password signup/login, Google OAuth, logout, protected routes, session restore)
+- Fix frontend API URL resolver for production chat routing to Railway
+- Fix backend tenant_id UUID mapping (remove tenant_<uuid> prefix)
+- Add Supabase dashboard configuration docs (Email + Google OAuth)
+
 ---
 
 ## MODULE STATUS

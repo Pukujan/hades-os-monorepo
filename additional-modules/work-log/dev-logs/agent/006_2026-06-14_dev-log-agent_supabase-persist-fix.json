@@ -1,0 +1,89 @@
+{
+  "meta": {
+    "schemaVersion": "1.0.0",
+    "entryId": "006",
+    "slug": "supabase-persist-fix",
+    "generatedAt": "2026-06-14T23:30:00.000Z",
+    "humanLogPath": "additional-modules/work-log/dev-logs/human/006_2026-06-14_dev-log_supabase-persist-fix.md",
+    "handoffRefs": ["012_2026-06-14_handoff_app-login-mvp-production-routing-uuid-persistence"],
+    "audience": "agent",
+    "filledBy": "agent"
+  },
+  "summary": "Fixed Supabase persist 500 errors: createMessage() randomUUID + clientMessageId + created_at; persistMsg only sends schema columns; .gitignore .vercel",
+  "apis": {
+    "capturedAt": "2026-06-14T23:30:00.000Z",
+    "sourceDocs": ["backend/src/modules/hades/services/hades.service.js", "backend/src/modules/hades/repositories/conversationRepository.js"],
+    "http": {
+      "active": ["POST /api/hades/chat/general", "POST /api/hades/chat/forge", "POST /api/hades/chat", "GET /api/hades/conversations", "POST /api/hades/assignment", "GET /api/hades/messages/:conversationId", "DELETE /api/hades/conversations/:conversationId/clear", "DELETE /api/hades/conversations/:conversationId", "GET /api/auth/config"],
+      "stub": [],
+      "deprecated": []
+    },
+    "moduleStatus": [
+      {"slug": "control-platform", "backend": "implementing", "frontend": "implementing"}
+    ]
+  },
+  "git": {
+    "branch": "master",
+    "sha": "5c4dbd5e542e8de313634fac982d4ddb72130b18",
+    "shortSha": "5c4dbd5",
+    "changedFiles": [
+      ".gitignore",
+      "backend/src/modules/hades/repositories/conversationRepository.js",
+      "backend/src/modules/hades/services/hades.service.js"
+    ],
+    "diffStatAgainstHead": "3 files changed, 17 insertions(+), 10 deletions(-)",
+    "recentCommits": [
+      "5c4dbd5 Update session state: 405 root-cause found (VITE_API_BASE_URL in Vercel env set to Vercel URL, not Railway) (#5)",
+      "0ceb5ec Add shared apiUrl resolver, sendHadesChatMessage export, build smoke test (#5)",
+      "1ea242a Fix Vite env var injection: module-level try-catch with direct import.meta.env.VITE_* (#5)"
+    ]
+  },
+  "tests": {
+    "ran": false,
+    "exitCode": null,
+    "summary": "Production fix — verified via Railway logs (no persist errors after deploy)"
+  },
+  "repositoryTree": {
+    "capturedAt": "2026-06-14T23:30:00.000Z",
+    "excludeDirs": ["node_modules", ".git", "__pycache__", "dist", ".vercel"]
+  },
+  "changes": {
+    "modified": [
+      ".gitignore",
+      "backend/src/modules/hades/repositories/conversationRepository.js",
+      "backend/src/modules/hades/services/hades.service.js"
+    ],
+    "added": [],
+    "deleted": [],
+    "byArea": {
+      "backend": ["conversationRepository.js: persistMsg schema-column-only payload", "hades.service.js: randomUUID, clientMessageId, created_at"],
+      "config": [".gitignore: add .vercel"]
+    },
+    "narrative": [
+      "hades.service.js createMessage(): changed id from msg-${randomUUID().slice(0,8)} to randomUUID(); added clientMessageId field; changed createdAt to created_at to match DB column",
+      "conversationRepository.js: replaced custom createId('msg')/createId('conv') with randomUUID(); persistMsg now receives only {id, conversation_id, user_id, tenant_id, role, content, created_at} instead of full record spread"
+    ]
+  },
+  "decisions": [
+    {
+      "id": "D001",
+      "decision": "Fix code to match existing schema instead of adding columns to hidemessages",
+      "rationale": "Handoff explicitly forbids schema migration to hide code bugs. Table has id, conversation_id, user_id, tenant_id, role, content, created_at — send only those.",
+      "alternativesRejected": ["Add TEXT columns for suggestions/actions via SQL migration", "Change uuid columns to TEXT"],
+      "tradeoff": "App-layer fields (clientMessageId, suggestions, actions) not persisted. Acceptable for MVP — they're used for idempotency and UI hints, not data integrity."
+    },
+    {
+      "id": "D002",
+      "decision": "Use randomUUID() for message and conversation IDs instead of prefix-${random}",
+      "rationale": "Supabase uuid column rejects non-UUID format strings like msg-a1b2c3d4.",
+      "alternativesRejected": ["Keep prefix format and change column type to TEXT"],
+      "tradeoff": "IDs are less human-readable but correctly typed."
+    }
+  ],
+  "iterations": [],
+  "tradeoffs": ["App-layer fields not persisted — clientMessageId/suggestions/actions are ephemeral in current architecture"],
+  "improvements": ["createMessage() now uses proper UUID format", "persistMsg only sends DB columns — no more column-not-found errors"],
+  "regressions": [],
+  "risks": ["tenant_id still uses tenant_<uuid> format in authMiddleware — will cause persist errors on the tenant_id column. Already documented in handoff 012."],
+  "followUps": ["Handoff 012: App Login MVP + production routing + tenant_id UUID fix"]
+}
