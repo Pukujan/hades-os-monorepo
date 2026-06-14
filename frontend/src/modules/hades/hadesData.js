@@ -38,6 +38,7 @@ export const STARTER_MINIONS = [
     id: "cat-courier",
     avatar: "🔥",
     icon: "cat",
+    emoji: "🐱",
     name: "Cat Courier",
     description: "Manual summon · Discord + chat",
     category: "discord",
@@ -54,6 +55,7 @@ export const STARTER_MINIONS = [
     id: "price-imp",
     avatar: "🪙",
     icon: "shopping",
+    emoji: "🪙",
     name: "Price Imp",
     description: "Automatic · every 5 hours",
     category: "shopping",
@@ -70,6 +72,7 @@ export const STARTER_MINIONS = [
     id: "scroll-reader",
     avatar: "📜",
     icon: "chat",
+    emoji: "📜",
     name: "Scroll Reader",
     description: "Needs approval before sending",
     category: "chat",
@@ -86,6 +89,7 @@ export const STARTER_MINIONS = [
     id: "episode-watcher",
     avatar: "📺",
     icon: "sparkles",
+    emoji: "📺",
     name: "Episode Watcher",
     description: "Automatic · nightly scan",
     category: "watchlist",
@@ -102,6 +106,7 @@ export const STARTER_MINIONS = [
     id: "night-watch",
     avatar: "🌙",
     icon: "locked",
+    emoji: "🌙",
     name: "Night Watch",
     description: "Paused until reactivated",
     category: "topic watch",
@@ -118,6 +123,7 @@ export const STARTER_MINIONS = [
     id: "inbox-broom",
     avatar: "🧹",
     icon: "locked",
+    emoji: "🧹",
     name: "Inbox Broom",
     description: "Inactive · Gmail cleanup",
     category: "draft only",
@@ -184,6 +190,29 @@ export const SOCIAL_LINKS = [
     commandName: null
   }
 ];
+
+export function normalizeMinion(minion) {
+  if (!minion) return null;
+  const isMock = "destinationProvider" in minion || "triggerType" in minion;
+  const isStarter = "targetSocial" in minion && "destination" in minion && typeof minion.destination === "object";
+  const kind = minion.type === "auto" ? "auto" : minion.type === "manual" ? "manual" : "system";
+  return {
+    id: minion.id || "",
+    name: minion.name || "Unnamed",
+    title: minion.title || minion.description || "",
+    emoji: minion.emoji || "",
+    description: minion.description || "",
+    status: minion.slotIndex != null ? "active" : "inactive",
+    command: isMock ? (minion.command || "") : isStarter ? (minion.commandName || "") : "",
+    summon: isMock ? (minion.command || "") : isStarter ? (minion.commandName || "") : "",
+    destination: isMock ? (minion.destination || "") : isStarter ? (minion.destination?.channelName || formatSocialLabel(minion.targetSocial)) : "",
+    schedule: minion.interval || minion.schedule || (minion.triggerType === "automatic" ? "auto" : null),
+    kind,
+    preview: null,
+    logs: [],
+    technicalDetails: null,
+  };
+}
 
 export function createEmptyDraft() {
   return {

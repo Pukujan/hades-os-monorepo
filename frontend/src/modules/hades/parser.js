@@ -1,3 +1,10 @@
+const WRAPPER_TAG_RE = /<\/?(?:pastor|hades|persona|reply|message|assistant|system|think|thought)[^>]*>/gi;
+
+export function stripWrapperTags(text) {
+  if (!text) return "";
+  return String(text).replace(WRAPPER_TAG_RE, "").trim();
+}
+
 import { createEmptyDraft } from "./hadesData.js";
 
 const SOCIAL_PATTERNS = [
@@ -222,7 +229,7 @@ export function buildAssistantReply(result) {
 
   if (missing.length === 0) {
     return {
-      content: "Done — I drafted this minion. Want to test it?",
+      content: stripWrapperTags("Done — I drafted this minion. Want to test it?"),
       suggestions: [],
       status: "completed"
     };
@@ -230,7 +237,7 @@ export function buildAssistantReply(result) {
 
   if (missing.includes("command name")) {
     return {
-      content: "Nice - I can make that. What command should trigger it?",
+      content: stripWrapperTags("Nice - I can make that. What command should trigger it?"),
       suggestions: ["!catmeme", "!sendcat", "!catgif"],
       status: "completed"
     };
@@ -238,14 +245,14 @@ export function buildAssistantReply(result) {
 
   if (missing.includes("target social")) {
     return {
-      content: "Good idea. Where should this minion work first?",
+      content: stripWrapperTags("Good idea. Where should this minion work first?"),
       suggestions: ["Discord", "Telegram", "Private"],
       status: "completed"
     };
   }
 
   return {
-    content: `I still need: ${missing.join(", ")}.`,
+    content: stripWrapperTags(`I still need: ${missing.join(", ")}.`),
     suggestions: draft.triggerType === "command" ? ["!sendcat"] : [],
     status: "completed"
   };

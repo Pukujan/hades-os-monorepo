@@ -1,16 +1,38 @@
 export async function persistTable(client, name, mode, row) {
-  if (!client?.table) return;
-  const table = client.table(name);
-  if (mode === "upsert" && typeof table.upsert === "function") {
-    await table.upsert(row);
+  if (!client) return;
+  if (typeof client.from === "function") {
+    const table = client.from(name);
+    if (mode === "upsert") {
+      const { error } = await table.upsert(row);
+      if (error) throw new Error(`Supabase persist error (${name}): ${error.message}`);
+      return;
+    }
+    const { error } = await table.insert(row);
+    if (error) throw new Error(`Supabase persist error (${name}): ${error.message}`);
     return;
   }
-  if (typeof table.insert === "function") {
-    await table.insert(row);
+  if (typeof client.table === "function") {
+    const table = client.table(name);
+    if (mode === "upsert" && typeof table.upsert === "function") {
+      await table.upsert(row);
+      return;
+    }
+    if (typeof table.insert === "function") {
+      await table.insert(row);
+    }
   }
 }
 
-export function readTableRows(supabaseClient, tableName) {
-  const rows = supabaseClient?.tables?.[tableName];
-  return Array.isArray(rows) ? rows.map((r) => ({ ...r })) : [];
+export async function readTableRows(supabaseClient, tableName) {
+  if (!supabaseClient) return [];
+  if (typeof supabaseClient.from === "function") {
+    const { data, error } = await supabaseClient.from(tableName).select("*");
+    if (error) return [];
+    return data || [];
+  }
+  if (typeof supabaseClient.table === "function") {
+    const rows = supabaseClient?.tables?.[tableName];
+    return Array.isArray(rows) ? rows.map((r) => ({ ...r })) : [];
+  }
+  return [];
 }

@@ -45,6 +45,10 @@ export function createHadesRepository({ now = () => new Date().toISOString(), st
   }
 
   function readTableRows(tableName) {
+    if (!supabaseClient) return [];
+    if (typeof supabaseClient.from === "function") {
+      return [];
+    }
     const rows = supabaseClient?.tables?.[tableName];
     return Array.isArray(rows) ? rows.map((row) => clone(row)) : [];
   }
@@ -115,6 +119,16 @@ export function createHadesRepository({ now = () => new Date().toISOString(), st
   }
 
   async function persistTable(client, name, mode, row) {
+    if (!client) return;
+    if (typeof client.from === "function") {
+      const table = client.from(name);
+      if (mode === "upsert") {
+        await table.upsert(row);
+        return;
+      }
+      await table.insert(row);
+      return;
+    }
     if (!client?.table) return;
     const table = client.table(name);
     if (mode === "upsert" && typeof table.upsert === "function") {

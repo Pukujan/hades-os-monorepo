@@ -1,11 +1,11 @@
 import express from "express";
-import cors from "cors";
 import { loadModules } from "./module-loader.js";
 import { errorHandler } from "../shared/http/errors.js";
+import { createCorsMiddleware } from "../modules/hades/services/cors.js";
 
 export async function createApp({ overrides = {} } = {}) {
   const app = express();
-  app.use(cors());
+  app.use(createCorsMiddleware(process.env.CORS_ORIGIN));
   app.use(express.json({ limit: "10mb" }));
 
   const loadedModules = await loadModules(app, overrides);

@@ -8,10 +8,10 @@ export function createMinionRepository({ storage = "memory", supabaseClient, tab
   const minions = new Map();
   let hydrated = false;
 
-  function hydrate() {
+  async function hydrate() {
     if (storage !== "supabase" || hydrated) return;
     hydrated = true;
-    for (const row of readTableRows(supabaseClient, tableName)) {
+    for (const row of await readTableRows(supabaseClient, tableName)) {
       if (!row?.id) continue;
       minions.set(row.id, { ...row });
     }
@@ -24,7 +24,7 @@ export function createMinionRepository({ storage = "memory", supabaseClient, tab
   }
 
   async function create({ userId, tenantId, data }) {
-    hydrate();
+    await hydrate();
     const record = {
       ...data,
       id: data.id || createId("minion"),
@@ -39,7 +39,7 @@ export function createMinionRepository({ storage = "memory", supabaseClient, tab
   }
 
   async function findById({ id, userId, tenantId }) {
-    hydrate();
+    await hydrate();
     const record = minions.get(id) || null;
     if (!record) return null;
     if (record.user_id !== userId || record.tenant_id !== tenantId) return null;
@@ -47,14 +47,14 @@ export function createMinionRepository({ storage = "memory", supabaseClient, tab
   }
 
   async function listByUser({ userId, tenantId }) {
-    hydrate();
+    await hydrate();
     return [...minions.values()].filter(
       (m) => m.user_id === userId && m.tenant_id === tenantId
     );
   }
 
   async function update({ id, userId, tenantId, patch }) {
-    hydrate();
+    await hydrate();
     const record = minions.get(id) || null;
     if (!record) return null;
     if (record.user_id !== userId || record.tenant_id !== tenantId) return null;
@@ -65,7 +65,7 @@ export function createMinionRepository({ storage = "memory", supabaseClient, tab
   }
 
   async function remove({ id, userId, tenantId }) {
-    hydrate();
+    await hydrate();
     const record = minions.get(id) || null;
     if (!record) return false;
     if (record.user_id !== userId || record.tenant_id !== tenantId) return false;

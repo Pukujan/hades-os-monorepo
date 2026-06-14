@@ -68,7 +68,6 @@ test("GET /api/auth/browser-config returns only public auth config", async () =>
     assert.deepEqual(response.body, {
       supabaseUrl: "https://example.supabase.co",
       supabaseAnonKey: "sb_publishable_example",
-      appUrl: "https://hades.example"
     });
   } finally {
     process.env.SUPABASE_URL = previous.SUPABASE_URL;

@@ -6,11 +6,12 @@ function asyncRoute(handler) {
   };
 }
 
+const BROWSER_SAFE_KEYS = new Set(["supabaseUrl", "supabaseAnonKey"]);
+
 function pickPublicAuthConfig() {
   return {
     supabaseUrl: process.env.SUPABASE_URL || "",
     supabaseAnonKey: process.env.SUPABASE_ANON_KEY || "",
-    appUrl: process.env.APP_URL || process.env.CORS_ORIGIN || "http://localhost:5173"
   };
 }
 

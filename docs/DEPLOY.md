@@ -12,10 +12,21 @@ This monorepo deploys as **two independent targets**. Railway hosts `backend/` o
 - Entry: `npm run start` in `backend/`
 - Config: `backend/railway.toml`
 - Local env template: `backend/.env.example`
-- Hermes sync reads `backend/.env` as the shared source of truth for the backend app and Hermes CLI.
+- Railway must be configured with `rootDirectory = "backend"` so Railpack analyzes the correct `package.json`.
 - Do not add `backend/vercel.json`.
-- Railway service root must be `backend/`.
 - Required Railway env vars: `NODE_ENV`, `PORT`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `OPENROUTER_API_KEY`, `OPENROUTER_MODEL`, `CORS_ORIGIN`.
+
+### Hermes CLI on Railway
+
+Hermes is a Python CLI binary required at runtime. Two packaging strategies:
+
+1. **Railpack + Dockerfile** (recommended): Include a `backend/Dockerfile` that installs Hermes via `pip install hermes` or a pre-built binary, so it's available in the deploy image.
+2. **Pre-installed binary**: Set `HERMES_BIN_PATH` to a custom Hermes location if it ships with the base image.
+
+Environment variables:
+- `HERMES_BIN_PATH` — override Hermes binary location (optional; defaults to `PATH` lookup)
+- `HERMES_HOME` — writable directory for Hermes state (defaults to `/tmp/hades-hermes`)
+- `HERMES_REQUIRED` — set to `"true"` (default) to fail with 503 if Hermes is unavailable
 
 ## Frontend
 

@@ -8,10 +8,10 @@ export function createAssignmentRepository({ storage = "memory", supabaseClient,
   const assignments = new Map();
   let hydrated = false;
 
-  function hydrate() {
+  async function hydrate() {
     if (storage !== "supabase" || hydrated) return;
     hydrated = true;
-    for (const row of readTableRows(supabaseClient, tableName)) {
+    for (const row of await readTableRows(supabaseClient, tableName)) {
       if (!row?.id) continue;
       assignments.set(row.id, { ...row });
     }
@@ -24,7 +24,7 @@ export function createAssignmentRepository({ storage = "memory", supabaseClient,
   }
 
   async function create({ userId, tenantId, data }) {
-    hydrate();
+    await hydrate();
     const record = {
       ...data,
       id: data.id || createId("assign"),
@@ -39,7 +39,7 @@ export function createAssignmentRepository({ storage = "memory", supabaseClient,
   }
 
   async function findActiveAssignment({ userId, tenantId, provider, commandName, channelId, triggerType }) {
-    hydrate();
+    await hydrate();
     for (const record of assignments.values()) {
       if (record.user_id !== userId) continue;
       if (record.tenant_id !== tenantId) continue;
@@ -52,7 +52,7 @@ export function createAssignmentRepository({ storage = "memory", supabaseClient,
   }
 
   async function findById({ id, userId, tenantId }) {
-    hydrate();
+    await hydrate();
     const record = assignments.get(id) || null;
     if (!record) return null;
     if (record.user_id !== userId || record.tenant_id !== tenantId) return null;
@@ -60,14 +60,14 @@ export function createAssignmentRepository({ storage = "memory", supabaseClient,
   }
 
   async function listByUser({ userId, tenantId }) {
-    hydrate();
+    await hydrate();
     return [...assignments.values()].filter(
       (a) => a.user_id === userId && a.tenant_id === tenantId
     );
   }
 
   async function update({ id, userId, tenantId, patch }) {
-    hydrate();
+    await hydrate();
     const record = assignments.get(id) || null;
     if (!record) return null;
     if (record.user_id !== userId || record.tenant_id !== tenantId) return null;
@@ -78,7 +78,7 @@ export function createAssignmentRepository({ storage = "memory", supabaseClient,
   }
 
   async function remove({ id, userId, tenantId }) {
-    hydrate();
+    await hydrate();
     const record = assignments.get(id) || null;
     if (!record) return false;
     if (record.user_id !== userId || record.tenant_id !== tenantId) return false;

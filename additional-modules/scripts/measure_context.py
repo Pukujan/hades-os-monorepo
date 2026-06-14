@@ -8,8 +8,8 @@ Usage:
     python additional-modules/scripts/measure_context.py --archive-session --slug <slug> --tokens <count>
 
 Rules:
-    - Ceiling: 28000 tokens (warn-only — always exits 0 so agents keep working).
-    - Warning at 18k; critical at 25.2k (90% of ceiling).
+    - Ceiling: 64000 tokens (warn-only — always exits 0 so agents keep working).
+    - Warning at 51.2k (80%); compact at 57.6k (90%); stop at 62.4k (97.5%).
     - Updates context_budget.json with current usage.
 
 Paths resolve relative to the current working directory (project root).
@@ -18,6 +18,7 @@ Paths resolve relative to the current working directory (project root).
 import argparse
 import json
 import os
+import re
 import sys
 from datetime import datetime, timezone
 
@@ -26,9 +27,9 @@ _REPO_ROOT = os.getcwd()
 DEFAULT_BUDGET = "additional-modules/buildplan/context_budget.json"
 DEFAULT_SESSIONS = "additional-modules/work-log/sessions"
 
-HARD_LIMIT = 28000
-WARN_THRESHOLD = 18000
-CRITICAL_THRESHOLD = 25200
+HARD_LIMIT = 64000
+WARN_THRESHOLD = 51200
+CRITICAL_THRESHOLD = 57600
 
 
 def _resolve(path: str) -> str:
@@ -57,6 +58,9 @@ def default_budget() -> dict:
         "hardLimit": HARD_LIMIT,
         "currentUsage": 0,
         "remaining": HARD_LIMIT,
+        "warningAt": WARN_THRESHOLD,
+        "compactAt": CRITICAL_THRESHOLD,
+        "stopAt": int(HARD_LIMIT * 0.975),
         "sessionStart": None,
         "sessionEnd": None,
         "history": [],
@@ -70,6 +74,12 @@ def print_status(budget: dict) -> None:
     pct = (usage / limit * 100) if limit else 0
     print(f"Budget: {usage:,} / {limit:,} tokens ({pct:.0f}%)")
     print(f"Remaining: {remaining:,}")
+    if budget.get("warningAt"):
+        print(f"Warning at: {budget['warningAt']:,}")
+    if budget.get("compactAt"):
+        print(f"Compact at: {budget['compactAt']:,}")
+    if budget.get("stopAt"):
+        print(f"Stop at: {budget['stopAt']:,}")
     if budget.get("sessionStart"):
         print(f"Session started: {budget['sessionStart']}")
     if budget.get("sessionEnd"):
@@ -78,13 +88,14 @@ def print_status(budget: dict) -> None:
 
 def archive_session(slug: str, usage: int, budget_path: str) -> str:
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    stripped = re.sub(r"^\d{4}-\d{2}-\d{2}-", "", slug)
     sessions_dir = _resolve(DEFAULT_SESSIONS)
     os.makedirs(sessions_dir, exist_ok=True)
-    filename = f"{today}-{slug}.md"
+    filename = f"{today}-{stripped}.md"
     path = os.path.join(sessions_dir, filename)
     now = datetime.now(timezone.utc).isoformat(timespec="milliseconds")
     body = (
-        f"# Session archive — {today}-{slug}\n\n"
+        f"# Session archive — {today}-{stripped}\n\n"
         f"- **Archived:** {now}\n"
         f"- **Peak usage:** {usage:,} tokens\n"
         f"- **Budget file:** `{budget_path}`\n"
@@ -158,15 +169,21 @@ def main() -> int:
         print(f"Peak usage: {usage:,} / {limit:,} tokens")
 
     pct = (usage / limit * 100) if limit else 0
+    warn_at = budget.get("warningAt", WARN_THRESHOLD)
+    compact_at = budget.get("compactAt", CRITICAL_THRESHOLD)
+    stop_at = budget.get("stopAt", int(limit * 0.975))
 
-    if usage >= HARD_LIMIT:
-        print(f"\n🔴 CRITICAL: {usage:,} / {limit:,} tokens ({pct:.0f}%)", file=sys.stderr)
-        print("   At or above ceiling — compact context and archive the session soon.", file=sys.stderr)
-        print("   Run: python additional-modules/scripts/measure_context.py --archive-session --slug <topic> --tokens <count>", file=sys.stderr)
-    elif usage >= CRITICAL_THRESHOLD:
+    if usage >= limit:
         print(f"🔴 CRITICAL: {usage:,} / {limit:,} tokens ({pct:.0f}%)")
+        print("   At or above ceiling — compact context and archive the session.")
+        print("   Run: python additional-modules/scripts/measure_context.py --archive-session --slug <topic> --tokens <count>")
+    elif usage >= stop_at:
+        print(f"🔴 STOP: {usage:,} / {limit:,} tokens ({pct:.0f}%)")
+        print(f"   Remaining: {remaining:,} — archive immediately, then compact.")
+    elif usage >= compact_at:
+        print(f"🔴 COMPACT: {usage:,} / {limit:,} tokens ({pct:.0f}%)")
         print(f"   Remaining: {remaining:,} — compact context soon.")
-    elif usage >= WARN_THRESHOLD:
+    elif usage >= warn_at:
         print(f"⚠️  WARNING: {usage:,} / {limit:,} tokens ({pct:.0f}%)")
         print(f"   Remaining: {remaining:,} tokens")
     else:

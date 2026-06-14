@@ -2,7 +2,7 @@
   "version": "1.0.0",
   "lastUpdated": "2026-06-14",
   "branch": "codex/issue-1-hermes-discord-minion-runtime",
-  "latestCommit": "0cd071f",
+  "latestCommit": "ce09854",
   "projectDescription": "Hades OS — multi-user auth isolation for shared Hermes runtime. Backend owns identity, isolation, memory retrieval. Hermes is shared; user context is not shared.",
   "activeModule": {
     "slug": "control-platform",
@@ -135,15 +135,100 @@
         "Add Markdown rendering in chat bubbles (**bold**, *italic*, `code`, ```blocks```, newlines)",
         "Fix 404 on stale conversation DELETE clear: return { cleared: true, stale: true } instead",
         "Add general chat context memory integration tests",
-        "306 tests pass (221 backend + 85 frontend), 0 failures"
+        "306 tests pass (221 backend + 85 frontend), 0 failures",
+        "Port Minions UI/UX from HTML preview into React: MinionSlots, MinionListScreen, MinionDetailScreen, MinionLogsScreen",
+        "Create minionPreviewData.js with mock minions, logs, previews, connected destinations",
+        "Wire route navigation for /app/minions/list, /app/minions/:id, /app/minions/:id/logs",
+        "Add activateMinion/deactivateMinion helpers in HadesPrototypeApp context",
+        "Rewrite MinionsScreen to use slot grid and route-based detail view",
+        "Add CSS tokens for slots, list tiles, detail, logs, modal, destinations",
+        "101 frontend tests pass, 0 failures",
+        "Production build clean (vite build)",
+        "Fix measure_context.py: 28k→40k thresholds (HARD_LIMIT/WARN/COMPACT), budget-driven thresholds in main(), default_budget() includes warningAt/compactAt/stopAt",
+        "Fix archive_session: strip date prefix from slug to prevent double-dated filenames",
+        "Fix opencode.json: provider opencode-go, model deepseek-v4-pro, 40k context + 4k reserved",
+        "Fix render_memory.py: 28k→40k in default values and agent rule text",
+        "13/13 context-budget RED→GREEN tests pass",
+        "Stabilize AGENTS.md for cache-friendly agent boot: restructured into numbered sections + moved Operator Notes below core rules + added Cache Policy near top",
+        "Add contract tests: check_agents_contract.py (6 tests) + check_prompt_cache_shape.py (5 tests) + measure_opencode_cache_run.md (manual cache measurement docs)",
+        "All 6 contract tests + 5 cache-shape tests pass (11/11)",
+        "Added runtime compaction smoke-test utility/docs; distinguishes config threshold tests from actual OpenCode runtime compaction observation",
+        "Fixed agent_state.json inProgress/completed duplication bug",
+        "Browser smoke test Minions routes: all 4 routes return 200, 101 frontend tests pass, prod build clean",
+        "Supabase migration 001_hades_tables.sql already applied — all 10 tables exist (verified via ops test)",
+        "All deploy env vars already set in backend/.env (SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, ENCRYPTION_KEY)",
+        "Ops schema tests: 14/14 pass (10 table existence + 2 column checks + 1 doc test)",
+        "Add 4 missing minions (tea, job, pdf, empty1) to MOCK_MINIONS with emoji field",
+        "Add emoji field to all MOCK_MINIONS entries for direct emoji access",
+        "Expand MOCK_PREVIEWS to cover all 12 minions",
+        "Add log entries for tea, job, pdf, meme, empty1 to MOCK_LOGS",
+        "Add hades_chat to MOCK_CONNECTED_DESTINATIONS",
+        "Fix getEmojiForMinion to use minion.emoji directly (remove ICON_MAP)",
+        "Rename Discord Preview→Summon Preview in hadesViewModel.js",
+        "Fix activateMinion: firstEmptySlot() logic instead of index-based nextFree",
+        "Add maxSlots=4 constant to HadesProvider (was missing)",
+        "Fix ActiveSwitch: pass minion.id instead of full minion object",
+        "Add mini-note to auto schedule section in MinionDetailScreen",
+        "Add date input filter + scroll-to-log to MinionLogsScreen",
+        "Fix MinionLogsScreen to accept wrapper props (minion, logs, onBack)",
+        "Add notification count badge to bell button in AppShell",
+        "Add emoji field to STARTER_MINIONS in hadesData.js",
+        "Add .date-input and .notif-badge CSS classes",
+        "Build passes clean (vite build, 0 errors)",
+        "Add normalizeMinion() to unify STARTER_MINIONS/MOCK_MINIONS data shapes",
+        "Add stripWrapperTags() sanitizer in frontend parser.js",
+        "Add wrapper tag stripping to renderMarkdown() in HadesPrototypeApp.jsx",
+        "Add .chat-text--aside, .chat-text--warning, .chat-text--emphasis CSS classes",
+        "Add 8 stripWrapperTags tests + 5 normalizeMinion tests + 11 minions UI behavior tests",
+        "All 121 frontend tests pass, 0 failures",
+        "Production build clean (vite build)",
+        "RED: 3 tests confirmed failing against current behavior (<pastor> leak, no prompt contract)",
+        "FIX: Apply sanitizeAssistantText to general chat in hermes.service.js wrapGeneralResult",
+        "FIX: Add output contract forbidding wrapper tags to generalChatPrompt.js and forgeChatPrompt.js",
+        "FIX: Replace createSupabaseClient() fake with real @supabase/supabase-js client",
+        "FIX: Update _supabase.js persistTable/readTableRows for real Supabase client API",
+        "FIX: Make hydrate() async in all scoped repositories (6 repos)",
+        "FIX: Update hades.repository.js for compatibility with real Supabase client",
+        "Chore: Install @supabase/supabase-js dependency in backend",
+        "All 303 backend tests pass, 0 failures — 3 red tests now green",
+        "Deployment audit: identified Railway/Vercel split deployment gaps",
+        "Railway failure root cause: Railpack runs at repo root, missing rootDirectory in railway.toml",
+        "Railway fix: add rootDirectory = backend to railway.toml",
+        "Fix opencode.json: add deepseek-v4-flash model entry (was missing, only deepseek-v4-pro existed)",
+        "Exploration: read all key source files (server.js, app.js, routes, services, middlewares, configs, contracts, tests)",
+        "Exploration: read railway.toml, vercel.json, .env.example, package.json, .gitignore, DEPLOY.md, lint-deploy.mjs/test.mjs",
+        "Exploration: confirmed no .dockerignore, no nixpacks config, no railway.json",
+        "Exploration: read all existing tests (browserConfig, authMiddleware, hermesRuntime, hermes, contextBuilder, outputValidator, multiUserIsolation, hadesRoutes)",
+        "Created red tests: hermesRuntime.binaryResolution.test.js (Group B)",
+        "Created red tests: hermesRuntime.writableState.test.js (Group C)",
+        "Created red tests: nonHermesFallback.test.js (Group D)",
+        "Created red tests: cors.test.js (Group E)",
+        "Created red tests: browserConfig.secureKeys.test.js (Group F)",
+        "Created red tests: productionUserScoping.test.js (Group G)",
+        "Created cors.js middleware module (env-based whitelist)",
+        "Fixed app.js: wide-open cors() → createCorsMiddleware(process.env.CORS_ORIGIN)",
+        "Fix browser-config: safe-keys filter (only supabaseUrl + supabaseAnonKey)",
+        "Fix hermesRuntime binary resolution: HERMES_BIN_PATH → PATH → dev fallback (dev only)",
+        "Fix hermesRuntime writable state: HERMES_HOME/CACHE_DIR pass-through, safe defaults",
+        "Fix config/index.js: remove fallback semantics (no HADES_USER_ID or HERMES_MODE defaults)",
+        "Fix hades.service.js: production userId from authContext, not HADES_USER_ID/local-user",
+        "Update railway.toml: rootDirectory = backend, ensure correct build/start commands",
+        "Create Dockerfile + .dockerignore for Railway Hermes packaging",
+        "Update deploy contract + env vars (remove HERMES_MODE, HADES_USER_ID, add HERMES_BIN_PATH, HERMES_HOME, etc.)",
+        "Update DEPLOY.md with Hermes packaging and env var sections",
+        "Update .env.example: remove non-Hermes fallback semantics",
+        "Update lint-deploy contract tests for new env var expectations",
+        "Update existing browserConfig.routes.test.js (appUrl no longer returned)",
+        "Fix cors.test.js: any origin when CORS_ORIGIN is empty returns *",
+        "Fix hermesRuntime.binaryResolution.test.js: origEnv scoping (before/after)",
+        "Fix hermesRuntime.writableState.test.js: add os import",
+        "Fix nonHermesFallback.test.js: hermesMode→hermesRequired, fs import, no assert.source",
+        "All 321 backend + 121 frontend + 9 contract + 5 boundary tests pass, 0 failures",
+        "Frontend builds clean (vite build)",
+        "npm run lint:architecture passes"
       ],
       "inProgress": [],
-      "next": [
-        "Create Supabase tables from migration SQL 001_hades_tables.sql in production Supabase project",
-        "Deploy: set SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, ENCRYPTION_KEY env vars",
-        "Run ops schema tests against production Supabase",
-        "Deploy: set ENCRYPTION_KEY env var for AES-256-GCM token encryption"
-      ]
+      "next": []
     }
   },
   "modules": {
@@ -193,6 +278,47 @@
       }
     }
   },
+  "designDocs": {
+    "railwayHermesFix": {
+      "title": "Railway Fix With Hermes-Required Runtime",
+      "status": "complete",
+      "principles": [
+        "Layer 1: Railway must deploy backend/",
+        "Layer 2: Backend container must include Hermes CLI",
+        "No Hermes, no successful Hades chat (production rule)",
+        "No direct OpenRouter fallback, no mock Hermes fallback, no generic AI fallback",
+        "Shared Hermes binary is fine; shared local user memory is not fine",
+        "Durable multi-user memory belongs in Supabase, scoped by auth user_id"
+      ],
+      "binaryResolution": {
+        "priority1": "HERMES_BIN_PATH env var",
+        "priority2": "hermes from system PATH",
+        "priority3": "local dev fallback path (development/test only)",
+        "productionMissingBinary": "Return controlled 503-style 'Hermes runtime unavailable' error"
+      },
+      "writableState": {
+        "HERMES_HOME": "/tmp/hades-hermes (safe Railway default)",
+        "HERMES_CACHE_DIR": "/tmp/hades-hermes/cache (safe Railway default)",
+        "rule": "Disposable or isolated; not durable multi-user memory"
+      },
+      "cors": {
+        "rule": "Env-based whitelist via CORS_ORIGIN (comma-separated)",
+        "behavior": "Allows configured origins + localhost + no-origin; rejects random browser origins"
+      },
+      "browserConfig": {
+        "allowed": ["SUPABASE_URL", "SUPABASE_ANON_KEY"],
+        "forbidden": ["SUPABASE_SERVICE_ROLE_KEY", "OPENROUTER_API_KEY", "ENCRYPTION_KEY", "auth.json", ".env"]
+      },
+      "authScoping": {
+        "productionRule": "userId from verified auth token, never HADES_USER_ID",
+        "HADES_USER_ID": "dev/test fallback only"
+      },
+      "packaging": {
+        "preferred": "Install Hermes from package/source during Railway build or use backend/Dockerfile if Python/system deps needed",
+        "forbidden": "Copy whole ~/.hermes into container"
+      }
+    }
+  },
   "architecture": {
     "registryPath": "backend/src/shared/contracts/registry.json",
     "registryVersion": "v001",
@@ -202,21 +328,25 @@
     "gate": 0
   },
   "lint": {
-    "lastRun": "2026-06-13T21:00:12.266+00:00",
+    "lastRun": "2026-06-14",
     "lastResult": "passed",
     "lastPass": true
   },
   "sessions": {
-    "currentId": "ses_2026-06-14-chat-cards-pending-voice",
-    "lastSessionId": "ses_2026-06-14-chat-cards-pending-voice",
+    "currentId": "ses_2026-06-14-railway-hermes-runtime-fix-greened-tests",
+    "lastSessionId": "ses_2026-06-14-context-budget-tooling-fixes",
     "archive": [
+      "2026-06-14-runtime-compaction-smoke-test",
+      "2026-06-14-stabilize-agents-md-cache",
+      "2026-06-14-context-budget-tooling-fixes",
+      "2026-06-14-minions-ui-port",
       "2026-06-14-chat-cards-pending-voice"
     ]
   },
   "contextBudget": {
-    "hardLimit": 28000,
+    "hardLimit": 64000,
     "currentUsage": 0,
-    "remaining": 28000,
-    "sessionStart": null
+    "remaining": 64000,
+    "sessionStart": "2026-06-14T15:32:10.691+00:00"
   }
 }

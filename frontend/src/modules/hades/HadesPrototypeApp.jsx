@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../auth/AuthProvider.jsx";
 import {
   Building2,
@@ -37,6 +37,11 @@ import {
   buildMinionScreenViewModel,
   buildNotificationViewModel
 } from "./hadesViewModel.js";
+import { MinionSlots } from "./MinionSlots.jsx";
+import { MinionListScreen } from "./MinionListScreen.jsx";
+import { MinionDetailScreen } from "./MinionDetailScreen.jsx";
+import { MinionLogsScreen } from "./MinionLogsScreen.jsx";
+import { getLogsForMinion } from "./minionPreviewData.js";
 import { buildAssistantReply, buildTestOutput, missingDraftFields } from "./parser.js";
 import {
   buildLocalDraftFallback,
@@ -136,8 +141,16 @@ function escapeHtml(text) {
   return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
+const WRAPPER_TAG_RE = /<\/?(?:pastor|hades|persona|reply|message|assistant|system|think|thought)[^>]*>/gi;
+
+function stripXmlWrappers(text) {
+  if (!text) return "";
+  return String(text).replace(WRAPPER_TAG_RE, "").trim();
+}
+
 function renderMarkdown(text) {
-  const html = escapeHtml(text);
+  const clean = stripXmlWrappers(text);
+  const html = escapeHtml(clean);
   return html
     .replace(/```([\s\S]*?)```/g, "<pre><code>$1</code></pre>")
     .replace(/`([^`]+)`/g, "<code>$1</code>")
@@ -206,6 +219,7 @@ function HadesProvider({ children }) {
   const [conversationId, setConversationId] = usePersistentState("hades.conversationId", null);
   const [forgeConversationId, setForgeConversationId] = usePersistentState("hades.forgeConversationId", null);
   const [toast, setToast] = React.useState(null);
+  const maxSlots = 4;
   const [composerText, setComposerText] = React.useState("");
   const [selectedStarterId, setSelectedStarterId] = React.useState("task-helper");
   const [selectedMinionId, setSelectedMinionId] = usePersistentState("hades.selectedMinionId", "task-helper");
@@ -393,6 +407,24 @@ function HadesProvider({ children }) {
   const closeMinionDetail = React.useCallback(() => {
     setDetailMinionId(null);
   }, []);
+
+  const activateMinion = React.useCallback((minionId) => {
+    setMinions((prev) => {
+      const activeCount = prev.filter((m) => m.slotIndex != null).length;
+      if (activeCount >= maxSlots) return prev;
+      const filled = new Set(prev.filter((m) => m.slotIndex != null).map((m) => m.slotIndex));
+      let firstEmpty = 0;
+      while (firstEmpty < maxSlots && filled.has(firstEmpty)) firstEmpty++;
+      if (firstEmpty >= maxSlots) return prev;
+      return prev.map((m) => m.id === minionId ? { ...m, slotIndex: firstEmpty, status: "active" } : m);
+    });
+    showToast("Activated. The minion has taken its little throne.");
+  }, [showToast]);
+
+  const deactivateMinion = React.useCallback((minionId) => {
+    setMinions((prev) => prev.map((m) => m.id === minionId ? { ...m, slotIndex: null, status: "inactive" } : m));
+    showToast("Dismissed. The slot is empty again. Try not to mourn it.");
+  }, [showToast]);
 
   const toggleNotificationDropdown = React.useCallback(() => {
     setNotificationOpen((current) => !current);
@@ -852,7 +884,10 @@ function HadesProvider({ children }) {
         selectedStarterId,
         setSelectedStarterId,
         selectStarterCard,
-        pendingCopy
+        pendingCopy,
+        activateMinion,
+        deactivateMinion,
+        maxSlots
       }}
     >
       {children}
@@ -863,8 +898,15 @@ function HadesProvider({ children }) {
 function AppShell() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { toast, minions, levelState, detailMinionId, closeMinionDetail, theme, setTheme, notificationOpen, toggleNotificationDropdown } = useHades();
+  const { toast, minions, levelState, detailMinionId, closeMinionDetail, theme, setTheme, notificationOpen, toggleNotificationDropdown, notifications } = useHades();
   const screen = getScreenFromPath(location.pathname);
+
+  React.useEffect(() => {
+    if (detailMinionId && location.pathname === "/app/minions") {
+      navigate(`/app/minions/${detailMinionId}`);
+      closeMinionDetail();
+    }
+  }, [detailMinionId]);
   const themeIndex = Math.max(0, THEME_CHOICES.findIndex((choice) => choice.id === theme));
   const nextTheme = THEME_CHOICES[(themeIndex + 1) % THEME_CHOICES.length];
   const realmCopy = {
@@ -892,6 +934,7 @@ function AppShell() {
                   <button className="icon" type="button" onClick={toggleNotificationDropdown} aria-label="Open notifications">
                     ✦
                     <span className="dot" />
+                    {notifications.filter((n) => !n.read).length > 0 ? <span className="notif-badge">{notifications.filter((n) => !n.read).length}</span> : null}
                   </button>
                 </div>
                 <button className="theme-btn" type="button" onClick={() => setTheme(nextTheme.id)}>
@@ -918,7 +961,7 @@ function AppShell() {
               <Outlet />
             </div>
             <NotificationDropdown />
-            {detailMinionId ? <MinionDetailView minionId={detailMinionId} onClose={closeMinionDetail} /> : null}
+            {detailMinionId ? null : null}
           </section>
 
           <nav className="bottom">
@@ -1414,15 +1457,50 @@ function ThemeCard({ choice }) {
   );
 }
 
+function MinionListScreenWrapped() {
+  const { id } = useParams();
+  return <MinionListScreen minionId={id} />;
+}
+
+function MinionDetailScreenWrapped() {
+  const { id } = useParams();
+  const { minions, activateMinion, deactivateMinion } = useHades();
+  const navigate = useNavigate();
+  return (
+    <MinionDetailScreen
+      minionId={id}
+      minions={minions}
+      onActivate={activateMinion}
+      onDeactivate={deactivateMinion}
+      onBack={() => navigate("/app/minions")}
+      onLogs={(mid) => navigate(`/app/minions/${mid}/logs`)}
+    />
+  );
+}
+
+function MinionLogsScreenWrapped() {
+  const { id } = useParams();
+  const { minions } = useHades();
+  const navigate = useNavigate();
+  const minion = minions.find((m) => m.id === id);
+  if (!minion) return null;
+  return (
+    <MinionLogsScreen
+      minion={minion}
+      logs={getLogsForMinion(id)}
+      onBack={() => navigate(`/app/minions/${id}`)}
+    />
+  );
+}
+
 function MinionsScreen() {
-  const [activeTab, setActiveTab] = React.useState("active");
   const [chatFocused, setChatFocused] = React.useState(false);
   const [chatExpanded, setChatExpanded] = React.useState(false);
   const navigate = useNavigate();
-  const { minions, messages, sending, pendingCopy, composerText, setComposerText, sendMessage, clearMessages, openMinionDetail } = useHades();
-  const view = buildMinionScreenViewModel({ minions });
-  const visibleMinions = activeTab === "active" ? view.active : view.inactive;
+  const { minions, messages, sending, pendingCopy, composerText, setComposerText, sendMessage, clearMessages } = useHades();
   const chatClass = chatExpanded ? "card chat-card expanded" : `card chat-card${chatFocused ? " focused" : ""}`;
+  const activeCount = minions.filter((m) => m.slotIndex != null).length;
+
   const suggestionButtons = [
     { label: "What is this place?", action: () => sendMessage("What is this place?", "minions") },
     { label: "Open Forge", action: () => navigate("/forge") },
@@ -1441,6 +1519,27 @@ function MinionsScreen() {
     <>
       <ScreenHead title="Minions" subtitle="Speak to Hades, then inspect your minions and slots." />
       <div className="scroll">
+        <div className="card row">
+          <div>
+            <h2 className="title">Your lesser court</h2>
+            <p className="hades-copy">Four slots. Use them wisely. Or waste them on cats, apparently.</p>
+          </div>
+          <span className="chip">4 slots</span>
+        </div>
+
+        <div className="section-head"><h2>Minion Slots</h2><span className="tiny">{activeCount} / 4 active</span></div>
+        <MinionSlots minions={minions} />
+
+        <div className="card">
+          <div className="row">
+            <div>
+              <h2 className="title" style={{ fontSize: 19 }}>Hades is listening</h2>
+              <p className="hades-copy">Speak, ask, or choose a door. The machinery dislikes idleness.</p>
+            </div>
+            <button className="pill-btn" type="button" onClick={() => navigate("/app/minions/list")}>Minion List</button>
+          </div>
+        </div>
+
         <section className={chatClass} id="hadesChatCard">
           <p className="kicker">Speak to Hades
             {messages.length > 0 ? <button className="tiny" type="button" style={{ float: "right" }} onClick={() => clearMessages("general")}>Clear</button> : null}
@@ -1489,47 +1588,6 @@ function MinionsScreen() {
             </button>
           </div>
         </section>
-
-        <div className="section-row">
-          <h3>Your Minions</h3>
-          <button className="tiny" type="button">View all</button>
-        </div>
-        <div className="tabs">
-          <button type="button" className={`tab ${activeTab === "active" ? "active" : ""}`} onClick={() => setActiveTab("active")}>
-            ACTIVE
-          </button>
-          <button type="button" className={`tab ${activeTab === "inactive" ? "active" : ""}`} onClick={() => setActiveTab("inactive")}>
-            INACTIVE
-          </button>
-        </div>
-        <section className="minions-pane">
-          <div className="contained-list">
-            {visibleMinions.map((minion) => (
-              <MinionCard key={minion.id} minion={minion} />
-            ))}
-            {!visibleMinions.length ? (
-              <p className="task" style={{ margin: 0 }}>
-                No {activeTab} minions yet.
-              </p>
-            ) : null}
-          </div>
-        </section>
-
-        <div className="section-row">
-          <h3>Minion Slots</h3>
-          <button className="tiny" type="button">Upgrade</button>
-        </div>
-        <div className="slots">
-          {view.slots.map((slot) => {
-            const parts = slot.name.split(" ");
-            const hasBreak = parts.length > 1;
-            return (
-              <button key={slot.id} type="button" className={`slot ${slot.commandSyntax ? "filled" : ""}`} onClick={() => (slot.id.startsWith("empty") ? null : openMinionDetail(slot.id))}>
-                {hasBreak ? <>{parts[0]}<br />{parts.slice(1).join(" ")}</> : slot.name}
-              </button>
-            );
-          })}
-        </div>
       </div>
     </>
   );
@@ -1797,6 +1855,9 @@ function HadesRoutes() {
       <Route element={<AppShell />}>
         <Route path="app/home" element={<Navigate to="/app/minions" replace />} />
         <Route path="app/minions" element={<MinionsScreen />} />
+        <Route path="app/minions/list" element={<MinionListScreenWrapped />} />
+        <Route path="app/minions/:id" element={<MinionDetailScreenWrapped />} />
+        <Route path="app/minions/:id/logs" element={<MinionLogsScreenWrapped />} />
         <Route path="app/socials" element={<SocialsScreen />} />
         <Route path="app/inbox" element={<InboxScreen />} />
         <Route path="app/settings" element={<SettingsScreen />} />

@@ -35,8 +35,9 @@ export function getHadesConfig() {
     openRouterModel: process.env.OPENROUTER_MODEL || "deepseek/deepseek-v4-flash",
     openRouterHttpReferer: process.env.OPENROUTER_HTTP_REFERER || "",
     openRouterAppTitle: process.env.OPENROUTER_APP_TITLE || "Hades OS",
-    hermesMode: process.env.HERMES_MODE || "openrouter_with_fallback",
-    userId: process.env.HADES_USER_ID || "local-user",
+    hermesRequired: process.env.HERMES_REQUIRED !== "false",
+    hermesBinPath: process.env.HERMES_BIN_PATH || "",
+    hermesHome: process.env.HERMES_HOME || "",
     giphyApiKey: process.env.GIPHY_API_KEY || "",
     telegramBotToken: process.env.TELEGRAM_BOT_TOKEN || "",
     readiness: buildReadiness()

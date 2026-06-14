@@ -1,6 +1,38 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { buildAssistantReply, buildTestOutput, createDraftFromMessage, missingDraftFields } from "./parser.js";
+import { buildAssistantReply, buildTestOutput, createDraftFromMessage, missingDraftFields, stripWrapperTags } from "./parser.js";
+
+test("stripWrapperTags removes <pastor>, <hades>, <persona>, <reply>, <message>, <assistant>, <system>, <think>, <thought> tags", () => {
+  assert.equal(stripWrapperTags("<pastor>Hello</pastor>"), "Hello");
+  assert.equal(stripWrapperTags("<hades>Reply</hades>"), "Reply");
+  assert.equal(stripWrapperTags("<persona>text</persona>"), "text");
+  assert.equal(stripWrapperTags("<reply>data</reply>"), "data");
+  assert.equal(stripWrapperTags("<message>content</message>"), "content");
+  assert.equal(stripWrapperTags("<assistant>output</assistant>"), "output");
+  assert.equal(stripWrapperTags("<system>prompt</system>"), "prompt");
+  assert.equal(stripWrapperTags("<think>processing</think>"), "processing");
+  assert.equal(stripWrapperTags("<thought>inner</thought>"), "inner");
+});
+
+test("stripWrapperTags removes self-closing and nested tags", () => {
+  assert.equal(stripWrapperTags("<pastor/>Hello"), "Hello");
+  assert.equal(stripWrapperTags("<hades /><pastor>nested</pastor>"), "nested");
+});
+
+test("stripWrapperTags handles mixed content and multiple tags", () => {
+  const input = "<pastor>You're sitting in the underworld lobby.</pastor><hades>What do you need?</hades>";
+  assert.equal(stripWrapperTags(input), "You're sitting in the underworld lobby.What do you need?");
+});
+
+test("stripWrapperTags returns empty string for null or undefined", () => {
+  assert.equal(stripWrapperTags(null), "");
+  assert.equal(stripWrapperTags(undefined), "");
+  assert.equal(stripWrapperTags(""), "");
+});
+
+test("stripWrapperTags preserves text without tags", () => {
+  assert.equal(stripWrapperTags("Hello, mortal."), "Hello, mortal.");
+});
 
 test("infers a discord cat meme command and asks only for the command name", () => {
   const result = createDraftFromMessage("I want a command to send cat memes in Discord.");

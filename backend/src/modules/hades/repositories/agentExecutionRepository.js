@@ -20,10 +20,10 @@ export function createAgentExecutionRepository({ storage = "memory", supabaseCli
   const executions = new Map();
   let hydrated = false;
 
-  function hydrate() {
+  async function hydrate() {
     if (storage !== "supabase" || hydrated) return;
     hydrated = true;
-    for (const row of readTableRows(supabaseClient, tableName)) {
+    for (const row of await readTableRows(supabaseClient, tableName)) {
       if (!row?.id) continue;
       executions.set(row.id, { ...row });
     }
@@ -36,7 +36,7 @@ export function createAgentExecutionRepository({ storage = "memory", supabaseCli
   }
 
   async function create({ userId, tenantId, data }) {
-    hydrate();
+    await hydrate();
     const safeData = stripSecrets(data);
     const record = {
       ...safeData,
@@ -51,7 +51,7 @@ export function createAgentExecutionRepository({ storage = "memory", supabaseCli
   }
 
   async function findById({ id, userId, tenantId }) {
-    hydrate();
+    await hydrate();
     const record = executions.get(id) || null;
     if (!record) return null;
     if (record.user_id !== userId || record.tenant_id !== tenantId) return null;
@@ -59,7 +59,7 @@ export function createAgentExecutionRepository({ storage = "memory", supabaseCli
   }
 
   async function listByUser({ userId, tenantId }) {
-    hydrate();
+    await hydrate();
     return [...executions.values()].filter(
       (e) => e.user_id === userId && e.tenant_id === tenantId
     );

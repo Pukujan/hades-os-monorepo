@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hades OS — Minions UX Preview</title>
+  <style>
+    :root{
+      --bg:#020805; --panel:#061b0e; --panel2:#0a2715; --panel3:#12351d;
+      --line:#245b36; --line2:#407b4a; --lime:#d8ff86; --mint:#c6f5bf;
+      --soft:#9cc990; --muted:#66815f; --danger:#ff6b84; --warn:#ffd36e;
+      --ok:#7dff9f; --black:#000503; --radius:24px;
+      --shadow:0 0 48px rgba(91,255,123,.12), inset 0 0 30px rgba(91,255,123,.045);
+      --font:"Courier New", Courier, monospace;
+    }
+    *{box-sizing:border-box} body{margin:0;min-height:100vh;background:radial-gradient(circle at 50% 6%,rgba(112,255,135,.15),transparent 28%),radial-gradient(circle at 22% 80%,rgba(216,255,134,.08),transparent 28%),linear-gradient(180deg,#031008,#000302);font-family:var(--font);color:var(--mint);display:grid;place-items:center;padding:22px}button,input,select{font-family:inherit}.phone{width:min(462px,100%);height:min(900px,calc(100vh - 28px));border:1px solid rgba(122,223,77,.18);border-radius:36px;background:rgba(1,10,5,.88);box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;position:relative}.phone:after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(to bottom,rgba(255,255,255,.025),rgba(255,255,255,.025) 1px,transparent 1px,transparent 4px);opacity:.26}.top{padding:18px 18px 8px;display:flex;justify-content:space-between;gap:12px;align-items:flex-start;z-index:3}.brand h1{margin:0;color:#f0ffe9;font-size:31px;letter-spacing:1px;text-shadow:0 0 12px rgba(216,255,134,.25)}.brand p{margin:7px 0 0;color:var(--soft);font-size:12px;font-weight:900}.top-actions{display:flex;gap:8px}.icon-btn,.pill-btn{border:1px solid rgba(216,255,134,.46);background:rgba(24,57,26,.82);color:var(--lime);min-height:40px;border-radius:18px;padding:0 13px;font-size:12px;font-weight:900;cursor:pointer;box-shadow:inset 0 0 18px rgba(216,255,134,.05)}.icon-btn{width:42px;padding:0;font-size:18px;position:relative}.red-dot{position:absolute;right:8px;top:7px;width:8px;height:8px;border-radius:50%;background:var(--danger);box-shadow:0 0 10px var(--danger)}.main{flex:1;overflow:auto;padding:0 16px 92px;scrollbar-width:thin;scrollbar-color:var(--line) transparent;z-index:2}.screen{display:none}.screen.active{display:block}.card{border:1px solid var(--line);border-radius:22px;background:linear-gradient(180deg,rgba(7,31,15,.98),rgba(3,18,9,.98));box-shadow:inset 0 0 28px rgba(83,245,116,.05);padding:16px;margin:12px 0}.row{display:flex;align-items:center;justify-content:space-between;gap:12px}.muted{color:var(--soft);font-size:12px;font-weight:800}.tiny{font-size:11px;color:var(--muted);font-weight:900;text-transform:uppercase;letter-spacing:.08em}.title{margin:0;color:#f1ffe9;font-size:22px;line-height:1.1}.hades-copy{margin:8px 0 0;color:var(--soft);font-size:13px;line-height:1.45;font-weight:800}.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(216,255,134,.35);border-radius:999px;padding:5px 9px;color:var(--lime);font-size:11px;font-weight:900;background:rgba(216,255,134,.07)}.chip.off{color:var(--muted);border-color:rgba(156,201,144,.24)}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.slot,.minion-tile{min-height:92px;border-radius:20px;border:1px solid rgba(122,223,77,.28);background:rgba(10,39,21,.78);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:9px;cursor:pointer;position:relative}.slot:hover,.minion-tile:hover,.action:hover,.icon-btn:hover,.pill-btn:hover{filter:brightness(1.14)}.slot.empty{border-style:dashed;color:var(--muted);background:rgba(7,23,12,.56)}.slot .emoji,.minion-tile .emoji{font-size:25px;margin-bottom:7px}.slot strong,.minion-tile strong{font-size:11px;color:#f1ffe9;line-height:1.15}.slot small,.minion-tile small{font-size:10px;color:var(--soft);font-weight:900;margin-top:4px}.section-head{display:flex;align-items:flex-end;justify-content:space-between;margin:16px 0 8px}.section-head h2{margin:0;color:#f1ffe9;font-size:20px}.action-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.action{border:1px solid rgba(216,255,134,.35);border-radius:18px;background:rgba(16,48,25,.82);color:var(--mint);padding:12px;text-align:left;cursor:pointer;min-height:66px}.action strong{display:block;color:#f1ffe9;font-size:13px}.action span{display:block;color:var(--soft);font-size:11px;font-weight:800;margin-top:4px;line-height:1.3}.action.primary{border-color:rgba(216,255,134,.72);background:linear-gradient(180deg,rgba(75,98,39,.9),rgba(22,62,28,.9));color:#f5ffe7}.action:disabled{opacity:.42;cursor:not-allowed}.summon-box{border:1px solid rgba(216,255,134,.36);background:rgba(0,0,0,.22);border-radius:18px;padding:13px;margin-top:10px}.summon-command{font-size:22px;color:#f0ffe9;font-weight:900}.desc{font-size:12px;color:var(--soft);font-weight:800;margin-top:6px;line-height:1.4}.preview{overflow:hidden;border:1px solid rgba(122,223,77,.27);border-radius:22px;background:#05140b;margin-top:12px}.gif{height:150px;display:grid;place-items:center;font-size:58px;background:radial-gradient(circle at 50% 50%,rgba(216,255,134,.18),transparent 52%),linear-gradient(135deg,rgba(17,74,33,.72),rgba(4,17,10,.95));position:relative}.gif:before{content:"⚖️";position:absolute;left:70px;top:25px;font-size:31px}.gif:after{content:"§";position:absolute;right:74px;bottom:22px;color:var(--lime);font-size:42px;text-shadow:0 0 12px rgba(216,255,134,.5)}.preview-caption{padding:11px 13px;color:var(--soft);font-size:12px;font-weight:800}.details{border:1px solid rgba(122,223,77,.22);border-radius:18px;overflow:hidden;background:rgba(0,0,0,.14);margin-top:12px}.details summary{padding:13px;cursor:pointer;color:var(--lime);font-weight:900;font-size:13px}.details-body{padding:0 13px 13px}.kv{display:grid;grid-template-columns:110px 1fr;gap:8px;font-size:12px;padding:7px 0;border-top:1px solid rgba(122,223,77,.13)}.kv span:first-child{color:var(--muted);font-weight:900}.kv span:last-child{color:var(--mint);font-weight:800}.switch{display:flex;align-items:center;gap:10px}.toggle{width:56px;height:31px;border-radius:999px;border:1px solid rgba(216,255,134,.45);background:#243223;position:relative;cursor:pointer;transition:.2s}.toggle:before{content:"";position:absolute;width:23px;height:23px;top:3px;left:4px;border-radius:50%;background:var(--muted);transition:.2s;box-shadow:0 0 8px rgba(0,0,0,.4)}.toggle.on{background:rgba(89,255,121,.18);border-color:rgba(125,255,159,.8)}.toggle.on:before{left:27px;background:var(--lime);box-shadow:0 0 13px rgba(216,255,134,.5)}.toast{display:none;border:1px solid rgba(216,255,134,.32);border-radius:16px;padding:10px;margin-top:10px;color:var(--mint);font-size:12px;font-weight:800;background:rgba(216,255,134,.06)}.toast.show{display:block}.toast.error{border-color:rgba(255,107,132,.48);color:#ffd8df;background:rgba(255,107,132,.08)}.activity{max-height:178px;overflow:auto;padding-right:4px}.log-mini,.notif-item,.log-row{border:1px solid rgba(122,223,77,.18);border-radius:16px;padding:11px;margin:8px 0;background:rgba(8,31,16,.56);cursor:pointer}.log-mini strong,.notif-item strong,.log-row strong{color:#f1ffe9;font-size:12px}.log-mini p,.notif-item p,.log-row p{margin:5px 0 0;color:var(--soft);font-size:11px;line-height:1.35;font-weight:800}.notif-panel{display:none;position:absolute;top:68px;right:14px;width:min(394px,calc(100% - 28px));max-height:650px;overflow:auto;z-index:10;border:1px solid rgba(216,255,134,.38);border-radius:24px;background:rgba(3,18,9,.98);box-shadow:0 18px 60px rgba(0,0,0,.5);padding:13px}.notif-panel.open{display:block}#notifList{max-height:318px;overflow:auto;padding-right:4px;scrollbar-width:thin;scrollbar-color:var(--line) transparent;border-top:1px solid rgba(122,223,77,.12);border-bottom:1px solid rgba(122,223,77,.12);margin-top:8px}.notif-count{font-size:10px;color:var(--muted);font-weight:900;text-transform:uppercase;letter-spacing:.08em;margin:8px 2px 0}.tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}.tab{border:1px solid rgba(122,223,77,.25);border-radius:15px;padding:9px;text-align:center;cursor:pointer;color:var(--soft);font-size:12px;font-weight:900;background:rgba(10,39,21,.5)}.tab.active{color:var(--lime);border-color:rgba(216,255,134,.52);background:rgba(216,255,134,.08)}.notif-item{position:relative}.notif-item.unread:before{content:"";position:absolute;right:12px;top:12px;width:8px;height:8px;border-radius:50%;background:var(--danger);box-shadow:0 0 10px var(--danger)}.notif-item.read{opacity:.72}.bottom-nav{height:76px;position:absolute;bottom:0;left:0;right:0;border-top:1px solid rgba(122,223,77,.18);background:rgba(0,8,3,.92);display:grid;grid-template-columns:repeat(4,1fr);z-index:4}.nav{border:0;background:transparent;color:var(--muted);font-weight:900;font-size:11px;cursor:pointer}.nav.active{color:var(--lime)}.back{display:inline-flex;align-items:center;gap:8px;color:var(--lime);background:transparent;border:0;font-weight:900;cursor:pointer;margin:6px 0 2px;padding:0}.list-top{display:flex;align-items:center;gap:12px;justify-content:space-between}.search{width:100%;border:1px solid rgba(122,223,77,.25);border-radius:16px;background:rgba(0,0,0,.18);color:var(--mint);padding:12px;margin:12px 0}.modal-backdrop{display:none;position:absolute;inset:0;background:rgba(0,0,0,.62);z-index:20;align-items:flex-end}.modal-backdrop.open{display:flex}.modal{width:100%;max-height:76%;overflow:auto;border-top:1px solid rgba(216,255,134,.42);border-radius:28px 28px 0 0;background:#041109;padding:16px;box-shadow:0 -20px 70px rgba(0,0,0,.55)}.chat-bubble{border:1px solid rgba(122,223,77,.25);border-radius:18px;padding:12px;margin:10px 0;background:rgba(10,39,21,.7);font-size:13px;line-height:1.45}.chat-bubble.hades{border-color:rgba(216,255,134,.35)}.destinations{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.dest{border:1px solid rgba(216,255,134,.33);border-radius:16px;padding:12px 8px;background:rgba(216,255,134,.06);color:var(--mint);font-size:12px;font-weight:900;cursor:pointer;text-align:center}.dest span{display:block;font-size:22px;margin-bottom:5px}.log-tools{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}.log-tools select,.log-tools input{border:1px solid rgba(122,223,77,.25);border-radius:14px;background:rgba(0,0,0,.2);color:var(--mint);padding:10px;font-weight:800}.date-head{margin:17px 0 8px;color:var(--lime);font-size:13px;font-weight:900}.target-log{outline:2px solid var(--lime);box-shadow:0 0 18px rgba(216,255,134,.24)}.auto-card{display:none}.auto .auto-card{display:block}.auto .manual-only{display:none}.social-icons{display:flex;gap:8px;flex-wrap:wrap}.social-icon{width:40px;height:40px;border-radius:15px;border:1px solid rgba(216,255,134,.34);display:grid;place-items:center;text-decoration:none;background:rgba(216,255,134,.06);font-size:20px}.mini-note{font-size:11px;color:var(--muted);font-weight:900;margin-top:8px;line-height:1.35}.owner{font-size:10px;color:var(--muted);font-weight:900;position:absolute;right:7px;top:7px}.hidden{display:none!important}
+  
+    .compact:empty{display:none}
+    .summon-main .desc{margin-top:12px;font-size:15px;line-height:1.55;color:var(--mint)}
+    .example-inline{margin-top:14px;padding-top:12px;border-top:1px solid rgba(216,255,134,.24);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    .example-inline span{font-size:11px;text-transform:uppercase;color:var(--soft);letter-spacing:.08em}
+    .example-inline strong{font-size:18px;color:var(--lime)}
+    .action span{display:none}
+    .action.disabled{opacity:.5}
+    .preview-caption{display:none}
+    .log-actions{margin-top:10px}
+    .mini-link{display:inline-flex;border:1px solid var(--line2);border-radius:999px;padding:7px 10px;color:var(--lime);text-decoration:none;background:rgba(216,255,134,.08);font-size:12px}
+
+  
+    .preview-label{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--soft);margin-bottom:8px}
+    .preview-input{font-size:18px;color:var(--lime);padding:12px 14px;border:1px solid var(--line2);border-radius:18px;background:rgba(0,5,3,.28);margin-bottom:14px}
+    .preview-output{border:1px solid var(--line);border-radius:22px;overflow:hidden;background:rgba(6,27,14,.72)}
+    .hermes-output-head{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 14px;border-bottom:1px solid rgba(216,255,134,.16)}
+    .hermes-output-head strong{font-size:14px;color:var(--mint)}
+    .cache-chip{font-size:11px;color:var(--soft);border:1px solid rgba(216,255,134,.26);border-radius:999px;padding:5px 8px}
+    .output-artifact{min-height:150px;display:flex;align-items:center;justify-content:center;font-size:52px;background:radial-gradient(circle at 50% 45%, rgba(216,255,134,.11), transparent 58%)}
+    .output-copy{padding:12px 14px;color:var(--mint);font-size:15px;line-height:1.45;border-top:1px solid rgba(216,255,134,.12)}
+    .auto-output-card{margin-top:14px;border:1px solid var(--line2);border-radius:22px;padding:14px;background:rgba(0,5,3,.22)}
+    .auto-output-card strong{display:block;margin-bottom:8px;color:var(--lime)}
+
+  </style>
+</head>
+<body>
+  <div class="phone">
+    <div class="top">
+      <div class="brand">
+        <h1>HADES</h1>
+        <p>MINIONS · SUMMONS · LOGS</p>
+      </div>
+      <div class="top-actions">
+        <button class="icon-btn" id="notifBtn">🔔<span class="red-dot" id="bellDot"></span></button>
+        <button class="icon-btn">⚙</button>
+      </div>
+    </div>
+
+    <div class="notif-panel" id="notifPanel">
+      <div class="row"><div><h2 class="title" style="font-size:18px">Summon Notices</h2><p class="hades-copy">The recent disturbances. Some even mattered.</p></div><button class="pill-btn" id="closeNotif">Close</button></div>
+      <div class="tabs"><button class="tab active" data-notif="manual">Recent 10 summons</button><button class="tab" data-notif="auto">Recent 10 autos</button></div>
+      <div class="notif-count" id="notifCount">Showing recent 10 summons</div>
+      <div id="notifList"></div>
+    </div>
+
+    <main class="main">
+      <section class="screen active" id="screen-home">
+        <div class="card row">
+          <div><h2 class="title">Your lesser court</h2><p class="hades-copy">Four slots. Use them wisely. Or waste them on cats, apparently.</p></div>
+          <span class="chip">4 slots</span>
+        </div>
+        <div class="section-head"><h2>Minion Slots</h2><span class="tiny" id="slotCount">3 / 4 active</span></div>
+        <div class="grid4" id="slots"></div>
+        <div class="card">
+          <div class="row"><div><h2 class="title" style="font-size:19px">Hades is listening</h2><p class="hades-copy">Speak, ask, or choose a door. The machinery dislikes idleness.</p></div><button class="pill-btn" onclick="go('screen-list')">Minion List</button></div>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-list">
+        <button class="back" onclick="go('screen-home')">← Back to slots</button>
+        <div class="card">
+          <div class="list-top"><div><h2 class="title">Minion List</h2><p class="hades-copy">The whole cabinet of obedient nonsense. Pick one to inspect, or fill an empty slot.</p></div><span class="chip">4×4 grid</span></div>
+          <input class="search" placeholder="Search the lesser things..." oninput="renderMinionList(this.value)">
+          <div class="grid4" id="minionGrid"></div>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-detail">
+        <button class="back" onclick="go('screen-home')">← Back to slots</button>
+        <div class="card" id="detailRoot">
+          <div class="row">
+            <div>
+              <div class="tiny" id="detailSource">Default minion</div>
+              <h2 class="title" id="detailName">Cat Courier</h2>
+              <p class="hades-copy compact" id="detailDesc"></p>
+            </div>
+            <div class="switch">
+              <span class="tiny" id="activeLabel">Active</span>
+              <div class="toggle on" id="activeToggle" role="switch" aria-label="Active switch"></div>
+            </div>
+          </div>
+          <div class="toast" id="stateToast"></div>
+        </div>
+
+        <div class="card manual-only">
+          <div class="section-head" style="margin-top:0"><h2>How to summon</h2><span class="chip">Manual</span></div>
+          <div class="summon-box summon-main">
+            <div class="summon-command" id="summonCmd">!sendcat</div>
+            <div class="desc" id="summonDesc">Speak the word after the summon and the beast takes its shape. Lawyer. Wizard. Tax auditor. A miserable little pantheon of cats.</div>
+            <div class="example-inline"><span>Example</span><strong id="exampleCmd">!sendcat lawyer</strong></div>
+          </div>
+        </div>
+
+        <div class="card auto-card">
+          <div class="section-head" style="margin-top:0"><h2>Auto schedule</h2><span class="chip">Auto</span></div>
+          <div class="kv"><span>Interval</span><span id="autoInterval">Every day at 9:00 AM</span></div>
+          <div class="kv"><span>Next run</span><span id="autoNext">Today · 9:00 AM</span></div>
+          <div class="kv"><span>Sends to</span><span><span class="social-icons" id="autoDestinations"></span></span></div>
+          <div class="mini-note">When the appointed hour limps in, the minion works and sends the result where you bound it.</div>
+        </div>
+
+        <div class="card manual-only">
+          <div class="section-head" style="margin-top:0"><h2>Summon Preview</h2></div>
+          <div class="preview-label">Example input</div>
+          <div class="preview-input" id="previewInput">!sendcat lawyer</div>
+          <div class="preview-output">
+            <div class="hermes-output-head">
+              <strong>Hermes output</strong>
+              <span class="cache-chip">cached from current version</span>
+            </div>
+            <div class="output-artifact" id="previewGif">⚖️ 🐱 §</div>
+            <div class="output-copy" id="previewCopy">A lawyer cat, grave with legal delusions. It objects to the yarn and bills by the hour.</div>
+          </div>
+          <details class="details"><summary>Follow-up preview</summary><div class="details-body"><div class="preview-label">Follow-up input</div><div class="chat-bubble">!hades I want a different cat</div><div class="preview-label">Hermes output</div><div class="chat-bubble hades">The court permits a different beast.<br><br><div style="font-size:44px;text-align:center">🐈‍⬛🧙</div></div></div></details>
+        </div>
+
+        <div class="card">
+          <div class="section-head" style="margin-top:0"><h2>Minion Control</h2></div>
+          <div class="action-grid">
+            <button class="action primary manual-only" id="testRun"><strong>Test run</strong></button>
+            <button class="action primary" id="manualSummon"><strong>Manual summon</strong></button>
+            <button class="action" id="editMinion"><strong>Edit minion</strong></button>
+            <button class="action" id="viewLogs"><strong>View logs</strong></button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-head" style="margin-top:0"><h2>Activity snapshot</h2><span class="tiny">Recent 5–6</span></div>
+          <div class="activity" id="activityList"></div>
+        </div>
+
+        <details class="details"><summary>Technical details</summary><div class="details-body" id="techDetails"></div></details>
+      </section>
+
+      <section class="screen" id="screen-logs">
+        <button class="back" onclick="go('screen-detail')">← Back to minion</button>
+        <div class="card">
+          <div class="row"><div><h2 class="title">Run Logs</h2><p class="hades-copy">A dated ledger of what the minions disturbed.</p></div><span class="chip" id="logScopeChip">Cat Courier</span></div>
+          <div class="log-tools"><select id="logFilter"><option value="current">This minion</option><option value="all">All minions</option></select><input id="dateFilter" type="date"></div>
+          <div id="fullLogs"></div>
+        </div>
+      </section>
+    </main>
+
+    <div class="bottom-nav">
+      <button class="nav active" onclick="go('screen-home')">MINIONS</button><button class="nav">SOCIALS</button><button class="nav">FORGE</button><button class="nav">SETTINGS</button>
+    </div>
+
+    <div class="modal-backdrop" id="testModal">
+      <div class="modal">
+        <div class="row"><div><h2 class="title" style="font-size:20px">Test Run</h2><p class="hades-copy">A private rehearsal. Nothing leaves the crypt unless you command it.</p></div><button class="pill-btn" id="closeModal">Close</button></div>
+        <div class="chat-bubble">!sendcat lawyer</div>
+        <div class="chat-bubble hades">Here. A lawyer cat. It objects to everything, including its own existence.<br><br><div style="font-size:54px;text-align:center">🐱⚖️</div></div>
+        <div class="chat-bubble hades">Send this test somewhere private?</div>
+        <div class="destinations" id="privateDests"></div>
+      </div>
+    </div>
+  </div>
+<script>
+const maxSlots = 4;
+let selectedMinionId = 'cat';
+let notifTab = 'manual';
+let jumpLogId = null;
+const connected = { telegram:true, discord:true, email:true };
+const minions = [
+  {id:'cat', name:'Cat Courier', emoji:'🐱', type:'manual', source:'Default', owner:'system', active:true, slot:0, command:'!sendcat', example:'!sendcat lawyer', desc:'Speak the word after the summon and the beast takes its shape. Lawyer. Wizard. Tax auditor. A miserable little pantheon of cats.', destination:'Discord · #cat-chaos', version:'v1.0 default'},
+  {id:'brief', name:'Brief Wraith', emoji:'📜', type:'auto', source:'Default', owner:'system', active:true, slot:1, desc:'It prowls the morning docket and drags back deadlines before they rot.', destination:'Email · inbox', interval:'Daily at 8:30 AM', next:'Tomorrow · 8:30 AM', version:'v1.0 default'},
+  {id:'social', name:'Social Imp', emoji:'📣', type:'auto', source:'User', owner:'you', active:true, slot:2, desc:'A tiny herald with too much confidence. It posts when the clock permits.', destination:'Telegram · private bot chat', interval:'Every 5 hours', next:'Today · 5:00 PM', version:'v3 user'},
+  {id:'invoice', name:'Invoice Ghoul', emoji:'🧾', type:'manual', source:'User', owner:'you', active:false, slot:null, command:'!invoice', example:'!invoice client', desc:'It sniffs out receipts and arranges them into something almost respectable.', destination:'Gmail · drafts', version:'v2 user'},
+  {id:'weather', name:'Weather Oracle', emoji:'🌧️', type:'auto', source:'Default', owner:'system', active:false, slot:null, desc:'Looks upward, complains, and tells you whether the sky intends betrayal.', destination:'Telegram · private bot chat', interval:'Daily at 7:00 AM', next:'Tomorrow · 7:00 AM', version:'v1.0 default'},
+  {id:'law', name:'Law Goblin', emoji:'⚖️', type:'manual', source:'User', owner:'you', active:false, slot:null, command:'!lawgoblin', example:'!lawgoblin queens pc', desc:'A small clerk-beast that remembers procedural misery better than it should.', destination:'Hades chat', version:'v4 user'},
+  {id:'meme', name:'Meme Furnace', emoji:'🔥', type:'manual', source:'Default', owner:'system', active:false, slot:null, command:'!meme', example:'!meme tired developer', desc:'Throws your phrase into the furnace and returns culture. Usually damaged.', destination:'Discord · private test', version:'v1.0 default'},
+  {id:'calendar', name:'Calendar Shade', emoji:'📅', type:'auto', source:'Default', owner:'system', active:false, slot:null, desc:'Counts the hours. Judges your optimism. Sends reminders anyway.', destination:'Email · calendar digest', interval:'Weekdays at 6:00 PM', next:'Monday · 6:00 PM', version:'v1.0 default'},
+  {id:'empty1', name:'Empty Husk', emoji:'🕳️', type:'manual', source:'Default', owner:'system', active:false, slot:null, command:'!husk', example:'!husk awaken', desc:'Mostly decorative. Still less useless than a meeting.', destination:'Hades chat', version:'v1.0 default'},
+  {id:'tea', name:'Tea Familiar', emoji:'🍵', type:'auto', source:'User', owner:'you', active:false, slot:null, desc:'Summons caffeine reminders with the gravity of an ancient curse.', destination:'Telegram · private bot chat', interval:'Every 3 hours', next:'Today · 4:15 PM', version:'v1 user'},
+  {id:'job', name:'Job Harpy', emoji:'🦅', type:'auto', source:'User', owner:'you', active:false, slot:null, desc:'Screeches when a role appears. Occasionally useful. Often rude.', destination:'Email · job alerts', interval:'Daily at 10:00 AM', next:'Tomorrow · 10:00 AM', version:'v5 user'},
+  {id:'pdf', name:'PDF Imp', emoji:'📄', type:'manual', source:'Default', owner:'system', active:false, slot:null, command:'!pdfimp', example:'!pdfimp summarize', desc:'Chews documents. Spits out order. A disgusting but practical miracle.', destination:'Hades chat', version:'v1.0 default'}
+];
+const logs = [
+  {id:'l1', minion:'cat', name:'Cat Courier', type:'manual', status:'success', dest:'Discord · #cat-chaos', time:'Today · 2:14 PM', exact:'2026-06-14 2:14:32 PM EDT', date:'Today', summary:'Lawyer cat GIF sent.', unread:true, version:'v1.0 default', owner:'you', openLabel:'Open Discord message', externalUrl:'https://discord.com/channels/example/cat-chaos/l1'},
+  {id:'l2', minion:'cat', name:'Cat Courier', type:'test', status:'success', dest:'Telegram private', time:'Today · 1:02 PM', exact:'2026-06-14 1:02:09 PM EDT', date:'Today', summary:'Wizard cat test delivered.', unread:false, version:'v1.0 default', owner:'you', openLabel:'Open Telegram chat', externalUrl:'https://t.me/hades_test_bot'},
+  {id:'l3', minion:'brief', name:'Brief Wraith', type:'auto', status:'success', dest:'Email · inbox', time:'Today · 8:30 AM', exact:'2026-06-14 8:30:02 AM EDT', date:'Today', summary:'Morning docket digest sent.', unread:true, version:'v1.0 default', owner:'you', openLabel:'Open email thread', externalUrl:'https://mail.google.com/mail/u/0/#inbox/example-thread'},
+  {id:'l4', minion:'social', name:'Social Imp', type:'auto', status:'failed', dest:'Telegram private', time:'Today · 7:00 AM', exact:'2026-06-14 7:00:01 AM EDT', date:'Today', summary:'Telegram delivery failed.', unread:true, version:'v3 user', owner:'you', openLabel:'Open Telegram chat', externalUrl:'https://t.me/hades_test_bot'},
+  {id:'l5', minion:'cat', name:'Cat Courier', type:'manual', status:'success', dest:'Discord · #cat-chaos', time:'Yesterday · 4:44 PM', exact:'2026-06-13 4:44:18 PM EDT', date:'Yesterday', summary:'Tax-auditor cat sent.', unread:false, version:'v1.0 default', owner:'you', openLabel:'Open Discord message', externalUrl:'https://discord.com/channels/example/cat-chaos/l5'},
+  {id:'l6', minion:'cat', name:'Cat Courier', type:'manual', status:'cancelled', dest:'Preview', time:'Yesterday · 1:12 PM', exact:'2026-06-13 1:12:44 PM EDT', date:'Yesterday', summary:'Private send cancelled.', unread:false, version:'v1.0 default', owner:'you', openLabel:null, externalUrl:null},
+  {id:'l7', minion:'brief', name:'Brief Wraith', type:'auto', status:'success', dest:'Email · inbox', time:'Yesterday · 8:30 AM', exact:'2026-06-13 8:30:00 AM EDT', date:'Yesterday', summary:'Deadline digest sent.', unread:false, version:'v1.0 default', owner:'you', openLabel:'Open email thread', externalUrl:'https://mail.google.com/mail/u/0/#inbox/example-thread-2'},
+  {id:'l8', minion:'cat', name:'Cat Courier', type:'manual', status:'success', dest:'Discord · #cat-chaos', time:'Jun 13 · 2:03 PM', exact:'2026-06-13 2:03:11 PM EDT', date:'Jun 13, 2026', summary:'Wizard cat GIF sent.', unread:false, version:'v1.0 default', owner:'you', openLabel:'Open Discord message', externalUrl:'https://discord.com/channels/example/cat-chaos/l8'},
+  {id:'l9', minion:'invoice', name:'Invoice Ghoul', type:'manual', status:'success', dest:'Gmail · drafts', time:'Jun 13 · 11:22 AM', exact:'2026-06-13 11:22:45 AM EDT', date:'Jun 13, 2026', summary:'Invoice email draft created.', unread:true, version:'v2 user', owner:'you', openLabel:'Open Gmail draft', externalUrl:'https://mail.google.com/mail/u/0/#drafts'},
+  {id:'l10', minion:'law', name:'Law Goblin', type:'manual', status:'success', dest:'Hades chat', time:'Jun 12 · 6:12 PM', exact:'2026-06-12 6:12:03 PM EDT', date:'Jun 12, 2026', summary:'Citation goblin answered in chat.', unread:false, version:'v1 user', owner:'you', openLabel:null, externalUrl:null},
+  {id:'l11', minion:'cat', name:'Cat Courier', type:'test', status:'success', dest:'Email · self', time:'Jun 12 · 5:20 PM', exact:'2026-06-12 5:20:56 PM EDT', date:'Jun 12, 2026', summary:'Pirate cat test emailed.', unread:false, version:'v1.0 default', owner:'you', openLabel:'Open email thread', externalUrl:'https://mail.google.com/mail/u/0/#inbox/example-thread-3'},
+  {id:'l12', minion:'cat', name:'Cat Courier', type:'manual', status:'blocked', dest:'Discord · #cat-chaos', time:'Jun 12 · 3:00 PM', exact:'2026-06-12 3:00:10 PM EDT', date:'Jun 12, 2026', summary:'Blocked because minion was inactive.', unread:false, version:'v1.0 default', owner:'you', openLabel:null, externalUrl:null},
+  {id:'l13', minion:'brief', name:'Brief Wraith', type:'auto', status:'success', dest:'Email · inbox', time:'Jun 12 · 8:30 AM', exact:'2026-06-12 8:30:00 AM EDT', date:'Jun 12, 2026', summary:'Morning docket digest sent.', unread:false, version:'v1.0 default', owner:'you', openLabel:'Open email thread', externalUrl:'https://mail.google.com/mail/u/0/#inbox/example-thread-4'},
+  {id:'l14', minion:'tea', name:'Tea Familiar', type:'auto', status:'success', dest:'Telegram private', time:'Jun 11 · 4:15 PM', exact:'2026-06-11 4:15:00 PM EDT', date:'Jun 11, 2026', summary:'Caffeine reminder sent.', unread:false, version:'v1 user', owner:'you', openLabel:'Open Telegram chat', externalUrl:'https://t.me/hades_test_bot'},
+  {id:'l15', minion:'social', name:'Social Imp', type:'auto', status:'success', dest:'Telegram private', time:'Jun 11 · 12:00 PM', exact:'2026-06-11 12:00:00 PM EDT', date:'Jun 11, 2026', summary:'Noon post reminder sent.', unread:false, version:'v3 user', owner:'you', openLabel:'Open Telegram chat', externalUrl:'https://t.me/hades_test_bot'},
+  {id:'l16', minion:'calendar', name:'Calendar Shade', type:'auto', status:'failed', dest:'Email · calendar digest', time:'Jun 10 · 6:00 PM', exact:'2026-06-10 6:00:00 PM EDT', date:'Jun 10, 2026', summary:'Calendar digest failed.', unread:true, version:'v1.0 default', owner:'you', openLabel:'Open email app', externalUrl:'mailto:'},
+  {id:'l17', minion:'weather', name:'Weather Oracle', type:'auto', status:'success', dest:'Telegram private', time:'Jun 10 · 7:00 AM', exact:'2026-06-10 7:00:00 AM EDT', date:'Jun 10, 2026', summary:'Weather notice sent.', unread:false, version:'v1.0 default', owner:'you', openLabel:'Open Telegram chat', externalUrl:'https://t.me/hades_test_bot'}
+];
+function $(id){return document.getElementById(id)}
+function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));$(id).classList.add('active');document.querySelectorAll('.nav').forEach(n=>n.classList.remove('active'));document.querySelector('.nav').classList.add('active');if(id==='screen-detail') renderDetail();if(id==='screen-logs') renderLogs();}
+function activeCount(){return minions.filter(m=>m.active).length}
+function firstEmptySlot(){for(let i=0;i<maxSlots;i++){if(!minions.some(m=>m.active && m.slot===i)) return i;} return null;}
+function renderSlots(){const wrap=$('slots');wrap.innerHTML='';for(let i=0;i<maxSlots;i++){const m=minions.find(x=>x.active&&x.slot===i);const div=document.createElement('div');div.className='slot'+(m?'':' empty');if(m){div.innerHTML=`<div class="emoji">${m.emoji}</div><strong>${m.name}</strong><small>${m.type==='auto'?'auto':'manual'}</small>`;div.onclick=()=>{selectedMinionId=m.id;go('screen-detail')};}else{div.innerHTML=`<div class="emoji">＋</div><strong>Empty Slot</strong><small>add minion</small>`;div.onclick=()=>go('screen-list');}wrap.appendChild(div)}$('slotCount').textContent=`${activeCount()} / ${maxSlots} active`;}
+function renderMinionList(q=''){const grid=$('minionGrid');grid.innerHTML='';minions.filter(m=>(m.name+m.desc).toLowerCase().includes(q.toLowerCase())).slice(0,16).forEach(m=>{const div=document.createElement('div');div.className='minion-tile';div.innerHTML=`<span class="owner">${m.source}</span><div class="emoji">${m.emoji}</div><strong>${m.name}</strong><small>${m.active?'Active':'Inactive'} · ${m.type}</small>`;div.onclick=()=>{selectedMinionId=m.id;go('screen-detail')};grid.appendChild(div)});}
+function current(){return minions.find(m=>m.id===selectedMinionId)}
+function showToast(msg, error=false){const t=$('stateToast');t.textContent=msg;t.className='toast show'+(error?' error':'');setTimeout(()=>t.classList.remove('show'),3200)}
+function renderDetail(){const m=current();$('detailRoot').classList.toggle('auto',m.type==='auto');document.body.classList.toggle('auto',false);$('detailName').textContent=m.name;$('detailSource').textContent=`${m.source} minion · ${m.version}`;$('detailDesc').textContent='';$('activeToggle').classList.toggle('on',m.active);$('activeLabel').textContent=m.active?'Active':'Inactive';$('summonCmd').textContent=m.command||'Auto-bound';$('exampleCmd').textContent=m.example||'No manual summon';if($('previewInput')) $('previewInput').textContent=m.example||'No manual summon';if($('previewCopy')) $('previewCopy').textContent=previewCopyFor(m);if($('previewGif')) $('previewGif').textContent=previewArtifactFor(m);$('manualSummon').disabled=!m.active;$('manualSummon').classList.toggle('disabled', !m.active);$('detailRoot').parentElement.querySelectorAll('.manual-only').forEach(el=>el.style.display=m.type==='auto'?'none':'');document.querySelectorAll('.auto-card').forEach(el=>el.style.display=m.type==='auto'?'block':'none');$('autoInterval').textContent=m.interval||'Not scheduled';$('autoNext').textContent=m.next||'No next run';$('autoDestinations').innerHTML=destIcons(m.destination);if($('autoPreviewInput')) $('autoPreviewInput').textContent=`${m.next||'Next run'} → ${m.destination||'configured destination'}`;if($('autoPreviewOutput')) $('autoPreviewOutput').textContent=autoPreviewFor(m);$('activityList').innerHTML=logs.filter(l=>l.minion===m.id).slice(0,6).map(logMini).join('');$('techDetails').innerHTML=`<div class="kv"><span>Owner</span><span>${m.owner}</span></div><div class="kv"><span>Type</span><span>${m.type}</span></div><div class="kv"><span>Destination</span><span>${m.destination}</span></div><div class="kv"><span>Version</span><span>${m.version}</span></div><div class="kv"><span>Slot</span><span>${m.active?'Slot '+(m.slot+1):'Inactive'}</span></div><div class="kv"><span>Access</span><span>User scoped. Defaults fork before edit.</span></div>`;}
+function previewArtifactFor(m){
+  if(m.id==='cat') return '⚖️ 🐱 §';
+  if((m.example||'').includes('wizard')) return '🐈‍⬛ 🧙';
+  return `${m.emoji || '☍'} ✨`;
+}
+function previewCopyFor(m){
+  if(m.id==='cat') return 'A lawyer cat, grave with legal delusions. It objects to the yarn and bills by the hour.';
+  return `${m.name} answers the example summon. The output is cached until the minion changes again.`;
+}
+function autoPreviewFor(m){
+  if(m.id==='brief') return 'Morning docket digest prepared. The deadlines have assembled like minor demons.';
+  if(m.id==='social') return 'Scheduled social note prepared for Telegram. The imp has found something to shout about.';
+  if(m.id==='weather') return 'Weather notice prepared. Rain threatens theatrically, as usual.';
+  if(m.id==='tea') return 'Caffeine reminder prepared. A small mercy from a cruel clock.';
+  if(m.id==='job') return 'Job alert digest prepared. Three postings crawled out of the market fog.';
+  return `${m.name} prepares its scheduled output for ${m.destination || 'the bound destination'}.`;
+}
+function destIcons(dest){let html=''; if(dest?.toLowerCase().includes('telegram')) html+=`<a class="social-icon" href="#">✈️</a>`; if(dest?.toLowerCase().includes('discord')) html+=`<a class="social-icon" href="#">💬</a>`; if(dest?.toLowerCase().includes('email')||dest?.toLowerCase().includes('gmail')) html+=`<a class="social-icon" href="mailto:">✉️</a>`; return html || `<a class="social-icon" href="#">☍</a>`;}
+function logMini(l){return `<div class="log-mini" onclick="openLog('${l.id}')"><strong>${l.type} · ${l.dest}</strong><p>${l.time}</p></div>`}
+function externalButton(l){return l.externalUrl ? `<a class="mini-link" href="${l.externalUrl}" target="_blank" rel="noreferrer" onclick="event.stopPropagation()">${l.openLabel || 'Open destination'}</a>` : `<span class="tiny">No external jump available</span>`}
+function renderLogs(){const f=$('logFilter').value;const m=current();$('logScopeChip').textContent=f==='current'?m.name:'All minions';let list=logs.filter(l=>f==='all'||l.minion===m.id);const groups={};list.forEach(l=>{(groups[l.date] ||= []).push(l)});$('fullLogs').innerHTML=Object.entries(groups).map(([date,items])=>`<div class="date-head">${date}</div>`+items.map(l=>`<div class="log-row ${jumpLogId===l.id?'target-log':''}" id="log-${l.id}" onclick="focusLog('${l.id}')"><strong>${l.name} · ${l.type} · ${l.status}</strong><p>${l.exact}<br>${l.dest}<br>${l.summary}<br><span class="tiny">${l.version} · owner: ${l.owner}</span></p><div class="log-actions">${externalButton(l)}</div></div>`).join('')).join('');setTimeout(()=>{if(jumpLogId&&$('log-'+jumpLogId))$('log-'+jumpLogId).scrollIntoView({block:'center',behavior:'smooth'});},80)}
+function renderNotifs(){const pool=logs.filter(l=>notifTab==='manual'?l.type==='manual'||l.type==='test':l.type==='auto');const list=pool.slice(0,10);$('notifCount').textContent=notifTab==='manual'?'Recent 10 summons / tests':'Recent 10 autos';$('notifList').innerHTML=list.map(l=>`<div class="notif-item ${l.unread?'unread':'read'}" onclick="openLog('${l.id}', true)"><strong>${l.name} · ${l.type}</strong><p>${l.time}<br>${l.dest}</p></div>`).join('');$('bellDot').style.display=logs.some(l=>l.unread)?'block':'none';}
+function focusLog(id){jumpLogId=id;renderLogs();}
+function openLog(id, fromNotif=false){const l=logs.find(x=>x.id===id);if(!l)return;selectedMinionId=l.minion;jumpLogId=id;if(fromNotif){l.unread=false;$('notifPanel').classList.remove('open');renderNotifs();}go('screen-logs');}
+$('notifBtn').onclick=()=>{$('notifPanel').classList.toggle('open');renderNotifs();};$('closeNotif').onclick=()=>$('notifPanel').classList.remove('open');document.querySelectorAll('[data-notif]').forEach(b=>b.onclick=()=>{notifTab=b.dataset.notif;document.querySelectorAll('[data-notif]').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderNotifs();});
+$('activeToggle').onclick=()=>{const m=current();if(m.active){m.active=false;m.slot=null;showToast('Dismissed. The slot is empty again. Try not to mourn it.');}else{const slot=firstEmptySlot();if(slot===null){showToast('No empty slot remains. Dismiss one of the lesser things first.',true);return;}m.active=true;m.slot=slot;showToast('Activated. The minion has taken its little throne.');}renderSlots();renderDetail();renderMinionList();};
+$('manualSummon').onclick=()=>{const m=current();if(!m.active){showToast('Activate this minion before summoning it.',true);return;}logs.unshift({id:'l'+Date.now(),minion:m.id,name:m.name,type:'manual',status:'success',dest:m.destination,time:'Just now',date:'Today',summary:`${m.name} was manually summoned. The realm endured.`,unread:true,version:m.version,owner:'you'});showToast('Summoned. A new mark has been carved into the logs.');renderDetail();renderNotifs();};
+$('editMinion').onclick=()=>showToast(current().source==='Default'?'Forge will fork this default before editing. The original remains untouched.':'Opening Forge for your owned minion.');
+$('viewLogs').onclick=()=>{jumpLogId=null;go('screen-logs')};$('testRun').onclick=()=>{$('testModal').classList.add('open');};$('closeModal').onclick=()=>$('testModal').classList.remove('open');$('privateDests').innerHTML=`${connected.telegram?'<button class="dest"><span>✈️</span>Telegram</button>':''}${connected.discord?'<button class="dest"><span>💬</span>Discord DM</button>':''}${connected.email?'<button class="dest"><span>✉️</span>Email</button>':''}`;document.addEventListener('click',e=>{if(e.target.closest('.dest')){logs.unshift({id:'l'+Date.now(),minion:'cat',name:'Cat Courier',type:'test',status:'success',dest:e.target.closest('.dest').innerText.trim(),time:'Just now',date:'Today',summary:'Private test sent. A lawyer cat has been dispatched into safer shadows.',unread:true,version:'v1.0 default',owner:'you'});$('testModal').classList.remove('open');showToast('Private test sent. The logs noticed.');renderDetail();renderNotifs();}});$('logFilter').onchange=renderLogs;$('dateFilter').onchange=renderLogs;
+renderSlots();renderMinionList();renderDetail();renderNotifs();
+</script>
+</body>
+</html>

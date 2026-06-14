@@ -3,14 +3,18 @@
   "compaction": {
     "auto": true,
     "prune": true,
-    "reserved": 4000,
+    "reserved": 10000,
     "tail_turns": 2
   },
   "provider": {
-    "opencode": {
+    "opencode-go": {
+      "id": "opencode-go",
       "models": {
-        "big-pickle": {
-          "limit": { "context": 40000, "output": 16384 }
+        "deepseek-v4-pro": {
+          "limit": { "context": 64000, "output": 16384 }
+        },
+        "deepseek-v4-flash": {
+          "limit": { "context": 64000, "output": 16384 }
         }
       }
     }

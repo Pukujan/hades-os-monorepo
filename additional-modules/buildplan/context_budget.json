@@ -1,14 +1,14 @@
 {
-  "hardLimit": 40000,
-  "currentUsage": 0,
-  "remaining": 40000,
-  "warningAt": 32000,
-  "compactAt": 36000,
-  "stopAt": 39000,
+  "hardLimit": 64000,
+  "currentUsage": 2800,
+  "remaining": 61200,
+  "warningAt": 51200,
+  "compactAt": 57600,
+  "stopAt": 62400,
   "lastCompactedAt": null,
   "compactionStrategy": "summarize completed work, preserve current phase, target files, failing tests, blockers",
-  "sessionStart": "2026-06-13T19:38:41.101+00:00",
-  "sessionEnd": "2026-06-14T13:10:48.704+00:00",
+  "sessionStart": "2026-06-14T16:56:02.857+00:00",
+  "sessionEnd": "2026-06-14T18:13:52.404+00:00",
   "history": [
     {
       "endedAt": "2026-06-12T16:33:56.160+00:00",
@@ -93,6 +93,48 @@
       "peakUsage": 0,
       "reason": "archive_session",
       "slug": "chat-cards-pending-voice"
+    },
+    {
+      "endedAt": "2026-06-14T15:05:04.254+00:00",
+      "peakUsage": 0,
+      "reason": "archive_session",
+      "slug": "2026-06-14-minions-ui-port"
+    },
+    {
+      "endedAt": "2026-06-14T15:22:01.321+00:00",
+      "peakUsage": 70000,
+      "reason": "archive_session",
+      "slug": "context-budget-tooling-fixes"
+    },
+    {
+      "endedAt": "2026-06-14T15:32:16.201+00:00",
+      "peakUsage": 0,
+      "reason": "archive_session",
+      "slug": "stabilize-agents-md-cache"
+    },
+    {
+      "endedAt": "2026-06-14T15:45:08.032+00:00",
+      "peakUsage": 0,
+      "reason": "archive_session",
+      "slug": "runtime-compaction-smoke-test"
+    },
+    {
+      "endedAt": "2026-06-14T17:19:28.445+00:00",
+      "peakUsage": 0,
+      "reason": "archive_session",
+      "slug": "minions-ui-validation-chat-markup-cleanup"
+    },
+    {
+      "endedAt": "2026-06-14T18:04:44.283+00:00",
+      "peakUsage": 0,
+      "reason": "archive_session",
+      "slug": "persistence-output-contract-deployment-audit"
+    },
+    {
+      "endedAt": "2026-06-14T18:13:52.404+00:00",
+      "peakUsage": 2800,
+      "reason": "archive_session",
+      "slug": "railway-hermes-runtime-fix-greened-tests"
     }
   ]
 }

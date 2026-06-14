@@ -19,7 +19,11 @@ function createMessage(role, content, extra = {}) {
 
 export function createHadesService({ repository, scopedRepos, hermes, config = {}, minionAssignmentRuntime, context, telegramClientFactory } = {}) {
   function resolveUserId(authContext) {
-    return authContext?.userId || "local-user";
+    if (authContext?.userId) return authContext.userId;
+    if (process.env.NODE_ENV !== "production") {
+      return process.env.HADES_USER_ID || "local-user";
+    }
+    return null;
   }
 
   async function readiness() {

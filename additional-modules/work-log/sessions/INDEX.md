@@ -2,6 +2,10 @@
 
 | Date | Slug | Summary | Reference |
 |------|------|---------|-----------|
+| 2026-06-14 | runtime-compaction-smoke-test | Smoke test utilities: payload gen, markers, log watcher, runtime docs | [→](./2026-06-14-runtime-compaction-smoke-test.md) |
+| 2026-06-14 | stabilize-agents-md-cache | Restructure AGENTS.md cache-stable: numbered sections, Cache Policy near top, Operator Notes below core | [→](./2026-06-14-stabilize-agents-md-cache.md) |
+| 2026-06-14 | context-budget-tooling-fixes | Fix 28k→40k thresholds, opencode model config, archive slug dedup | [→](./2026-06-14-context-budget-tooling-fixes.md) |
+| 2026-06-14 | minions-ui-port | Port Minions UI/UX from HTML preview into React (frontend-only, mock data) | [→](./2026-06-14-minions-ui-port.md) |
 | 2026-06-06 | audit-and-memory-setup | Registry audit, MEMORY.md creation, context engineering | [→](./2026-06-06-audit-and-memory-setup.md) |
 | 2026-06-06 | generic-rename-and-enforcement-test | Renamed pipeline agents to generic slugs, verified boundary enforcement | [→](./2026-06-06-generic-rename-and-enforcement-test.md) |
 | 2026-06-13 | handoff-multi-user-auth | Multi-user auth + Hermes isolation via TDD — full handoff document | [→](./2026-06-13-handoff-multi-user-auth.md) |

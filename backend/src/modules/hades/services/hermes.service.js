@@ -30,7 +30,7 @@ function wrapGeneralResult(result) {
   const normalized = normalizeChatActions(rawActions);
   const cards = normalizeChatCards(result.cards);
   const response = {
-    reply: result.assistantText || result.reply || "",
+    reply: sanitizeAssistantText(result.assistantText || result.reply || ""),
     actions: normalized,
   };
   const guarded = guardGeneralChatScope(response);

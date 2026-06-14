@@ -9,10 +9,10 @@ export function createDiscordConnectionRepository({ storage = "memory", supabase
   const byDiscordUserId = new Map();
   let hydrated = false;
 
-  function hydrate() {
+  async function hydrate() {
     if (storage !== "supabase" || hydrated) return;
     hydrated = true;
-    for (const row of readTableRows(supabaseClient, tableName)) {
+    for (const row of await readTableRows(supabaseClient, tableName)) {
       if (!row?.id) continue;
       connections.set(row.id, { ...row });
       if (row.discord_user_id) {
@@ -28,7 +28,7 @@ export function createDiscordConnectionRepository({ storage = "memory", supabase
   }
 
   async function createOrUpdate({ userId, tenantId, discordUserId, guildId, channelId, status }) {
-    hydrate();
+    await hydrate();
     const existing = byDiscordUserId.get(discordUserId);
     const id = existing?.id || createId("dconn");
     const record = {
@@ -49,7 +49,7 @@ export function createDiscordConnectionRepository({ storage = "memory", supabase
   }
 
   async function findPublicByUser({ userId, tenantId }) {
-    hydrate();
+    await hydrate();
     for (const record of connections.values()) {
       if (record.user_id === userId && record.tenant_id === tenantId) {
         return record;
@@ -59,7 +59,7 @@ export function createDiscordConnectionRepository({ storage = "memory", supabase
   }
 
   async function findByDiscordUserId({ discordUserId }) {
-    hydrate();
+    await hydrate();
     return byDiscordUserId.get(discordUserId) || null;
   }
 

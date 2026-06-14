@@ -1,3 +1,4 @@
+import { createClient } from "@supabase/supabase-js";
 import { createHadesRoutes } from "./routes/hades.routes.js";
 import { createHadesRepository } from "./repositories/hades.repository.js";
 import { createHermesService } from "./services/hermes.service.js";
@@ -21,27 +22,11 @@ import { createTokenCrypto } from "./security/tokenCrypto.js";
 
 function createSupabaseClient() {
   const url = process.env.SUPABASE_URL;
-  const anonKey = process.env.SUPABASE_ANON_KEY;
-  if (!url || !anonKey) return null;
-  return {
-    _url: url,
-    _anonKey: anonKey,
-    tables: {},
-    table(name) {
-      return {
-        upsert: async (row) => {
-          this.tables[name] = this.tables[name] || [];
-          const idx = this.tables[name].findIndex((r) => r.id === row.id);
-          if (idx >= 0) this.tables[name][idx] = { ...this.tables[name][idx], ...row };
-          else this.tables[name].push({ ...row });
-        },
-        insert: async (row) => {
-          this.tables[name] = this.tables[name] || [];
-          this.tables[name].push({ ...row });
-        },
-      };
-    },
-  };
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !serviceRoleKey) return null;
+  return createClient(url, serviceRoleKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
 }
 
 export async function register(app, context) {

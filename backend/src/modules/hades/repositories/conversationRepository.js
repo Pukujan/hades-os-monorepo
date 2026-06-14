@@ -9,17 +9,17 @@ export function createConversationRepository({ storage = "memory", supabaseClien
   const messagesByConversation = new Map();
   let hydrated = false;
 
-  function hydrate() {
+  async function hydrate() {
     if (storage !== "supabase" || hydrated) return;
     hydrated = true;
-    for (const row of readTableRows(supabaseClient, tableName)) {
+    for (const row of await readTableRows(supabaseClient, tableName)) {
       if (!row?.id) continue;
       conversations.set(row.id, { ...row });
       if (!messagesByConversation.has(row.id)) {
         messagesByConversation.set(row.id, []);
       }
     }
-    for (const row of readTableRows(supabaseClient, messagesTableName)) {
+    for (const row of await readTableRows(supabaseClient, messagesTableName)) {
       if (!row?.conversation_id) continue;
       const msgs = messagesByConversation.get(row.conversation_id);
       if (msgs) {
@@ -43,7 +43,7 @@ export function createConversationRepository({ storage = "memory", supabaseClien
   }
 
   async function createConversation({ userId, tenantId, data, contextType } = {}) {
-    hydrate();
+    await hydrate();
     const record = {
       ...data,
       id: data.id || createId("conv"),
@@ -62,14 +62,14 @@ export function createConversationRepository({ storage = "memory", supabaseClien
   }
 
   async function listConversations({ userId, tenantId, contextType }) {
-    hydrate();
+    await hydrate();
     return [...conversations.values()].filter(
       (c) => c.user_id === userId && c.tenant_id === tenantId && (contextType == null || c.context_type === contextType)
     );
   }
 
   async function addMessage({ userId, tenantId, conversationId, data, idempotencyKey }) {
-    hydrate();
+    await hydrate();
     const conv = conversations.get(conversationId);
     if (!conv) return null;
     if (conv.user_id !== userId || conv.tenant_id !== tenantId) return null;
@@ -95,7 +95,7 @@ export function createConversationRepository({ storage = "memory", supabaseClien
   }
 
   async function listMessages({ userId, tenantId, conversationId }) {
-    hydrate();
+    await hydrate();
     const conv = conversations.get(conversationId);
     if (!conv) return [];
     if (conv.user_id !== userId || conv.tenant_id !== tenantId) return [];
@@ -103,7 +103,7 @@ export function createConversationRepository({ storage = "memory", supabaseClien
   }
 
   async function clearMessages({ userId, tenantId, conversationId }) {
-    hydrate();
+    await hydrate();
     const conv = conversations.get(conversationId);
     if (!conv) return null;
     if (conv.user_id !== userId || conv.tenant_id !== tenantId) return null;

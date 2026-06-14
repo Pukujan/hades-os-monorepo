@@ -38,9 +38,17 @@ function parseDotEnv(text) {
 }
 
 function resolveHermesBin() {
-  const bundled = path.join(os.homedir(), ".hermes", "hermes-agent", "venv", "bin", "hermes");
-  if (fs.existsSync(bundled)) {
-    return bundled;
+  if (process.env.HERMES_BIN_PATH) {
+    return process.env.HERMES_BIN_PATH;
+  }
+  if (process.env.NODE_ENV !== "production") {
+    const devPaths = [
+      "/Users/teresaguajardo/.hermes/hermes-agent/venv/bin/hermes",
+      path.join(os.homedir(), ".hermes", "hermes-agent", "venv", "bin", "hermes"),
+    ];
+    for (const p of devPaths) {
+      if (fs.existsSync(p)) return p;
+    }
   }
   return "hermes";
 }
@@ -197,13 +205,20 @@ export function createHermesRuntimeService({
       contextLength,
       context
     });
+    const subprocessEnv = {
+      ...process.env,
+      ...backendEnv,
+    };
+    if (!subprocessEnv.HERMES_HOME) {
+      subprocessEnv.HERMES_HOME = "/tmp/hades-hermes";
+    }
+    if (!subprocessEnv.HERMES_CACHE_DIR) {
+      subprocessEnv.HERMES_CACHE_DIR = "/tmp/hades-hermes/cache";
+    }
     try {
       const output = await runCommand(hermesBin, buildCommandArgs(prompt, { provider, model }), {
         encoding: "utf8",
-        env: {
-          ...process.env,
-          ...backendEnv
-        }
+        env: subprocessEnv,
       });
 
       return parseRuntimeOutput(output, context);

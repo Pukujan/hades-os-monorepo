@@ -14,10 +14,10 @@ export function createTelegramConnectionRepository({ storage = "memory", supabas
   const byTelegramUserId = new Map();
   let hydrated = false;
 
-  function hydrate() {
+  async function hydrate() {
     if (storage !== "supabase" || hydrated) return;
     hydrated = true;
-    for (const row of readTableRows(supabaseClient, tableName)) {
+    for (const row of await readTableRows(supabaseClient, tableName)) {
       if (!row?.id) continue;
       connections.set(row.id, { ...row });
       if (row.telegram_user_id) {
@@ -33,7 +33,7 @@ export function createTelegramConnectionRepository({ storage = "memory", supabas
   }
 
   async function createOrUpdate({ userId, tenantId, telegramUserId, botToken, botUsername, status }) {
-    hydrate();
+    await hydrate();
     if (!crypto || typeof crypto.encrypt !== "function") {
       throw Object.assign(
         new Error("Crypto dependency is required to store Telegram bot tokens"),
@@ -63,7 +63,7 @@ export function createTelegramConnectionRepository({ storage = "memory", supabas
   }
 
   async function findPublicByUser({ userId, tenantId }) {
-    hydrate();
+    await hydrate();
     for (const record of connections.values()) {
       if (record.user_id === userId && record.tenant_id === tenantId) {
         const { encrypted_bot_token, bot_token, ...rest } = record;
@@ -74,7 +74,7 @@ export function createTelegramConnectionRepository({ storage = "memory", supabas
   }
 
   async function findRuntimeTokenByTelegramUserId({ telegramUserId }) {
-    hydrate();
+    await hydrate();
     const record = byTelegramUserId.get(telegramUserId) || null;
     if (!record) return null;
     if (!crypto || typeof crypto.decrypt !== "function") {
@@ -87,7 +87,7 @@ export function createTelegramConnectionRepository({ storage = "memory", supabas
   }
 
   async function findByTelegramUserId({ telegramUserId }) {
-    hydrate();
+    await hydrate();
     return byTelegramUserId.get(telegramUserId) || null;
   }
 

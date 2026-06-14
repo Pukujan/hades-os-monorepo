@@ -7,14 +7,15 @@ export const DEPLOY_TARGETS = {
   backend: {
     root: "backend",
     platform: "railway",
-    requiredFiles: ["backend/package.json", "backend/railway.toml", "backend/.env.example"],
+    requiredFiles: ["backend/package.json", "backend/railway.toml", "backend/.env.example", "backend/Dockerfile", "backend/.dockerignore"],
     forbiddenFiles: ["backend/vercel.json"],
     startScript: "start",
     envVars: [
       "PORT",
       "NODE_ENV",
-      "HADES_USER_ID",
-      "HERMES_MODE",
+      "HERMES_REQUIRED",
+      "HERMES_BIN_PATH",
+      "HERMES_HOME",
       "SUPABASE_URL",
       "SUPABASE_SERVICE_ROLE_KEY",
       "SUPABASE_ANON_KEY",

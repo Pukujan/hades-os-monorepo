@@ -38,7 +38,7 @@ function buildDestinationPreview(minion) {
   if (provider === "discord") {
     return {
       type: "discord",
-      title: "Discord Preview",
+      title: "Summon Preview",
       label: channel,
       previewMessages: [
         { sender: "Pu", text: minion?.commandName || "!sendcat funny lawyer cat" },
