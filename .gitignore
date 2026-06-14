@@ -12,3 +12,8 @@ file-exchange/exports/consolidated-models.json
 !frontend/.env.example
 *.log
 .vercel
+__pycache__/
+*.pyc
+*.pyo
+forge-response.json
+.env copy
