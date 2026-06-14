@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "scripts": {
     "start": "npm --prefix backend run start",
-    "build": "echo 'Build handled by Dockerfile'",
+    "build": "npm --prefix backend ci",
     "sync:cli-template": "node scripts/sync-cli-template.mjs",
     "export:architecture-starter": "node scripts/export-architecture-starter.mjs",
     "dev:backend": "npm --prefix backend run dev",

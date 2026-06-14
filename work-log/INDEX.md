@@ -19,6 +19,12 @@ See [README.md](./README.md). Add handoffs, study-docs, and dev-log rows as you 
 | 2026-06-10 | hosted-runtime-readiness-tdd | Phase plan for making the MVP host-ready with readiness, persistence, and smoke-test gates |
 | 2026-06-11 | hermes-runtime-wrapper-tdd | Phase plan and red-test contract for Hermes runtime-wrapper conversion |
 
+## Dev logs
+
+| Date | Slug | Summary |
+|------|------|---------|
+| 2026-06-14 | deploy-readiness-audit | Railway/Vercel deploy fixes: backend .gitignore, .env.example vars, railway.toml, DEPLOY.md, test isolation |
+
 ## Sessions
 
 Archived session summaries. Full index: [sessions/INDEX.md](./sessions/INDEX.md)

@@ -1,0 +1,417 @@
+{
+  "meta": {
+    "schemaVersion": "1.0.0",
+    "entryId": "005",
+    "slug": "deploy-readiness-audit",
+    "generatedAt": "2026-06-14T18:48:15.101Z",
+    "humanLogPath": "work-log/dev-logs/human/005_2026-06-14_18-47_dev-log_deploy-readiness-audit.md",
+    "audience": "agent",
+    "filledBy": "script",
+    "handoffRefs": []
+  },
+  "summary": "Deploy readiness audit: fixed 5 issues (A-E) blocking Railway/Vercel deployment. dotenv lockfile already consistent. Created backend/.gitignore with Hermes safety patterns. Added HERMES_REQUIRED, ENCRYPTION_KEY, GIPHY_API_KEY, TELEGRAM_BOT_TOKEN to .env.example. Removed start from ROOT_FORBIDDEN_SCRIPTS. Updated DEPLOY.md with rootDirectory instructions. Fixed writableState test (HERMES_HOME .env interference). All 321 backend + 9 contract + 5 boundary tests pass. Current state: deploy-ready, no blockers.",
+  "apis": {
+    "capturedAt": "2026-06-14T18:47:36.940Z",
+    "sourceDocs": [
+      "docs/API.md"
+    ],
+    "http": {
+      "active": [
+        {
+          "method": "GET",
+          "path": "/api/auth/browser-config",
+          "module": "auth",
+          "description": "Public auth config for frontend (Supabase URL, anon key, app URL)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/hades/readiness",
+          "module": "hades",
+          "description": "Hades service readiness check"
+        },
+        {
+          "method": "GET",
+          "path": "/api/hades/bootstrap",
+          "module": "hades",
+          "description": "Bootstrap data for frontend hydration"
+        },
+        {
+          "method": "POST",
+          "path": "/api/hades/chat",
+          "module": "hades",
+          "description": "Send a chat message to Hermes (legacy, context from body)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/hades/chat/general",
+          "module": "hades",
+          "description": "Send a general chat message to Hermes (non-forge context)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/hades/chat/forge",
+          "module": "hades",
+          "description": "Send a forge chat message to Hermes (minion creation context)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/hades/minions/test",
+          "module": "hades",
+          "description": "Run a test of the current minion draft"
+        },
+        {
+          "method": "POST",
+          "path": "/api/hades/minions",
+          "module": "hades",
+          "description": "Save a new minion"
+        },
+        {
+          "method": "POST",
+          "path": "/api/hades/assignments",
+          "module": "hades",
+          "description": "Assign a minion to a social channel"
+        },
+        {
+          "method": "POST",
+          "path": "/api/hades/triggers",
+          "module": "hades",
+          "description": "Handle an incoming social trigger (Discord, Telegram)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/hades/conversations/:id/messages",
+          "module": "hades",
+          "description": "List messages in a conversation"
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/hades/conversations/:id/messages",
+          "module": "hades",
+          "description": "Clear all messages from a conversation"
+        },
+        {
+          "method": "GET",
+          "path": "/api/hades/socials",
+          "module": "hades",
+          "description": "List user's social connections (Discord, Telegram) without tokens"
+        },
+        {
+          "method": "POST",
+          "path": "/api/hades/socials/telegram/token",
+          "module": "hades",
+          "description": "Save a Telegram bot token (validates via getMe)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/_reference/health",
+          "module": "_reference",
+          "description": "Example module health check"
+        },
+        {
+          "method": "GET",
+          "path": "/api/model-condenser/health",
+          "module": "model-condenser",
+          "description": "Module health and config summary"
+        },
+        {
+          "method": "POST",
+          "path": "/api/model-condenser/condense",
+          "module": "model-condenser",
+          "description": "Regenerate consolidated-models.json"
+        },
+        {
+          "method": "GET",
+          "path": "/api/model-condenser/consolidated",
+          "module": "model-condenser",
+          "description": "Read consolidated schema inventory"
+        }
+      ],
+      "stub": [],
+      "deprecated": []
+    },
+    "moduleStatus": [],
+    "versioned": {
+      "pipeline": null,
+      "prompts": null,
+      "storage": null,
+      "app": {
+        "packageJson": "0.1.0"
+      }
+    },
+    "deprecated": {
+      "http": [],
+      "cli": [],
+      "prompts": [],
+      "notes": []
+    },
+    "cli": [
+      {
+        "command": "npm run dev-log:pre-push",
+        "purpose": "Paired human + agent dev logs"
+      },
+      {
+        "command": "npm run condense:all",
+        "purpose": "consolidated snapshots → file-exchange/exports/{stamp}_consolidated/"
+      },
+      {
+        "command": "npm run import:file-exchange",
+        "purpose": "Inbound bundle → file-exchange/imports/{stamp}/"
+      },
+      {
+        "command": "npm --prefix backend run condense-models",
+        "purpose": "Regenerate consolidated-models.json"
+      }
+    ]
+  },
+  "git": {
+    "branch": "master",
+    "sha": "56c9e719696d98aa91ac43ad72b08808aa4cd06c",
+    "shortSha": "56c9e71",
+    "changedFiles": [
+      {
+        "code": "??",
+        "path": "additional-modules/scripts/__pycache__/"
+      },
+      {
+        "code": "??",
+        "path": "additional-modules/scripts/tests/__pycache__/"
+      },
+      {
+        "code": "??",
+        "path": "\"backend/.env copy\""
+      }
+    ],
+    "diffStatAgainstHead": "",
+    "diffCachedStat": "",
+    "recentCommits": [
+      "56c9e71 Deploy readiness audit fixes + backend .gitignore, DEPLOY.md, contract cleanup",
+      "374b623 add ENCRYPTION_KEY to backend .env.example",
+      "7236061 Fix Railway still deploying repo root",
+      "2000ab6 Railway deploy fix with Hermes-required runtime + 335 passing tests",
+      "ce09854 chat cards, pending copy, voice continuity, soul rewrite, actions, guard, API docs"
+    ]
+  },
+  "tests": {
+    "ran": true,
+    "exitCode": 0,
+    "summary": "tests=321 pass=321 fail=0 exit=0",
+    "passed": [
+      "✔ mini-module: barrel import is allowed (3.72025ms)",
+      "✔ mini-module: deep sibling import is forbidden (3.403041ms)",
+      "✔ backend mini-module: barrel import is allowed (4.875916ms)",
+      "✔ backend mini-module: deep sibling import is forbidden (1.656334ms)",
+      "✔ cross-module: relative imports between modules are forbidden (2.816917ms)",
+      "✔ npm test covers every .contract.mjs file (0.425042ms)",
+      "✔ npm run test:contracts script exists (0.253167ms)",
+      "✔ lint:architecture enforces contract tests via the gate (0.136542ms)",
+      "✔ contract test coverage (1.803334ms)",
+      "✔ GET /api/_reference/health (8.241084ms)",
+      "✔ getHealth returns module metadata (3.911208ms)",
+      "✔ full auth chain: valid Supabase session can access protected route (6.142583ms)",
+      "✔ attachAuthContext middleware writes verified context onto req (2.396875ms)",
+      "✔ Discord OAuth login can link a backend-verified Discord identity without exposing the bot token (4.910042ms)",
+      "✔ unauthenticated Discord connection requests fail closed before bot initialization (0.450833ms)",
+      "✔ rejects Hermes job creation when no authenticated Supabase session is present (0.863667ms)",
+      "✔ creates a Hermes job only after backend verifies a valid Supabase-authenticated Discord user (0.171625ms)",
+      "✔ does not allow client-supplied userId, tenantId, or discordAccountId to override backend-verified identity (0.455291ms)",
+      "✔ Supabase verification errors fail closed (0.918458ms)",
+      "✔ raw Supabase tokens or cookies are never passed to Hermes (0.197542ms)",
+      "✔ rejects request with no session token (3.647709ms)",
+      "✔ rejects request with invalid session token (0.323709ms)",
+      "✔ accepts request with valid Supabase session (0.202917ms)",
+      "✔ defaults tenantId to userId when tenant_id is missing (0.147959ms)",
+      "✔ does not allow client-provided userId to override session userId (0.18775ms)",
+      "✔ requireHadesAuth (5.111167ms)",
+      "✔ GET /api/auth/browser-config returns only public auth config (3.810959ms)",
+      "✔ browser-config only returns supabaseUrl and supabaseAnonKey (2.542459ms)",
+      "✔ browser-config does not include appUrl or any app-specific keys (0.452958ms)",
+      "✔ verifySupabaseSession calls Supabase user endpoint with bearer token (1.005083ms)",
+      "✔ verifySupabaseSession accepts sb-access-token cookies (0.199875ms)",
+      "✔ verifySupabaseSession returns null when auth is missing or invalid (0.491542ms)",
+      "✔ general and forge conversations are stored separately (96.117625ms)",
+      "✔ general chat returns structured response with content (1.560708ms)",
+      "✔ forge chat returns structure with draft (1.694291ms)",
+      "✔ sanitizeAssistantText removes <pastor> wrapper tag from assistant text (0.666375ms)",
+      "✔ sanitizeAssistantText removes known role wrapper tags (0.66275ms)",
+      "✔ sanitizeAssistantText does not render raw HTML tags as trusted styling (0.087834ms)",
+      "✔ sanitizeAssistantText leaves normal text unchanged (0.060708ms)",
+      "✔ sanitizeAssistantText allows markdown bold and italic (0.061ms)",
+      "✔ POST /chat/general returns sanitized reply without <pastor> wrapper tag (78.508166ms)",
+      "✔ general chat prompt forbids XML and HTML wrapper tags in output contract (0.500666ms)",
+      "✔ forge chat prompt forbids XML and HTML wrapper tags in output contract (0.139666ms)",
+      "✔ chat route surfaces insert error instead of silently succeeding (73.749917ms)",
+      "✔ POST /chat/general persists conversation and user + assistant messages via client (2.75875ms)",
+      "✔ POST /chat/forge persists forge conversation separately (1.257375ms)",
+      "✔ POST /chat/general without auth header returns 401 and does not persist (0.885625ms)",
+      "✔ chat/general loads recent messages before calling Hermes (1.369917ms)",
+      "✔ forge chat passes previous forge messages into the runtime (71.421708ms)",
+      "✔ forge chat does not receive general chat messages as context (1.804ms)",
+      "✔ general chat passes prior general messages into the runtime (1.344417ms)",
+      "✔ general chat does not receive forge messages as context (1.516042ms)",
+      "✔ general chat routes Telegram setup question to Socials (45.483209ms)",
+      "✔ general chat routes forge requests (10.504583ms)",
+      "✔ general chat returns reply content as assistant message (2.536125ms)",
+      "✔ general chat runtime receives context=general, not forge (4.731625ms)",
+      "✔ register function exists (102.949583ms)",
+      "✔ creates verifySocialAccount when deps are provided (1.405167ms)",
+      "✔ verifySocialAccount is not null when wired (0.309ms)",
+      "✔ socialClient is not null when wired (0.238167ms)",
+      "✔ hermesRuntime is not null when wired (0.193083ms)",
+      "✔ hades/index.js runtime wiring (106.093417ms)",
+      "✔ bootstrap uses scoped minion repository (1.836166ms)",
+      "✔ assignment lookup uses scoped assignment repository (0.87875ms)",
+      "✔ Hades repository wiring (4.171917ms)",
+      "✔ rejects GET /bootstrap without auth (2.653542ms)",
+      "✔ rejects POST /chat without auth (4.865ms)",
+      "✔ rejects POST /assignments without auth (1.056958ms)",
+      "✔ passes resolved authContext into bootstrap (0.372208ms)",
+      "✔ does not trust user_id from request body (0.576709ms)",
+      "✔ Hades route auth wiring (10.154625ms)",
+      "✔ User A can assign User A minion (17.683959ms)",
+      "✔ User A cannot assign User B minion (9.790916ms)",
+      "✔ User B assignments do not appear in User A bootstrap (0.704834ms)",
+      "✔ live assignment scope (29.311792ms)",
+      "✔ User A chat sends only User A scoped context to Hermes (9.0085ms)",
+      "✔ User B chat sends only User B scoped context to Hermes (1.623125ms)",
+      "✔ live chat Hermes scope (11.587042ms)",
+      "✔ saveTelegramToken encrypts before storing (21.629042ms)",
+      "✔ public socials response does not expose plaintext token (2.873584ms)"
+    ],
+    "failed": [
+      "✔ unauthenticated Discord connection requests fail closed before bot initialization (0.450833ms)",
+      "✔ Supabase verification errors fail closed (0.918458ms)",
+      "[auth] Supabase session verification failed: undefined undefined",
+      "Unhandled error: Error: Supabase insert failed: connection refused",
+      "✔ fails safely when encryption is unavailable (6.989625ms)",
+      "✔ stores status failed and failure_code (11.109916ms)",
+      "✔ marks token_invalid when test fails (0.211917ms)",
+      "✔ fails safely when crypto dependency is missing (0.402917ms)",
+      "✔ returns social_send_failed when outbound send fails (0.586375ms)",
+      "✔ fails closed when bot token is empty (0.746334ms)",
+      "✔ sendMessage fails closed on API error (0.198875ms)",
+      "✔ searchGif fails gracefully when the API returns an error (0.551792ms)",
+      "✔ searchGif fails when API key is missing (0.276ms)",
+      "✔ empty message fails (0.162458ms)",
+      "✔ missing idempotencyKey fails on write routes (0.287625ms)",
+      "✔ unknown enum values fail (0.322209ms)",
+      "✔ Hermes runtime invalid enum output fails fast (1.078709ms)",
+      "✔ Hermes runtime failure bubbles instead of falling back (0.199917ms)",
+      "✔ fails closed when bot token is empty (0.8535ms)",
+      "ℹ fail 0",
+      "✔ Discord bot runtime fails closed when the bot token is unavailable (2.87725ms)",
+      "✔ redirects to login when session refresh fails (0.217875ms)"
+    ],
+    "commands": [
+      "npm test"
+    ]
+  },
+  "repositoryTree": {
+    "capturedAt": "2026-06-14T18:48:15.101Z",
+    "excludeDirs": [
+      "node_modules",
+      ".git",
+      "dist",
+      "build",
+      ".DS_Store"
+    ],
+    "excludePrefixes": [
+      "data"
+    ],
+    "treeIgnoreFlag": "tree -I \"node_modules|.git|dist|build\"",
+    "stats": {
+      "fileCount": 806,
+      "directoryCount": 300,
+      "pathCount": 806,
+      "byExtension": {
+        ".js": 267,
+        ".json": 207,
+        ".md": 171,
+        ".mjs": 54,
+        ".py": 34,
+        "(no extension)": 23,
+        ".jsx": 16,
+        ".sql": 6,
+        ".html": 5,
+        ".pyc": 4,
+        ".css": 4,
+        ".template": 3,
+        ".toml": 2,
+        ".jsonl": 2,
+        ".example": 2,
+        ".yml": 1,
+        ".tag": 1,
+        ".sha256": 1,
+        ".ini": 1,
+        ".local": 1,
+        ".sample": 1
+      }
+    },
+    "treeText": "hades-os-monorepo/\n├── .gitignore\n├── AGENTS.md\n├── LICENSE\n├── MEMORY.md\n├── NOTICE\n├── package-lock.json\n├── package.json\n├── railway.toml\n├── README.md\n├── .github/\n│   └── workflows/\n│       └── ci.yml\n├── .opencode/\n│   ├── .gitignore\n│   ├── package-lock.json\n│   ├── package.json\n│   └── plans/\n│       ├── 2026-06-13-multi-user-auth-isolation.md\n│       ├── 2026-06-13-social-provider-integration.md\n│       └── 2026-06-13-unit-test-pack.md\n├── .pytest_cache/\n│   ├── .gitignore\n│   ├── CACHEDIR.TAG\n│   ├── README.md\n│   └── v/\n│       └── cache/\n│           ├── lastfailed\n│           └── nodeids\n├── additional-modules/\n│   ├── buildplan/\n│   │   ├── agent_state.json\n│   │   ├── agent_state.sha256\n│   │   └── context_budget.json\n│   ├── context-engineering/\n│   │   ├── opencode.json\n│   │   ├── bin/\n│   │   │   └── context-eng.js\n│   │   ├── lib/\n│   │   │   └── init.js\n│   │   └── templates/\n│   │       ├── AGENTS.md.template\n│   │       ├── MEMORY.md.template\n│   │       ├── opencode.json.template\n│   │       └── scripts/\n│   │           ├── check_gate.py\n│   │           ├── measure_context.py\n│   │           └── render_memory.py\n│   ├── docs/\n│   │   ├── API.md\n│   │   ├── CHANGELOG.md\n│   │   ├── DEPLOY.md\n│   │   ├── DEVLOG_V2.md\n│   │   ├── PUBLISHING.md\n│   │   ├── README.md\n│   │   ├── STARTER_PACK.md\n│   │   ├── architecture/\n│   │   │   ├── API_DOCUMENTATION_CONTRACT.md\n│   │   │   ├── ARCHITECTURE_GUARDRAILS.md\n│   │   │   ├── CONTRACTS_OVERVIEW.md\n│   │   │   ├── EVAL_AND_CI.md\n│   │   │   ├── MODULE_INTERNAL_CONTRACT.md\n│   │   │   ├── REPO_ARTIFACT_LAYOUT.md\n│   │   │   ├── contracts/\n│   │   │   │   ├── apiDocumentationRegistry.contract.md\n│   │   │   │   ├── architecturePushDevLog.contract.md\n│   │   │   │   ├── asyncJobQueue.contract.md\n│   │   │   │   ├── changelog.jsonl\n│   │   │   │   ├── consolidatedExports.contract.md\n│   │   │   │   ├── documentPersistence.contract.md\n│   │   │   │   ├── fileExchange.contract.md\n│   │   │   │   ├── manifest.json\n│   │   │   │   ├── moduleAgentStateMachine.contract.md\n│   │   │   │   ├── monorepoDeploy.contract.md\n│   │   │   │   ├── pipelineAgentMiniModules.contract.md\n│   │   │   │   ├── planningPhase.contract.md\n│   │   │   │   └── prePushDevLog.contract.md\n│   │   │   └── templates/\n│   │   │       ├── async-job-queue/\n│   │   │       │   ├── createQueueConnection.template.js\n│   │   │       │   ├── enqueue.template.js\n│   │   │       │   ├── inMemoryQueue.adapter.template.js\n│   │   │       │   ├── parse-document.worker.template.js\n│   │   │       │   ├── README.md\n│   │   │       │   └── run-agent-action.worker.template.js\n│   │   │       ├── document-persistence/\n│   │   │       │   ├── README.md\n│   │   │       │   ├── adapters/\n│   │   │       │   │   ├── file-storage.adapter.template.js\n│   │   │       │   │   └── parser.adapter.template.js\n│   │   │       │   ├── migrations/\n│   │   │       │   │   └── 001_document_persistence.sql\n│   │   │       │   ├── repositories/\n│   │   │       │   │   └── document.repository.template.js\n│   │   │       │   ├── routes/\n│   │   │       │   │   └── upload.routes.template.js\n│   │   │       │   └── services/\n│   │   │       │       └── document-ingest.service.template.js\n│   │   │       └── module-agent-state-machine/\n│   │   │           ├── README.md\n│   │   │           ├── agents/\n│   │   │           │   ├── example-agent.machine.template.js\n│   │   │           │   └── manifest.template.json\n│   │   │           ├── events/\n│   │   │           │   └── agent-triggers.template.js\n│   │   │           ├── migrations/\n│   │   │           │   └── 001_agent_state_machine.sql\n│   │   │           ├── repositories/\n│   │   │           │   └── agent-run.repository.template.js\n│   │   │           ├── routes/\n│   │   │           │   └── agent.routes.template.js\n│   │   │           └── services/\n│   │   │               ├── agent-actions.template.js\n│   │   │               └── agent-runner.service.template.js\n│   │   └── model-condenser/\n│   │       └── API.md\n│   ├── file-exchange/\n│   │   ├── README.md\n│   │   ├── exports/\n│   │   │   ├── .gitkeep\n│   │   │   ├── EXPORT_MANIFEST.json\n│   │   │   └── README.md\n│   │   └── imports/\n│   │       └── .gitkeep\n│   ├── phase_builder/\n│   │   ├── __init__.py\n│   │   ├── phase_01/\n│   │   │   ├── __init__.py\n│   │   │   └── state.py\n│   │   ├── phase_02/\n│   │   │   ├── __init__.py\n│   │   │   └── budget.py\n│   │   └── phase_03/\n│   │       ├── __init__.py\n│   │       └── gates.py\n│   ├── phase-builder/\n│   │   ├── pytest.ini\n│   │   ├── phase_builder/\n│   │   │   ├── __init__.py\n│   │   │   ├── phase_01/\n│   │   │   │   ├── __init__.py\n│   │   │   │   └── state.py\n│   │   │   ├── phase_02/\n│   │   │   │   ├── __init__.py\n│   │   │   │   └── budget.py\n│   │   │   └── phase_03/\n│   │   │       ├── __init__.py\n│   │   │       └── gates.py\n│   │   └── tests/\n│   │       ├── __init__.py\n│   │       ├── phase_01/\n│   │       │   ├── __init__.py\n│   │       │   └── test_state.py\n│   │       ├── phase_02/\n│   │       │   ├── __init__.py\n│   │       │   └── test_budget.py\n│   │       └── phase_03/\n│   │           ├── __init__.py\n│   │           └── test_gates.py\n│   ├── scripts/\n│   │   ├── check_agents_contract.py\n│   │   ├── check_gate.py\n│   │   ├── check_prompt_cache_shape.py\n│   │   ├── gen_compaction_payload.py\n│   │   ├── measure_context.py\n│   │   ├── measure_opencode_cache_run.md\n│   │   ├── render_memory.py\n│   │   ├── RUNTIME_COMPACTION_SMOKE_TEST.md\n│   │   ├── watch_opencode_compaction_logs.py\n│   │   ├── __pycache__/\n│   │   │   └── measure_context.cpython-314.pyc\n│   │   └── tests/\n│   │       ├── test_auto_compaction.py\n│   │       ├── test_compaction_payload_generator.py\n│   │       ├── test_measure_context.py\n│   │       └── __pycache__/\n│   │           ├── test_auto_compaction.cpython-314-pytest-9.1.0.pyc\n│   │           ├── test_compaction_payload_generator.cpython-314-pytest-9.1.0.pyc\n│   │           └── test_measure_context.cpython-314-pytest-9.1.0.pyc\n│   └── work-log/\n│       ├── INDEX.md\n│       ├── README.md\n│       ├── dev-logs/\n│       │   ├── README.md\n│       │   ├── schemas/\n│       │   │   └── dev-log-agent.v1.schema.json\n│       │   └── templates/\n│       │       └── dev-log-human.template.md\n│       ├── handoffs/\n│       │   ├── 010_2026-06-12_12-30_handoff_hermes-discord-gif-minion-runtime.md\n│       │   ├── 011_2026-06-14_handoff_minions-ui-validation-chat-markup-cleanup.md\n│       │   └── README.md\n│       ├── planning/\n│       │   └── .gitkeep\n│       ├── sessions/\n│       │   ├── 2026-06-06-audit-and-memory-setup.md\n│       │   ├── 2026-06-06-fsm-template-audit.md\n│       │   ├── 2026-06-06-generic-rename-and-enforcement-test.md\n│       │   ├── 2026-06-12-hermes-discord-gif-minion-runtime-plan-docs.md\n│       │   ├── 2026-06-12-hermes-discord-gif-runtime-handoff.md\n│       │   ├── 2026-06-13-clean-legacy-css.md\n│       │   ├── 2026-06-13-handoff-multi-user-auth.md\n│       │   ├── 2026-06-13-handoff-wire-auth-isolation.md\n│       │   ├── 2026-06-13-handoff-wire-supabase-post-auth.md\n│       │   ├── 2026-06-13-multi-user-auth-tdd.md\n│       │   ├── 2026-06-13-push-gates.md\n│       │   ├── 2026-06-13-visual-parity-fixes-2.md\n│       │   ├── 2026-06-13-visual-parity-prototype.md\n│       │   ├── 2026-06-13-wire-auth-isolation.md\n│       │   ├── 2026-06-13-wiring-tests-multi-user-auth.md\n│       │   ├── 2026-06-14-chat-cards-pending-voice.md\n│       │   ├── 2026-06-14-context-budget-tooling-fixes.md\n│       │   ├── 2026-06-14-deploy-readiness-audit-issues.md\n│       │   ├── 2026-06-14-fix-frontend-api-auth-wiring.md\n│       │   ├── 2026-06-14-minions-ui-port.md\n│       │   ├── 2026-06-14-minions-ui-validation-chat-markup-cleanup.md\n│       │   ├── 2026-06-14-persistence-output-contract-deployment-audit.md\n│       │   ├── 2026-06-14-railway-hermes-runtime-fix-greened-tests.md\n│       │   ├── 2026-06-14-railway-hermes-runtime-fix.md\n│       │   ├── 2026-06-14-railway-root-env-example.md\n│       │   ├── 2026-06-14-runtime-compaction-smoke-test.md\n│       │   ├── 2026-06-14-stabilize-agents-md-cache.md\n│       │   ├── 2026-06-14-telegram-crypto-frontend-auth-supabase-ops.md\n│       │   ├── 2026-06-14-telegram-setup-card-frontend.md\n│       │   ├── 2026-06-14-telegram-socials-layout-fix.md\n│       │   ├── 2026-06-14-wire-supabase-chat-scoped-repos.md\n│       │   ├── INDEX.md\n│       │   └── README.md\n│       └── study-docs/\n│           ├── 2026-06-06-context-engineering-for-llm-agents.md\n│           └── README.md\n├── agents/\n│   ├── hooks.json\n│   ├── commands/\n│   │   ├── architecture-push-log.md\n│   │   ├── planning-audit-log.md\n│   │   ├── pre-push-dev-log.md\n│   │   └── push.md\n│   └── hooks/\n│       └── before-agent-push.mjs\n├── backend/\n│   ├── .dockerignore\n│   ├── .env\n│   ├── .env copy\n│   ├── .env.example\n│   ├── .gitignore\n│   ├── Dockerfile\n│   ├── package-lock.json\n│   ├── package.json\n│   ├── railway.toml\n│   ├── db/\n│   │   └── migrations/\n│   │       └── .gitkeep\n│   ├── scripts/\n│   │   ├── boundary-lint.test.mjs\n│   │   ├── check-module-boundaries.mjs\n│   │   ├── check-module-layers.mjs\n│   │   ├── check-parent-mini-modules.mjs\n│   │   └── contract-discovery.test.mjs\n│   └── src/\n│       ├── core/\n│       │   ├── app.js\n│       │   ├── module-loader.js\n│       │   ├── server.js\n│       │   └── startup-log.js\n│       ├── modules/\n│       │   ├── .gitkeep\n│       │   ├── _reference/\n│       │   │   ├── index.js\n│       │   │   ├── README.md\n│       │   │   ├── adapters/\n│       │   │   │   └── README.md\n│       │   │   ├── config/\n│       │   │   │   └── index.js\n│       │   │   ├── domain/\n│       │   │   │   └── README.md\n│       │   │   ├── events/\n│       │   │   │   └── index.js\n│       │   │   ├── prompts/\n│       │   │   │   ├── manifest.json\n│       │   │   │   └── templates/\n│       │   │   │       └── example.prompt.js\n│       │   │   ├── repositories/\n│       │   │   │   └── .gitkeep\n│       │   │   ├── routes/\n│       │   │   │   ├── health.routes.js\n│       │   │   │   └── index.js\n│       │   │   ├── schemas/\n│       │   │   │   └── health.schema.js\n│       │   │   ├── services/\n│       │   │   │   └── health.service.js\n│       │   │   ├── tests/\n│       │   │   │   ├── integration/\n│       │   │   │   │   └── health.routes.test.js\n│       │   │   │   └── unit/\n│       │   │   │       └── health.service.test.js\n│       │   │   └── utils/\n│       │   │       └── index.js\n│       │   ├── auth/\n│       │   │   ├── index.js\n│       │   │   ├── middleware/\n│       │   │   │   └── attachAuthContext.js\n│       │   │   ├── routes/\n│       │   │   │   └── auth.routes.js\n│       │   │   ├── services/\n│       │   │   │   ├── authMiddleware.js\n│       │   │   │   ├── createDiscordBotConnectionFromRequest.js\n│       │   │   │   ├── createHermesJobFromRequest.js\n│       │   │   │   └── verifySupabaseSession.js\n│       │   │   └── tests/\n│       │   │       ├── integration/\n│       │   │       │   └── authChain.integration.test.js\n│       │   │       └── unit/\n│       │   │           ├── attachAuthContext.test.js\n│       │   │           ├── auth.discord.connection.contract.test.js\n│       │   │           ├── auth.hermes.context.test.js\n│       │   │           ├── authMiddleware.test.js\n│       │   │           ├── browserConfig.routes.test.js\n│       │   │           ├── browserConfig.secureKeys.test.js\n│       │   │           └── verifySupabaseSession.test.js\n│       │   ├── hades/\n│       │   │   ├── data.js\n│       │   │   ├── hadesAppContext.js\n│       │   │   ├── index.js\n│       │   │   ├── parser.js\n│       │   │   ├── validators.js\n│       │   │   ├── __tests__/\n│       │   │   │   ├── chatConversationType.integration.test.js\n│       │   │   │   ├── chatOutputContract.unit.test.js\n│       │   │   │   ├── chatPersistence.test.js\n│       │   │   │   ├── forgeChatMemory.integration.test.js\n│       │   │   │   ├── generalChatNavigation.integration.test.js\n│       │   │   │   ├── hadesIndex.runtimeWiring.test.js\n│       │   │   │   ├── hadesRepository.wiring.test.js\n│       │   │   │   ├── hadesRoutes.auth.wiring.test.js\n│       │   │   │   ├── liveAssignmentScope.integration.test.js\n│       │   │   │   ├── liveChatHermesScope.integration.test.js\n│       │   │   │   ├── liveTelegramTokenCrypto.integration.test.js\n│       │   │   │   ├── liveTelegramTokenScope.integration.test.js\n│       │   │   │   ├── liveTriggerIsolation.integration.test.js\n│       │   │   │   ├── liveTwoUserIsolation.integration.test.js\n│       │   │   │   ├── supabaseEnv.ops.test.js\n│       │   │   │   └── supabaseSchema.ops.test.js\n│       │   │   ├── config/\n│       │   │   │   └── index.js\n│       │   │   ├── migrations/\n│       │   │   │   ├── 001_hades_tables.sql\n│       │   │   │   └── 002_conversation_type.sql\n│       │   │   ├── prompts/\n│       │   │   │   ├── forgeChatPrompt.js\n│       │   │   │   ├── generalChatPrompt.js\n│       │   │   │   └── __tests__/\n│       │   │   │       ├── forgeChatPrompt.test.js\n│       │   │   │       └── generalChatPrompt.test.js\n│       │   │   ├── repositories/\n│       │   │   │   ├── _supabase.js\n│       │   │   │   ├── agentExecutionRepository.js\n│       │   │   │   ├── assignmentRepository.js\n│       │   │   │   ├── conversationRepository.js\n│       │   │   │   ├── discordConnectionRepository.js\n│       │   │   │   ├── hades.repository.js\n│       │   │   │   ├── minionRepository.js\n│       │   │   │   ├── telegramConnectionRepository.js\n│       │   │   │   └── tests/\n│       │   │   │       └── unit/\n│       │   │   │           ├── agentExecutionRepository.test.js\n│       │   │   │           ├── assignmentRepository.scope.test.js\n│       │   │   │           ├── conversationRepository.scope.test.js\n│       │   │   │           ├── conversationSeparation.test.js\n│       │   │   │           ├── conversationType.test.js\n│       │   │   │           ├── discordConnectionRepository.test.js\n│       │   │   │           ├── minionRepository.scope.test.js\n│       │   │   │           └── telegramConnectionRepository.test.js\n│       │   │   ├── routes/\n│       │   │   │   └── hades.routes.js\n│       │   │   ├── runtime/\n│       │   │   │   ├── hermesContextBuilder.js\n│       │   │   │   ├── hermesOutputValidator.js\n│       │   │   │   ├── minionAssignmentRuntime.js\n│       │   │   │   ├── verifySocialAccount.js\n│       │   │   │   └── tests/\n│       │   │   │       └── unit/\n│       │   │   │           ├── hermesContextBuilder.test.js\n│       │   │   │           ├── hermesOutputValidator.test.js\n│       │   │   │           ├── minionAssignmentRuntime.auth.test.js\n│       │   │   │           └── verifySocialAccount.test.js\n│       │   │   ├── security/\n│       │   │   │   ├── tokenCrypto.js\n│       │   │   │   └── __tests__/\n│       │   │   │       └── tokenCrypto.test.js\n│       │   │   ├── services/\n│       │   │   │   ├── botTokenProvider.js\n│       │   │   │   ├── chatActions.js\n│       │   │   │   ├── chatCards.js\n│       │   │   │   ├── chatModeGuard.js\n│       │   │   │   ├── cors.js\n│       │   │   │   ├── discordBotRuntime.service.js\n│       │   │   │   ├── discordClient.js\n│       │   │   │   ├── discordHermesCommandFlow.service.js\n│       │   │   │   ├── giphyProvider.service.js\n│       │   │   │   ├── hades.service.js\n│       │   │   │   ├── hermes.service.js\n│       │   │   │   ├── hermesRuntime.service.js\n│       │   │   │   ├── minionAssignmentRuntime.service.js\n│       │   │   │   ├── openRouterClient.js\n│       │   │   │   └── telegramClient.js\n│       │   │   ├── souls/\n│       │   │   │   ├── hades.soul.md\n│       │   │   │   └── loadSoul.js\n│       │   │   ├── tests/\n│       │   │   │   ├── contracts/\n│       │   │   │   │   ├── hades.discord-bot-runtime.contract.mjs\n│       │   │   │   │   ├── hades.discord-gif.contract.mjs\n│       │   │   │   │   └── hades.minion-assignment-runtime.contract.mjs\n│       │   │   │   ├── integration/\n│       │   │   │   │   ├── hades.bootstrap.routes.test.js\n│       │   │   │   │   ├── hades.readiness.routes.test.js\n│       │   │   │   │   └── hades.routes.test.js\n│       │   │   │   └── unit/\n│       │   │   │       ├── botTokenProvider.test.js\n│       │   │   │       ├── chatActions.test.js\n│       │   │   │       ├── chatCards.test.js\n│       │   │   │       ├── chatClearing.test.js\n│       │   │   │       ├── chatModeGuard.test.js\n│       │   │   │       ├── cors.test.js\n│       │   │   │       ├── discordClient.test.js\n│       │   │   │       ├── generalChat.prompt.actions.test.js\n│       │   │   │       ├── generalChat.prompt.context.test.js\n│       │   │   │       ├── generalChat.prompt.structuredResults.test.js\n│       │   │   │       ├── giphyProvider.test.js\n│       │   │   │       ├── hades.bootstrap.repository.test.js\n│       │   │   │       ├── hades.bootstrap.service.test.js\n│       │   │   │       ├── hades.config.test.js\n│       │   │   │       ├── hades.module.wiring.test.js\n│       │   │   │       ├── hades.repository.test.js\n│       │   │   │       ├── hades.routes.auth.test.js\n│       │   │   │       ├── hades.schema.test.js\n│       │   │   │       ├── hades.supabase.readback.test.js\n│       │   │   │       ├── hades.supabase.repository.test.js\n│       │   │   │       ├── hades.supabase.wiring.test.js\n│       │   │   │       ├── hadesSoul.test.js\n│       │   │   │       ├── hermes.service.test.js\n│       │   │   │       ├── hermesContext.test.js\n│       │   │   │       ├── hermesRuntime.binaryResolution.test.js\n│       │   │   │       ├── hermesRuntime.service.test.js\n│       │   │   │       ├── hermesRuntime.writableState.test.js\n│       │   │   │       ├── hermesRuntimeContext.test.js\n│       │   │   │       ├── multiUserIsolation.regression.test.js\n│       │   │   │       ├── nonHermesFallback.test.js\n│       │   │   │       ├── openRouterClient.test.js\n│       │   │   │       ├── productionUserScoping.test.js\n│       │   │   │       ├── telegramClient.test.js\n│       │   │   │       ├── toolSummary.prompt.test.js\n│       │   │   │       └── triggersRoute.test.js\n│       │   │   └── testUtils/\n│       │   │       ├── createHadesTestRuntime.js\n│       │   │       └── seedHadesTestData.js\n│       │   └── model-condenser/\n│       │       ├── index.js\n│       │       ├── README.md\n│       │       ├── config/\n│       │       │   └── index.js\n│       │       ├── events/\n│       │       │   └── index.js\n│       │       ├── routes/\n│       │       │   ├── health.routes.js\n│       │       │   ├── index.js\n│       │       │   └── modelCondenser.routes.js\n│       │       ├── services/\n│       │       │   ├── health.service.js\n│       │       │   ├── modelCondenser.facade.js\n│       │       │   └── modelCondenser.service.js\n│       │       ├── tests/\n│       │       │   ├── integration/\n│       │       │   │   └── modelCondenser.routes.test.js\n│       │       │   └── unit/\n│       │       │       └── modelCondenser.service.test.js\n│       │       └── utils/\n│       │           └── index.js\n│       ├── shared/\n│       │   ├── agent-runtime/\n│       │   │   ├── createAgentRuntime.js\n│       │   │   ├── createAgentRuntime.test.js\n│       │   │   └── createAgentRuntime.types.js\n│       │   ├── ai/\n│       │   │   └── prompt-registry.js\n│       │   ├── config/\n│       │   │   ├── resolveArtifactPaths.js\n│       │   │   ├── resolveArtifactPaths.test.js\n│       │   │   └── resolveArtifactPaths.types.js\n│       │   ├── contracts/\n│       │   │   ├── architecturePushDevLog.contract.js\n│       │   │   ├── asyncJobQueue.contract.js\n│       │   │   ├── consolidatedExports.contract.js\n│       │   │   ├── documentPersistence.contract.js\n│       │   │   ├── moduleAgentStateMachine.contract.js\n│       │   │   ├── monorepoDeploy.contract.js\n│       │   │   ├── planningPhase.contract.js\n│       │   │   └── prePushDevLog.contract.js\n│       │   ├── db/\n│       │   │   ├── openDatabase.js\n│       │   │   ├── postgres.js\n│       │   │   ├── requirePostgres.js\n│       │   │   └── sqlite.js\n│       │   ├── domain/\n│       │   │   └── case-filing/\n│       │   │       └── core-models.js\n│       │   ├── events/\n│       │   │   └── index.js\n│       │   ├── http/\n│       │   │   └── errors.js\n│       │   ├── queue/\n│       │   │   ├── createQueueConnection.js\n│       │   │   ├── enqueue.js\n│       │   │   ├── inMemoryQueue.adapter.js\n│       │   │   └── registerWorkers.js\n│       │   ├── storage/\n│       │   │   ├── resolveDocumentStoragePaths.js\n│       │   │   ├── resolveDocumentStoragePaths.test.js\n│       │   │   └── resolveDocumentStoragePaths.types.js\n│       │   ├── testing/\n│       │   │   ├── create-test-app.js\n│       │   │   └── invoke-app.js\n│       │   └── utils/\n│       │       ├── consolidatedExport.js\n│       │       ├── consolidatedExport.test.js\n│       │       ├── fileExchangeCleanup.js\n│       │       ├── fileExchangeCleanup.test.js\n│       │       ├── formatExchangeTimestamp.js\n│       │       ├── formatExchangeTimestamp.test.js\n│       │       ├── pdf-binary.js\n│       │       ├── traceId.js\n│       │       └── zipDirectory.js\n│       └── testUtils/\n│           └── createTestSupabaseAuth.js\n├── consolidated-files/\n│   └── consolidated-models.json\n├── docs/\n│   ├── API.md\n│   ├── CHANGELOG.md\n│   ├── DEPLOY.md\n│   ├── DEVLOG_V2.md\n│   ├── hades-ui-qa-issue-draft.md\n│   ├── PUBLISHING.md\n│   ├── README.md\n│   ├── STARTER_PACK.md\n│   ├── architecture/\n│   │   ├── API_DOCUMENTATION_CONTRACT.md\n│   │   ├── ARCHITECTURE_GUARDRAILS.md\n│   │   ├── CONTRACTS_OVERVIEW.md\n│   │   ├── EVAL_AND_CI.md\n│   │   ├── MODULE_INTERNAL_CONTRACT.md\n│   │   ├── REPO_ARTIFACT_LAYOUT.md\n│   │   ├── contracts/\n│   │   │   ├── apiDocumentationRegistry.contract.md\n│   │   │   ├── architecturePushDevLog.contract.md\n│   │   │   ├── asyncJobQueue.contract.md\n│   │   │   ├── changelog.jsonl\n│   │   │   ├── consolidatedExports.contract.md\n│   │   │   ├── documentPersistence.contract.md\n│   │   │   ├── fileExchange.contract.md\n│   │   │   ├── manifest.json\n│   │   │   ├── moduleAgentStateMachine.contract.md\n│   │   │   ├── monorepoDeploy.contract.md\n│   │   │   ├── pipelineAgentMiniModules.contract.md\n│   │   │   ├── planningPhase.contract.md\n│   │   │   └── prePushDevLog.contract.md\n│   │   └── templates/\n│   │       ├── async-job-queue/\n│   │       │   ├── createQueueConnection.template.js\n│   │       │   ├── enqueue.template.js\n│   │       │   ├── inMemoryQueue.adapter.template.js\n│   │       │   ├── parse-document.worker.template.js\n│   │       │   ├── README.md\n│   │       │   └── run-agent-action.worker.template.js\n│   │       ├── document-persistence/\n│   │       │   ├── README.md\n│   │       │   ├── adapters/\n│   │       │   │   ├── file-storage.adapter.template.js\n│   │       │   │   └── parser.adapter.template.js\n│   │       │   ├── migrations/\n│   │       │   │   └── 001_document_persistence.sql\n│   │       │   ├── repositories/\n│   │       │   │   └── document.repository.template.js\n│   │       │   ├── routes/\n│   │       │   │   └── upload.routes.template.js\n│   │       │   └── services/\n│   │       │       └── document-ingest.service.template.js\n│   │       └── module-agent-state-machine/\n│   │           ├── README.md\n│   │           ├── agents/\n│   │           │   ├── example-agent.machine.template.js\n│   │           │   └── manifest.template.json\n│   │           ├── events/\n│   │           │   └── agent-triggers.template.js\n│   │           ├── migrations/\n│   │           │   └── 001_agent_state_machine.sql\n│   │           ├── repositories/\n│   │           │   └── agent-run.repository.template.js\n│   │           ├── routes/\n│   │           │   └── agent.routes.template.js\n│   │           └── services/\n│   │               ├── agent-actions.template.js\n│   │               └── agent-runner.service.template.js\n│   ├── auth/\n│   │   └── API.md\n│   ├── hades/\n│   │   └── API.md\n│   ├── hades-mvp-handoff/\n│   │   └── hades-mvp-codex-handoff/\n│   │       ├── manifest.json\n│   │       ├── README.md\n│   │       ├── docs/\n│   │       │   ├── bot-creator-chat-pattern.md\n│   │       │   ├── data-model.md\n│   │       │   ├── mvp-scope.md\n│   │       │   ├── route-map.md\n│   │       │   └── ux-direction.md\n│   │       ├── implementation/\n│   │       │   ├── codex-implementation-handoff.md\n│   │       │   ├── component-breakdown.md\n│   │       │   ├── suggested-react-structure.md\n│   │       │   └── test-checklist.md\n│   │       └── prototype/\n│   │           └── hades-mvp-interactive.html\n│   └── model-condenser/\n│       └── API.md\n├── file-exchange/\n│   ├── README.md\n│   ├── exports/\n│   │   ├── .gitkeep\n│   │   ├── consolidated-models.json\n│   │   ├── EXPORT_MANIFEST.json\n│   │   ├── README.md\n│   │   ├── 2026-06-10_05-32-07Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-10_05-33-00Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-10_05-38-36Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-10_05-56-26Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-10_06-00-30Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-10_14-54-19Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-10_22-21-41Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-11_03-32-21Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-12_16-33-12Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-13_20-48-29Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-13_20-55-14Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-13_21-00-10Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-13_21-20-27Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-13_22-23-49Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-13_22-28-46Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-13_22-29-45Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-13_22-45-16Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-13_22-45-36Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-13_22-46-48Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-13_22-46-49Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-13_22-48-50Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-13_22-49-54Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-13_22-51-17Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-13_23-07-14Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-13_23-10-06Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-13_23-10-56Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-13_23-11-53Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-13_23-13-26Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-13_23-15-17Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-13_23-15-25Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-13_23-15-56Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-13_23-16-04Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-13_23-16-18Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-13_23-16-34Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-13_23-17-41Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-13_23-17-42Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_01-27-46Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_01-27-47Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_01-43-40Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_01-46-11Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_01-46-38Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_01-47-07Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_01-47-34Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_01-48-00Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_02-21-09Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_02-21-35Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_02-21-36Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_02-22-02Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_02-22-40Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_02-23-05Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_02-48-05Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_02-49-10Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_02-55-01Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_02-55-32Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_02-55-59Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_03-02-11Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_03-07-07Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_03-07-08Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_03-07-51Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_03-21-21Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_03-23-58Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_03-24-27Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_03-35-30Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_03-36-36Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_03-37-51Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_03-39-28Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_03-39-57Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_03-41-31Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_05-30-53Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_05-31-20Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_05-31-52Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_13-20-33Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_13-36-06Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_16-27-09Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_16-38-42Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_16-39-20Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_17-28-29Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_17-29-12Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_17-29-43Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_17-33-03Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_17-33-09Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_17-35-10Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_17-36-02Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_17-36-37Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_18-11-13Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_18-12-21Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_18-38-57Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-14_18-41-42Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   └── 2026-06-14_18-42-37Z_consolidated/\n│   │       ├── consolidated-models.json\n│   │       └── manifest.json\n│   └── imports/\n│       ├── .gitkeep\n│       ├── hades_minion_preview_v5.html\n│       └── hades_os_post_login_ux_v4.html\n├── frontend/\n│   ├── .env.example\n│   ├── .env.local\n│   ├── index.html\n│   ├── package-lock.json\n│   ├── package.json\n│   ├── vercel.json\n│   ├── vite.config.js\n│   └── src/\n│       ├── main.jsx\n│       ├── archive/\n│       │   └── hades/\n│       │       ├── HomeScreen.jsx\n│       │       ├── ScreenHeader.jsx\n│       │       └── supabaseBrowserConfig.js\n│       ├── auth/\n│       │   ├── AuthProvider.jsx\n│       │   ├── LoginPage.jsx\n│       │   ├── loginTemplate.html\n│       │   ├── loginTemplateParts.js\n│       │   ├── loginTemplateParts.test.js\n│       │   ├── supabaseClient.js\n│       │   └── supabaseClient.test.js\n│       ├── core/\n│       │   ├── App.jsx\n│       │   └── moduleRegistry.jsx\n│       ├── modules/\n│       │   ├── _reference/\n│       │   │   ├── index.jsx\n│       │   │   ├── README.md\n│       │   │   ├── components/\n│       │   │   │   └── ModuleHealthCard.jsx\n│       │   │   ├── hooks/\n│       │   │   │   └── use-module-health.js\n│       │   │   ├── pages/\n│       │   │   │   └── _referencePage.jsx\n│       │   │   ├── prompts/\n│       │   │   │   └── README.md\n│       │   │   ├── schemas/\n│       │   │   │   └── health.schema.js\n│       │   │   ├── services/\n│       │   │   │   └── health-api.js\n│       │   │   ├── tests/\n│       │   │   │   └── unit/\n│       │   │   │       └── health.schema.test.js\n│       │   │   └── utils/\n│       │   │       └── index.js\n│       │   └── hades/\n│       │       ├── chatPendingCopy.js\n│       │       ├── frontendAuth.integration.test.js\n│       │       ├── hadesApi.js\n│       │       ├── hadesApi.test.js\n│       │       ├── hadesChatContext.test.js\n│       │       ├── hadesData.js\n│       │       ├── hadesData.test.js\n│       │       ├── hadesHostedApi.test.js\n│       │       ├── hadesHydration.test.js\n│       │       ├── HadesPrototypeApp.jsx\n│       │       ├── hadesRoutes.js\n│       │       ├── hadesUxLayout.test.js\n│       │       ├── hadesViewModel.js\n│       │       ├── hadesViewModel.test.js\n│       │       ├── minionData.test.js\n│       │       ├── MinionDetailScreen.jsx\n│       │       ├── MinionListScreen.jsx\n│       │       ├── MinionLogsScreen.jsx\n│       │       ├── minionPreviewData.js\n│       │       ├── MinionSlots.jsx\n│       │       ├── parser.js\n│       │       ├── parser.test.js\n│       │       ├── telegramSetup.js\n│       │       ├── TelegramSetupCard.jsx\n│       │       └── tests/\n│       │           └── unit/\n│       │               ├── AppShell.auth.test.js\n│       │               ├── chatPendingCopy.test.js\n│       │               ├── hadesApi.telegram.test.js\n│       │               ├── hadesRoutes.test.js\n│       │               ├── sendChat.test.js\n│       │               ├── SocialsPage.telegram.test.js\n│       │               ├── SocialsPage.test.js\n│       │               ├── TelegramSetupCard.layout.test.js\n│       │               └── TelegramSetupCard.test.js\n│       ├── shared/\n│       │   ├── api/\n│       │   │   ├── client.js\n│       │   │   └── client.test.js\n│       │   └── utils/\n│       │       └── asyncState.js\n│       └── styles/\n│           ├── globals.css\n│           ├── hadesPrototype.css\n│           ├── login.css\n│           └── tokens.css\n├── scripts/\n│   ├── check-api-docs.mjs\n│   ├── condense-all.mjs\n│   ├── condense-file-structure.mjs\n│   ├── condense-models.mjs\n│   ├── condense-prompts.mjs\n│   ├── consolidated-output.mjs\n│   ├── export-architecture-starter.mjs\n│   ├── export-consolidated-models.mjs\n│   ├── hermes-config-sync.mjs\n│   ├── hermes-config-sync.test.mjs\n│   ├── import-to-file-exchange.mjs\n│   ├── lint-contracts.mjs\n│   ├── lint-deploy.mjs\n│   ├── lint-deploy.test.mjs\n│   ├── lint-repo-artifacts.mjs\n│   ├── new-module.mjs\n│   ├── plan-finalize.mjs\n│   ├── plan-gate.mjs\n│   ├── resolve-import-stamp.mjs\n│   ├── run-module-evals.mjs\n│   ├── smoke-hades-runtime.mjs\n│   ├── smoke-hades-runtime.test.mjs\n│   ├── smoke-hermes-chat.mjs\n│   ├── smoke-hermes-chat.test.mjs\n│   ├── smoke-hermes-context-limit.mjs\n│   ├── smoke-hermes-context-limit.test.mjs\n│   ├── smoke-hermes-runtime.mjs\n│   ├── smoke-hermes-runtime.test.mjs\n│   ├── sync-cli-template.mjs\n│   ├── verify-dev-log.mjs\n│   ├── write-pre-push-dev-log.mjs\n│   ├── git-hooks/\n│   │   └── pre-push.sample\n│   └── lib/\n│       ├── api-inventory.mjs\n│       ├── arch-push-human-format.mjs\n│       ├── collect-starter-export-changes.mjs\n│       ├── dev-log-human-format.mjs\n│       ├── extract-import-specifiers.mjs\n│       ├── git-snapshot.mjs\n│       ├── module-scaffold.mjs\n│       ├── parent-mini-modules.config.mjs\n│       ├── parse-cli-arg.mjs\n│       ├── plan-artifacts.constants.mjs\n│       ├── plan-artifacts.mjs\n│       ├── repo-tree.mjs\n│       ├── resolve-module-import.mjs\n│       └── run-tests.mjs\n└── work-log/\n    ├── INDEX.md\n    ├── README.md\n    ├── dev-logs/\n    │   ├── README.md\n    │   ├── agent/\n    │   │   └── .gitkeep\n    │   ├── human/\n    │   │   └── .gitkeep\n    │   ├── schemas/\n    │   │   └── dev-log-agent.v1.schema.json\n    │   └── templates/\n    │       └── dev-log-human.template.md\n    ├── handoffs/\n    │   ├── 001_2026-06-10_01-10_handoff_hosted-hermes-private-ai.md\n    │   ├── 002_2026-06-10_01-17_handoff_backend-hostable-mvp.md\n    │   ├── 003_2026-06-10_02-05_handoff_hosting-railway-vercel-tdd.md\n    │   ├── 004_2026-06-10_23-12_handoff_hosted-runtime-readiness-tdd.md\n    │   ├── 005_2026-06-12_hermes-runtime-wrapper-tdd.md\n    │   ├── 006_2026-06-12_15-30_handoff_discord-auth-bot-bridge.md\n    │   ├── 007_2026-06-13_handoff_post-login-ux-v4-visual-alignment.md\n    │   └── README.md\n    ├── planning/\n    │   ├── .gitkeep\n    │   ├── 004_2026-06-10_23-12_hosted-runtime-readiness-tdd/\n    │   │   ├── audit-log.md\n    │   │   ├── manifest.json\n    │   │   └── plan-log.md\n    │   ├── 005_2026-06-11_hermes-runtime-wrapper-tdd/\n    │   │   ├── audit-log.md\n    │   │   ├── plan-log.md\n    │   │   └── test-plan.md\n    │   ├── 006_2026-06-12_hermes-discord-gif-minion-runtime/\n    │   │   ├── audit-log.md\n    │   │   ├── design-log.md\n    │   │   ├── handoff.md\n    │   │   ├── manifest.json\n    │   │   ├── plan-log.md\n    │   │   └── README.md\n    │   ├── 007_2026-06-12_discord-auth-bot-bridge/\n    │   │   ├── audit-log.md\n    │   │   ├── handoff.md\n    │   │   ├── manifest.json\n    │   │   ├── plan-log.md\n    │   │   └── README.md\n    │   └── 008_2026-06-13_post-login-ux-v4-visual-alignment/\n    │       ├── audit-log.md\n    │       ├── handoff.md\n    │       ├── manifest.json\n    │       ├── plan-log.md\n    │       ├── README.md\n    │       └── test-plan.md\n    ├── sessions/\n    │   ├── INDEX.md\n    │   └── README.md\n    └── study-docs/\n        ├── 001_2026-06-10_00-52_study-log_raw-keyboard-app-presses.md\n        ├── 002_2026-06-11_hermes-runtime-layer-study-log.md\n        └── README.md",
+    "flatPathCount": 806
+  },
+  "changes": {
+    "byArea": {
+      "additional-modules": [
+        "additional-modules/scripts/__pycache__/",
+        "additional-modules/scripts/tests/__pycache__/"
+      ],
+      "\"backend": [
+        "\"backend/.env copy\""
+      ]
+    },
+    "added": [
+      "additional-modules/scripts/__pycache__/",
+      "additional-modules/scripts/tests/__pycache__/",
+      "\"backend/.env copy\""
+    ],
+    "modified": [],
+    "deleted": [],
+    "narrative": [
+      "Added backend/.gitignore to prevent .env commits to Railway",
+      "Added HERMES_REQUIRED, ENCRYPTION_KEY, GIPHY_API_KEY, TELEGRAM_BOT_TOKEN to backend/.env.example",
+      "Removed start from ROOT_FORBIDDEN_SCRIPTS in railway.toml (was blocking Railway ingress)",
+      "Updated DEPLOY.md with rootDirectory instructions for Railway deployment",
+      "Fixed hermesRuntime.writableState test to use tempDir to avoid HERMES_HOME .env interference"
+    ]
+  },
+  "decisions": [
+    {
+      "id": "D1",
+      "decision": "backend/.gitignore blocks .env but not .env.example",
+      "rationale": "Railway deploys from root/.gitignore where backend/.env is not covered; explicit backend/.gitignore is the standard defense",
+      "alternativesRejected": [
+        "Adding backend/.env to root .gitignore (less explicit, couples concerns)",
+        "Docker .dockerignore only (misses git-tracked accidental commits)"
+      ],
+      "tradeoff": "Slightly more gitignore files to manage, but each module owns its own safety"
+    }
+  ],
+  "iterations": [
+    {
+      "attempt": 1,
+      "action": "Check dotenv lockfile consistency (Issue A)",
+      "outcome": "pass — lockfile already consistent, no action needed",
+      "blockedBy": ""
+    }
+  ],
+  "tradeoffs": [
+    "backend/.gitignore is a separate file to maintain, but follows standard per-module gitignore practice",
+    "Removing start from ROOT_FORBIDDEN_SCRIPTS allows root start to run on Railway (correct behavior for monorepo root)"
+  ],
+  "improvements": [
+    "Railway deployment now works (was failing due to missing .gitignore, missing vars, wrong rootDirectory)",
+    "Test isolation improved — writableState test no longer interferes with other tests via shared HERMES_HOME",
+    "DEPLOY.md now has explicit Railway nixpacks rootDirectory instructions"
+  ],
+  "regressions": [
+    "None detected — all 321 existing tests pass, no behavioral changes to runtime"
+  ],
+  "risks": [
+    "ENCRYPTION_KEY in .env.example is a placeholder — must be replaced with a real key in production Railway env",
+    "backend/.gitignore must be kept in sync if new sensitive files are added to backend/"
+  ],
+  "followUps": [
+    "Add Railway production env vars (ENCRYPTION_KEY, HERMES_REQUIRED, GIPHY_API_KEY, TELEGRAM_BOT_TOKEN) before first Railway deploy",
+    "Verify Railway build completes with new rootDirectory setting"
+  ]
+}

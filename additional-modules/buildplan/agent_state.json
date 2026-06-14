@@ -2,7 +2,7 @@
   "version": "1.0.0",
   "lastUpdated": "2026-06-14",
   "branch": "master",
-  "latestCommit": "374b623",
+  "latestCommit": "56c9e71",
   "projectDescription": "Hades OS — multi-user auth isolation for shared Hermes runtime. Backend owns identity, isolation, memory retrieval. Hermes is shared; user context is not shared.",
   "activeModule": {
     "slug": "control-platform",
@@ -237,7 +237,11 @@
         "Issue D: Updated DEPLOY.md with Vercel/Railway Root Directory instructions and corrected required-env-vars lists",
         "Added ENCRYPTION_KEY to contract envVars as required; GIPHY_API_KEY and TELEGRAM_BOT_TOKEN documented as optional",
         "Fixed hermesRuntime.writableState.test.js: pass backendEnvPath to createHermesRuntimeService to avoid backend/.env interference",
-        "All 321 backend + 9 contract + 5 boundary tests pass, 0 failures"
+        "All 321 backend + 9 contract + 5 boundary tests pass, 0 failures",
+        "Created dev-log pair 005 (agent JSON + human MD) for deploy-readiness-audit session",
+        "Populated all FILL sections in both human and agent dev logs",
+        "Updated work-log/INDEX.md with dev-log 005 entry",
+        "Updated additional-modules/work-log/INDEX.md with dev-log 005 entry"
       ],
       "inProgress": [],
       "next": []
@@ -345,9 +349,10 @@
     "lastPass": true
   },
   "sessions": {
-    "currentId": "ses_2026-06-14-deploy-readiness-audit-issues",
-    "lastSessionId": "ses_2026-06-14-railway-root-env-example-fix",
+    "currentId": "ses_2026-06-14-deploy-readiness-devlog-fill",
+    "lastSessionId": "ses_2026-06-14-deploy-readiness-audit-issues",
     "archive": [
+      "2026-06-14-deploy-readiness-audit-issues",
       "2026-06-14-runtime-compaction-smoke-test",
       "2026-06-14-stabilize-agents-md-cache",
       "2026-06-14-context-budget-tooling-fixes",
@@ -359,6 +364,6 @@
     "hardLimit": 64000,
     "currentUsage": 0,
     "remaining": 64000,
-    "sessionStart": "2026-06-14T15:32:10.691+00:00"
+    "sessionStart": "2026-06-14T19:41:00.000+00:00"
   }
 }
