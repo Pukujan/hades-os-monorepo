@@ -1,20 +1,36 @@
 import { createClient } from "@supabase/supabase-js";
 
+let VITE_API_BASE_URL = "";
+let VITE_SUPABASE_URL = "";
+let VITE_SUPABASE_ANON_KEY = "";
+let VITE_APP_URL = "";
+let MODE = "development";
+
+try {
+  VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
+  VITE_SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "";
+  VITE_SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
+  VITE_APP_URL = import.meta.env.VITE_APP_URL || "";
+  MODE = import.meta.env.MODE || "development";
+} catch {
+  // non-Vite runtime (Node test runner)
+}
+
 function normalizeBaseUrl(url) {
   return String(url || "").trim().replace(/\/+$/, "");
 }
 
 export function getSupabaseBrowserConfig() {
   return {
-    supabaseUrl: import.meta?.env?.VITE_SUPABASE_URL || "",
-    supabaseAnonKey: import.meta?.env?.VITE_SUPABASE_ANON_KEY || "",
-    appUrl: import.meta?.env?.VITE_APP_URL || (typeof window !== "undefined" ? window.location.origin : "http://localhost:5173")
+    supabaseUrl: VITE_SUPABASE_URL,
+    supabaseAnonKey: VITE_SUPABASE_ANON_KEY,
+    appUrl: VITE_APP_URL || (typeof window !== "undefined" ? window.location.origin : "http://localhost:5173")
   };
 }
 
 export async function loadSupabaseBrowserConfig({
   fetchImpl = globalThis.fetch,
-  apiBaseUrl = import.meta?.env?.VITE_API_BASE_URL || "",
+  apiBaseUrl = VITE_API_BASE_URL,
   envConfig = getSupabaseBrowserConfig()
 } = {}) {
   if (typeof fetchImpl !== "function") {
@@ -43,22 +59,24 @@ export async function loadSupabaseBrowserConfig({
     }
   }
 
-  try {
-    const relativeResponse = await fetchImpl("/api/auth/browser-config", {
-      method: "GET",
-      headers: { accept: "application/json" }
-    });
+  if (MODE === "development") {
+    try {
+      const relativeResponse = await fetchImpl("/api/auth/browser-config", {
+        method: "GET",
+        headers: { accept: "application/json" }
+      });
 
-    if (relativeResponse?.ok) {
-      const runtimeConfig = await relativeResponse.json();
-      return {
-        supabaseUrl: runtimeConfig?.supabaseUrl || envConfig.supabaseUrl || "",
-        supabaseAnonKey: runtimeConfig?.supabaseAnonKey || envConfig.supabaseAnonKey || "",
-        appUrl: runtimeConfig?.appUrl || envConfig.appUrl || ""
-      };
+      if (relativeResponse?.ok) {
+        const runtimeConfig = await relativeResponse.json();
+        return {
+          supabaseUrl: runtimeConfig?.supabaseUrl || envConfig.supabaseUrl || "",
+          supabaseAnonKey: runtimeConfig?.supabaseAnonKey || envConfig.supabaseAnonKey || "",
+          appUrl: runtimeConfig?.appUrl || envConfig.appUrl || ""
+        };
+      }
+    } catch {
+      // Fall back to local env config below.
     }
-  } catch {
-    // Fall back to local env config below.
   }
 
   return envConfig;

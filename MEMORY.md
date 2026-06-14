@@ -70,7 +70,7 @@ Index: `additional-modules/work-log/sessions/INDEX.md`
 - `2026-06-14-context-budget-tooling-fixes`
 - `2026-06-14-minions-ui-port`
 - `2026-06-14-chat-cards-pending-voice`
-**Active:** `ses_2026-06-14-deploy-readiness-devlog-fill`
+**Active:** `ses_2026-06-14-vite-env-var-injection-fix`
 
 ---
 

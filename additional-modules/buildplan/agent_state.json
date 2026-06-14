@@ -241,7 +241,12 @@
         "Created dev-log pair 005 (agent JSON + human MD) for deploy-readiness-audit session",
         "Populated all FILL sections in both human and agent dev logs",
         "Updated work-log/INDEX.md with dev-log 005 entry",
-        "Updated additional-modules/work-log/INDEX.md with dev-log 005 entry"
+        "Updated additional-modules/work-log/INDEX.md with dev-log 005 entry",
+        "Fix Vite env var injection: module-level try-catch for direct import.meta.env.VITE_* constants, removing optional chaining",
+        "Red tests for no import.meta?.env, MODE guard, production URL priority, valid Supabase client init (5 tests)",
+        "127 frontend + 316 backend + 9 contract + 5 boundary tests pass, 0 failures",
+        "Production build bakes Railway URL (2 occurrences), zero import.meta?.env in dist bundle",
+        "Archive supabaseBrowserConfig.js updated with same try-catch pattern for consistency"
       ],
       "inProgress": [],
       "next": []
@@ -349,7 +354,7 @@
     "lastPass": true
   },
   "sessions": {
-    "currentId": "ses_2026-06-14-deploy-readiness-devlog-fill",
+    "currentId": "ses_2026-06-14-vite-env-var-injection-fix",
     "lastSessionId": "ses_2026-06-14-deploy-readiness-audit-issues",
     "archive": [
       "2026-06-14-deploy-readiness-audit-issues",

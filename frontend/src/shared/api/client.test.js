@@ -14,6 +14,11 @@ test("frontend API client uses VITE_API_BASE_URL as the only backend origin env"
   assert.doesNotMatch(source, /SUPABASE_ANON_KEY/);
 });
 
+test("frontend API client must not use optional chaining on import.meta.env", () => {
+  assert.doesNotMatch(source, /import\.meta\?\.env/);
+  assert.doesNotMatch(source, /import\.meta\.env\?/);
+});
+
 test("frontend API client keeps the local backend fallback explicit", () => {
   assert.match(source, /http:\/\/localhost:3001|http:\/\/127\.0\.0\.1:3001/);
 });

@@ -1,7 +1,23 @@
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import { buildDiscordRedirectToFromAppUrl, createSupabaseBrowserClientFrom, loadSupabaseBrowserConfig } from "./supabaseClient.js";
+
+const here = dirname(fileURLToPath(import.meta.url));
+
+test("source must not use optional chaining on import.meta.env", () => {
+  const source = readFileSync(join(here, "supabaseClient.js"), "utf8");
+  assert.doesNotMatch(source, /import\.meta\?\.env/);
+  assert.doesNotMatch(source, /import\.meta\.env\?/);
+});
+
+test("source guards relative URL fallback behind MODE === development check", () => {
+  const source = readFileSync(join(here, "supabaseClient.js"), "utf8");
+  assert.match(source, /if\s*\(\s*MODE\s*===\s*["']development["']\s*\)/);
+});
 
 test("discord redirect points back to the Hades app", () => {
   assert.equal(buildDiscordRedirectToFromAppUrl("https://hades.example"), "https://hades.example/app/home");
@@ -62,7 +78,7 @@ test("same-origin /api/auth/browser-config is only a fallback when VITE_API_BASE
   });
 });
 
-test("falls back to env config when both production and same-origin fetches fail", async () => {
+test("falls back to env config when absolute browser-config request fails", async () => {
   const config = await loadSupabaseBrowserConfig({
     apiBaseUrl: "https://api.railway.example",
     envConfig: {
@@ -106,4 +122,13 @@ test("frontend never reads or exposes service role key from browser-config respo
 
   assert.equal("supabaseServiceRoleKey" in config, false, "frontend must not expose service role key");
   assert.equal(config.supabaseAnonKey, "sb_publishable_runtime", "anon key is the publishable one");
+});
+
+test("createSupabaseBrowserClientFrom initializes Supabase with valid config", () => {
+  const client = createSupabaseBrowserClientFrom({
+    supabaseUrl: "https://project.supabase.co",
+    supabaseAnonKey: "sb_publishable_key"
+  });
+  assert.notEqual(client, null);
+  assert.equal(typeof client.auth.signInWithOAuth, "function");
 });
