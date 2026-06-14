@@ -1,6 +1,5 @@
 [build]
-builder = "NIXPACKS"
+builder = "DOCKERFILE"
 
 [deploy]
-startCommand = "npm run start"
 restartPolicyType = "ON_FAILURE"
