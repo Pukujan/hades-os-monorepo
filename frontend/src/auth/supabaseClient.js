@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { apiUrl } from "../shared/api/client.js";
 
 let VITE_API_BASE_URL = "";
 let VITE_SUPABASE_URL = "";
@@ -61,7 +62,7 @@ export async function loadSupabaseBrowserConfig({
 
   if (MODE === "development") {
     try {
-      const relativeResponse = await fetchImpl("/api/auth/browser-config", {
+      const relativeResponse = await fetchImpl(apiUrl("/api/auth/browser-config"), {
         method: "GET",
         headers: { accept: "application/json" }
       });

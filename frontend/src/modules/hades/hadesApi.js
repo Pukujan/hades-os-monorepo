@@ -8,6 +8,23 @@ import {
   deriveLevelState
 } from "./hadesData.js";
 
+export async function sendHadesChatMessage({
+  mode = "general",
+  message,
+  conversationId,
+  idempotencyKey,
+  clientMessageId,
+  currentDraft
+} = {}, accessToken) {
+  return apiPost(`/api/hades/chat/${mode}`, {
+    clientMessageId: clientMessageId || idempotencyKey,
+    idempotencyKey,
+    message,
+    conversationId: conversationId || null,
+    currentDraft: currentDraft || null,
+  }, { accessToken });
+}
+
 export async function getHadesBootstrap(accessToken) {
   return apiGet("/api/hades/bootstrap", { accessToken });
 }

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "fs";
+import { existsSync, readFileSync, readdirSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { DEPLOY_TARGETS } from "../backend/src/shared/contracts/monorepoDeploy.contract.js";
@@ -149,7 +149,44 @@ test("DEPLOY.md documents Railway Root Directory = backend", () => {
 });
 
 // ===================================================================
-// Group 6 — Secret / Hermes leakage prevention
+// Group 6 — Build artifact smoke test
+//   Requires: frontend/dist/ exists (skipped locally if not built)
+//   Verifies: VITE_API_BASE_URL baked into assets, zero optional
+//   chaining on import.meta.env leaks into the bundle.
+// ===================================================================
+
+const distAssetsDir = join(repoRoot, "frontend", "dist", "assets");
+const distExists = existsSync(distAssetsDir);
+
+function getDistJsFiles(dir) {
+  const entries = readdirSync(dir, { withFileTypes: true, recursive: true });
+  return entries
+    .filter(e => e.isFile() && e.name.endsWith(".js"))
+    .map(e => join(e.parentPath ?? e.path ?? dir, e.name));
+}
+
+test("production build bakes VITE_API_BASE_URL into assets", { skip: !distExists }, () => {
+  const jsFiles = getDistJsFiles(distAssetsDir);
+  assert.ok(jsFiles.length > 0, "dist/assets must contain JS files");
+
+  const allJs = jsFiles.map(f => readFileSync(f, "utf8")).join("\n");
+  const railwayUrl = "https://hades-os-monorepo-production.up.railway.app";
+  assert.ok(allJs.includes(railwayUrl), `built JS must contain Railway URL "${railwayUrl}"`);
+});
+
+test("built bundle must not contain optional chaining on import.meta.env", { skip: !distExists }, () => {
+  const jsFiles = getDistJsFiles(distAssetsDir);
+  assert.ok(jsFiles.length > 0, "dist/assets must contain JS files");
+
+  for (const f of jsFiles) {
+    const src = readFileSync(f, "utf8");
+    assert.doesNotMatch(src, /import\.meta\?\.env/, `${f} must not contain import.meta?.env`);
+    assert.doesNotMatch(src, /import\.meta\.env\?\./, `${f} must not contain import.meta.env?.`);
+  }
+});
+
+// ===================================================================
+// Group 7 — Secret / Hermes leakage prevention
 //   (already green — backend/.gitignore blocks all patterns)
 // ===================================================================
 

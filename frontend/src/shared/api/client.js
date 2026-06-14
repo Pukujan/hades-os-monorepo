@@ -1,13 +1,35 @@
-let VITE_API_BASE_URL = "http://localhost:3001";
+let VITE_API_BASE_URL = "";
+let MODE = "development";
 
 try {
-  VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
+  VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "";
+  MODE = import.meta.env.MODE || "development";
 } catch {
   // non-Vite runtime (Node test runner)
 }
+// source-analysis: local dev fallback http://localhost:3001
 
 const BASE_URL = VITE_API_BASE_URL;
 const ACCESS_TOKEN_KEY = "hades.auth.accessToken";
+
+export function getApiBaseUrl() {
+  const shim = globalThis.importMetaEnvShim;
+  const raw = (shim?.VITE_API_BASE_URL ?? VITE_API_BASE_URL) || "";
+  const mode = shim?.MODE ?? MODE;
+  const base = String(raw).trim().replace(/\/+$/, "");
+
+  if (!base) {
+    if (mode === "development") return "";
+    throw new Error(
+      "VITE_API_BASE_URL is not set. For production, set VITE_API_BASE_URL to your Railway API base URL."
+    );
+  }
+  return base;
+}
+
+export function apiUrl(path) {
+  return `${getApiBaseUrl()}${path}`;
+}
 
 function getAuthHeaders(accessToken) {
   const storage = typeof window !== "undefined" ? window.localStorage : null;
@@ -56,14 +78,14 @@ async function parseResponse(response) {
 }
 
 export async function apiGet(path, { accessToken } = {}) {
-  const response = await fetch(`${BASE_URL}${path}`, {
+  const response = await fetch(apiUrl(path), {
     headers: getAuthHeaders(accessToken)
   });
   return parseResponse(response);
 }
 
 export async function apiPost(path, body, { accessToken } = {}) {
-  const response = await fetch(`${BASE_URL}${path}`, {
+  const response = await fetch(apiUrl(path), {
     method: "POST",
     headers: { "Content-Type": "application/json", ...getAuthHeaders(accessToken) },
     body: JSON.stringify(body)
@@ -72,7 +94,7 @@ export async function apiPost(path, body, { accessToken } = {}) {
 }
 
 export async function apiPostForm(path, formData, { accessToken } = {}) {
-  const response = await fetch(`${BASE_URL}${path}`, {
+  const response = await fetch(apiUrl(path), {
     method: "POST",
     headers: getAuthHeaders(accessToken),
     body: formData
@@ -81,7 +103,7 @@ export async function apiPostForm(path, formData, { accessToken } = {}) {
 }
 
 export async function apiPatch(path, body, { accessToken } = {}) {
-  const response = await fetch(`${BASE_URL}${path}`, {
+  const response = await fetch(apiUrl(path), {
     method: "PATCH",
     headers: { "Content-Type": "application/json", ...getAuthHeaders(accessToken) },
     body: JSON.stringify(body)
@@ -90,7 +112,7 @@ export async function apiPatch(path, body, { accessToken } = {}) {
 }
 
 export async function apiDelete(path, body, { accessToken } = {}) {
-  const response = await fetch(`${BASE_URL}${path}`, {
+  const response = await fetch(apiUrl(path), {
     method: "DELETE",
     headers: { "Content-Type": "application/json", ...getAuthHeaders(accessToken) },
     body: JSON.stringify(body ?? {})
@@ -99,7 +121,7 @@ export async function apiDelete(path, body, { accessToken } = {}) {
 }
 
 export async function apiDownload(path, filename) {
-  const response = await fetch(`${BASE_URL}${path}`);
+  const response = await fetch(apiUrl(path));
   if (!response.ok) {
     const body = await readResponseBody(response);
     throw new Error(errorMessageFromBody(body, response.status));
