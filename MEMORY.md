@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-06-14
 **Branch:** `master`
-**Latest commit:** `56c9e71`
+**Latest commit:** `0ceb5ec`
 **Active module:** `control-platform`
 **State file:** `buildplan/agent_state.json`
 

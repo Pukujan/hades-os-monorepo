@@ -2,7 +2,7 @@
   "version": "1.0.0",
   "lastUpdated": "2026-06-14",
   "branch": "master",
-  "latestCommit": "56c9e71",
+  "latestCommit": "0ceb5ec",
   "projectDescription": "Hades OS — multi-user auth isolation for shared Hermes runtime. Backend owns identity, isolation, memory retrieval. Hermes is shared; user context is not shared.",
   "activeModule": {
     "slug": "control-platform",
@@ -246,7 +246,16 @@
         "Red tests for no import.meta?.env, MODE guard, production URL priority, valid Supabase client init (5 tests)",
         "127 frontend + 316 backend + 9 contract + 5 boundary tests pass, 0 failures",
         "Production build bakes Railway URL (2 occurrences), zero import.meta?.env in dist bundle",
-        "Archive supabaseBrowserConfig.js updated with same try-catch pattern for consistency"
+        "Archive supabaseBrowserConfig.js updated with same try-catch pattern for consistency",
+        "Add shared getApiBaseUrl()/apiUrl() resolver in client.js",
+        "Add sendHadesChatMessage export to hadesApi.js using apiPost and apiUrl",
+        "Add 5 red→green tests for hadesApi (production URL, trailing slash, same-origin guard, missing-base throw, dev fallback)",
+        "Update supabaseClient.js to use shared apiUrl resolver from client.js",
+        "Add build artifact smoke test to lint-deploy.test.mjs (Group 6)",
+        "All 130 frontend + 321 backend + 9 contract + 5 boundary tests pass, 0 failures",
+        "Production build clean + smoke test passes (Railway URL baked, no import.meta?.env in bundle)",
+        "Gate passed (lint:architecture clean)",
+        "Committed and pushed (0ceb5ec)"
       ],
       "inProgress": [],
       "next": []
