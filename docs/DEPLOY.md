@@ -25,7 +25,7 @@ This monorepo deploys as **two independent targets**. Railway hosts `backend/` o
 
 Hermes is a Python CLI binary required at runtime. Two packaging strategies:
 
-1. **Railpack + Dockerfile** (recommended): Include a `backend/Dockerfile` that installs Hermes via `pip install hermes` or a pre-built binary, so it's available in the deploy image.
+1. **Railpack + Dockerfile** (recommended): Include a `backend/Dockerfile` that installs Hermes via `pip install hermes-agent` or a pre-built binary, so it's available in the deploy image.
 2. **Pre-installed binary**: Set `HERMES_BIN_PATH` to a custom Hermes location if it ships with the base image.
 
 Environment variables:
