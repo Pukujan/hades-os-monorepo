@@ -1,0 +1,11 @@
+{
+  "phase": "Phase 11",
+  "slug": "phase-11-final-acceptance",
+  "title": "CI/Final Acceptance",
+  "description": "Final milestone acceptance: promote ci-final-acceptance fitness check, create FINAL_ACCEPTANCE.md, add check:repo-architecture npm script, close repo-architecture-contract milestone.",
+  "status": "active",
+  "startedAt": "2026-06-15T00:00:00.000Z",
+  "completedAt": null,
+  "testFile": "scripts/tasks/repo-architecture-contract/phases/phase-11-final-acceptance/final-acceptance.test.mjs",
+  "expectedTests": 14
+}

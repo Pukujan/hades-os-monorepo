@@ -18,6 +18,12 @@
 | DELETE | `/api/hades/conversations/:id/messages` | hades | Clear all messages from a conversation |
 | GET | `/api/hades/socials` | hades | List user's social connections (Discord, Telegram) without tokens |
 | POST | `/api/hades/socials/telegram/token` | hades | Save a Telegram bot token (validates via getMe) |
+| GET | `/api/hades/minions` | hades | List all minions for the authenticated user |
+| GET | `/api/hades/minions/:id` | hades | Get a single minion by ID |
+| GET | `/api/hades/minions/:id/logs` | hades | Get execution logs for a minion |
+| GET | `/api/hades/notifications` | hades | List notifications for the authenticated user |
+| PATCH | `/api/hades/minions/:id` | hades | Update a minion's configuration |
+| DELETE | `/api/hades/minions/:id` | hades | Delete a minion |
 | GET | `/api/_reference/health` | _reference | Example module health check |
 | GET | `/api/model-condenser/health` | model-condenser | Module health and config summary |
 | POST | `/api/model-condenser/condense` | model-condenser | Regenerate consolidated-models.json |

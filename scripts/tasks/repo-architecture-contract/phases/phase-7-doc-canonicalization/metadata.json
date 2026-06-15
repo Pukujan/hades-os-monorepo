@@ -1,0 +1,9 @@
+{
+  "phase": "phase-7-doc-canonicalization",
+  "task": "repo-architecture-contract",
+  "purpose": "Add legacy registry for additional-modules/docs/ and enforce full doc canonicalization via lint:doc-canonical.",
+  "status": "active",
+  "commands": ["lint:doc-canonical"],
+  "runtimeBehaviorChange": false,
+  "deploymentBehaviorChange": false
+}

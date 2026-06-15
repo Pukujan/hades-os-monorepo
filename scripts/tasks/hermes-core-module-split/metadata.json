@@ -1,0 +1,27 @@
+{
+  "task": "hermes-core-module-split",
+  "taskType": "overall-project",
+  "branch": {
+    "preferred": "refactor/hermes-core-module-split",
+    "fallback": "codex/refactor-hermes-core-module-split",
+    "note": "Use fallback if Git cannot create refs/heads/refactor/hermes-core-module-split."
+  },
+  "purpose": "Split Hades OS into a reusable Hermes boilerplate while preserving hosted Hades behavior.",
+  "owner": "hermes-core-module-split",
+  "status": "active",
+  "activePhases": [
+    "phase-1-portability"
+  ],
+  "commands": [
+    "npm run test:portable",
+    "npm run verify:portable"
+  ],
+  "extractionPolicy": "Keep this task folder with the reusable boilerplate until all split phases are green. After repo extraction, preserve green portability tests as permanent hostability gates.",
+  "handoffFolder": "work-log/handoffs/hermes-core-module-split",
+  "relatedDocs": [
+    "docs/DEPLOY.md",
+    "docs/architecture/contracts/monorepoDeploy.contract.md",
+    "additional-modules/work-log/sessions/2026-06-15-portable-hostability-red-tests.md",
+    "additional-modules/work-log/sessions/2026-06-15-script-phase-metadata.md"
+  ]
+}

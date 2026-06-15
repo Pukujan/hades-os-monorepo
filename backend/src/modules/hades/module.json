@@ -1,0 +1,17 @@
+{
+  "module": "hades",
+  "type": "product",
+  "status": "active",
+  "boundedContext": "Hades",
+  "side": "backend",
+  "owns": ["backend/src/modules/hades/**"],
+  "dependsOn": ["backend/src/modules/auth/**"],
+  "forbiddenDependencies": ["backend/src/modules/model-condenser/**"],
+  "apiDocs": "docs/hades/API.md",
+  "tests": [
+    "backend/src/modules/hades/tests/unit/**",
+    "backend/src/modules/hades/tests/integration/**",
+    "backend/src/modules/hades/tests/contracts/**",
+    "backend/src/modules/hades/__tests__/**"
+  ]
+}

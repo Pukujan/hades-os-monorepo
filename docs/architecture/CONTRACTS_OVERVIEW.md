@@ -123,6 +123,15 @@ These entries are registered in [manifest.json](./contracts/manifest.json):
 | **pipelineAgentMiniModules** | v001 | Mirrored frontend/backend pipeline agent + assigner mini-modules under `ai-ops` |
 | **asyncJobQueue** | v001 | BullMQ + Redis for background jobs (SQL remains source of truth) |
 
+| **docCanonicalSource** | v001 | Authored docs live under `docs/`; agent/OpenCode docs under `additional-modules/docs/` |
+| **taskArtifactLayout** | v001 | Task metadata, scripts, work-log, and docs layout |
+| **moduleMetadata** | v001 | `module.json` fields and validation |
+| **modulePublicApi** | v001 | Public API surface rules for modular boundaries |
+| **repoCatalog** | v001 | `metadata/*.json` catalog generation rules |
+| **routeManifest** | v001 | Route registration conventions |
+| **architectureFitness** | v001 | Architecture fitness function contracts |
+| **adrLifecycle** | v001 | ADR creation, metadata, and lifecycle rules |
+
 Per-contract detail: follow the `doc` link in [manifest.json](./contracts/manifest.json).
 
 ### Specs synced but not in the starter manifest

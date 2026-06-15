@@ -1,0 +1,15 @@
+{
+  "modules": ["backend:auth", "backend:hades", "backend:model-condenser", "backend:_reference", "frontend:hades", "frontend:_reference"],
+  "dependencies": [
+    {"from": "backend:hades", "to": "backend:auth", "type": "depends-on"},
+    {"from": "backend:model-condenser", "to": "backend:auth", "type": "depends-on", "optional": true}
+  ],
+  "nodes": [
+    {"id": "backend:auth", "label": "auth", "type": "platform", "side": "backend", "status": "active"},
+    {"id": "backend:hades", "label": "hades", "type": "product", "side": "backend", "status": "active"},
+    {"id": "backend:model-condenser", "label": "model-condenser", "type": "product", "side": "backend", "status": "active"},
+    {"id": "backend:_reference", "label": "_reference", "type": "reference", "side": "backend", "status": "reference"},
+    {"id": "frontend:hades", "label": "hades", "type": "product", "side": "frontend", "status": "active"},
+    {"id": "frontend:_reference", "label": "_reference", "type": "reference", "side": "frontend", "status": "reference"}
+  ]
+}

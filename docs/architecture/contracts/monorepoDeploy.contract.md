@@ -1,6 +1,6 @@
 # Contract: monorepo deploy layout
 
-**Version:** `v003`  
+**Version:** `v004`  
 **Code:** `backend/src/shared/contracts/monorepoDeploy.contract.js`  
 **Lint:** `scripts/lint-deploy.mjs`  
 **User doc:** [DEPLOY.md](../../DEPLOY.md)
@@ -21,8 +21,9 @@ Codify that this repository deploys as **two independent targets** — not a sin
 | Check | Path / rule |
 |-------|-------------|
 | Backend `start` script | `backend/package.json` → `scripts.start` |
-| Backend Railway config | `backend/railway.toml` |
+| Backend Railway config | `railway.toml` (root) |
 | No backend Vercel config | `backend/vercel.json` must not exist |
+| Root Railway config | `railway.toml` (sets builder=DOCKERFILE, rootDirectory=backend) |
 | Frontend Vercel SPA rewrites | `frontend/vercel.json` → `rewrites` |
 | No frontend Railway config | `frontend/railway.toml` must not exist |
 | Env templates | `backend/.env.example`, `frontend/.env.example` |

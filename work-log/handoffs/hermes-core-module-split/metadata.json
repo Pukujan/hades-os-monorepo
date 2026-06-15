@@ -1,0 +1,26 @@
+{
+  "task": "hermes-core-module-split",
+  "taskType": "overall-project",
+  "branch": {
+    "preferred": "refactor/hermes-core-module-split",
+    "fallback": "codex/refactor-hermes-core-module-split",
+    "note": "Use fallback if Git cannot create refs/heads/refactor/hermes-core-module-split."
+  },
+  "type": "handoff",
+  "status": "active",
+  "owner": "hermes-core-module-split",
+  "created": "2026-06-15",
+  "purpose": "Task-owned handoff folder for OpenCode/Codex coordination during the Hermes core split.",
+  "canonicalHandoff": "work-log/handoffs/hermes-core-module-split/handoff.md",
+  "relatedScriptTask": "scripts/tasks/hermes-core-module-split/metadata.json",
+  "phases": [
+    {
+      "id": "phase-1-portability",
+      "status": "red",
+      "tests": [
+        "scripts/tasks/hermes-core-module-split/phases/phase-1-portability/portable-hostability.test.mjs"
+      ]
+    }
+  ],
+  "movePolicy": "Keep this folder with the task until the split is complete. When creating a new repo, copy this folder as the task handoff history."
+}

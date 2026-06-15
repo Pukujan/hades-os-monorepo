@@ -168,5 +168,59 @@ export function createHadesRoutes({ service, requireHadesAuth, config, scopedRep
     })
   );
 
+  router.get(
+    "/minions",
+    requireAuth,
+    asyncRoute(async (req, res) => {
+      const result = await service.listMinions(req.authContext);
+      res.status(200).json(result);
+    })
+  );
+
+  router.get(
+    "/minions/:id",
+    requireAuth,
+    asyncRoute(async (req, res) => {
+      const result = await service.getMinion(req.params.id, req.authContext);
+      res.status(200).json(result);
+    })
+  );
+
+  router.get(
+    "/minions/:id/logs",
+    requireAuth,
+    asyncRoute(async (req, res) => {
+      const result = await service.getMinionLogs(req.params.id, req.authContext);
+      res.status(200).json(result);
+    })
+  );
+
+  router.get(
+    "/notifications",
+    requireAuth,
+    asyncRoute(async (req, res) => {
+      const result = await service.listNotifications(req.authContext);
+      res.status(200).json(result);
+    })
+  );
+
+  router.patch(
+    "/minions/:id",
+    requireAuth,
+    asyncRoute(async (req, res) => {
+      const result = await service.updateMinion(req.params.id, req.body, req.authContext);
+      res.status(200).json(result);
+    })
+  );
+
+  router.delete(
+    "/minions/:id",
+    requireAuth,
+    asyncRoute(async (req, res) => {
+      const result = await service.deleteMinion(req.params.id, req.authContext);
+      res.status(200).json(result);
+    })
+  );
+
   return router;
 }

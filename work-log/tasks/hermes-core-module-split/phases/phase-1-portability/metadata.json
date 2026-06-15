@@ -1,0 +1,15 @@
+{
+  "phase": "phase-1-portability",
+  "task": "hermes-core-module-split",
+  "purpose": "Red tests for the first Hermes core / Hades module split slice.",
+  "owner": "hermes-core-module-split",
+  "status": "green",
+  "commands": ["npm run test:portable", "npm run verify:portable"],
+  "guards": [
+    "Railway/Vercel deploy artifacts remain present and correctly separated.",
+    "Core/shared/auth code must not import Hades product modules.",
+    "Core/shared/auth code must not contain non-portable local, Hades, or hosted-path assumptions."
+  ],
+  "movePolicy": "Keep with reusable boilerplate until Phase 1 is green; after extraction, keep as a portable-hostability gate.",
+  "relatedHandoff": "work-log/tasks/hermes-core-module-split/handoffs/handoff.md"
+}

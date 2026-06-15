@@ -1,0 +1,19 @@
+{
+  "tasks": [
+    {
+      "name": "repo-architecture-contract",
+      "path": "scripts/tasks/repo-architecture-contract",
+      "type": "overall-project"
+    },
+    {
+      "name": "hermes-core-module-split",
+      "path": "scripts/tasks/hermes-core-module-split",
+      "type": "overall-project"
+    },
+    {
+      "name": "task-artifact-layout",
+      "path": "scripts/tasks/task-artifact-layout",
+      "type": "supporting"
+    }
+  ]
+}

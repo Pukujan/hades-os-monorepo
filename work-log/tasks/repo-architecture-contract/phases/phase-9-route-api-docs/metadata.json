@@ -1,0 +1,28 @@
+{
+  "phase": "Phase 9",
+  "slug": "phase-9-route-api-docs",
+  "title": "Route/API Docs Drift Cleanup",
+  "description": "Fix API documentation drift for Hades minions/notifications endpoints and add route/API manifest alignment. Makes lint:api-docs pass without changing runtime behavior.",
+  "status": "complete",
+  "startedAt": "2026-06-15T00:00:00.000Z",
+  "completedAt": "2026-06-15T23:00:00.000Z",
+  "testFile": "scripts/tasks/repo-architecture-contract/phases/phase-9-route-api-docs/route-api-docs.test.mjs",
+  "relatedScript": "scripts/check-api-docs.mjs",
+  "expectedTests": 12,
+  "allowedChanges": [
+    "docs/API.md",
+    "docs/hades/API.md",
+    "metadata/apis.json",
+    "metadata/architecture-fitness.json",
+    "package.json (lint:repo-arch chain only)",
+    "PROJECT_PLAN.md",
+    "scripts/tasks/repo-architecture-contract/phases/phase-9-route-api-docs/**",
+    "work-log/tasks/repo-architecture-contract/phases/phase-9-route-api-docs/**"
+  ],
+  "forbiddenChanges": [
+    "backend/src/**",
+    "frontend/src/**",
+    "docs/architecture/contracts/**",
+    "AGENTS.md"
+  ]
+}

@@ -21,7 +21,7 @@ test("deploy contract explicitly assigns Railway to backend and Vercel to fronte
 });
 
 test("deploy config files exist only in their owning app folders", () => {
-  assert.equal(existsSync(join(repoRoot, "backend/railway.toml")), true);
+  assert.equal(existsSync(join(repoRoot, "railway.toml")), true);
   assert.equal(existsSync(join(repoRoot, "backend/Dockerfile")), true);
   assert.equal(existsSync(join(repoRoot, "backend/.dockerignore")), true);
   assert.equal(existsSync(join(repoRoot, "frontend/vercel.json")), true);

@@ -1,0 +1,29 @@
+{
+  "phase": "Phase 10",
+  "slug": "phase-10-adr-lifecycle",
+  "title": "ADR Lifecycle",
+  "description": "Create Architecture Decision Records for decisions made during Phases 2-9 and add ADR lifecycle enforcement via lint-adr-lifecycle.mjs. Promotes adr-lifecycle from deferred to implemented checks.",
+  "status": "active",
+  "startedAt": "2026-06-15T00:00:00.000Z",
+  "completedAt": null,
+  "testFile": "scripts/tasks/repo-architecture-contract/phases/phase-10-adr-lifecycle/adr-lifecycle.test.mjs",
+  "relatedScript": "scripts/core/lint-adr-lifecycle.mjs",
+  "expectedTests": 23,
+  "allowedChanges": [
+    "docs/architecture/adr/**",
+    "metadata/adrs.json",
+    "metadata/catalog.json",
+    "metadata/architecture-fitness.json",
+    "package.json (add lint:adr-lifecycle, append to lint:repo-architecture)",
+    "PROJECT_PLAN.md",
+    "scripts/core/lint-adr-lifecycle.mjs",
+    "scripts/tasks/repo-architecture-contract/phases/phase-10-adr-lifecycle/**",
+    "work-log/tasks/repo-architecture-contract/phases/phase-10-adr-lifecycle/**"
+  ],
+  "forbiddenChanges": [
+    "backend/src/**",
+    "frontend/src/**",
+    "docs/architecture/contracts/**",
+    "AGENTS.md"
+  ]
+}

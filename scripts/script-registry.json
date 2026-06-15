@@ -1,0 +1,85 @@
+{
+  "version": 1,
+  "purpose": "Map script and test ownership so the Hermes boilerplate split can move files intentionally.",
+  "tasks": {
+    "hermes-core-module-split": {
+      "metadata": "scripts/tasks/hermes-core-module-split/metadata.json",
+      "handoff": "work-log/handoffs/hermes-core-module-split/metadata.json",
+      "phases": {
+        "phase-1-portability": {
+          "metadata": "scripts/tasks/hermes-core-module-split/phases/phase-1-portability/metadata.json",
+          "entrypoints": [
+            "scripts/tasks/hermes-core-module-split/phases/phase-1-portability/portable-hostability.test.mjs"
+          ],
+          "commands": [
+            "npm run test:portable",
+            "npm run verify:portable"
+          ]
+        }
+      }
+    }
+  },
+  "phaseSuites": {
+    "phase-1-portability": {
+      "metadata": "scripts/tasks/hermes-core-module-split/phases/phase-1-portability/metadata.json",
+      "entrypoints": [
+        "scripts/tasks/hermes-core-module-split/phases/phase-1-portability/portable-hostability.test.mjs"
+      ],
+      "commands": [
+        "npm run test:portable",
+        "npm run verify:portable"
+      ]
+    }
+  },
+  "legacyBuckets": {
+    "deploy": [
+      "scripts/lint-deploy.mjs",
+      "scripts/lint-deploy.test.mjs"
+    ],
+    "hermes-runtime": [
+      "scripts/smoke-hermes-runtime.mjs",
+      "scripts/smoke-hermes-runtime.test.mjs",
+      "scripts/smoke-hermes-chat.mjs",
+      "scripts/smoke-hermes-chat.test.mjs",
+      "scripts/smoke-hermes-context-limit.mjs",
+      "scripts/smoke-hermes-context-limit.test.mjs",
+      "scripts/hermes-config-sync.mjs",
+      "scripts/hermes-config-sync.test.mjs"
+    ],
+    "architecture": [
+      "scripts/lint-contracts.mjs",
+      "scripts/lint-repo-artifacts.mjs",
+      "scripts/check-api-docs.mjs",
+      "backend/scripts/check-module-boundaries.mjs",
+      "backend/scripts/check-module-layers.mjs",
+      "backend/scripts/boundary-lint.test.mjs",
+      "backend/scripts/contract-discovery.test.mjs"
+    ],
+    "planning-and-worklog": [
+      "scripts/plan-finalize.mjs",
+      "scripts/plan-gate.mjs",
+      "scripts/write-pre-push-dev-log.mjs",
+      "scripts/verify-dev-log.mjs"
+    ],
+    "scaffolding-and-export": [
+      "scripts/new-module.mjs",
+      "scripts/export-architecture-starter.mjs",
+      "scripts/import-to-file-exchange.mjs",
+      "scripts/sync-cli-template.mjs"
+    ],
+    "model-condenser": [
+      "scripts/condense-all.mjs",
+      "scripts/condense-file-structure.mjs",
+      "scripts/condense-models.mjs",
+      "scripts/condense-prompts.mjs",
+      "scripts/export-consolidated-models.mjs",
+      "scripts/consolidated-output.mjs"
+    ]
+  },
+  "migrationPolicy": [
+    "Do not mass-move legacy scripts without updating package.json and any docs that call them.",
+    "When a script is edited for a split phase, add phase metadata or move it under scripts/tasks/<task-name>/phases/<phase-id>/.",
+    "Keep Hades-only tests under module folders until the Hades module is extracted.",
+    "Keep deploy and architecture gates in the reusable boilerplate unless a product-specific dependency is proven."
+  ]
+}

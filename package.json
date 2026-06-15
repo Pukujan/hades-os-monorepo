@@ -14,10 +14,21 @@
     "lint:api-docs": "node scripts/check-api-docs.mjs",
     "lint:contracts": "node scripts/lint-contracts.mjs",
     "lint:repo-artifacts": "node scripts/lint-repo-artifacts.mjs",
+    "lint:doc-canonical": "node scripts/core/lint-doc-canonical-source.mjs",
+    "lint:task-artifacts": "node scripts/core/lint-task-artifacts.mjs",
+    "lint:module-metadata": "node scripts/core/lint-module-metadata.mjs",
+    "lint:repo-catalog": "node scripts/core/lint-repo-catalog.mjs",
+    "lint:architecture-fitness": "node scripts/core/lint-architecture-fitness.mjs",
+    "lint:adr-lifecycle": "node scripts/core/lint-adr-lifecycle.mjs",
+    "lint:repo-architecture": "npm run lint:doc-canonical && npm run lint:task-artifacts && npm run lint:module-metadata && npm run lint:repo-catalog && npm run lint:architecture-fitness && npm run lint:api-docs && npm run lint:adr-lifecycle",
+    "check:repo-architecture": "npm run test:repo-architecture && npm run lint:repo-architecture && npm run lint:contracts && npm run lint:repo-artifacts && npm run lint:deploy && npm run test:deploy",
     "lint:deploy": "node scripts/lint-deploy.mjs",
     "lint:architecture": "npm --prefix backend run lint:architecture",
     "test": "npm --prefix backend test && npm --prefix frontend test",
     "test:deploy": "node --test scripts/lint-deploy.test.mjs",
+    "test:portable": "node --test scripts/tasks/hermes-core-module-split/phases/phase-1-portability/portable-hostability.test.mjs",
+    "test:repo-architecture": "node --test scripts/tasks/repo-architecture-contract/phases/phase-1-red-tests/repo-architecture-contract.test.mjs; node --test scripts/tasks/repo-architecture-contract/phases/phase-2-contracts/contract-docs.test.mjs; node --test scripts/tasks/repo-architecture-contract/phases/phase-2-contracts/phase-0-1-regression.test.mjs; node --test scripts/tasks/repo-architecture-contract/phases/phase-3-metadata-catalog/metadata-catalog.test.mjs; node --test scripts/tasks/repo-architecture-contract/phases/phase-4-module-manifests/module-manifests.test.mjs; node --test scripts/tasks/repo-architecture-contract/phases/phase-5-generated-indexes/generated-indexes.test.mjs; node --test scripts/tasks/repo-architecture-contract/phases/phase-6-enforcement/enforcement-lints.test.mjs; node --test scripts/tasks/repo-architecture-contract/phases/phase-7-doc-canonicalization/doc-canonicalization.test.mjs; node --test scripts/tasks/repo-architecture-contract/phases/phase-8-architecture-fitness/architecture-fitness.test.mjs; node --test scripts/tasks/repo-architecture-contract/phases/phase-9-route-api-docs/route-api-docs.test.mjs; node --test scripts/tasks/repo-architecture-contract/phases/phase-10-adr-lifecycle/adr-lifecycle.test.mjs; node --test scripts/tasks/repo-architecture-contract/phases/phase-11-final-acceptance/final-acceptance.test.mjs",
+    "lint:repo-architecture:red": "node scripts/tasks/repo-architecture-contract/phases/phase-1-red-tests/lint-repo-architecture-red.mjs",
     "smoke:hades": "node scripts/smoke-hades-runtime.mjs",
     "smoke:hermes-context": "node scripts/smoke-hermes-context-limit.mjs",
     "smoke:hermes-chat": "node scripts/smoke-hermes-chat.mjs",
@@ -35,6 +46,7 @@
     "test:discord-login-bot-contracts": "npm run test:auth-discord-connection-contract && npm run test:hades-discord-bot-runtime-contract",
     "test:evals": "npm --prefix backend run test:evals",
     "test:ci": "npm run lint:contracts && npm run lint:repo-artifacts && npm run lint:deploy && npm run lint:architecture && npm test && npm run test:deploy && npm run test:evals",
+    "verify:portable": "npm run lint:deploy && npm run lint:architecture && npm test && npm run test:portable && npm --prefix frontend run build",
     "new:module": "node scripts/new-module.mjs",
     "condense-prompts": "node scripts/condense-prompts.mjs",
     "condense-file-structure": "node scripts/condense-file-structure.mjs",
@@ -46,6 +58,7 @@
     "dev-log:verify": "node scripts/verify-dev-log.mjs",
     "dev-log:sync-head": "node scripts/sync-dev-log-head.mjs",
     "dev-log:install-hook": "node scripts/install-dev-log-hook.mjs",
-    "import:file-exchange": "node scripts/import-to-file-exchange.mjs"
+    "import:file-exchange": "node scripts/import-to-file-exchange.mjs",
+    "generate:indexes": "node scripts/core/generate-repo-indexes.mjs"
   }
 }

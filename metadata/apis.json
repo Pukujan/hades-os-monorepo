@@ -1,0 +1,27 @@
+{
+  "apis": [
+    {
+      "name": "discord-gif",
+      "method": "POST",
+      "path": "/hades/gif",
+      "module": "hades",
+      "apiDocsStatus": "api-docs-complete",
+      "routeManifest": "docs/modules/hades/routes.json"
+    },
+    {
+      "name": "minion-assignment-runtime",
+      "method": "POST",
+      "path": "/hades/minion/assign",
+      "module": "hades",
+      "apiDocsStatus": "api-docs-complete",
+      "routeManifest": "docs/modules/hades/routes.json"
+    },
+    {
+      "name": "auth-discord-connection",
+      "method": "POST",
+      "path": "/auth/discord/connect",
+      "module": "auth",
+      "apiDocsStatus": "api-docs-complete"
+    }
+  ]
+}

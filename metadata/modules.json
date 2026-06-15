@@ -1,0 +1,46 @@
+{
+  "modules": [
+    {
+      "name": "auth",
+      "path": "backend/src/modules/auth",
+      "type": "backend",
+      "runtime": "node",
+      "manifestPath": "backend/src/modules/auth/module.json"
+    },
+    {
+      "name": "hades",
+      "path": "backend/src/modules/hades",
+      "type": "backend",
+      "runtime": "node",
+      "manifestPath": "backend/src/modules/hades/module.json"
+    },
+    {
+      "name": "model-condenser",
+      "path": "backend/src/modules/model-condenser",
+      "type": "backend",
+      "runtime": "node",
+      "manifestPath": "backend/src/modules/model-condenser/module.json"
+    },
+    {
+      "name": "_reference",
+      "path": "backend/src/modules/_reference",
+      "type": "backend",
+      "runtime": "node",
+      "manifestPath": "backend/src/modules/_reference/module.json"
+    },
+    {
+      "name": "hades",
+      "path": "frontend/src/modules/hades",
+      "type": "frontend",
+      "runtime": "browser",
+      "manifestPath": "frontend/src/modules/hades/module.json"
+    },
+    {
+      "name": "_reference",
+      "path": "frontend/src/modules/_reference",
+      "type": "frontend",
+      "runtime": "browser",
+      "manifestPath": "frontend/src/modules/_reference/module.json"
+    }
+  ]
+}

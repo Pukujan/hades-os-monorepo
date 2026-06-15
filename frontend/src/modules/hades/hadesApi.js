@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiDelete } from "../../shared/api/client.js";
+import { apiGet, apiPost, apiPatch, apiDelete } from "../../shared/api/client.js";
 import { createDraftFromMessage } from "./parser.js";
 import {
   SOCIAL_LINKS,
@@ -71,6 +71,49 @@ export async function deleteHadesMessages(conversationId, accessToken) {
 
 export async function saveTelegramToken({ token }, accessToken) {
   return apiPost("/api/hades/socials/telegram/token", { token }, { accessToken });
+}
+
+export async function getMinion(minionId, accessToken) {
+  return apiGet(`/api/hades/minions/${minionId}`, { accessToken });
+}
+
+export async function listMinions(accessToken) {
+  return apiGet("/api/hades/minions", { accessToken });
+}
+
+export async function getMinionLogs(minionId, accessToken) {
+  return apiGet(`/api/hades/minions/${minionId}/logs`, { accessToken });
+}
+
+export async function getNotifications(accessToken) {
+  return apiGet("/api/hades/notifications", { accessToken });
+}
+
+export async function markNotificationRead(notificationId, accessToken) {
+  return apiPatch(`/api/hades/notifications/${notificationId}/read`, {}, { accessToken });
+}
+
+export async function markAllNotificationsRead(accessToken) {
+  return apiPatch("/api/hades/notifications/read-all", {}, { accessToken });
+}
+
+export async function updateMinion(minionId, updates, accessToken) {
+  return apiPatch(`/api/hades/minions/${minionId}`, updates, { accessToken });
+}
+
+export async function deleteMinion(minionId, accessToken) {
+  return apiDelete(`/api/hades/minions/${minionId}`, null, { accessToken });
+}
+
+export async function generateCatMeme(promptOrOptions, accessToken) {
+  const payload = typeof promptOrOptions === "string"
+    ? { prompt: promptOrOptions }
+    : { templateId: promptOrOptions?.templateId, text: promptOrOptions?.text };
+  return apiPost("/api/hades/catmeme/generate", payload, { accessToken });
+}
+
+export async function getCatMemeTemplates(accessToken) {
+  return apiGet("/api/hades/catmeme/templates", { accessToken });
 }
 
 export function buildLocalDraftFallback(message, currentDraft) {

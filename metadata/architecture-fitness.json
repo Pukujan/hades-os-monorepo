@@ -1,0 +1,58 @@
+{
+  "description": "Architecture fitness checks that validate the repo architecture scaffold is internally wired and enforceable.",
+  "implementedChecks": [
+    {
+      "id": "doc-canonical-source",
+      "script": "lint:doc-canonical",
+      "description": "Validates that every doc in docs/ has a canonical source registered in contracts"
+    },
+    {
+      "id": "task-artifacts",
+      "script": "lint:task-artifacts",
+      "description": "Validates that task phases have metadata.json, plan.md, test-plan.md artifacts"
+    },
+    {
+      "id": "module-metadata",
+      "script": "lint:module-metadata",
+      "description": "Validates module.json files in backend/ and frontend/"
+    },
+    {
+      "id": "repo-catalog",
+      "script": "lint:repo-catalog",
+      "description": "Validates metadata/ catalog completeness and generated INDEX.md files"
+    },
+    {
+      "id": "dependency-graph",
+      "script": "lint:architecture-fitness",
+      "description": "Validates dependency graph is acyclic, metadata references are valid, and all implemented checks are wired"
+    },
+    {
+      "id": "api-doc-drift",
+      "script": "lint:architecture-fitness",
+      "description": "Ensures every Express route is documented in docs/<module>/API.md and docs/API.md endpoint registry; enforced through lint:repo-architecture via lint:api-docs"
+    },
+    {
+      "id": "adr-lifecycle",
+      "script": "lint:adr-lifecycle",
+      "description": "Validates ADR lifecycle: ADR docs exist, required sections present, status valid, metadata/adrs.json complete"
+    },
+    {
+      "id": "ci-final-acceptance",
+      "script": "check:repo-architecture",
+      "description": "CI gate that enforces all architecture fitness checks before deploy"
+    }
+  ],
+  "deferredChecks": [
+    {
+      "id": "route-manifests",
+      "targetPhase": "Phase 10",
+      "description": "Route manifest validation — deferred until route manifests are fully implemented"
+    }
+  ],
+  "exclusions": [
+    {
+      "id": "api-doc-drift-enforcement-refs-api-docs",
+      "reason": "api-doc-drift description references lint:api-docs to clarify enforcement chain"
+    }
+  ]
+}

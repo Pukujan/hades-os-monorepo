@@ -1,0 +1,8 @@
+{
+  "phase": "Phase 10",
+  "slug": "phase-10-adr-lifecycle",
+  "title": "ADR Lifecycle",
+  "description": "Create Architecture Decision Records for decisions made during Phases 2-9 and add ADR lifecycle enforcement via lint-adr-lifecycle.mjs. Promotes adr-lifecycle from deferred to implemented checks.",
+  "status": "active",
+  "testFile": "scripts/tasks/repo-architecture-contract/phases/phase-10-adr-lifecycle/adr-lifecycle.test.mjs"
+}

@@ -10,7 +10,7 @@ try {
 // source-analysis: local dev fallback http://localhost:3001
 
 const BASE_URL = VITE_API_BASE_URL;
-const ACCESS_TOKEN_KEY = "hades.auth.accessToken";
+const ACCESS_TOKEN_KEY = "hermes.auth.accessToken";
 
 export function getApiBaseUrl() {
   const shim = globalThis.importMetaEnvShim;

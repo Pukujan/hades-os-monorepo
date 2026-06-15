@@ -1,13 +1,13 @@
 /** @readonly Monorepo deploy layout — Railway backend + Vercel frontend. */
 
-export const MONOREPO_DEPLOY_VERSION = "v003";
+export const MONOREPO_DEPLOY_VERSION = "v004";
 
 /** @type {Record<string, { root: string, platform: string, requiredFiles: string[], envVars: string[] }>} */
 export const DEPLOY_TARGETS = {
   backend: {
     root: "backend",
     platform: "railway",
-    requiredFiles: ["backend/package.json", "backend/railway.toml", "backend/.env.example", "backend/Dockerfile", "backend/.dockerignore"],
+    requiredFiles: ["backend/package.json", "railway.toml", "backend/.env.example", "backend/Dockerfile", "backend/.dockerignore"],
     forbiddenFiles: ["backend/vercel.json"],
     startScript: "start",
     envVars: [

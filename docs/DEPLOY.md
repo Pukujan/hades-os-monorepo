@@ -9,15 +9,15 @@ This monorepo deploys as **two independent targets**. Railway hosts `backend/` o
 
 ## Backend
 
-- Entry: `npm run start` in `backend/`
-- Config: `backend/railway.toml`
+- Entry: `node src/core/server.js` (via Dockerfile CMD)
+- Config: `railway.toml` (root — sets `builder = "DOCKERFILE"`, `rootDirectory = "backend"`)
 - Local env template: `backend/.env.example`
-- **Railway dashboard settings:**
+- **Railway dashboard settings (authoritative — override root railway.toml):**
   - `Root Directory`: `backend`
-  - `Build Command`: leave blank (uses `backend/railway.toml` Nixpacks builder)
-  - `Start Command`: `npm run start`
-  - Without these, Railway builds from the repo root and skips backend deps.
-- **Root build safety net:** `package.json` `build` script runs `npm --prefix backend ci` as a fallback if Railway ignores Root Directory.
+  - `Build Command`: leave blank (reads `[build]` from root `railway.toml`)
+  - `Start Command`: leave blank (uses Dockerfile CMD `node src/core/server.js`)
+  - Without these, Railway may fall back to Nixpacks and ignore the Dockerfile.
+- **Root safety net:** `railway.toml` at repo root carries `[build]` + `[deploy]` so Railway finds the config even without dashboard overrides.
 - Do not add `backend/vercel.json`.
 - Required Railway env vars: `NODE_ENV`, `PORT`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_ANON_KEY`, `OPENROUTER_API_KEY`, `OPENROUTER_MODEL`, `ENCRYPTION_KEY`, `HERMES_REQUIRED`, `CORS_ORIGIN`.
 
@@ -53,7 +53,7 @@ Environment variables:
 
 The repo root orchestrates lint, tests, and scaffolding scripts. It defines `start` as a local-dev convenience (`npm --prefix backend run start`) and `build` as a Railway safety net that installs backend deps (`npm --prefix backend ci`).
 
-> **Why root build exists:** Railway's Railpack build sometimes ignores `rootDirectory = "backend"` in the root `railway.toml` and builds from repo root. The root build script ensures backend dependencies are installed even if Railway builds from root. The **primary** fix is the Railway dashboard Root Directory setting; root build is a belt-and-suspenders fallback.
+> **Why root build exists:** Railway's Railpack build sometimes ignores `rootDirectory` and builds from repo root. The root `npm --prefix backend ci` ensures backend deps are installed even if that happens. The **primary** configuration is `[build] builder = "DOCKERFILE"` in root `railway.toml`; the root build is a belt-and-suspenders fallback.
 
 ## Verify
 

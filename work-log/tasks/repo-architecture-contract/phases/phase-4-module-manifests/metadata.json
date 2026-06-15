@@ -1,0 +1,9 @@
+{
+  "phase": "phase-4-module-manifests",
+  "task": "repo-architecture-contract",
+  "status": "active",
+  "purpose": "Add active module manifests and update module metadata for the contracted modular monolith upgrade.",
+  "expectedResult": "module manifest tests should pass; generated index red tests may still fail",
+  "runtimeBehaviorChange": false,
+  "deploymentBehaviorChange": false
+}

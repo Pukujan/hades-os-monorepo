@@ -1,0 +1,15 @@
+{
+  "module": "auth",
+  "type": "platform",
+  "status": "active",
+  "boundedContext": "Auth",
+  "side": "backend",
+  "owns": ["backend/src/modules/auth/**"],
+  "dependsOn": [],
+  "forbiddenDependencies": ["backend/src/modules/hades/**", "backend/src/modules/model-condenser/**"],
+  "apiDocs": "docs/auth/API.md",
+  "tests": [
+    "backend/src/modules/auth/tests/unit/**",
+    "backend/src/modules/auth/tests/integration/**"
+  ]
+}

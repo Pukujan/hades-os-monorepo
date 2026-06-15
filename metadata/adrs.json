@@ -1,0 +1,60 @@
+{
+  "adrs": [
+    {
+      "id": "ADR-0001",
+      "title": "Contract Document Format",
+      "status": "Accepted",
+      "path": "docs/architecture/adr/0001-contract-document-format.md",
+      "phase": "Phase 2"
+    },
+    {
+      "id": "ADR-0002",
+      "title": "Metadata Catalog Structure",
+      "status": "Accepted",
+      "path": "docs/architecture/adr/0002-metadata-catalog-structure.md",
+      "phase": "Phase 3"
+    },
+    {
+      "id": "ADR-0003",
+      "title": "Module Manifest Convention",
+      "status": "Accepted",
+      "path": "docs/architecture/adr/0003-module-manifest-convention.md",
+      "phase": "Phase 3"
+    },
+    {
+      "id": "ADR-0004",
+      "title": "Generated Index Strategy",
+      "status": "Accepted",
+      "path": "docs/architecture/adr/0004-generated-index-strategy.md",
+      "phase": "Phase 5"
+    },
+    {
+      "id": "ADR-0005",
+      "title": "Architecture Enforcement Lints",
+      "status": "Accepted",
+      "path": "docs/architecture/adr/0005-architecture-enforcement-lints.md",
+      "phase": "Phase 6"
+    },
+    {
+      "id": "ADR-0006",
+      "title": "Doc Canonicalization",
+      "status": "Accepted",
+      "path": "docs/architecture/adr/0006-doc-canonicalization.md",
+      "phase": "Phase 7"
+    },
+    {
+      "id": "ADR-0007",
+      "title": "Architecture Fitness Tests",
+      "status": "Accepted",
+      "path": "docs/architecture/adr/0007-architecture-fitness-tests.md",
+      "phase": "Phase 8"
+    },
+    {
+      "id": "ADR-0008",
+      "title": "API Documentation Standards",
+      "status": "Accepted",
+      "path": "docs/architecture/adr/0008-api-documentation-standards.md",
+      "phase": "Phase 9"
+    }
+  ]
+}

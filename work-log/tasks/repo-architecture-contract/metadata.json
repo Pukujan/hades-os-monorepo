@@ -1,0 +1,14 @@
+{
+  "task": "repo-architecture-contract",
+  "taskType": "overall-project",
+  "branch": {
+    "preferred": "refactor/repo-architecture-contract",
+    "fallback": "codex/refactor-repo-architecture-contract"
+  },
+  "status": "complete",
+  "completedAt": "2026-06-15T00:00:00.000Z",
+  "purpose": "Upgrade the repo into a metadata-driven contracted modular monolith before the Hades/Hermes split.",
+  "activePhases": ["phase-1-red-tests", "phase-5-generated-indexes", "phase-6-enforcement", "phase-8-architecture-fitness", "phase-11-final-acceptance"],
+  "runtimeBehaviorChange": false,
+  "deploymentBehaviorChange": false
+}

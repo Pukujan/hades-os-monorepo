@@ -97,4 +97,45 @@ Manifest: [contracts/manifest.json](./contracts/manifest.json) · Changelog: [co
 | Pipeline versions | `pipelineVersions.js` |
 | Rule authority | `court-rules/contracts/ruleAuthority.contract.js` |
 
+| Document canonical source | [docCanonicalSource.contract.md](./contracts/docCanonicalSource.contract.md) |
+| Task artifact layout | [taskArtifactLayout.contract.md](./contracts/taskArtifactLayout.contract.md) |
+| Module metadata | [moduleMetadata.contract.md](./contracts/moduleMetadata.contract.md) |
+| Module public API | [modulePublicApi.contract.md](./contracts/modulePublicApi.contract.md) |
+| Repo catalog | [repoCatalog.contract.md](./contracts/repoCatalog.contract.md) |
+| Route manifest | [routeManifest.contract.md](./contracts/routeManifest.contract.md) |
+| Architecture fitness | [architectureFitness.contract.md](./contracts/architectureFitness.contract.md) |
+| ADR lifecycle | [adrLifecycle.contract.md](./contracts/adrLifecycle.contract.md) |
+
+## Task artifact layout
+
+Task metadata, scripts, work-log, and docs follow a three-directory convention:
+
+```
+docs/tasks/<task>/
+scripts/tasks/<task>/
+work-log/tasks/<task>/
+```
+
+Each task directory contains a `metadata.json` and an optional `phases/` subdirectory. See [taskArtifactLayout.contract.md](./contracts/taskArtifactLayout.contract.md) for the full schema.
+
+## Module layout
+
+Every module under `backend/src/modules/` and `frontend/src/modules/` should contain a `module.json` declaring its identity, public API, and dependencies. See [moduleMetadata.contract.md](./contracts/moduleMetadata.contract.md) and [modulePublicApi.contract.md](./contracts/modulePublicApi.contract.md).
+
+## Repo catalog
+
+Generated `metadata/*.json` files index the repo's modules, tasks, contracts, APIs, and architecture fitness checks. See [repoCatalog.contract.md](./contracts/repoCatalog.contract.md).
+
+## Route manifest
+
+API route registration follows documented conventions. See [routeManifest.contract.md](./contracts/routeManifest.contract.md).
+
+## Architecture fitness
+
+Fitness functions guard against architectural drift. See [architectureFitness.contract.md](./contracts/architectureFitness.contract.md).
+
+## ADR lifecycle
+
+Architecture Decision Records live under `docs/architecture/adr/`. See [adrLifecycle.contract.md](./contracts/adrLifecycle.contract.md).
+
 Human storage doc: [docs/case-filing-ai/STORAGE.md](../case-filing-ai/STORAGE.md)

@@ -1,0 +1,30 @@
+{
+  "phase": "Phase 11",
+  "slug": "phase-11-final-acceptance",
+  "title": "CI/Final Acceptance",
+  "description": "Final milestone acceptance: promote ci-final-acceptance fitness check, create FINAL_ACCEPTANCE.md, add check:repo-architecture npm script, close repo-architecture-contract milestone.",
+  "status": "active",
+  "startedAt": "2026-06-15T00:00:00.000Z",
+  "completedAt": "2026-06-15T00:00:00.000Z",
+  "testFile": "scripts/tasks/repo-architecture-contract/phases/phase-11-final-acceptance/final-acceptance.test.mjs",
+  "relatedScript": null,
+  "expectedTests": 14,
+  "allowedChanges": [
+    "docs/tasks/repo-architecture-contract/FINAL_ACCEPTANCE.md",
+    "docs/tasks/repo-architecture-contract/PROJECT_PLAN.md",
+    "docs/tasks/repo-architecture-contract/ACCEPTANCE.md",
+    "metadata/architecture-fitness.json",
+    "metadata/catalog.json",
+    "package.json (add check:repo-architecture, append test:repo-architecture)",
+    "scripts/tasks/repo-architecture-contract/metadata.json",
+    "scripts/tasks/repo-architecture-contract/phases/phase-11-final-acceptance/**",
+    "work-log/tasks/repo-architecture-contract/metadata.json",
+    "work-log/tasks/repo-architecture-contract/phases/phase-11-final-acceptance/**"
+  ],
+  "forbiddenChanges": [
+    "backend/src/**",
+    "frontend/src/**",
+    "docs/architecture/contracts/**",
+    "AGENTS.md"
+  ]
+}
