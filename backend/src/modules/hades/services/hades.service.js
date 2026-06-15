@@ -18,7 +18,7 @@ function createMessage(role, content, extra = {}) {
   };
 }
 
-export function createHadesService({ repository, scopedRepos, hermes, config = {}, minionAssignmentRuntime, context, telegramClientFactory } = {}) {
+export function createHadesService({ repository, scopedRepos, hermes, config = {}, minionAssignmentRuntime, context, telegramClientFactory, minionLogsRepo, notificationsRepo } = {}) {
   function resolveUserId(authContext) {
     if (authContext?.userId) return authContext.userId;
     if (process.env.NODE_ENV !== "production") {
@@ -120,29 +120,33 @@ export function createHadesService({ repository, scopedRepos, hermes, config = {
       scopedMemory,
     });
 
-    if (scopedRepos?.executions) {
-      await scopedRepos.executions.create({
-        userId, tenantId,
-        data: {
-          conversationId: conversation.id,
-          sessionId: hermesResult.sessionId || null,
-          source: hermesResult.source,
-          status: hermesResult.source === "hermes_runtime" ? "completed" : "fallback",
-          errorMessage: null,
-        },
-      });
-    } else if (typeof repository.saveAgentExecution === "function") {
-      await repository.saveAgentExecution({
-        idempotencyKey: `${payload.idempotencyKey}:agent`,
-        execution: {
-          conversationId: conversation.id,
-          userId,
-          sessionId: hermesResult.sessionId || null,
-          source: hermesResult.source,
-          status: hermesResult.source === "hermes_runtime" ? "completed" : "fallback",
-          errorMessage: null,
-        },
-      });
+    try {
+      if (scopedRepos?.executions) {
+        await scopedRepos.executions.create({
+          userId, tenantId,
+          data: {
+            conversation_id: conversation.id,
+            session_id: hermesResult.sessionId || null,
+            source: hermesResult.source,
+            status: hermesResult.source === "hermes_runtime" ? "completed" : "fallback",
+            error_message: null,
+          },
+        });
+      } else if (typeof repository.saveAgentExecution === "function") {
+        await repository.saveAgentExecution({
+          idempotencyKey: `${payload.idempotencyKey}:agent`,
+          execution: {
+            conversation_id: conversation.id,
+            userId,
+            session_id: hermesResult.sessionId || null,
+            source: hermesResult.source,
+            status: hermesResult.source === "hermes_runtime" ? "completed" : "fallback",
+            error_message: null,
+          },
+        });
+      }
+    } catch (persistError) {
+      console.error("Failed to persist agent execution:", persistError.message);
     }
 
     const messageActions = hermesResult.assistantMessage.actions || [];
@@ -427,6 +431,61 @@ async function saveTelegramToken(body, authContext) {
     return { status: "connected", botUsername: botInfo.username || null, token_last4: last4(token) };
   }
 
+  async function listMinions(authContext) {
+    const userId = resolveUserId(authContext);
+    const tenantId = authContext?.tenantId || userId;
+    if (scopedRepos?.minions) {
+      return scopedRepos.minions.listByUser({ userId, tenantId });
+    }
+    return repository.listMinions();
+  }
+
+  async function getMinion(minionId, authContext) {
+    const userId = resolveUserId(authContext);
+    const tenantId = authContext?.tenantId || userId;
+    if (scopedRepos?.minions) {
+      return scopedRepos.minions.findById({ id: minionId, userId, tenantId });
+    }
+    return repository.getMinion(minionId);
+  }
+
+  async function getMinionLogs(minionId, authContext) {
+    const userId = resolveUserId(authContext);
+    const tenantId = authContext?.tenantId || userId;
+    if (minionLogsRepo) {
+      return minionLogsRepo.listLogsByMinionId(minionId);
+    }
+    return [];
+  }
+
+  async function listNotifications(authContext) {
+    const userId = resolveUserId(authContext);
+    const tenantId = authContext?.tenantId || userId;
+    if (notificationsRepo) {
+      return notificationsRepo.listNotifications({ userId });
+    }
+    return [];
+  }
+
+  async function updateMinion(minionId, updates, authContext) {
+    if (typeof updates !== "object" || updates === null) {
+      throw new AppError("Updates body is required", 400);
+    }
+    const userId = resolveUserId(authContext);
+    if (scopedRepos?.minions) {
+      return scopedRepos.minions.update({ id: minionId, userId, data: updates });
+    }
+    return repository.updateMinion(minionId, updates);
+  }
+
+  async function deleteMinion(minionId, authContext) {
+    const userId = resolveUserId(authContext);
+    if (scopedRepos?.minions) {
+      return scopedRepos.minions.delete({ id: minionId, userId });
+    }
+    return repository.deleteMinion(minionId);
+  }
+
   async function handleTrigger(body, authContext = null) {
     if (!minionAssignmentRuntime) {
       throw new AppError("Minion assignment runtime is not configured", 501);
@@ -446,5 +505,11 @@ async function saveTelegramToken(body, authContext) {
     listSocialConnections,
     saveTelegramToken,
     handleTrigger,
+    listMinions,
+    getMinion,
+    getMinionLogs,
+    listNotifications,
+    updateMinion,
+    deleteMinion,
   };
 }

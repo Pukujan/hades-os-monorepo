@@ -161,6 +161,10 @@ create table if not exists hades_agent_executions (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   tenant_id uuid not null,
+  conversation_id uuid,
+  session_id text,
+  source text,
+  error_message text,
   provider text,
   trigger_type text,
   minion_id uuid,
@@ -174,6 +178,12 @@ create table if not exists hades_agent_executions (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- Add columns that may be missing if the table was created by an earlier migration
+alter table hades_agent_executions add column if not exists conversation_id uuid;
+alter table hades_agent_executions add column if not exists session_id text;
+alter table hades_agent_executions add column if not exists source text;
+alter table hades_agent_executions add column if not exists error_message text;
 
 create index if not exists idx_hades_agent_executions_user_tenant
   on hades_agent_executions(user_id, tenant_id);
