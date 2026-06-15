@@ -1458,8 +1458,8 @@ function ThemeCard({ choice }) {
 }
 
 function MinionListScreenWrapped() {
-  const { id } = useParams();
-  return <MinionListScreen minionId={id} />;
+  const { minions } = useHades();
+  return <MinionListScreen minions={minions} />;
 }
 
 function MinionDetailScreenWrapped() {
