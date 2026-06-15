@@ -35,7 +35,7 @@ import { TelegramSetupCard } from "./TelegramSetupCard.jsx";
 import {
   buildMinionDetailViewModel,
   buildMinionScreenViewModel,
-  buildNotificationViewModel
+  buildNotificationViewModel,
   normalizeMessage
 } from "./hadesViewModel.js";
 import { MinionSlots } from "./MinionSlots.jsx";
