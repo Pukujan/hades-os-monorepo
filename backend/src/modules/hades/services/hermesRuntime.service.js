@@ -38,18 +38,23 @@ function parseDotEnv(text) {
 }
 
 function resolveHermesBin() {
+  const candidates = [];
+
   if (process.env.HERMES_BIN_PATH) {
-    return process.env.HERMES_BIN_PATH;
+    candidates.push(process.env.HERMES_BIN_PATH);
   }
-  if (process.env.NODE_ENV !== "production") {
-    const devPaths = [
-      "/Users/teresaguajardo/.hermes/hermes-agent/venv/bin/hermes",
-      path.join(os.homedir(), ".hermes", "hermes-agent", "venv", "bin", "hermes"),
-    ];
-    for (const p of devPaths) {
-      if (fs.existsSync(p)) return p;
-    }
+
+  candidates.push(...[
+    "/opt/hermes-venv/bin/hermes",
+    "/app/hermes-agent/venv/bin/hermes",
+    "/Users/teresaguajardo/.hermes/hermes-agent/venv/bin/hermes",
+    path.join(os.homedir(), ".hermes", "hermes-agent", "venv", "bin", "hermes"),
+  ]);
+
+  for (const p of candidates) {
+    if (fs.existsSync(p)) return p;
   }
+
   return "hermes";
 }
 

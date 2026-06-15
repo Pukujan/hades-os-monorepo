@@ -15,31 +15,32 @@ function makeTempDir() {
 }
 
 describe("resolveHermesBin", () => {
-  test("uses HERMES_BIN_PATH env var when set (highest priority)", async () => {
-    process.env.HERMES_BIN_PATH = "/custom/path/hermes";
+  test("uses HERMES_BIN_PATH env var when set and exists (highest priority)", async () => {
+    const tmpDir = makeTempDir();
+    const fakeBin = path.join(tmpDir, "hermes");
+    fs.writeFileSync(fakeBin, "", { mode: 0o755 });
+    process.env.HERMES_BIN_PATH = fakeBin;
     try {
       const mod = await import("../../services/hermesRuntime.service.js");
-      const runtime = mod.createHermesRuntimeService({
-        hermesBin: undefined,
-        runCommand: async () => '{"assistantText":"ok"}',
-      });
+
       const calls = [];
-      const runtime2 = mod.createHermesRuntimeService({
+      const runtime = mod.createHermesRuntimeService({
         hermesBin: undefined,
         runCommand: async (bin, args, options) => {
           calls.push(bin);
           return '{"assistantText":"ok"}';
         },
       });
-      await runtime2.generateDraft({ message: "test", currentDraft: { status: "incomplete" } });
-      assert.equal(calls[0], "/custom/path/hermes");
+      await runtime.generateDraft({ message: "test", currentDraft: { status: "incomplete" } });
+      assert.equal(calls[0], fakeBin);
     } finally {
       delete process.env.HERMES_BIN_PATH;
+      fs.rmSync(tmpDir, { recursive: true, force: true });
     }
   });
 });
 
-describe("dev fallback", () => {
+describe("binary resolution order", () => {
   let NODE_ENV_ORIG;
 
   before(() => {
@@ -50,7 +51,7 @@ describe("dev fallback", () => {
     process.env.NODE_ENV = NODE_ENV_ORIG;
   });
 
-  test("does NOT fall back to dev path in production", async () => {
+  test("uses explicit hermesBin over resolveHermesBin", async () => {
     process.env.NODE_ENV = "production";
     const mod = await import("../../services/hermesRuntime.service.js");
 
