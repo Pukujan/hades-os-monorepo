@@ -36,12 +36,14 @@ import {
   buildMinionDetailViewModel,
   buildMinionScreenViewModel,
   buildNotificationViewModel
+  normalizeMessage
 } from "./hadesViewModel.js";
 import { MinionSlots } from "./MinionSlots.jsx";
 import { MinionListScreen } from "./MinionListScreen.jsx";
 import { MinionDetailScreen } from "./MinionDetailScreen.jsx";
 import { MinionLogsScreen } from "./MinionLogsScreen.jsx";
 import { getLogsForMinion } from "./minionPreviewData.js";
+import { ChatBubble } from "./ChatBubble.js";
 import { buildAssistantReply, buildTestOutput, missingDraftFields } from "./parser.js";
 import {
   buildLocalDraftFallback,
@@ -552,18 +554,16 @@ function HadesProvider({ children }) {
         setPendingCopy(response.pendingCopy);
       }
 
-      const msgActions = response.actions || response.assistantMessage?.actions || [];
-      const msgCards = response.cards || [];
       setMsgs((current) =>
-        current.map((entry) => (entry.id === userMessageId ? { ...entry, status: "completed" } : entry)).concat({
+        current.map((entry) => (entry.id === userMessageId ? { ...entry, status: "completed" } : entry)).concat(normalizeMessage({
           id: response.assistantMessage?.id || createId("msg"),
           role: "assistant",
           content: response.assistantMessage?.content || "Draft updated.",
           status: response.assistantMessage?.status || "completed",
           suggestions: response.assistantMessage?.suggestions || [],
-          actions: msgActions,
-          cards: msgCards,
-        })
+          actions: response.actions || response.assistantMessage?.actions || [],
+          cards: response.cards || [],
+        }))
       );
       updateDraft(response.draft);
     } catch (error) {
@@ -571,13 +571,13 @@ function HadesProvider({ children }) {
       updateDraft(parsed.draft);
       const assistantReply = buildAssistantReply(parsed);
       setMsgs((current) =>
-        current.map((entry) => (entry.id === userMessageId ? { ...entry, status: "completed" } : entry)).concat({
+        current.map((entry) => (entry.id === userMessageId ? { ...entry, status: "completed" } : entry)).concat(normalizeMessage({
           id: createId("msg"),
           role: "assistant",
           content: assistantReply.content,
           status: assistantReply.status,
           suggestions: assistantReply.suggestions
-        })
+        }))
       );
       showToast(error?.message ? `Using local fallback: ${error.message}` : "Using local fallback.");
     }
@@ -1049,57 +1049,6 @@ function ComparisonCard({ card }) {
   );
 }
 
-function Bubble({ message, showStamp = true }) {
-  const { sendMessage } = useHades();
-  const navigate = useNavigate();
-  const className = `bubble ${message.role === "user" ? "user" : "hades"} ${message.status === "queued" ? "pending" : ""}`;
-
-  return (
-    <div className={className}>
-      <span dangerouslySetInnerHTML={{ __html: renderMarkdown(message.content) }} />
-      {showStamp ? <span className="stamp">{message.createdAt || "Just now"}</span> : null}
-      {message.status === "queued" ? <small>Pending sync</small> : null}
-      {message.cards?.length > 0 ? (
-        <div className="hades-message-cards">
-          {message.cards.map((card, i) => {
-            if (card.type === "product_result") return <ProductCard key={`card-${i}`} card={card} />;
-            if (card.type === "comparison_row") return <ComparisonCard key={`card-${i}`} card={card} />;
-            return null;
-          })}
-        </div>
-      ) : null}
-      {message.actions?.length > 0 ? (
-        <div className="hades-message-actions">
-          {message.actions.map((action, i) => {
-            if (action.type === "route") {
-              return (
-                <button key={`action-${i}`} type="button" className="hades-action-button" onClick={() => navigate(action.to)}>
-                  {action.label}
-                </button>
-              );
-            }
-            if (action.type === "external_link") {
-              return (
-                <a key={`action-${i}`} className="hades-action-button" href={action.url} target="_blank" rel="noreferrer noopener">
-                  {action.label}
-                </a>
-              );
-            }
-            if (action.type === "command") {
-              return (
-                <button key={`action-${i}`} type="button" className="hades-action-button" onClick={() => sendMessage(`/${action.command}`)}>
-                  {action.label}
-                </button>
-              );
-            }
-            return null;
-          })}
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
 function LoadingDots({ pendingCopy }) {
   return (
     <div className="loading">
@@ -1555,7 +1504,7 @@ function MinionsScreen() {
           <div className="chat-log" id="minionsChat">
             {messages.map((message) => (
               <React.Fragment key={message.id}>
-                <Bubble message={message} />
+                <ChatBubble message={message} sendMessage={sendMessage} ProductCard={ProductCard} ComparisonCard={ComparisonCard} />
                 {message.suggestions?.length ? (
                   <div className="suggest">
                     {message.suggestions.map((s, i) => {
@@ -1760,7 +1709,7 @@ function ForgeScreen() {
           <div className="chat-log" id="forgeChat">
             {messages.map((message) => (
               <React.Fragment key={message.id}>
-                <Bubble message={message} />
+                <ChatBubble message={message} sendMessage={sendMessage} ProductCard={ProductCard} ComparisonCard={ComparisonCard} />
                 {message.suggestions?.length ? (
                   <div className="suggest">
                     {message.suggestions.map((s, i) => {

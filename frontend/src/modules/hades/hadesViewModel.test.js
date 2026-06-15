@@ -3,7 +3,8 @@ import { test } from "node:test";
 import {
   buildMinionDetailViewModel,
   buildMinionScreenViewModel,
-  buildNotificationViewModel
+  buildNotificationViewModel,
+  normalizeMessage
 } from "./hadesViewModel.js";
 
 test("minion screen view model splits active and inactive minions without mutating api state", () => {
@@ -203,4 +204,39 @@ test("notification view model preserves exact location metadata and open labels"
   assert.equal(view.manual[0].openLabel, "Open Discord location");
   assert.equal(view.automated[0].locationLabel, "Gmail · pujan@gmail.com · to: alex@example.com · subject: Summary Draft");
   assert.equal(view.automated[0].openLabel, "Open Gmail thread");
+});
+
+test("normalizeMessage extracts link actions from content", () => {
+  const result = normalizeMessage({
+    id: "msg1",
+    role: "assistant",
+    content: "Check this out https://example.com/cat and also https://other.com"
+  });
+  const links = result.actions.filter((a) => a.type === "external_link");
+  assert.equal(links.length, 2);
+  assert.equal(links[0].url, "https://example.com/cat");
+  assert.equal(links[1].url, "https://other.com");
+});
+
+test("normalizeMessage merges with existing actions and dedupes", () => {
+  const msg = {
+    id: "msg1",
+    role: "assistant",
+    content: "Visit https://example.com for details",
+    actions: [{ type: "route", label: "Go to settings", to: "/settings" }]
+  };
+  const result = normalizeMessage(msg);
+  assert.equal(result.actions.length, 2);
+  assert.equal(result.actions[0].type, "route");
+  assert.equal(result.actions[1].url, "https://example.com");
+});
+
+test("normalizeMessage returns null when message is null", () => {
+  assert.equal(normalizeMessage(null), null);
+});
+
+test("normalizeMessage preserves message with no URLs and no actions", () => {
+  const msg = { id: "msg1", role: "assistant", content: "Just text" };
+  const result = normalizeMessage(msg);
+  assert.deepEqual(result.actions, []);
 });

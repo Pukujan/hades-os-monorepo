@@ -104,7 +104,32 @@ function buildStatusModeCard(minion) {
   };
 }
 
-export function buildMinionScreenViewModel(state = {}) {
+export function buildMinionScreenViewModel(state, options = {}) {
+  if (state && typeof state === "object" && !Array.isArray(state)) {
+    const { listMinions } = state;
+    if (typeof listMinions === "function") {
+      return listMinions().then((data) => {
+        if (Array.isArray(data)) data = { minions: data };
+        if (data) {
+          return buildMinionScreenViewModel(data);
+        }
+        return { active: [], inactive: [], slots: [], hasMoreActive: false, hasMoreInactive: false, minions: [] };
+      });
+    }
+  }
+
+  const { listMinions } = options;
+  if (typeof listMinions === "function") {
+    return listMinions().then((data) => {
+      if (Array.isArray(data)) data = { minions: data };
+      if (data) {
+        return buildMinionScreenViewModel(data);
+      }
+      return { active: [], inactive: [], slots: [], hasMoreActive: false, hasMoreInactive: false, minions: [] };
+    });
+  }
+
+  if (!state) state = {};
   const minions = Array.isArray(state.minions) ? state.minions : [];
   const active = [];
   const inactive = [];
@@ -144,11 +169,26 @@ export function buildMinionScreenViewModel(state = {}) {
     inactive,
     slots,
     hasMoreActive: active.length > 3,
-    hasMoreInactive: inactive.length > 0
+    hasMoreInactive: inactive.length > 0,
+    minions: [...active, ...inactive]
   };
 }
 
-export function buildMinionDetailViewModel(minion = {}) {
+export function buildMinionDetailViewModel(minion, options) {
+  const getMinion = typeof options?.getMinion === "function" ? options.getMinion : null;
+  const hasGetMinion = !!getMinion;
+
+  if (hasGetMinion) {
+    const id = typeof minion === "string" ? minion : minion?.id;
+    if (id) {
+      return getMinion(id).then((data) => {
+        if (data === null || data === undefined) return null;
+        return buildMinionDetailViewModel(data);
+      });
+    }
+  }
+
+  if (!minion) minion = {};
   const statusMode = buildStatusModeCard(minion);
   const destinationPreview = buildDestinationPreview(minion);
 
@@ -172,7 +212,37 @@ export function buildMinionDetailViewModel(minion = {}) {
   };
 }
 
-export function buildNotificationViewModel(notifications = []) {
+import { normalizeMessageActions } from "./chatActions.js";
+
+export function normalizeMessage(message) {
+  if (!message) return message;
+  return normalizeMessageActions(message);
+}
+
+export function buildNotificationViewModel(notifications, options = {}) {
+  if (notifications && typeof notifications === "object" && !Array.isArray(notifications)) {
+    const { listNotifications } = notifications;
+    if (typeof listNotifications === "function") {
+      return listNotifications().then((data) => {
+        if (data) {
+          return buildNotificationViewModel(data);
+        }
+        return { manual: [], automated: [], notifications: [] };
+      });
+    }
+  }
+
+  const { listNotifications } = options;
+  if (typeof listNotifications === "function") {
+    return listNotifications().then((data) => {
+      if (data) {
+        return buildNotificationViewModel(data);
+      }
+      return { manual: [], automated: [], notifications: [] };
+    });
+  }
+
+  if (!notifications) notifications = [];
   const manual = [];
   const automated = [];
 
@@ -191,7 +261,7 @@ export function buildNotificationViewModel(notifications = []) {
     }
   }
 
-  return { manual, automated };
+  return { manual, automated, notifications: [...manual, ...automated] };
 }
 
 function buildNotificationLocationLabel(notification = {}) {
