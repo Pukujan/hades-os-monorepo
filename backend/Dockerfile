@@ -7,8 +7,8 @@ ENV HERMES_BIN_PATH=/opt/hermes-venv/bin/hermes
 
 FROM base AS runner
 WORKDIR /app
-COPY package.json package-lock.json* ./
+COPY backend/package.json backend/package-lock.json* ./
 RUN npm ci --omit=dev
-COPY . .
+COPY backend/ ./
 EXPOSE ${PORT:-3001}
 CMD ["node", "src/core/server.js"]
