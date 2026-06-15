@@ -1,0 +1,15 @@
+{
+  "module": "_reference",
+  "type": "reference",
+  "status": "reference",
+  "boundedContext": "Shared",
+  "side": "backend",
+  "owns": ["backend/src/modules/_reference/**"],
+  "dependsOn": [],
+  "forbiddenDependencies": [],
+  "apiDocs": "docs/modules/_reference/API.md",
+  "tests": [
+    "backend/src/modules/_reference/tests/unit/**",
+    "backend/src/modules/_reference/tests/integration/**"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "module": "model-condenser",
+  "type": "product",
+  "status": "active",
+  "boundedContext": "ModelCondenser",
+  "side": "backend",
+  "owns": ["backend/src/modules/model-condenser/**"],
+  "dependsOn": [],
+  "forbiddenDependencies": ["backend/src/modules/hades/**", "backend/src/modules/auth/**"],
+  "apiDocs": "docs/model-condenser/API.md",
+  "tests": [
+    "backend/src/modules/model-condenser/tests/unit/**",
+    "backend/src/modules/model-condenser/tests/integration/**"
+  ]
+}

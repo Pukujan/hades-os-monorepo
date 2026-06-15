@@ -184,6 +184,8 @@ function parseRuntimeOutput(stdout, context = "forge") {
   }
 }
 
+export { resolveHermesBin };
+
 export function createHermesRuntimeService({
   hermesBin = resolveHermesBin(),
   backendEnvPath = DEFAULT_BACKEND_ENV_PATH,

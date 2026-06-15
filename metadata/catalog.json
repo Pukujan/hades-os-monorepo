@@ -1,0 +1,91 @@
+{
+  "catalogName": "repo-architecture-catalog",
+  "description": "Cross-catalog index of all metadata files for the Hades OS monorepo",
+  "finalAcceptancePath": "docs/tasks/repo-architecture-contract/FINAL_ACCEPTANCE.md",
+  "files": [
+    {
+      "path": "metadata/repo.json",
+      "description": "Repo-level metadata (name, version, root layout)"
+    },
+    {
+      "path": "metadata/catalog.json",
+      "description": "Cross-catalog index"
+    },
+    {
+      "path": "metadata/modules.json",
+      "description": "Module inventory"
+    },
+    {
+      "path": "metadata/tasks.json",
+      "description": "Task inventory"
+    },
+    {
+      "path": "metadata/contracts.json",
+      "description": "Contract registry (mirrors manifest.json)"
+    },
+    {
+      "path": "metadata/apis.json",
+      "description": "API endpoint registry"
+    },
+    {
+      "path": "metadata/architecture-fitness.json",
+      "description": "Fitness function registry"
+    },
+    {
+      "path": "metadata/dependency-graph.json",
+      "description": "Module dependency graph"
+    },
+    {
+      "path": "metadata/adrs.json",
+      "description": "ADR lifecycle registry"
+    },
+    {
+      "path": "docs/tasks/repo-architecture-contract/FINAL_ACCEPTANCE.md",
+      "description": "Final milestone acceptance criteria for repo-architecture-contract"
+    }
+  ],
+  "modules": [
+    {
+      "name": "auth",
+      "path": "backend/src/modules/auth",
+      "manifestPath": "backend/src/modules/auth/module.json",
+      "type": "platform",
+      "side": "backend"
+    },
+    {
+      "name": "hades",
+      "path": "backend/src/modules/hades",
+      "manifestPath": "backend/src/modules/hades/module.json",
+      "type": "product",
+      "side": "backend"
+    },
+    {
+      "name": "model-condenser",
+      "path": "backend/src/modules/model-condenser",
+      "manifestPath": "backend/src/modules/model-condenser/module.json",
+      "type": "product",
+      "side": "backend"
+    },
+    {
+      "name": "_reference",
+      "path": "backend/src/modules/_reference",
+      "manifestPath": "backend/src/modules/_reference/module.json",
+      "type": "reference",
+      "side": "backend"
+    },
+    {
+      "name": "hades",
+      "path": "frontend/src/modules/hades",
+      "manifestPath": "frontend/src/modules/hades/module.json",
+      "type": "product",
+      "side": "frontend"
+    },
+    {
+      "name": "_reference",
+      "path": "frontend/src/modules/_reference",
+      "manifestPath": "frontend/src/modules/_reference/module.json",
+      "type": "reference",
+      "side": "frontend"
+    }
+  ]
+}

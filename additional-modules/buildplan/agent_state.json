@@ -1,48 +1,64 @@
 {
-  "phase": "stabilize",
-  "module": "deploy",
-  "task": "Fix Railway Dockerfile deployment + update contract",
+  "phase": "phase-11-final-acceptance",
+  "module": "repo-architecture-contract",
+  "task": "Final milestone acceptance: promote ci-final-acceptance, create FINAL_ACCEPTANCE.md, add check:repo-architecture npm script, close repo-architecture-contract milestone",
   "state": {
-    "hermesRuntime": {
-      "resolveHermesBin": "exported + tested (4/4 pass)",
-      "binPath": "HERMES_BIN_PATH env /opt/hermes-venv/bin/hermes fallback chain"
-    },
-    "railwayConfig": {
-      "rootRailwayToml": "has [build] builder=DOCKERFILE + [deploy]",
-      "backendRailwayToml": "removed (was ignored by Railway)",
-      "dockerfile": "backend/Dockerfile installs hermes-agent, HERMES_BIN_PATH set",
-      "dockerfileUpdated": "COPY commands changed to backend/ prefix for repo-root build context; node:20-slim → node:22-slim for WebSocket support",
-      "railwayVariables": ["RAILWAY_DOCKERFILE_PATH=backend/Dockerfile", "HERMES_BIN_PATH=/opt/hermes-venv/bin/hermes"]
-    },
-    "deployContract": {
-      "version": "v005",
-      "requiredFiles": "changed backend/Dockerfile (node:22-slim, COPY paths)",
-      "docsUpdated": ["DEPLOY.md", "monorepoDeploy.contract.md", "monorepoDeploy.contract.js", "lint-deploy.test.mjs"],
-      "testsPassing": "17/20, 2 skip, 1 pre-existing frontend build failure"
-    },
-    "railwayDeploy": {
-      "status": "Online",
-      "deploymentId": "03ad195f-cbc1-4a73-8954-e7b3941f9052",
-      "url": "https://hades-os-monorepo-production.up.railway.app",
-      "healthCheck": "${'status':'ok'}",
-      "hermesAvailable": true,
-      "authLogNoise": "attachAuthContext warns on unauthenticated health probes — harmless"
-    },
-    "hadesModule": {
-      "status": "loaded",
-      "routes": {
-        "readiness": "GET /api/hades/readiness → 200 OK",
-        "chatGeneral": "POST /api/hades/chat/general → 401 missing_auth (expected — needs auth token)",
-        "bootstrap": "GET /api/hades/bootstrap → 401 missing_auth (expected)"
+    "repoArchitectureContract": {
+      "phase": "phase-11-final-acceptance",
+      "branch": "refactor/repo-architecture-contract",
+      "status": "Milestone repo-architecture-contract complete. All 11 phases implemented and verified. Phase 11: 14/14 pass, ci-final-acceptance promoted to implementedChecks, check:repo-architecture passes, all lints green.",
+      "phase1TestResults": "11/11 pass",
+      "phase2TestResults": "7/7 pass",
+      "phase3TestResults": "10/10 pass",
+      "phase4TestResults": "7/7 pass",
+      "phase5TestResults": "9/9 pass",
+      "phase6TestResults": "6/6 pass",
+      "phase7TestResults": "12/12 pass",
+      "phase8TestResults": "9/9 pass",
+      "phase9TestResults": "11/11 pass",
+      "phase10TestResults": "23/23 pass",
+      "phase11TestResults": "14/14 pass",
+      "lintContractsPassed": true,
+      "lintRepoArtifactsPassed": true,
+      "lintBoundariesPassed": true,
+      "lintDocCanonicalPassed": true,
+      "lintTaskArtifactsPassed": true,
+      "lintModuleMetadataPassed": true,
+      "lintRepoCatalogPassed": true,
+      "lintArchitectureFitnessPassed": true,
+      "lintApiDocsPassed": true,
+      "lintAdrLifecyclePassed": true,
+      "checkRepoArchitecturePassed": true,
+      "existingContractsPreserved": true,
+      "contractsCreated": [
+        "docCanonicalSource",
+        "taskArtifactLayout",
+        "moduleMetadata",
+        "modulePublicApi",
+        "repoCatalog",
+        "routeManifest",
+        "architectureFitness",
+        "adrLifecycle"
+      ],
+      "manifestEntriesAdded": 8,
+      "manifestEntryCount": 17,
+      "changelogEntryAdded": true,
+      "filesCreated": {
+        "docs": ["README.md", "PROJECT_PLAN.md", "ACCEPTANCE.md", "FINAL_ACCEPTANCE.md", "legacy-registry.json"],
+        "routeManifest": ["docs/modules/hades/routes.json"],
+        "scripts": ["metadata.json", "phases/phase-1-red-tests/metadata.json", "phases/phase-1-red-tests/repo-architecture-contract.test.mjs", "phases/phase-1-red-tests/lint-repo-architecture-red.mjs", "phases/phase-2-contracts/metadata.json", "phases/phase-2-contracts/contract-docs.test.mjs", "phases/phase-2-contracts/phase-0-1-regression.test.mjs", "phases/phase-3-metadata-catalog/metadata.json", "phases/phase-3-metadata-catalog/metadata-catalog.test.mjs", "phases/phase-4-module-manifests/metadata.json", "phases/phase-4-module-manifests/module-manifests.test.mjs", "phases/phase-5-generated-indexes/metadata.json", "phases/phase-5-generated-indexes/generated-indexes.test.mjs", "phases/phase-6-enforcement/metadata.json", "phases/phase-6-enforcement/enforcement-lints.test.mjs", "phases/phase-7-doc-canonicalization/metadata.json", "phases/phase-7-doc-canonicalization/doc-canonicalization.test.mjs", "phases/phase-8-architecture-fitness/metadata.json", "phases/phase-8-architecture-fitness/architecture-fitness.test.mjs", "phases/phase-9-route-api-docs/metadata.json", "phases/phase-9-route-api-docs/route-api-docs.test.mjs", "phases/phase-10-adr-lifecycle/metadata.json", "phases/phase-10-adr-lifecycle/adr-lifecycle.test.mjs", "phases/phase-11-final-acceptance/metadata.json", "phases/phase-11-final-acceptance/final-acceptance.test.mjs"],
+        "moduleManifests": ["backend/src/modules/auth/module.json", "backend/src/modules/hades/module.json", "backend/src/modules/model-condenser/module.json", "backend/src/modules/_reference/module.json", "frontend/src/modules/hades/module.json", "frontend/src/modules/_reference/module.json"],
+        "contractDocs": ["docCanonicalSource.contract.md", "taskArtifactLayout.contract.md", "moduleMetadata.contract.md", "modulePublicApi.contract.md", "repoCatalog.contract.md", "routeManifest.contract.md", "architectureFitness.contract.md", "adrLifecycle.contract.md"],
+        "metadata": ["repo.json", "catalog.json", "modules.json", "tasks.json", "contracts.json", "apis.json", "architecture-fitness.json", "dependency-graph.json"],
+        "generator": ["scripts/core/generate-repo-indexes.mjs"],
+        "lintScripts": ["lint-doc-canonical-source.mjs", "lint-task-artifacts.mjs", "lint-module-metadata.mjs", "lint-repo-catalog.mjs", "lint-architecture-fitness.mjs", "lint-adr-lifecycle.mjs"],
+        "generatedIndexes": ["docs/INDEX.md", "docs/modules/INDEX.md", "docs/tasks/INDEX.md", "scripts/tasks/INDEX.md", "work-log/tasks/INDEX.md"],
+        "workLog": ["metadata.json", "phases/phase-1-red-tests/metadata.json", "phases/phase-1-red-tests/plan.md", "phases/phase-1-red-tests/test-plan.md", "phases/phase-1-red-tests/audit-log.md", "phases/phase-2-contracts/metadata.json", "phases/phase-2-contracts/plan.md", "phases/phase-2-contracts/test-plan.md", "phases/phase-2-contracts/audit-log.md", "phases/phase-3-metadata-catalog/metadata.json", "phases/phase-3-metadata-catalog/plan.md", "phases/phase-3-metadata-catalog/test-plan.md", "phases/phase-3-metadata-catalog/audit-log.md", "phases/phase-4-module-manifests/metadata.json", "phases/phase-4-module-manifests/plan.md", "phases/phase-4-module-manifests/test-plan.md", "phases/phase-4-module-manifests/audit-log.md", "phases/phase-5-generated-indexes/metadata.json", "phases/phase-5-generated-indexes/plan.md", "phases/phase-5-generated-indexes/test-plan.md", "phases/phase-5-generated-indexes/audit-log.md", "phases/phase-6-enforcement/metadata.json", "phases/phase-6-enforcement/plan.md", "phases/phase-6-enforcement/test-plan.md", "phases/phase-6-enforcement/audit-log.md", "phases/phase-7-doc-canonicalization/metadata.json", "phases/phase-7-doc-canonicalization/plan.md", "phases/phase-7-doc-canonicalization/test-plan.md", "phases/phase-7-doc-canonicalization/audit-log.md", "phases/phase-8-architecture-fitness/metadata.json", "phases/phase-8-architecture-fitness/plan.md", "phases/phase-8-architecture-fitness/test-plan.md", "phases/phase-8-architecture-fitness/audit-log.md", "phases/phase-9-route-api-docs/metadata.json", "phases/phase-9-route-api-docs/plan.md", "phases/phase-9-route-api-docs/test-plan.md", "phases/phase-9-route-api-docs/audit-log.md", "phases/phase-10-adr-lifecycle/metadata.json", "phases/phase-10-adr-lifecycle/plan.md", "phases/phase-10-adr-lifecycle/test-plan.md", "phases/phase-10-adr-lifecycle/audit-log.md", "phases/phase-11-final-acceptance/metadata.json", "phases/phase-11-final-acceptance/plan.md", "phases/phase-11-final-acceptance/test-plan.md", "phases/phase-11-final-acceptance/audit-log.md"],
+        "adrDocs": ["docs/architecture/adr/README.md", "docs/architecture/adr/INDEX.md", "docs/architecture/adr/0001-contract-document-format.md", "docs/architecture/adr/0002-metadata-catalog-structure.md", "docs/architecture/adr/0003-module-manifest-convention.md", "docs/architecture/adr/0004-generated-index-strategy.md", "docs/architecture/adr/0005-architecture-enforcement-lints.md", "docs/architecture/adr/0006-doc-canonicalization.md", "docs/architecture/adr/0007-architecture-fitness-tests.md", "docs/architecture/adr/0008-api-documentation-standards.md"]
       },
-      "rootCause": "@supabase/supabase-js requires native WebSocket (Node 22+); node:20-slim caused module load failure"
-    },
-    "persistError": {
-      "rootCause": "hades_agent_executions table missing conversation_id, session_id, source, error_message columns",
-      "fix": "wrapped executions.create() in try-catch so chat works despite persist failure",
-      "migration": "added ALTER TABLE ADD COLUMN IF NOT EXISTS to 001_hades_tables.sql",
-      "blocked": "cannot execute DDL from terminal — no DB password, no Supabase PAT"
-    },
-    "nextAction": "request user to run ALTER TABLE via Supabase dashboard SQL editor, then redeploy"
+      "packageJsonScripts": ["test:repo-architecture", "lint:repo-architecture:red", "lint:doc-canonical", "lint:task-artifacts", "lint:module-metadata", "lint:repo-catalog", "lint:architecture-fitness", "lint:api-docs", "lint:adr-lifecycle", "lint:repo-architecture", "check:repo-architecture", "generate:indexes"],
+      "nextPhase": null,
+      "milestoneComplete": true
+    }
   }
 }

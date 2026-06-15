@@ -1,7 +1,7 @@
 import express from "express";
 import { loadModules } from "./module-loader.js";
 import { errorHandler } from "../shared/http/errors.js";
-import { createCorsMiddleware } from "../modules/hades/services/cors.js";
+import { createCorsMiddleware } from "../shared/http/cors.js";
 
 export async function createApp({ overrides = {} } = {}) {
   const app = express();

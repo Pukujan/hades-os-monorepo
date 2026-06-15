@@ -2,7 +2,7 @@ import React from "react";
 import { createSupabaseBrowserClientFrom, loadSupabaseBrowserConfig } from "./supabaseClient.js";
 
 const AuthContext = React.createContext(null);
-const ACCESS_TOKEN_KEY = "hades.auth.accessToken";
+const ACCESS_TOKEN_KEY = "hermes.auth.accessToken";
 
 function writeAccessToken(session) {
   if (typeof window === "undefined") return;

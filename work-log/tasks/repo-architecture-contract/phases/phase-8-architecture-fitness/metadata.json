@@ -1,0 +1,7 @@
+{
+  "phase": "phase-8-architecture-fitness",
+  "task": "repo-architecture-contract",
+  "status": "active",
+  "purpose": "Implement architecture fitness lint that validates the repo architecture scaffold is internally wired and enforceable",
+  "dependencies": ["phase-7-doc-canonicalization"]
+}

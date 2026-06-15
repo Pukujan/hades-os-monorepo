@@ -68,5 +68,38 @@
     "file": "backend/src/shared/contracts/monorepoDeploy.contract.js",
     "lintScript": "scripts/lint-deploy.mjs",
     "userDoc": "docs/DEPLOY.md"
+  },
+  "docCanonicalSource": {
+    "version": "v001",
+    "doc": "docs/architecture/contracts/docCanonicalSource.contract.md"
+  },
+  "taskArtifactLayout": {
+    "version": "v001",
+    "doc": "docs/architecture/contracts/taskArtifactLayout.contract.md",
+    "lintScript": "scripts/lint-task-artifacts.mjs"
+  },
+  "moduleMetadata": {
+    "version": "v001",
+    "doc": "docs/architecture/contracts/moduleMetadata.contract.md"
+  },
+  "modulePublicApi": {
+    "version": "v001",
+    "doc": "docs/architecture/contracts/modulePublicApi.contract.md"
+  },
+  "repoCatalog": {
+    "version": "v001",
+    "doc": "docs/architecture/contracts/repoCatalog.contract.md"
+  },
+  "routeManifest": {
+    "version": "v001",
+    "doc": "docs/architecture/contracts/routeManifest.contract.md"
+  },
+  "architectureFitness": {
+    "version": "v001",
+    "doc": "docs/architecture/contracts/architectureFitness.contract.md"
+  },
+  "adrLifecycle": {
+    "version": "v001",
+    "doc": "docs/architecture/contracts/adrLifecycle.contract.md"
   }
 }

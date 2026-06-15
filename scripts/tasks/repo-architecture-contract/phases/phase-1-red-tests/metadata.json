@@ -1,0 +1,9 @@
+{
+  "phase": "phase-1-red-tests",
+  "task": "repo-architecture-contract",
+  "status": "active",
+  "purpose": "Add red tests that define the target repo architecture contract before implementation.",
+  "expectedResult": "tests may fail until later phases implement contracts, manifests, metadata, indexes, and lints",
+  "runtimeBehaviorChange": false,
+  "deploymentBehaviorChange": false
+}

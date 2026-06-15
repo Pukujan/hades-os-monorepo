@@ -1,0 +1,6 @@
+{
+  "phase": "phase-8-architecture-fitness",
+  "task": "repo-architecture-contract",
+  "status": "active",
+  "purpose": "Architecture fitness lints that validate the repo architecture scaffold is internally wired and enforceable"
+}

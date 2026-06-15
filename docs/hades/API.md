@@ -17,6 +17,12 @@
 | DELETE | `/conversations/:id/messages` | Clear all messages from a conversation |
 | GET | `/socials` | List user's social connections (Discord, Telegram) without tokens |
 | POST | `/socials/telegram/token` | Save a Telegram bot token (validates via getMe) |
+| GET | `/minions` | List all minions for the authenticated user |
+| GET | `/minions/:id` | Get a single minion by ID |
+| GET | `/minions/:id/logs` | Get execution logs for a minion |
+| GET | `/notifications` | List notifications for the authenticated user |
+| PATCH | `/minions/:id` | Update a minion's configuration |
+| DELETE | `/minions/:id` | Delete a minion |
 
 ## Endpoint details
 

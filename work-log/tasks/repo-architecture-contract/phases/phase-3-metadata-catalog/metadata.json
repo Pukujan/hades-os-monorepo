@@ -1,0 +1,9 @@
+{
+  "phase": "phase-3-metadata-catalog",
+  "task": "repo-architecture-contract",
+  "status": "in-progress",
+  "purpose": "Create metadata catalog files under metadata/ — repo.json, catalog.json, modules.json, tasks.json, contracts.json, apis.json, architecture-fitness.json, dependency-graph.json",
+  "expectedResult": "all 8 metadata files exist with valid JSON schema; Phase 3 tests pass; Phase 1 metadata red test changes from red to green",
+  "runtimeBehaviorChange": false,
+  "deploymentBehaviorChange": false
+}

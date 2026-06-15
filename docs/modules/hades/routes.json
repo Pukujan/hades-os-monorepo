@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "v001",
+  "module": "hades",
+  "status": "complete",
+  "source": "backend/src/modules/hades/routes/hades.routes.js",
+  "docs": {
+    "moduleDoc": "docs/hades/API.md",
+    "registryDoc": "docs/API.md"
+  },
+  "routes": [
+    { "method": "GET", "path": "/readiness", "description": "Hades service readiness check" },
+    { "method": "GET", "path": "/bootstrap", "description": "Bootstrap data for frontend hydration" },
+    { "method": "POST", "path": "/chat", "description": "Send a chat message to Hermes (legacy)" },
+    { "method": "POST", "path": "/chat/general", "description": "Send a general chat message to Hermes" },
+    { "method": "POST", "path": "/chat/forge", "description": "Send a forge chat message to Hermes" },
+    { "method": "POST", "path": "/minions/test", "description": "Run a test of the current minion draft" },
+    { "method": "POST", "path": "/minions", "description": "Save a new minion" },
+    { "method": "GET", "path": "/minions", "description": "List all minions for the authenticated user" },
+    { "method": "GET", "path": "/minions/:id", "description": "Get a single minion by ID" },
+    { "method": "PATCH", "path": "/minions/:id", "description": "Update a minion's configuration" },
+    { "method": "DELETE", "path": "/minions/:id", "description": "Delete a minion" },
+    { "method": "GET", "path": "/minions/:id/logs", "description": "Get execution logs for a minion" },
+    { "method": "GET", "path": "/notifications", "description": "List notifications for the authenticated user" },
+    { "method": "POST", "path": "/assignments", "description": "Assign a minion to a social channel" },
+    { "method": "POST", "path": "/triggers", "description": "Handle an incoming social trigger" },
+    { "method": "GET", "path": "/conversations/:id/messages", "description": "List messages in a conversation" },
+    { "method": "DELETE", "path": "/conversations/:id/messages", "description": "Clear all messages from a conversation" },
+    { "method": "GET", "path": "/socials", "description": "List user's social connections" },
+    { "method": "POST", "path": "/socials/telegram/token", "description": "Save a Telegram bot token" }
+  ]
+}

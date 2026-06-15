@@ -1,0 +1,21 @@
+{
+  "contracts": [
+    { "name": "repoArtifactLayout", "version": "v001", "path": "docs/architecture/REPO_ARTIFACT_LAYOUT.md" },
+    { "name": "fileExchange", "version": "v001", "path": "docs/architecture/contracts/fileExchange.contract.md" },
+    { "name": "consolidatedExports", "version": "v001", "path": "docs/architecture/contracts/consolidatedExports.contract.md" },
+    { "name": "planningPhase", "version": "v003", "path": "docs/architecture/contracts/planningPhase.contract.md" },
+    { "name": "prePushDevLog", "version": "v001", "path": "docs/architecture/contracts/prePushDevLog.contract.md" },
+    { "name": "apiDocumentationRegistry", "version": "v001", "path": "docs/architecture/contracts/apiDocumentationRegistry.contract.md" },
+    { "name": "moduleAgentStateMachine", "version": "v001", "path": "docs/architecture/contracts/moduleAgentStateMachine.contract.md" },
+    { "name": "asyncJobQueue", "version": "v001", "path": "docs/architecture/contracts/asyncJobQueue.contract.md" },
+    { "name": "monorepoDeploy", "version": "v003", "path": "docs/architecture/contracts/monorepoDeploy.contract.md" },
+    { "name": "docCanonicalSource", "version": "v001", "path": "docs/architecture/contracts/docCanonicalSource.contract.md" },
+    { "name": "taskArtifactLayout", "version": "v001", "path": "docs/architecture/contracts/taskArtifactLayout.contract.md" },
+    { "name": "moduleMetadata", "version": "v001", "path": "docs/architecture/contracts/moduleMetadata.contract.md" },
+    { "name": "modulePublicApi", "version": "v001", "path": "docs/architecture/contracts/modulePublicApi.contract.md" },
+    { "name": "repoCatalog", "version": "v001", "path": "docs/architecture/contracts/repoCatalog.contract.md" },
+    { "name": "routeManifest", "version": "v001", "path": "docs/architecture/contracts/routeManifest.contract.md" },
+    { "name": "architectureFitness", "version": "v001", "path": "docs/architecture/contracts/architectureFitness.contract.md" },
+    { "name": "adrLifecycle", "version": "v001", "path": "docs/architecture/contracts/adrLifecycle.contract.md" }
+  ]
+}

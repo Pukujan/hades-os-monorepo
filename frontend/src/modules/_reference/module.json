@@ -1,0 +1,14 @@
+{
+  "module": "_reference",
+  "type": "reference",
+  "status": "reference",
+  "boundedContext": "Shared",
+  "side": "frontend",
+  "owns": ["frontend/src/modules/_reference/**"],
+  "dependsOn": [],
+  "forbiddenDependencies": [],
+  "apiDocs": "none",
+  "tests": [
+    "frontend/src/modules/_reference/tests/unit/**"
+  ]
+}

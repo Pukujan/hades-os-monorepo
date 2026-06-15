@@ -1,0 +1,9 @@
+{
+  "phase": "phase-4-module-manifests",
+  "task": "repo-architecture-contract",
+  "status": "in-progress",
+  "purpose": "Add module.json manifests for all active backend/frontend modules and update metadata to reflect them",
+  "expectedResult": "module manifest tests should pass; generated indexes red test remains",
+  "runtimeBehaviorChange": false,
+  "deploymentBehaviorChange": false
+}

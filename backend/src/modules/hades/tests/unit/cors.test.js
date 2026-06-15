@@ -11,7 +11,7 @@ import assert from "node:assert/strict";
  */
 
 async function loadCors() {
-  return import("../../services/cors.js");
+  return import("../../../../shared/http/cors.js");
 }
 
 describe("createCorsMiddleware", () => {

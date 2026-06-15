@@ -3,12 +3,37 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { createHermesRuntimeService } from "../../services/hermesRuntime.service.js";
+import { createHermesRuntimeService, resolveHermesBin } from "../../services/hermesRuntime.service.js";
 import { createEmptyDraft } from "../../data.js";
 
 function makeTempDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), "hades-hermes-runtime-"));
 }
+
+function withEnvVar(name, value, fn) {
+  const prev = process.env[name];
+  if (value === undefined) delete process.env[name];
+  else process.env[name] = value;
+  try { return fn(); }
+  finally {
+    if (prev === undefined) delete process.env[name];
+    else process.env[name] = prev;
+  }
+}
+
+test("resolveHermesBin returns HERMES_BIN_PATH when set to existing binary", () => {
+  const tempDir = makeTempDir();
+  const fakePath = path.join(tempDir, "hermes");
+  fs.writeFileSync(fakePath, "#!/bin/sh\necho fake", { mode: 0o755 });
+  const result = withEnvVar("HERMES_BIN_PATH", fakePath, resolveHermesBin);
+  assert.equal(result, fakePath);
+});
+
+test("resolveHermesBin falls back to 'hermes' when nothing is found", (t) => {
+  t.mock.method(fs, "existsSync", () => false);
+  const result = withEnvVar("HERMES_BIN_PATH", undefined, resolveHermesBin);
+  assert.equal(result, "hermes");
+});
 
 test("Hermes runtime wrapper builds a oneshot OpenRouter command with backend env", async () => {
   const tempDir = makeTempDir();

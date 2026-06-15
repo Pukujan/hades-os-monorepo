@@ -366,6 +366,27 @@ export function createHadesRepository({ now = () => new Date().toISOString(), st
     return [...minions.values()];
   }
 
+  function updateMinion(minionId, updates) {
+    hydrateFromSupabase();
+    const existing = minions.get(minionId);
+    if (!existing) return null;
+    const updated = { ...existing, ...updates, id: minionId, updatedAt: nowIso(now) };
+    minions.set(minionId, updated);
+    const client = storage === "supabase" ? supabaseClient : null;
+    if (client) {
+      void persistMinion(client, updated);
+    }
+    return clone(updated);
+  }
+
+  function deleteMinion(minionId) {
+    hydrateFromSupabase();
+    const existing = minions.get(minionId);
+    if (!existing) return null;
+    minions.delete(minionId);
+    return { deleted: true, id: minionId };
+  }
+
   function listAssignments() {
     hydrateFromSupabase();
     return [...assignments.values()];
@@ -435,6 +456,8 @@ export function createHadesRepository({ now = () => new Date().toISOString(), st
     listMessages,
     deleteConversationMessages,
     listMinions,
+    updateMinion,
+    deleteMinion,
     listAssignments,
     listAgentExecutions,
     listTestRuns,

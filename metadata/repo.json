@@ -1,0 +1,5 @@
+{
+  "name": "modular-monolith-starter",
+  "description": "Monorepo with Hades (Discord AI chat) and Hermes (OpenCode/OpenAI integration), following a contracted modular monolith architecture",
+  "version": "0.1.0"
+}

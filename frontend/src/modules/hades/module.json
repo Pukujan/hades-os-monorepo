@@ -1,0 +1,15 @@
+{
+  "module": "hades",
+  "type": "product",
+  "status": "active",
+  "boundedContext": "Hades",
+  "side": "frontend",
+  "owns": ["frontend/src/modules/hades/**"],
+  "dependsOn": [],
+  "forbiddenDependencies": ["frontend/src/modules/_reference/**"],
+  "apiDocs": "docs/hades/API.md",
+  "tests": [
+    "frontend/src/modules/hades/tests/unit/**",
+    "frontend/src/modules/hades/**/*.test.js"
+  ]
+}

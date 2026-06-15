@@ -34,7 +34,7 @@ test("full auth chain: valid Supabase session can access protected route", async
       })
   }));
 
-  app.get("/api/hades/protected", async (req, res) => {
+  app.get("/api/auth-protected", async (req, res) => {
     try {
       const authCtx = await requireHadesAuth(req, {
         supabaseAuth: { getUserFromToken: async () => req.authContext }
@@ -47,7 +47,7 @@ test("full auth chain: valid Supabase session can access protected route", async
 
   const res = await invokeApp(app, {
     method: "GET",
-    path: "/api/hades/protected",
+    path: "/api/auth-protected",
     headers: { authorization: "Bearer valid-supabase-jwt" }
   });
 

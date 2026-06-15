@@ -1,0 +1,9 @@
+{
+  "phase": "phase-2-contracts",
+  "task": "repo-architecture-contract",
+  "status": "active",
+  "purpose": "Add tests, contract documents, and contract registrations for the contracted modular monolith upgrade.",
+  "expectedResult": "contract-doc tests should pass; metadata, module manifest, and generated index red tests may still fail",
+  "runtimeBehaviorChange": false,
+  "deploymentBehaviorChange": false
+}

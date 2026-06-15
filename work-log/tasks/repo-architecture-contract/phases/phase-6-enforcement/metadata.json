@@ -1,0 +1,9 @@
+{
+  "phase": "phase-6-enforcement",
+  "task": "repo-architecture-contract",
+  "status": "active",
+  "purpose": "Add executable lint enforcement for current repo architecture contracts and metadata.",
+  "expectedResult": "repo architecture lint commands should pass without changing runtime behavior",
+  "runtimeBehaviorChange": false,
+  "deploymentBehaviorChange": false
+}

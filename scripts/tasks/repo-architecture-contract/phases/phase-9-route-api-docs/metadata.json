@@ -1,0 +1,8 @@
+{
+  "phase": "Phase 9",
+  "slug": "phase-9-route-api-docs",
+  "title": "Route/API Docs Drift Cleanup",
+  "description": "Fix API documentation drift for Hades minions/notifications endpoints and add route/API manifest alignment. Makes lint:api-docs pass without changing runtime behavior.",
+  "status": "complete",
+  "testFile": "scripts/tasks/repo-architecture-contract/phases/phase-9-route-api-docs/route-api-docs.test.mjs"
+}

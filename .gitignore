@@ -17,3 +17,4 @@ __pycache__/
 *.pyo
 forge-response.json
 .env copy
+.env*

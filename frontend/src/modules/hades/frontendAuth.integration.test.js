@@ -1,7 +1,7 @@
 import { test, describe, beforeEach } from "node:test";
 import assert from "node:assert/strict";
 
-const ACCESS_TOKEN_KEY = "hades.auth.accessToken";
+const ACCESS_TOKEN_KEY = "hermes.auth.accessToken";
 
 function createAuthStore() {
   let store = {};

@@ -1,0 +1,9 @@
+{
+  "phase": "phase-5-generated-indexes",
+  "task": "repo-architecture-contract",
+  "status": "in-progress",
+  "purpose": "Generate INDEX.md files at key doc/script/work-log roots from metadata JSON sources",
+  "expectedResult": "generated index tests should pass; remaining Phase 1 red tests pass",
+  "runtimeBehaviorChange": false,
+  "deploymentBehaviorChange": false
+}

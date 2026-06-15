@@ -1,0 +1,9 @@
+{
+  "phase": "phase-6-enforcement",
+  "task": "repo-architecture-contract",
+  "purpose": "Add executable lint enforcement for current repo architecture contracts and metadata.",
+  "status": "active",
+  "commands": ["lint:doc-canonical", "lint:task-artifacts", "lint:module-metadata", "lint:repo-catalog", "lint:repo-architecture"],
+  "runtimeBehaviorChange": false,
+  "deploymentBehaviorChange": false
+}
