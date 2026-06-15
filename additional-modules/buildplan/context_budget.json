@@ -7,8 +7,8 @@
   "stopAt": 62400,
   "lastCompactedAt": null,
   "compactionStrategy": "summarize completed work, preserve current phase, target files, failing tests, blockers",
-  "sessionStart": "2026-06-14T18:25:35.112+00:00",
-  "sessionEnd": "2026-06-14T21:41:35.647+00:00",
+  "sessionStart": "2026-06-15T04:52:13.464+00:00",
+  "sessionEnd": "2026-06-15T04:52:13.418+00:00",
   "history": [
     {
       "endedAt": "2026-06-12T16:33:56.160+00:00",
@@ -165,6 +165,12 @@
       "peakUsage": 0,
       "reason": "archive_session",
       "slug": "vite-env-var-injection-fix"
+    },
+    {
+      "endedAt": "2026-06-15T04:52:13.418+00:00",
+      "peakUsage": 0,
+      "reason": "archive_session",
+      "slug": "fix-agent-execution-persist"
     }
   ]
 }
