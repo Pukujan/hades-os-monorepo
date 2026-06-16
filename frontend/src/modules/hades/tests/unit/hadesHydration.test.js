@@ -28,7 +28,7 @@ test("bootstrap api calls the backend hydration route", async () => {
   };
 
   try {
-    const { getHadesBootstrap } = await import("./hadesApi.js");
+    const { getHadesBootstrap } = await import("../../services/hadesApi.js");
     await getHadesBootstrap(TEST_TOKEN);
     assert.equal(calls[0].url.endsWith("/api/hades/bootstrap"), true);
     assert.equal(calls[0].headers.authorization, `Bearer ${TEST_TOKEN}`);
@@ -38,7 +38,7 @@ test("bootstrap api calls the backend hydration route", async () => {
 });
 
 test("bootstrap mapper preserves backend state and fills safe defaults", async () => {
-  const { mapBootstrapToHadesState } = await import("./hadesApi.js");
+  const { mapBootstrapToHadesState } = await import("../../services/hadesApi.js");
   const state = mapBootstrapToHadesState({
     conversationId: "conv-1",
     messages: [{ id: "m1", role: "assistant", content: "hello", status: "completed" }],
@@ -61,6 +61,6 @@ test("bootstrap mapper preserves backend state and fills safe defaults", async (
 
   const fallback = mapBootstrapToHadesState({});
   assert.ok(fallback.messages.length > 0);
-  assert.ok(fallback.minions.length > 0);
+  assert.equal(fallback.minions.length, 0);
   assert.equal(fallback.draft.status, "incomplete");
 });

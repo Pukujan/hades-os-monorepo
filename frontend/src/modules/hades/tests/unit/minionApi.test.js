@@ -4,7 +4,7 @@ import { describe, it } from "node:test";
 
 describe("minion API functions", () => {
   test("getMinion is exported as a function", async () => {
-    const mod = await import("../../hadesApi.js");
+    const mod = await import("../../services/hadesApi.js");
     assert.equal(typeof mod.getMinion, "function");
   });
 
@@ -20,7 +20,7 @@ describe("minion API functions", () => {
       };
     };
 
-    const mod = await import("../../hadesApi.js");
+    const mod = await import("../../services/hadesApi.js");
     const minion = await mod.getMinion("m1");
     assert.equal(minion.id, "m1");
     assert.equal(minion.name, "Test Minion");
@@ -28,7 +28,7 @@ describe("minion API functions", () => {
   });
 
   test("listMinions is exported as a function", async () => {
-    const mod = await import("../../hadesApi.js");
+    const mod = await import("../../services/hadesApi.js");
     assert.equal(typeof mod.listMinions, "function");
   });
 
@@ -47,14 +47,14 @@ describe("minion API functions", () => {
       };
     };
 
-    const mod = await import("../../hadesApi.js");
+    const mod = await import("../../services/hadesApi.js");
     const minions = await mod.listMinions();
     assert.equal(minions.length, 2);
     assert.equal(minions[0].id, "m1");
   });
 
   test("getMinionLogs is exported as a function", async () => {
-    const mod = await import("../../hadesApi.js");
+    const mod = await import("../../services/hadesApi.js");
     assert.equal(typeof mod.getMinionLogs, "function");
   });
 
@@ -73,14 +73,14 @@ describe("minion API functions", () => {
       };
     };
 
-    const mod = await import("../../hadesApi.js");
+    const mod = await import("../../services/hadesApi.js");
     const logs = await mod.getMinionLogs("m1");
     assert.equal(logs.length, 2);
     assert.equal(logs[0].summary, "Log entry 1");
   });
 
   test("updateMinion is exported as a function", async () => {
-    const mod = await import("../../hadesApi.js");
+    const mod = await import("../../services/hadesApi.js");
     assert.equal(typeof mod.updateMinion, "function");
   });
 
@@ -99,13 +99,13 @@ describe("minion API functions", () => {
       };
     };
 
-    const mod = await import("../../hadesApi.js");
+    const mod = await import("../../services/hadesApi.js");
     const result = await mod.updateMinion("m1", { name: "Updated Minion" });
     assert.equal(result.name, "Updated Minion");
   });
 
   test("deleteMinion is exported as a function", async () => {
-    const mod = await import("../../hadesApi.js");
+    const mod = await import("../../services/hadesApi.js");
     assert.equal(typeof mod.deleteMinion, "function");
   });
 
@@ -122,7 +122,7 @@ describe("minion API functions", () => {
       };
     };
 
-    const mod = await import("../../hadesApi.js");
+    const mod = await import("../../services/hadesApi.js");
     const result = await mod.deleteMinion("m1");
     assert.equal(result.deleted, true);
   });

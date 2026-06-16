@@ -1,4 +1,7 @@
-import { execFileSync } from "node:child_process";
+import { execFileSync, execFile } from "node:child_process";
+import { promisify } from "node:util";
+
+const execFileAsync = promisify(execFile);
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -136,6 +139,11 @@ function blockError(output, label) {
   return new Error(`Hermes runtime still looks blocked by the old ${label}:\n${output}`);
 }
 
+async function execHermesCommand(bin, args, options) {
+  const { stdout } = await execFileAsync(bin, args, options);
+  return stdout;
+}
+
 function parseRuntimeOutput(stdout, context = "forge") {
   const output = String(stdout || "").trim();
   if (!output) {
@@ -189,7 +197,7 @@ export { resolveHermesBin };
 export function createHermesRuntimeService({
   hermesBin = resolveHermesBin(),
   backendEnvPath = DEFAULT_BACKEND_ENV_PATH,
-  runCommand = execFileSync
+  runCommand = execHermesCommand
 } = {}) {
   async function generateDraft({
     userId = "local-user",
@@ -203,6 +211,7 @@ export function createHermesRuntimeService({
     const provider = backendEnv.HERMES_PROVIDER || DEFAULT_PROVIDER;
     const model = backendEnv.HERMES_MODEL || backendEnv.OPENROUTER_MODEL || DEFAULT_MODEL;
     const contextLength = parsePositiveInteger(backendEnv.HERMES_CONTEXT_LENGTH, MIN_CONTEXT_LENGTH);
+    const hermesTimeout = parsePositiveInteger(backendEnv.HERMES_TIMEOUT, 120000);
     const prompt = buildRuntimePrompt({
       userId,
       conversationId,
@@ -226,6 +235,7 @@ export function createHermesRuntimeService({
       const output = await runCommand(hermesBin, buildCommandArgs(prompt, { provider, model }), {
         encoding: "utf8",
         env: subprocessEnv,
+        timeout: hermesTimeout,
       });
 
       return parseRuntimeOutput(output, context);

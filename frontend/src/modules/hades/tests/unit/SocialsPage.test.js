@@ -1,6 +1,6 @@
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
-import { SOCIAL_LINKS, formatSocialLabel, getSocialIcon } from "../../hadesData.js";
+import { SOCIAL_LINKS, formatSocialLabel, getSocialIcon } from "../../utils/hadesData.js";
 
 describe("SocialsPage data", () => {
   test("Discord shows disconnected state by default", () => {

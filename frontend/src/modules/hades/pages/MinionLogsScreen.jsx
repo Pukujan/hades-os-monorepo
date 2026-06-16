@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { getLogsForMinion } from "./minionPreviewData.js";
+
+
 
 function externalButton(log) {
   if (log.externalMessageUrl) {
@@ -18,7 +19,7 @@ export function MinionLogsScreen({ minion, logs: initialLogs, onBack }) {
   const [filter, setFilter] = React.useState("current");
   const [dateFilter, setDateFilter] = React.useState("");
 
-  const logs = filter === "all" ? getLogsForMinion() : initialLogs;
+  const logs = filter === "all" ? [] : initialLogs;
   const filteredByDate = dateFilter
     ? logs.filter((l) => l.exactTimestamp && l.exactTimestamp.startsWith(dateFilter))
     : logs;

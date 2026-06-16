@@ -2,7 +2,6 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { DEFAULT_BACKEND_ENV_PATH, parseDotEnv } from "./hermes-config-sync.mjs";
 
 function resolveHermesBin() {
   const bundled = path.join(os.homedir(), ".hermes", "hermes-agent", "venv", "bin", "hermes");
@@ -14,13 +13,6 @@ function resolveHermesBin() {
 
 function buildCommandArgs(prompt) {
   return ["chat", "--quiet", "--query", prompt, "--source", "tool"];
-}
-
-function readBackendEnv(envPath = DEFAULT_BACKEND_ENV_PATH) {
-  if (!fs.existsSync(envPath)) {
-    return {};
-  }
-  return parseDotEnv(fs.readFileSync(envPath, "utf8"));
 }
 
 function validateOutput(stdout) {
@@ -44,17 +36,13 @@ export function runHermesChatSmoke({
   hermesBin = resolveHermesBin(),
   prompt = "Reply exactly ok.",
   logger = console,
-  runCommand = execFileSync,
-  backendEnvPath = DEFAULT_BACKEND_ENV_PATH
+  runCommand = execFileSync
 } = {}) {
   let output;
   try {
     output = runCommand(hermesBin, buildCommandArgs(prompt), {
       encoding: "utf8",
-      env: {
-        ...process.env,
-        ...readBackendEnv(backendEnvPath)
-      }
+      env: process.env
     });
   } catch (error) {
     const stderr = error?.stderr ? String(error.stderr).trim() : "";

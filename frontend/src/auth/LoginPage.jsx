@@ -1,6 +1,6 @@
 import React from "react";
 import { useAuth } from "./AuthProvider.jsx";
-import { signInWithEmail, signUpWithEmail, signInWithDiscord } from "./authClient.js";
+import { signInWithEmail, signUpWithEmail, signInWithDiscord, signInWithGoogle, signInWithApple, signInWithTelegram } from "./authClient.js";
 import { extractLoginTemplateParts } from "./loginTemplateParts.js";
 import loginTemplate from "./loginTemplate.html?raw";
 import "../styles/login.css";
@@ -41,7 +41,7 @@ function usePersistentTheme(rootRef) {
   return [theme, setTheme];
 }
 
-export function LoginPage() {
+export function LoginPage({ view = "signin", onNavigate }) {
   const { supabase } = useAuth();
   const rootRef = React.useRef(null);
   const parts = React.useMemo(() => extractLoginTemplateParts(loginTemplate), []);
@@ -96,10 +96,11 @@ export function LoginPage() {
     const emailInput = root.querySelector('input[type="email"]');
     const passwordInput = root.querySelector('input[type="password"]');
     const cta = root.querySelector(".cta");
-    const forgotLink = root.querySelector('a[href="#forgot-password"]');
-    const signupLink = root.querySelector('a[href="#sign-up"]');
+    const links = root.querySelectorAll(".links a");
     const discordButton = root.querySelector(".social.discord");
-    const comingSoonButtons = Array.from(root.querySelectorAll(".social:not(.discord)"));
+    const telegramButton = root.querySelector(".social.telegram");
+    const googleButton = root.querySelector(".social.google");
+    const appleButton = root.querySelector(".social.apple");
 
     const toggleSheet = (showSheet) => {
       if (!sheet) return;
@@ -125,6 +126,33 @@ export function LoginPage() {
       if (error) window.alert(error.message);
     };
 
+    const handleGoogleSignIn = async () => {
+      if (!supabase) {
+        window.alert("Supabase auth is not configured yet.");
+        return;
+      }
+      const { error } = await signInWithGoogle(supabase);
+      if (error) window.alert(error.message);
+    };
+
+    const handleTelegramSignIn = async () => {
+      if (!supabase) {
+        window.alert("Supabase auth is not configured yet.");
+        return;
+      }
+      const { error } = await signInWithTelegram(supabase);
+      if (error) window.alert(error.message);
+    };
+
+    const handleAppleSignIn = async () => {
+      if (!supabase) {
+        window.alert("Supabase auth is not configured yet.");
+        return;
+      }
+      const { error } = await signInWithApple(supabase);
+      if (error) window.alert(error.message);
+    };
+
     const handleEmailSignIn = async () => {
       if (!supabase) {
         window.alert("Supabase auth is not configured yet.");
@@ -140,8 +168,7 @@ export function LoginPage() {
       if (error) window.alert(error.message);
     };
 
-    const handleEmailSignUp = async (event) => {
-      event.preventDefault();
+    const handleEmailSignUp = async () => {
       if (!supabase) {
         window.alert("Supabase auth is not configured yet.");
         return;
@@ -156,8 +183,7 @@ export function LoginPage() {
       if (error) window.alert(error.message);
     };
 
-    const resetPassword = async (event) => {
-      event.preventDefault();
+    const resetPassword = async () => {
       if (!supabase) {
         window.alert("Supabase auth is not configured yet.");
         return;
@@ -174,12 +200,65 @@ export function LoginPage() {
       else window.alert("Password reset link sent.");
     };
 
+    const handleCTA = async () => {
+      if (view === "signup") {
+        await handleEmailSignUp();
+      } else if (view === "forgot") {
+        await resetPassword();
+      } else {
+        await handleEmailSignIn();
+      }
+    };
+
     const onKeydown = (event) => {
       if (event.key === "Enter" && event.target && (event.target.matches('input[type="email"]') || event.target.matches('input[type="password"]'))) {
         event.preventDefault();
-        void handleEmailSignIn();
+        void handleCTA();
       }
     };
+
+    const handleLinkClick = (linkIndex) => (event) => {
+      event.preventDefault();
+      if (view === "signup" && linkIndex === 1) {
+        onNavigate("signin");
+      } else if (view === "forgot" && linkIndex === 0) {
+        onNavigate("signin");
+      } else if (view === "signin") {
+        if (linkIndex === 0) onNavigate("forgot");
+        if (linkIndex === 1) onNavigate("signup");
+      }
+    };
+
+    if (cta) {
+      if (view === "signup") cta.textContent = "JOIN THE FORGE";
+      else if (view === "forgot") cta.textContent = "SEND RESET LINK";
+      else cta.textContent = "START THE FORGE";
+    }
+
+    if (passwordInput) {
+      passwordInput.style.display = view === "forgot" ? "none" : "";
+    }
+
+    if (links.length >= 2) {
+      if (view === "signup") {
+        links[0].style.display = "none";
+        const sep = links[0].nextElementSibling;
+        if (sep && sep.classList.contains("sep")) sep.style.display = "none";
+        links[1].textContent = "Sign in";
+      } else if (view === "forgot") {
+        links[0].textContent = "Back to sign in";
+        links[1].style.display = "none";
+        const sep = links[0].nextElementSibling;
+        if (sep && sep.classList.contains("sep")) sep.style.display = "none";
+      } else {
+        links[0].textContent = "Forgot password";
+        links[0].style.display = "";
+        links[1].textContent = "Sign up";
+        links[1].style.display = "";
+        const sep = links[0].nextElementSibling;
+        if (sep && sep.classList.contains("sep")) sep.style.display = "";
+      }
+    }
 
     const openThemeSheet = () => toggleSheet(true);
     const closeThemeSheet = () => toggleSheet(false);
@@ -190,18 +269,19 @@ export function LoginPage() {
       if (event.target === sheet) closeThemeSheet();
     }, { signal: controller.signal });
     options.forEach((option) => option.addEventListener("click", () => setThemeChoice(option.dataset.themeChoice || "ember"), { signal: controller.signal }));
-    cta?.addEventListener("click", handleEmailSignIn, { signal: controller.signal });
+    cta?.addEventListener("click", handleCTA, { signal: controller.signal });
     discordButton?.addEventListener("click", handleDiscordSignIn, { signal: controller.signal });
-    comingSoonButtons.forEach((button) => button.addEventListener("click", () => window.alert("This provider will be enabled later."), { signal: controller.signal }));
-    forgotLink?.addEventListener("click", resetPassword, { signal: controller.signal });
-    signupLink?.addEventListener("click", handleEmailSignUp, { signal: controller.signal });
+    telegramButton?.addEventListener("click", handleTelegramSignIn, { signal: controller.signal });
+    googleButton?.addEventListener("click", handleGoogleSignIn, { signal: controller.signal });
+    appleButton?.addEventListener("click", handleAppleSignIn, { signal: controller.signal });
+    links.forEach((link, i) => link.addEventListener("click", handleLinkClick(i), { signal: controller.signal }));
     root.addEventListener("keydown", onKeydown, { signal: controller.signal });
 
     return () => {
       if (intervalId) window.clearInterval(intervalId);
       controller.abort();
     };
-  }, [parts.frames.length, supabase, theme]);
+  }, [parts.frames.length, supabase, theme, view, onNavigate]);
 
   return (
     <div ref={rootRef} className="login-root">

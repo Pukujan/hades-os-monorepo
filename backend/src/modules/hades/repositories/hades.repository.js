@@ -11,8 +11,8 @@ function nowIso(now = () => new Date().toISOString()) {
   return now();
 }
 
-function createId(prefix) {
-  return `${prefix}-${randomUUID().slice(0, 8)}`;
+function createId() {
+  return randomUUID();
 }
 
 function createIdempotencyKey(scope, key) {

@@ -5,7 +5,7 @@ import { renderToString } from "react-dom/server";
 import { MemoryRouter } from "react-router-dom";
 
 test("ChatBubble renders message content", async () => {
-  const mod = await import("../../ChatBubble.js");
+  const mod = await import("../../components/ChatBubble.js");
   const { ChatBubble } = mod;
   const html = renderToString(
     React.createElement(MemoryRouter, null,
@@ -18,7 +18,7 @@ test("ChatBubble renders message content", async () => {
 });
 
 test("ChatBubble renders external_link action as <a> with href and label", async () => {
-  const mod = await import("../../ChatBubble.js");
+  const mod = await import("../../components/ChatBubble.js");
   const { ChatBubble } = mod;
   const html = renderToString(
     React.createElement(MemoryRouter, null,
@@ -37,7 +37,7 @@ test("ChatBubble renders external_link action as <a> with href and label", async
 });
 
 test("ChatBubble renders command action as <button>", async () => {
-  const mod = await import("../../ChatBubble.js");
+  const mod = await import("../../components/ChatBubble.js");
   const { ChatBubble } = mod;
   const html = renderToString(
     React.createElement(MemoryRouter, null,
@@ -55,7 +55,7 @@ test("ChatBubble renders command action as <button>", async () => {
 });
 
 test("ChatBubble renders route action as <button>", async () => {
-  const mod = await import("../../ChatBubble.js");
+  const mod = await import("../../components/ChatBubble.js");
   const { ChatBubble } = mod;
   const html = renderToString(
     React.createElement(MemoryRouter, null,
@@ -73,7 +73,7 @@ test("ChatBubble renders route action as <button>", async () => {
 });
 
 test("ChatBubble renders no actions div when actions is empty", async () => {
-  const mod = await import("../../ChatBubble.js");
+  const mod = await import("../../components/ChatBubble.js");
   const { ChatBubble } = mod;
   const html = renderToString(
     React.createElement(MemoryRouter, null,
@@ -86,7 +86,7 @@ test("ChatBubble renders no actions div when actions is empty", async () => {
 });
 
 test("ChatBubble renders user bubble with user class", async () => {
-  const mod = await import("../../ChatBubble.js");
+  const mod = await import("../../components/ChatBubble.js");
   const { ChatBubble } = mod;
   const html = renderToString(
     React.createElement(MemoryRouter, null,

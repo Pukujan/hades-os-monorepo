@@ -24,6 +24,6 @@ test("frontend API client keeps the local backend fallback explicit", () => {
 });
 
 test("frontend API client includes the auth token bridge", () => {
-  assert.match(source, /hades\.auth\.accessToken/);
+  assert.match(source, /hermes\.auth\.accessToken/);
   assert.match(source, /authorization: `Bearer \$\{token\}`/);
 });

@@ -1,6 +1,6 @@
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
-import { SOCIAL_LINKS } from "../../hadesData.js";
+import { SOCIAL_LINKS } from "../../utils/hadesData.js";
 
 describe("SocialsPage Telegram integration", () => {
   const telegramDefault = SOCIAL_LINKS.find((s) => s.provider === "telegram");

@@ -122,3 +122,37 @@ test("signOutUser returns error when no client", async () => {
   assert.ok(result.error);
   assert.match(result.error.message, /Supabase/);
 });
+
+test("signInWithApple calls supabase.auth.signInWithOAuth with apple provider", async () => {
+  const { signInWithApple } = await import("./authClient.js");
+  const supabase = mockSupabase();
+  const loc = makeLocation();
+  const result = await signInWithApple(supabase, loc);
+  assert.equal(result.data.provider, "apple");
+  assert.equal(result.error, null);
+  assert.equal(result.data.url, "https://hades.example.com/app");
+});
+
+test("signInWithApple returns error when no client", async () => {
+  const { signInWithApple } = await import("./authClient.js");
+  const result = await signInWithApple(null);
+  assert.ok(result.error);
+  assert.match(result.error.message, /Supabase/);
+});
+
+test("signInWithTelegram calls supabase.auth.signInWithOAuth with telegram provider", async () => {
+  const { signInWithTelegram } = await import("./authClient.js");
+  const supabase = mockSupabase();
+  const loc = makeLocation();
+  const result = await signInWithTelegram(supabase, loc);
+  assert.equal(result.data.provider, "telegram");
+  assert.equal(result.error, null);
+  assert.equal(result.data.url, "https://hades.example.com/app");
+});
+
+test("signInWithTelegram returns error when no client", async () => {
+  const { signInWithTelegram } = await import("./authClient.js");
+  const result = await signInWithTelegram(null);
+  assert.ok(result.error);
+  assert.match(result.error.message, /Supabase/);
+});

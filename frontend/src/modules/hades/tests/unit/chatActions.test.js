@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 
 test("extractLinkActionsFromText extracts http URLs from text", async () => {
-  const mod = await import("../../chatActions.js");
+  const mod = await import("../../utils/chatActions.js");
   const text = "Check out https://example.com/cat and http://foo.bar";
   const actions = mod.extractLinkActionsFromText(text);
   assert.equal(actions.length, 2);
@@ -14,7 +14,7 @@ test("extractLinkActionsFromText extracts http URLs from text", async () => {
 });
 
 test("extractLinkActionsFromText ignores URLs wrapped in markdown links", async () => {
-  const mod = await import("../../chatActions.js");
+  const mod = await import("../../utils/chatActions.js");
   const text = "[click here](https://example.com) and a raw https://real.link/page";
   const actions = mod.extractLinkActionsFromText(text);
   assert.equal(actions.length, 1);
@@ -22,19 +22,19 @@ test("extractLinkActionsFromText ignores URLs wrapped in markdown links", async 
 });
 
 test("extractLinkActionsFromText returns empty array for null/undefined/empty", async () => {
-  const mod = await import("../../chatActions.js");
+  const mod = await import("../../utils/chatActions.js");
   assert.deepEqual(mod.extractLinkActionsFromText(null), []);
   assert.deepEqual(mod.extractLinkActionsFromText(undefined), []);
   assert.deepEqual(mod.extractLinkActionsFromText(""), []);
 });
 
 test("extractLinkActionsFromText returns empty array for text without URLs", async () => {
-  const mod = await import("../../chatActions.js");
+  const mod = await import("../../utils/chatActions.js");
   assert.deepEqual(mod.extractLinkActionsFromText("just plain text no urls"), []);
 });
 
 test("normalizeMessageActions merges extracted link actions with existing actions", async () => {
-  const mod = await import("../../chatActions.js");
+  const mod = await import("../../utils/chatActions.js");
   const message = {
     content: "See https://example.com for details",
     actions: [{ type: "route", to: "/minions", label: "View minions" }]
@@ -47,7 +47,7 @@ test("normalizeMessageActions merges extracted link actions with existing action
 });
 
 test("normalizeMessageActions deduplicates by URL", async () => {
-  const mod = await import("../../chatActions.js");
+  const mod = await import("../../utils/chatActions.js");
   const message = {
     content: "Visit https://example.com and also https://example.com again",
     actions: [{ type: "external_link", url: "https://example.com", label: "Open example.com" }]
@@ -59,13 +59,13 @@ test("normalizeMessageActions deduplicates by URL", async () => {
 });
 
 test("normalizeMessageActions returns message as-is for null/undefined message", async () => {
-  const mod = await import("../../chatActions.js");
+  const mod = await import("../../utils/chatActions.js");
   assert.equal(mod.normalizeMessageActions(null), null);
   assert.equal(mod.normalizeMessageActions(undefined), undefined);
 });
 
 test("normalizeMessageActions keeps existing actions when content has no URLs", async () => {
-  const mod = await import("../../chatActions.js");
+  const mod = await import("../../utils/chatActions.js");
   const message = {
     content: "Just text with no links",
     actions: [{ type: "route", to: "/home", label: "Go home" }]

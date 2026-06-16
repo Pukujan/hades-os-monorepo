@@ -1,6 +1,6 @@
 import React from "react";
 import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
-import { useAuth } from "../../auth/AuthProvider.jsx";
+import { useAuth } from "../../../auth/AuthProvider.jsx";
 import {
   Building2,
   Cat,
@@ -18,33 +18,30 @@ import {
   LOCKED_PREVIEWS,
   MOBILE_NAV,
   SOCIAL_LINKS,
-  STARTER_MINIONS,
   STARTER_PROMPTS,
   THEME_CHOICES,
   createEmptyDraft,
   createInitialInbox,
   createInitialMessages,
-  createStarterOwnedMinions,
-  deriveLevelState,
   formatSocialLabel,
   getSocialIcon
-} from "./hadesData.js";
-import { saveTelegramToken } from "./hadesApi.js";
-import { getPendingCopy } from "./chatPendingCopy.js";
-import { TelegramSetupCard } from "./TelegramSetupCard.jsx";
+} from "../utils/hadesData.js";
+import { saveTelegramToken } from "../services/hadesApi.js";
+import { getPendingCopy } from "../utils/chatPendingCopy.js";
+import { TelegramSetupCard } from "../components/TelegramSetupCard.jsx";
 import {
   buildMinionDetailViewModel,
   buildMinionScreenViewModel,
   buildNotificationViewModel,
   normalizeMessage
-} from "./hadesViewModel.js";
+} from "../utils/hadesViewModel.js";
 import { MinionSlots } from "./MinionSlots.jsx";
 import { MinionListScreen } from "./MinionListScreen.jsx";
 import { MinionDetailScreen } from "./MinionDetailScreen.jsx";
 import { MinionLogsScreen } from "./MinionLogsScreen.jsx";
-import { getLogsForMinion } from "./minionPreviewData.js";
-import { ChatBubble } from "./ChatBubble.js";
-import { buildAssistantReply, buildTestOutput, missingDraftFields } from "./parser.js";
+
+import { ChatBubble } from "../components/ChatBubble.js";
+import { buildAssistantReply, buildTestOutput, missingDraftFields } from "../utils/parser.js";
 import {
   buildLocalDraftFallback,
   deleteHadesMessages,
@@ -55,7 +52,7 @@ import {
   sendGeneralChat,
   postHadesMinion,
   postHadesMinionTest
-} from "./hadesApi.js";
+} from "../services/hadesApi.js";
 
 const HadesContext = React.createContext(null);
 
@@ -214,17 +211,16 @@ function HadesProvider({ children }) {
   const [messages, setMessages] = usePersistentState("hades.chatMessages", createInitialMessages());
   const [forgeMessages, setForgeMessages] = usePersistentState("hades.forgeMessages", createInitialMessages());
   const [draft, setDraft] = usePersistentState("hades.draft", createEmptyDraft());
-  const [minions, setMinions] = usePersistentState("hades.minions", createStarterOwnedMinions());
+  const [minions, setMinions] = usePersistentState("hades.minions", []);
   const [inbox, setInbox] = usePersistentState("hades.inboxAlerts", createInitialInbox());
   const [assignments, setAssignments] = usePersistentState("hades.assignments", []);
-  const [levelState, setLevelState] = usePersistentState("hades.levelState", deriveLevelState(createStarterOwnedMinions().length));
+  const [levelState, setLevelState] = usePersistentState("hades.levelState", null);
   const [conversationId, setConversationId] = usePersistentState("hades.conversationId", null);
   const [forgeConversationId, setForgeConversationId] = usePersistentState("hades.forgeConversationId", null);
   const [toast, setToast] = React.useState(null);
   const maxSlots = 4;
   const [composerText, setComposerText] = React.useState("");
-  const [selectedStarterId, setSelectedStarterId] = React.useState("task-helper");
-  const [selectedMinionId, setSelectedMinionId] = usePersistentState("hades.selectedMinionId", "task-helper");
+  const [selectedMinionId, setSelectedMinionId] = usePersistentState("hades.selectedMinionId", "");
   const [selectedSocialId, setSelectedSocialId] = usePersistentState("hades.selectedSocialId", "discord");
   const [assignmentCommand, setAssignmentCommand] = usePersistentState("hades.assignmentCommand", "");
   const [futurePlanCache, setFuturePlanCache] = usePersistentState("hades.futurePlanCache", [
@@ -292,19 +288,6 @@ function HadesProvider({ children }) {
   }, [minions, selectedMinionId, setSelectedMinionId]);
 
   React.useEffect(() => {
-    const legacyStarterIds = new Set(["task-helper", "chat-summarizer", "deal-watcher"]);
-    const hasLegacySeed = minions.some((minion) => legacyStarterIds.has(minion.id));
-    const hasPrototypeSeed = minions.some((minion) => minion.id === "cat-courier" || minion.id === "price-imp");
-
-    if (!hasLegacySeed || hasPrototypeSeed) return;
-
-    const nextMinions = createStarterOwnedMinions();
-    setMinions(nextMinions);
-    setSelectedMinionId(nextMinions[0]?.id || "cat-courier");
-    setLevelState(deriveLevelState(nextMinions.length));
-  }, [minions, setLevelState, setMinions, setSelectedMinionId]);
-
-  React.useEffect(() => {
     if (hydratedRef.current || !accessToken) return;
     hydratedRef.current = true;
 
@@ -323,11 +306,6 @@ function HadesProvider({ children }) {
         hydratedRef.current = true;
       });
   }, [accessToken]);
-
-  React.useEffect(() => {
-    const nextLevel = deriveLevelState(minions.length);
-    setLevelState(nextLevel);
-  }, [minions.length, setLevelState]);
 
   React.useEffect(() => {
     if (!minions.some((entry) => entry.id === selectedMinionId)) {
@@ -480,31 +458,6 @@ function HadesProvider({ children }) {
     },
     [assignments, getAssignmentCommand]
   );
-
-  function selectStarterCard(starterId) {
-    const starter = STARTER_MINIONS.find((entry) => entry.id === starterId);
-    if (!starter) return;
-    if (starter.status === "locked") {
-      showToast("That starter is locked in MVP.");
-      return;
-    }
-
-    setSelectedStarterId(starterId);
-    setDraft({
-      name: starter.name,
-      description: starter.description,
-      category: starter.category,
-      targetSocial: starter.targetSocial,
-      triggerType: starter.triggerType,
-      commandName: starter.commandName,
-      action: starter.description,
-      responseStyle: "helpful",
-      safetyMode: "ask_first",
-      testInput: null,
-      status: "ready_to_test"
-    });
-    showToast(`${starter.name} selected.`);
-  }
 
   function updateDraft(nextDraft) {
     setDraft(nextDraft);
@@ -881,9 +834,6 @@ function HadesProvider({ children }) {
         closeMinionDetail,
         inbox,
         levelState,
-        selectedStarterId,
-        setSelectedStarterId,
-        selectStarterCard,
         pendingCopy,
         activateMinion,
         deactivateMinion,
@@ -916,7 +866,8 @@ function AppShell() {
     settings: "Keep control simple and visible.",
     inbox: "Pending sync notifications."
   }[screen] || "Ask Hades to forge a helper.";
-  const activeSlots = Math.min(minions.length, levelState.level);
+  const lvl = levelState ?? { title: "", level: 0 };
+  const activeSlots = Math.min(minions.length, lvl.level);
 
   return (
     <div className="viewport">
@@ -944,14 +895,14 @@ function AppShell() {
             </div>
             <section className="status">
               <div>
-                <h2>{levelState.title}</h2>
+                <h2>{lvl.title}</h2>
                 <p>
-                  LVL {levelState.level} · {activeSlots} active slot{activeSlots === 1 ? "" : "s"}
+                  LVL {lvl.level} · {activeSlots} active slot{activeSlots === 1 ? "" : "s"}
                 </p>
               </div>
-              <div className="level">LVL {levelState.level}</div>
+              <div className="level">LVL {lvl.level}</div>
               <div className="xp">
-                <i style={{ width: `${Math.min(100, 38 + levelState.level * 18)}%` }} />
+                <i style={{ width: `${Math.min(100, 38 + lvl.level * 18)}%` }} />
               </div>
             </section>
           </header>
@@ -1436,7 +1387,7 @@ function MinionLogsScreenWrapped() {
   return (
     <MinionLogsScreen
       minion={minion}
-      logs={getLogsForMinion(id)}
+      logs={[]}
       onBack={() => navigate(`/app/minions/${id}`)}
     />
   );

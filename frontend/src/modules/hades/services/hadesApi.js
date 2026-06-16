@@ -1,12 +1,10 @@
-import { apiGet, apiPost, apiPatch, apiDelete } from "../../shared/api/client.js";
-import { createDraftFromMessage } from "./parser.js";
+import { apiGet, apiPost, apiPatch, apiDelete } from "../../../shared/api/client.js";
+import { createDraftFromMessage } from "../utils/parser.js";
 import {
   SOCIAL_LINKS,
   createEmptyDraft,
-  createInitialMessages,
-  createStarterOwnedMinions,
-  deriveLevelState
-} from "./hadesData.js";
+  createInitialMessages
+} from "../utils/hadesData.js";
 
 export async function sendHadesChatMessage({
   mode = "general",
@@ -125,10 +123,10 @@ export function mapBootstrapToHadesState(payload = {}) {
     conversationId: payload.conversationId || null,
     messages: payload.messages?.length ? payload.messages : createInitialMessages(),
     draft: payload.draft || createEmptyDraft(),
-    minions: payload.minions?.length ? payload.minions : createStarterOwnedMinions(),
+    minions: payload.minions?.length ? payload.minions : [],
     assignments: payload.assignments || [],
     socialLinks: payload.socialLinks?.length ? payload.socialLinks : SOCIAL_LINKS,
-    levelState: payload.levelState || deriveLevelState(payload.minions?.length || createStarterOwnedMinions().length),
+    levelState: payload.levelState || null,
     source: payload.source || "local_fallback"
   };
 }

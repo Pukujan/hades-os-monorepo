@@ -31,7 +31,7 @@ afterEach(() => {
 test("uses VITE_API_BASE_URL for production Hades chat requests", async () => {
   mockEnv({ mode: "production", apiBaseUrl: RAILWAY_API_BASE });
 
-  const { sendHadesChatMessage } = await import("./hadesApi.js");
+  const { sendHadesChatMessage } = await import("../../services/hadesApi.js");
 
   await sendHadesChatMessage({
     mode: "general",
@@ -49,7 +49,7 @@ test("uses VITE_API_BASE_URL for production Hades chat requests", async () => {
 test("trims trailing slash from VITE_API_BASE_URL", async () => {
   mockEnv({ mode: "production", apiBaseUrl: `${RAILWAY_API_BASE}/` });
 
-  const { sendHadesChatMessage } = await import("./hadesApi.js");
+  const { sendHadesChatMessage } = await import("../../services/hadesApi.js");
 
   await sendHadesChatMessage({
     mode: "general",
@@ -65,7 +65,7 @@ test("trims trailing slash from VITE_API_BASE_URL", async () => {
 test("does not call Vercel same-origin API in production", async () => {
   mockEnv({ mode: "production", apiBaseUrl: RAILWAY_API_BASE });
 
-  const { sendHadesChatMessage } = await import("./hadesApi.js");
+  const { sendHadesChatMessage } = await import("../../services/hadesApi.js");
 
   await sendHadesChatMessage({
     mode: "general",
@@ -82,7 +82,7 @@ test("does not call Vercel same-origin API in production", async () => {
 test("fails loudly in production when VITE_API_BASE_URL is missing", async () => {
   mockEnv({ mode: "production", apiBaseUrl: "" });
 
-  const { sendHadesChatMessage } = await import("./hadesApi.js");
+  const { sendHadesChatMessage } = await import("../../services/hadesApi.js");
 
   await assert.rejects(
     sendHadesChatMessage({
@@ -99,7 +99,7 @@ test("fails loudly in production when VITE_API_BASE_URL is missing", async () =>
 test("allows relative API path only in development when VITE_API_BASE_URL is missing", async () => {
   mockEnv({ mode: "development", apiBaseUrl: "" });
 
-  const { sendHadesChatMessage } = await import("./hadesApi.js");
+  const { sendHadesChatMessage } = await import("../../services/hadesApi.js");
 
   await sendHadesChatMessage({
     mode: "general",

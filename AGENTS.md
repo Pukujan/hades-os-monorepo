@@ -73,7 +73,13 @@ They are parallel — OpenCode does not call `measure_context.py` unless you run
 
 ---
 
-# 6. Lint Commands
+# 6. TDD Rule (Mandatory)
+
+Before writing any implementation code, you MUST first write failing unit tests that define the expected behavior. This applies to every code change — new features, bug fixes, refactors. Only implement after the tests are written and confirmed to fail. Run the tests after implementation to confirm they pass.
+
+---
+
+# 7. Lint Commands
 
 | Command | Checks |
 |---------|--------|

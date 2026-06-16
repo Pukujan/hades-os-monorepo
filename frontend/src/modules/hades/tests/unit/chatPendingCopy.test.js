@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { getPendingCopy, getFallbackPendingCopy } from "../../chatPendingCopy.js";
+import { getPendingCopy, getFallbackPendingCopy } from "../../utils/chatPendingCopy.js";
 
 test("uses price-search copy for shopping/search tasks", () => {
   assert.equal(getPendingCopy("find the cheapest nike pegasus"), "Searching prices...");

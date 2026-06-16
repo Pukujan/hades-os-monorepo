@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 
 test("HADES_APP_ROUTES contains all expected routes", async () => {
-  const { HADES_APP_ROUTES } = await import("../../hadesRoutes.js");
+  const { HADES_APP_ROUTES } = await import("../../index.jsx");
 
   assert.ok(Array.isArray(HADES_APP_ROUTES));
   assert.ok(HADES_APP_ROUTES.length >= 6);
@@ -15,7 +15,7 @@ test("HADES_APP_ROUTES contains all expected routes", async () => {
 });
 
 test("each route has required fields", async () => {
-  const { HADES_APP_ROUTES } = await import("../../hadesRoutes.js");
+  const { HADES_APP_ROUTES } = await import("../../index.jsx");
 
   for (const route of HADES_APP_ROUTES) {
     assert.equal(typeof route.id, "string", `route ${route.id} missing id`);
@@ -28,7 +28,7 @@ test("each route has required fields", async () => {
 });
 
 test("routes have distinct ids", async () => {
-  const { HADES_APP_ROUTES } = await import("../../hadesRoutes.js");
+  const { HADES_APP_ROUTES } = await import("../../index.jsx");
 
   const ids = HADES_APP_ROUTES.map((r) => r.id);
   const unique = new Set(ids);

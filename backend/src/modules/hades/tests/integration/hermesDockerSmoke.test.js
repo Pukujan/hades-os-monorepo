@@ -18,11 +18,11 @@ function dockerAvailable() {
 }
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const cwd = path.resolve(__dirname, "../../../../..");
+const cwd = path.resolve(__dirname, "../../../../../../");
 
 test("Docker image builds from backend/Dockerfile", { timeout: 300_000 }, (t) => {
   if (!dockerAvailable()) { t.skip("Docker daemon not running"); return; }
-  execSync(`docker build -t ${IMAGE} -f Dockerfile .`, { cwd, stdio: "pipe" });
+  execSync(`docker build -t ${IMAGE} -f backend/Dockerfile .`, { cwd, stdio: "pipe" });
 });
 
 test("hermes binary exists at /opt/hermes-venv/bin/hermes in Docker image", { timeout: 30_000 }, (t) => {

@@ -5,7 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const DIR = path.dirname(fileURLToPath(import.meta.url));
-const COMPONENT_PATH = path.resolve(DIR, "../../TelegramSetupCard.jsx");
+const COMPONENT_PATH = path.resolve(DIR, "../../components/TelegramSetupCard.jsx");
 const CSS_PATH = path.resolve(DIR, "../../../../styles/hadesPrototype.css");
 
 describe("TelegramSetupCard layout structure", () => {

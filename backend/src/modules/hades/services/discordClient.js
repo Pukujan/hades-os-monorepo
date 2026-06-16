@@ -14,6 +14,7 @@ export async function createDiscordClient({ botToken, rest } = {}) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(body),
+        signal: AbortSignal.timeout(5_000),
       });
       if (!response.ok) {
         throw new Error(`Discord API error: ${response.status}`);

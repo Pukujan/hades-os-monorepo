@@ -44,7 +44,7 @@ describe("saveTelegramToken", () => {
     };
 
     try {
-      const { saveTelegramToken } = await import("../../hadesApi.js");
+      const { saveTelegramToken } = await import("../../services/hadesApi.js");
       const result = await saveTelegramToken({ token: fakeToken }, TEST_TOKEN);
 
       assert.equal(calls.length, 1);
@@ -71,7 +71,7 @@ describe("saveTelegramToken", () => {
     mockFetch(fakeResponse);
 
     try {
-      const { saveTelegramToken } = await import("../../hadesApi.js");
+      const { saveTelegramToken } = await import("../../services/hadesApi.js");
       const result = await saveTelegramToken({ token: "test:token" }, TEST_TOKEN);
 
       assert.equal(result.connection.status, "connected");
@@ -86,7 +86,7 @@ describe("saveTelegramToken", () => {
     mockFetchError(400, { error: "Invalid token", code: "token_invalid" });
 
     try {
-      const { saveTelegramToken } = await import("../../hadesApi.js");
+      const { saveTelegramToken } = await import("../../services/hadesApi.js");
 
       await assert.rejects(
         () => saveTelegramToken({ token: "bad:token" }, TEST_TOKEN)

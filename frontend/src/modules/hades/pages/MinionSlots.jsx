@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { getEmojiForMinion } from "./minionPreviewData.js";
+import { getEmojiForMinion } from "../utils/minionPreviewData.js";
 
 export function MinionSlots({ minions, maxSlots = 4 }) {
   const navigate = useNavigate();

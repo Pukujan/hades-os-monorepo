@@ -12,6 +12,7 @@ export async function createTelegramClient({ botToken, api } = {}) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
+        signal: AbortSignal.timeout(5_000),
       });
       const result = await response.json();
       if (!result.ok) {

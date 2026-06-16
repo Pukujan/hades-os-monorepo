@@ -5,7 +5,7 @@ import {
   buildMinionScreenViewModel,
   buildNotificationViewModel,
   normalizeMessage
-} from "./hadesViewModel.js";
+} from "../../utils/hadesViewModel.js";
 
 test("minion screen view model splits active and inactive minions without mutating api state", () => {
   const apiState = {
@@ -72,7 +72,7 @@ test("detail Cat Courier command syntax is !sendcat not !sendcat lawyer", () => 
   assert.notEqual(detail.commandSyntax, "!sendcat lawyer");
 });
 
-test("MinionListScreen shows 12 minions from MOCK_MINIONS", () => {
+test("MinionListScreen shows 12 minions from list", () => {
   const list = [
     { id: "cat", name: "Cat Courier", slotIndex: 0, type: "manual", ownerType: "system_default" },
     { id: "brief", name: "Brief Wraith", slotIndex: 1, type: "auto", ownerType: "system_default" },

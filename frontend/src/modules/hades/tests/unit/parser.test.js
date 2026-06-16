@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { buildAssistantReply, buildTestOutput, createDraftFromMessage, missingDraftFields, stripWrapperTags } from "./parser.js";
+import { buildAssistantReply, buildTestOutput, createDraftFromMessage, missingDraftFields, stripWrapperTags } from "../../utils/parser.js";
 
 test("stripWrapperTags removes <pastor>, <hades>, <persona>, <reply>, <message>, <assistant>, <system>, <think>, <thought> tags", () => {
   assert.equal(stripWrapperTags("<pastor>Hello</pastor>"), "Hello");

@@ -2,16 +2,22 @@ import React from "react";
 import { AuthProvider, useAuth } from "../auth/AuthProvider.jsx";
 import { LoginPage } from "../auth/LoginPage.jsx";
 
-const HADES_APP_PATH = "../modules/hades/HadesPrototypeApp.jsx";
+const HADES_APP_PATH = "../modules/hades/pages/HadesPrototypeApp.jsx";
 
 function AuthSwitch() {
   const { loading, session } = useAuth();
+  const [authView, setAuthView] = React.useState("signin");
 
   if (loading) {
     return null;
   }
 
-  return session ? <HadesAppShell /> : <LoginPage />;
+  if (session) {
+    if (authView !== "signin") setAuthView("signin");
+    return <HadesAppShell />;
+  }
+
+  return <LoginPage view={authView} onNavigate={setAuthView} />;
 }
 
 function HadesAppShell() {

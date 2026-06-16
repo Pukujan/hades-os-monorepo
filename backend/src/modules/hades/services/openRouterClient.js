@@ -1,3 +1,4 @@
+import { withRetry } from "../utils/withRetry.js";
 import { VALID_CATEGORIES, VALID_TARGET_SOCIALS, VALID_TRIGGER_TYPES } from "../data.js";
 import { buildGeneralChatPrompt } from "../prompts/generalChatPrompt.js";
 import { buildForgeChatPrompt } from "../prompts/forgeChatPrompt.js";
@@ -45,7 +46,7 @@ export function createOpenRouterClient({
   model = DEFAULT_MODEL,
   httpReferer = "",
   appTitle = "",
-  fetchImpl = fetch
+  fetchImpl = fetch,
 } = {}) {
   async function generateDraft({ userId, conversationId, message, currentDraft, allowedProviders, mode, context = "forge" }) {
     if (!apiKey) {
@@ -60,6 +61,7 @@ export function createOpenRouterClient({
         ...(httpReferer ? { "HTTP-Referer": httpReferer } : {}),
         ...(appTitle ? { "X-OpenRouter-Title": appTitle } : {})
       },
+      signal: AbortSignal.timeout(30_000),
       body: JSON.stringify({
         model,
         response_format: { type: "json_object" },
@@ -102,5 +104,7 @@ export function createOpenRouterClient({
     return parsed;
   }
 
-  return { generateDraft };
+  const generateDraftWithRetry = withRetry(generateDraft, { retries: 2 });
+
+  return { generateDraft: generateDraftWithRetry };
 }

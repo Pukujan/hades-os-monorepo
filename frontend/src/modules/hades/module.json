@@ -9,7 +9,6 @@
   "forbiddenDependencies": ["frontend/src/modules/_reference/**"],
   "apiDocs": "docs/hades/API.md",
   "tests": [
-    "frontend/src/modules/hades/tests/unit/**",
-    "frontend/src/modules/hades/**/*.test.js"
+    "frontend/src/modules/hades/tests/unit/**"
   ]
 }

@@ -82,6 +82,75 @@ test("Hermes runtime wrapper builds a oneshot OpenRouter command with backend en
   assert.ok(calls[0].args.includes("--model"));
   assert.ok(calls[0].args.includes("deepseek/deepseek-v4-flash"));
   assert.equal(calls[0].options.env.OPENROUTER_API_KEY, "backend-secret");
+  assert.ok(typeof calls[0].options.timeout === "number", "options.timeout should be a number");
+});
+
+test("Hermes runtime passes timeout option from HERMES_TIMEOUT env var", async () => {
+  const tempDir = makeTempDir();
+  const backendEnvPath = path.join(tempDir, ".env");
+  fs.writeFileSync(
+    backendEnvPath,
+    ["HERMES_PROVIDER=openrouter", "HERMES_MODEL=model", "HERMES_TIMEOUT=25000"].join("\n"),
+    "utf8"
+  );
+
+  const calls = [];
+  const runtime = createHermesRuntimeService({
+    hermesBin: "/fake/hermes",
+    backendEnvPath,
+    runCommand: async (bin, args, options) => {
+      calls.push({ bin, args, options });
+      return JSON.stringify({ assistantText: "ok" });
+    }
+  });
+
+  await runtime.generateDraft({
+    message: "test",
+    currentDraft: createEmptyDraft()
+  });
+
+  assert.equal(calls[0].options.timeout, 25000);
+});
+
+test("Hermes runtime uses default timeout when HERMES_TIMEOUT is not set", async () => {
+  const tempDir = makeTempDir();
+  const backendEnvPath = path.join(tempDir, ".env");
+  fs.writeFileSync(backendEnvPath, "HERMES_PROVIDER=openrouter\nHERMES_MODEL=model\n", "utf8");
+
+  const calls = [];
+  const runtime = createHermesRuntimeService({
+    hermesBin: "/fake/hermes",
+    backendEnvPath,
+    runCommand: async (bin, args, options) => {
+      calls.push({ bin, args, options });
+      return JSON.stringify({ assistantText: "ok" });
+    }
+  });
+
+  await runtime.generateDraft({
+    message: "test",
+    currentDraft: createEmptyDraft()
+  });
+
+  assert.equal(calls[0].options.timeout, 120000);
+});
+
+test("Hermes runtime wraps timeout/exec errors with stderr", async () => {
+  const runtime = createHermesRuntimeService({
+    hermesBin: "/fake/hermes",
+    runCommand: async () => {
+      const err = new Error("Command timed out");
+      err.stderr = "FATAL: process exceeded limit";
+      err.stdout = "";
+      err.killed = true;
+      throw err;
+    }
+  });
+
+  await assert.rejects(
+    () => runtime.generateDraft({ message: "test", currentDraft: createEmptyDraft() }),
+    /FATAL: process exceeded limit/i
+  );
 });
 
 test("Hermes runtime wrapper rejects non-JSON output and old context/provider blockers", async () => {

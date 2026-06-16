@@ -6,6 +6,7 @@
 # === Hermes local artifacts (auth, history, caches) ===
 auth.json
 .hermes_history
+.hermes/
 audio_cache/
 .skills_prompt_snapshot.json
 

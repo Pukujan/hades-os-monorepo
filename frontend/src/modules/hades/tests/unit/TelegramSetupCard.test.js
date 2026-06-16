@@ -1,6 +1,6 @@
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
-import { buildBotFatherCommand, formatTokenDisplay } from "../../telegramSetup.js";
+import { buildBotFatherCommand, formatTokenDisplay } from "../../services/telegramSetup.js";
 
 describe("buildBotFatherCommand", () => {
   test("includes username in bot suffix when provided", () => {

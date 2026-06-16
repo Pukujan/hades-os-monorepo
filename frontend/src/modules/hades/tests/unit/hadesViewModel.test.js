@@ -6,7 +6,7 @@ describe("hadesViewModel", () => {
   // --- RED: these test desired API-driven behavior that doesn't exist yet ---
 
   test("buildMinionDetailViewModel accepts data source option", async () => {
-    const mod = await import("../../hadesViewModel.js");
+    const mod = await import("../../utils/hadesViewModel.js");
     assert.equal(
       mod.buildMinionDetailViewModel.length >= 2,
       true,
@@ -15,7 +15,7 @@ describe("hadesViewModel", () => {
   });
 
   test("buildMinionDetailViewModel returns async result when options.getMinion is provided", async () => {
-    const mod = await import("../../hadesViewModel.js");
+    const mod = await import("../../utils/hadesViewModel.js");
     const getMinion = async (id) => ({ id, name: "API Minion", status: "active" });
     const result = mod.buildMinionDetailViewModel("m1", { getMinion });
     assert.equal(typeof result?.then, "function", "expected async result with options.getMinion");
@@ -24,14 +24,14 @@ describe("hadesViewModel", () => {
   });
 
   test("buildMinionDetailViewModel returns null for non-existent minion via API", async () => {
-    const mod = await import("../../hadesViewModel.js");
+    const mod = await import("../../utils/hadesViewModel.js");
     const getMinion = async () => null;
     const result = await mod.buildMinionDetailViewModel("non_existent", { getMinion });
     assert.equal(result, null);
   });
 
   test("buildMinionScreenViewModel accepts data source option", async () => {
-    const mod = await import("../../hadesViewModel.js");
+    const mod = await import("../../utils/hadesViewModel.js");
     assert.equal(
       mod.buildMinionScreenViewModel.length >= 1,
       true,
@@ -40,7 +40,7 @@ describe("hadesViewModel", () => {
   });
 
   test("buildMinionScreenViewModel returns async result when options.listMinions is provided", async () => {
-    const mod = await import("../../hadesViewModel.js");
+    const mod = await import("../../utils/hadesViewModel.js");
     const listMinions = async () => [
       { id: "m1", name: "M1", status: "active" },
     ];
@@ -52,7 +52,7 @@ describe("hadesViewModel", () => {
   });
 
   test("buildNotificationViewModel accepts data source option", async () => {
-    const mod = await import("../../hadesViewModel.js");
+    const mod = await import("../../utils/hadesViewModel.js");
     assert.equal(
       mod.buildNotificationViewModel.length >= 1,
       true,
@@ -61,7 +61,7 @@ describe("hadesViewModel", () => {
   });
 
   test("buildNotificationViewModel returns async result when options.listNotifications is provided", async () => {
-    const mod = await import("../../hadesViewModel.js");
+    const mod = await import("../../utils/hadesViewModel.js");
     const listNotifications = async () => [
       { id: "n1", title: "Test", message: "Hello", read: false },
     ];
@@ -75,17 +75,17 @@ describe("hadesViewModel", () => {
   // --- GREEN: these test existing mock-based behavior (baseline contract) ---
 
   test("buildMinionDetailViewModel is exported as a function", async () => {
-    const mod = await import("../../hadesViewModel.js");
+    const mod = await import("../../utils/hadesViewModel.js");
     assert.equal(typeof mod.buildMinionDetailViewModel, "function");
   });
 
   test("buildMinionScreenViewModel is exported as a function", async () => {
-    const mod = await import("../../hadesViewModel.js");
+    const mod = await import("../../utils/hadesViewModel.js");
     assert.equal(typeof mod.buildMinionScreenViewModel, "function");
   });
 
   test("buildNotificationViewModel is exported as a function", async () => {
-    const mod = await import("../../hadesViewModel.js");
+    const mod = await import("../../utils/hadesViewModel.js");
     assert.equal(typeof mod.buildNotificationViewModel, "function");
   });
 });

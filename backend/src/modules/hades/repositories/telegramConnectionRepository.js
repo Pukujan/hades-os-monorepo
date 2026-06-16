@@ -1,8 +1,5 @@
 import { persistTable, readTableRows } from "./_supabase.js";
-
-function createId(prefix) {
-  return `${prefix}-${Math.random().toString(36).slice(2, 10)}`;
-}
+import { randomUUID } from "node:crypto";
 
 function last4(token) {
   if (!token || token.length < 4) return token || "";
@@ -41,7 +38,7 @@ export function createTelegramConnectionRepository({ storage = "memory", supabas
       );
     }
     const existing = byTelegramUserId.get(telegramUserId);
-    const id = existing?.id || createId("tgconn");
+    const id = existing?.id || randomUUID();
     const encrypted = crypto.encrypt(botToken);
 
     const record = {

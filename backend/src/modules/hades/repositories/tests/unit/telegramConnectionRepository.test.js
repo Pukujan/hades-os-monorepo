@@ -1,5 +1,6 @@
 import { test, describe, beforeEach } from "node:test";
 import assert from "node:assert/strict";
+import { randomUUID } from "node:crypto";
 
 async function loadRepo() {
   try {
@@ -137,5 +138,42 @@ describe("telegramConnectionRepository", () => {
     });
 
     assert.equal(record, null);
+  });
+
+  test("generates a valid UUID v4 id", async () => {
+    const record = await repo.createOrUpdate({
+      userId: "user_a",
+      tenantId: "tenant_a",
+      telegramUserId: "tg_uuid_test",
+      botToken: "123456:SECRET",
+      botUsername: "hades_bot",
+      status: "connected",
+    });
+
+    // UUID v4 format: xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
+    const uuidV4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    assert.match(record.id, uuidV4, `id "${record.id}" is not a valid UUID v4`);
+  });
+
+  test("reuses existing id on update", async () => {
+    const first = await repo.createOrUpdate({
+      userId: "user_a",
+      tenantId: "tenant_a",
+      telegramUserId: "tg_update_test",
+      botToken: "111:SECRET",
+      botUsername: "hades_bot",
+      status: "connected",
+    });
+
+    const second = await repo.createOrUpdate({
+      userId: "user_a",
+      tenantId: "tenant_a",
+      telegramUserId: "tg_update_test",
+      botToken: "222:NEW_SECRET",
+      botUsername: "hades_bot",
+      status: "connected",
+    });
+
+    assert.equal(second.id, first.id, "id should remain stable on update");
   });
 });

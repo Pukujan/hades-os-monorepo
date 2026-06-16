@@ -4,7 +4,7 @@ import { describe, it } from "node:test";
 
 describe("catmeme API functions", () => {
   test("generateCatMeme is exported as a function", async () => {
-    const mod = await import("../../hadesApi.js");
+    const mod = await import("../../services/hadesApi.js");
     assert.equal(typeof mod.generateCatMeme, "function");
   });
 
@@ -28,7 +28,7 @@ describe("catmeme API functions", () => {
       };
     };
 
-    const mod = await import("../../hadesApi.js");
+    const mod = await import("../../services/hadesApi.js");
     const result = await mod.generateCatMeme("funny cat with hat");
     assert.equal(result.prompt, "funny cat with hat");
     assert.ok(result.imageUrl);
@@ -36,7 +36,7 @@ describe("catmeme API functions", () => {
   });
 
   test("getCatMemeTemplates is exported as a function", async () => {
-    const mod = await import("../../hadesApi.js");
+    const mod = await import("../../services/hadesApi.js");
     assert.equal(typeof mod.getCatMemeTemplates, "function");
   });
 
@@ -55,7 +55,7 @@ describe("catmeme API functions", () => {
       };
     };
 
-    const mod = await import("../../hadesApi.js");
+    const mod = await import("../../services/hadesApi.js");
     const result = await mod.getCatMemeTemplates();
     assert.equal(result.length, 2);
     assert.equal(result[0].name, "Grumpy Cat");

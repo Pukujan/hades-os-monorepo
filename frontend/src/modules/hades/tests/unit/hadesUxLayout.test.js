@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
 
-const css = readFileSync(new URL("../../styles/hadesPrototype.css", import.meta.url), "utf8");
-const loginTemplate = readFileSync(new URL("../../auth/loginTemplate.html", import.meta.url), "utf8");
+const css = readFileSync(new URL("../../../../styles/hadesPrototype.css", import.meta.url), "utf8");
+const loginTemplate = readFileSync(new URL("../../../../auth/loginTemplate.html", import.meta.url), "utf8");
 
 test("post-login shell defines contained scroll surfaces", () => {
   for (const selector of [

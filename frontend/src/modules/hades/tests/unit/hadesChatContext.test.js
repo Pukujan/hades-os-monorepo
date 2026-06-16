@@ -16,7 +16,7 @@ describe("frontend chat context", () => {
     };
 
     try {
-      const { postHadesChat } = await import("./hadesApi.js");
+      const { postHadesChat } = await import("../../services/hadesApi.js");
 
       await postHadesChat({
         clientMessageId: "msg-ctx-1",
@@ -49,7 +49,7 @@ describe("frontend chat context", () => {
     };
 
     try {
-      const { postHadesChat } = await import("./hadesApi.js");
+      const { postHadesChat } = await import("../../services/hadesApi.js");
 
       await postHadesChat({
         clientMessageId: "msg-noctx-1",

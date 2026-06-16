@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { THEME_CHOICES, getSocialIcon } from "./hadesData.js";
+import { THEME_CHOICES, getSocialIcon } from "../../utils/hadesData.js";
 
 test("theme picker keeps only the core forge themes", () => {
   const ids = THEME_CHOICES.map((choice) => choice.id);

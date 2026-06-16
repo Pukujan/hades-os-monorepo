@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { normalizeMinion } from "./hadesData.js";
+import { normalizeMinion } from "../../utils/hadesData.js";
 
 test("normalizeMinion returns null for null/undefined input", () => {
   assert.equal(normalizeMinion(null), null);
@@ -30,7 +30,7 @@ test("normalizeMinion normalizes MOCK_MINIONS shape", () => {
   assert.equal(n.schedule, null);
 });
 
-test("normalizeMinion normalizes STARTER_MINIONS shape", () => {
+test("normalizeMinion normalizes starter minion shape", () => {
   const starter = {
     id: "cat-courier",
     name: "Cat Courier",

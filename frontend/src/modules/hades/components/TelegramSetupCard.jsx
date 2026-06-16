@@ -1,5 +1,5 @@
 import React from "react";
-import { buildBotFatherCommand, formatTokenDisplay } from "./telegramSetup.js";
+import { buildBotFatherCommand, formatTokenDisplay } from "../services/telegramSetup.js";
 
 const BOTFATHER_URL = "https://t.me/BotFather";
 

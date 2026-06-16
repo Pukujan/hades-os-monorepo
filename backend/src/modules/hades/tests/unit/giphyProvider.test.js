@@ -78,12 +78,12 @@ describe("Giphy provider", () => {
 
     const provider = createGiphyProvider({
       apiKey: "test-key",
-      fetch: async () => ({ ok: false, status: 429 }),
+      fetch: async () => ({ ok: false, status: 400 }),
     });
 
     await assert.rejects(
       () => provider.searchGif({ query: "cat", rating: "pg-13", limit: 1 }),
-      /giphy|rate limit|API error/i
+      /Giphy API error/i
     );
   });
 

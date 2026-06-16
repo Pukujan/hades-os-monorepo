@@ -15,7 +15,7 @@ test("sendGeneralChat posts to /chat/general with correct payload", async () => 
   };
 
   try {
-    const { sendGeneralChat } = await import("../../hadesApi.js");
+    const { sendGeneralChat } = await import("../../services/hadesApi.js");
     const result = await sendGeneralChat({
       message: "where do I connect telegram?",
       conversationId: "conv-1",
@@ -47,7 +47,7 @@ test("sendForgeChat posts to /chat/forge with correct payload", async () => {
   };
 
   try {
-    const { sendForgeChat } = await import("../../hadesApi.js");
+    const { sendForgeChat } = await import("../../services/hadesApi.js");
     const result = await sendForgeChat({
       message: "make a telegram minion",
       idempotencyKey: "idem-2",

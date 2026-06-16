@@ -1,7 +1,8 @@
 import { persistTable, readTableRows } from "./_supabase.js";
+import { randomUUID } from "node:crypto";
 
-function createId(prefix) {
-  return `${prefix}-${Math.random().toString(36).slice(2, 10)}`;
+function createId() {
+  return randomUUID();
 }
 
 export function createAssignmentRepository({ storage = "memory", supabaseClient, tableName = "hades_assignments" } = {}) {

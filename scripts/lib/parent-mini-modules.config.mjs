@@ -44,7 +44,9 @@ export const BACKEND_MINI_MODULE_INTERNAL_DIRS = new Set([
 ]);
 
 /** Top-level frontend module pairs allowed to import each other via relative paths. */
-export const CROSS_MODULE_ALLOWLIST = [];
+export const CROSS_MODULE_ALLOWLIST = [
+  { from: "hades", to: "auth" }
+];
 
 export function isAllowlistedCrossImport(fromModule, toModule) {
   return CROSS_MODULE_ALLOWLIST.some((e) => e.from === fromModule && e.to === toModule);

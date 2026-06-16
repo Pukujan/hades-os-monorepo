@@ -30,6 +30,22 @@ export async function signInWithDiscord(supabase, location) {
   });
 }
 
+export async function signInWithApple(supabase, location) {
+  if (!supabase) return clientError();
+  return supabase.auth.signInWithOAuth({
+    provider: "apple",
+    options: { redirectTo: buildOAuthRedirectTo(location) }
+  });
+}
+
+export async function signInWithTelegram(supabase, location) {
+  if (!supabase) return clientError();
+  return supabase.auth.signInWithOAuth({
+    provider: "telegram",
+    options: { redirectTo: buildOAuthRedirectTo(location) }
+  });
+}
+
 export async function signOutUser(supabase) {
   if (!supabase) return { error: new Error("Supabase auth client is not available."), data: null };
   return supabase.auth.signOut();

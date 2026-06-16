@@ -405,14 +405,18 @@ async function saveTelegramToken(body, authContext) {
       botInfo = await tgClient.getMe();
     } catch {
       if (scopedRepos?.telegramConnections) {
-        await scopedRepos.telegramConnections.createOrUpdate({
-          userId,
-          tenantId,
-          telegramUserId: "unknown",
-          botToken: token,
-          botUsername: null,
-          status: "token_invalid",
-        });
+        try {
+          await scopedRepos.telegramConnections.createOrUpdate({
+            userId,
+            tenantId,
+            telegramUserId: "unknown",
+            botToken: token,
+            botUsername: null,
+            status: "token_invalid",
+          });
+        } catch {
+          // swallow — best-effort record of invalid token
+        }
       }
       throw new AppError("Token validation failed", 400);
     }

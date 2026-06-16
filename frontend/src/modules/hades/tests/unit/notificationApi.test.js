@@ -4,7 +4,7 @@ import { describe, it } from "node:test";
 
 describe("notification API functions", () => {
   test("getNotifications is exported as a function", async () => {
-    const mod = await import("../../hadesApi.js");
+    const mod = await import("../../services/hadesApi.js");
     assert.equal(typeof mod.getNotifications, "function");
   });
 
@@ -23,14 +23,14 @@ describe("notification API functions", () => {
       };
     };
 
-    const mod = await import("../../hadesApi.js");
+    const mod = await import("../../services/hadesApi.js");
     const result = await mod.getNotifications();
     assert.equal(result.length, 2);
     assert.equal(result[0].title, "Test");
   });
 
   test("markNotificationRead is exported as a function", async () => {
-    const mod = await import("../../hadesApi.js");
+    const mod = await import("../../services/hadesApi.js");
     assert.equal(typeof mod.markNotificationRead, "function");
   });
 
@@ -47,13 +47,13 @@ describe("notification API functions", () => {
       };
     };
 
-    const mod = await import("../../hadesApi.js");
+    const mod = await import("../../services/hadesApi.js");
     const result = await mod.markNotificationRead("n1");
     assert.equal(result.read, true);
   });
 
   test("markAllNotificationsRead is exported as a function", async () => {
-    const mod = await import("../../hadesApi.js");
+    const mod = await import("../../services/hadesApi.js");
     assert.equal(typeof mod.markAllNotificationsRead, "function");
   });
 
@@ -70,7 +70,7 @@ describe("notification API functions", () => {
       };
     };
 
-    const mod = await import("../../hadesApi.js");
+    const mod = await import("../../services/hadesApi.js");
     const result = await mod.markAllNotificationsRead();
     assert.equal(result.success, true);
   });

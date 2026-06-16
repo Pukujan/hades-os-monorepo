@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getEmojiForMinion, getPreviewForMinion, getRecentLogsForMinion, MOCK_CONNECTED_DESTINATIONS } from "./minionPreviewData.js";
+import { getEmojiForMinion } from "../utils/minionPreviewData.js";
 
 function ActiveSwitch({ minion, onActivate, onDeactivate }) {
   const isOn = minion.slotIndex != null;
@@ -21,10 +21,7 @@ export function MinionDetailScreen({ minions, onActivate, onDeactivate }) {
   const { id } = useParams();
   const navigate = useNavigate();
   const minion = minions.find((m) => m.id === id) || minions[0];
-  const preview = getPreviewForMinion(minion.id);
-  const logs = getRecentLogsForMinion(minion.id, 6);
   const [openTech, setOpenTech] = React.useState(false);
-  const [openFollowUp, setOpenFollowUp] = React.useState(false);
   const [openTestModal, setOpenTestModal] = React.useState(false);
 
   if (!minion) {
@@ -72,44 +69,6 @@ export function MinionDetailScreen({ minions, onActivate, onDeactivate }) {
           </div>
         )}
 
-        {isManual && preview ? (
-          <div className="card">
-            <div className="section-head" style={{ marginTop: 0 }}><h2>Summon Preview</h2></div>
-            <div className="preview-label">Example input</div>
-            <div className="preview-input">{preview.exampleInput}</div>
-            <div className="preview-output">
-              <div className="hermes-output-head">
-                <strong>Hermes output</strong>
-                <span className="cache-chip">cached from current version</span>
-              </div>
-              <div className="output-artifact">{minion.id === "cat" ? "\u2696\uFE0F \uD83D\uDC31 \u00A7" : "\u2728"}</div>
-              <div className="output-copy">{preview.outputText}</div>
-            </div>
-
-            {preview.followUp ? (
-              <details className="details" open={openFollowUp} onToggle={(e) => setOpenFollowUp(e.target.open)}>
-                <summary>Follow-up preview</summary>
-                <div className="details-body">
-                  <div className="preview-label">Follow-up input</div>
-                  <div className="chat-bubble">{preview.followUp.input}</div>
-                  <div className="preview-label">Hermes output</div>
-                  <div className="chat-bubble hades">{preview.followUp.output}</div>
-                </div>
-              </details>
-            ) : null}
-          </div>
-        ) : null}
-
-        {!isManual && preview ? (
-          <div className="card">
-            <div className="section-head" style={{ marginTop: 0 }}><h2>Cached Hermes output</h2></div>
-            <div className="auto-output-card">
-              <strong>Example auto run</strong>
-              <div className="output-copy">{preview.outputText}</div>
-            </div>
-          </div>
-        ) : null}
-
         <div className="card">
           <div className="section-head" style={{ marginTop: 0 }}><h2>Minion Control</h2></div>
           <div className="action-grid">
@@ -127,15 +86,9 @@ export function MinionDetailScreen({ minions, onActivate, onDeactivate }) {
         </div>
 
         <div className="card">
-          <div className="section-head" style={{ marginTop: 0 }}><h2>Activity snapshot</h2><span className="tiny">Recent {logs.length}</span></div>
+          <div className="section-head" style={{ marginTop: 0 }}><h2>Activity snapshot</h2></div>
           <div className="activity" id="activityList">
-            {logs.map((l) => (
-              <div key={l.id} className="log-mini" onClick={() => navigate(`/app/minions/${minion.id}/logs`)}>
-                <strong>{l.runType} · {l.destinationLabel}</strong>
-                <p>{l.friendlyTime}</p>
-              </div>
-            ))}
-            {!logs.length ? <p className="task" style={{ margin: 0 }}>No recent activity.</p> : null}
+            <p className="task" style={{ margin: 0 }}>No recent activity.</p>
           </div>
         </div>
 
@@ -164,16 +117,9 @@ export function MinionDetailScreen({ minions, onActivate, onDeactivate }) {
             </div>
             <div className="chat-bubble">{minion.exampleInput || minion.command}</div>
             <div className="chat-bubble hades">
-              {preview?.outputText || "Here. A test run. The result awaits your judgment."}
+              Here. A test run. The result awaits your judgment.
             </div>
             <div className="chat-bubble hades">Send this test somewhere private?</div>
-            <div className="destinations">
-              {MOCK_CONNECTED_DESTINATIONS.filter((d) => d.connected).map((d) => (
-                <button key={d.provider} className="dest" type="button" onClick={() => { setOpenTestModal(false); }}>
-                  <span>{d.icon}</span>{d.label}
-                </button>
-              ))}
-            </div>
           </div>
         </div>
       ) : null}
