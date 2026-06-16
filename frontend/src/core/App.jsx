@@ -2,7 +2,7 @@ import React from "react";
 import { AuthProvider, useAuth } from "../auth/AuthProvider.jsx";
 import { LoginPage } from "../auth/LoginPage.jsx";
 
-const HADES_APP_PATH = "../modules/hades/pages/HadesPrototypeApp.jsx";
+const HadesPrototypeApp = React.lazy(() => import("../modules/hades/pages/HadesPrototypeApp"));
 
 function AuthSwitch() {
   const { loading, session } = useAuth();
@@ -14,22 +14,14 @@ function AuthSwitch() {
 
   if (session) {
     if (authView !== "signin") setAuthView("signin");
-    return <HadesAppShell />;
+    return (
+      <React.Suspense fallback={null}>
+        <HadesPrototypeApp />
+      </React.Suspense>
+    );
   }
 
   return <LoginPage view={authView} onNavigate={setAuthView} />;
-}
-
-function HadesAppShell() {
-  const [Component, setComponent] = React.useState(null);
-
-  React.useEffect(() => {
-    import(HADES_APP_PATH).then((m) => {
-      setComponent(() => m.HadesPrototypeApp);
-    });
-  }, []);
-
-  return Component ? <Component /> : null;
 }
 
 export function App() {

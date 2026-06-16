@@ -43,10 +43,26 @@ export async function createTelegramClient({ botToken, api } = {}) {
     return result.result === true;
   }
 
+  async function getUpdates({ offset, timeout, limit, allowedUpdates } = {}) {
+    const body = {};
+    if (offset != null) body.offset = offset;
+    if (timeout != null) body.timeout = timeout;
+    if (limit != null) body.limit = limit;
+    if (allowedUpdates != null) body.allowed_updates = allowedUpdates;
+
+    const result = await httpClient.post("getUpdates", body);
+    if (!result.ok) {
+      throw new Error(
+        `Telegram API error: ${result.error_code} ${result.description}`
+      );
+    }
+    return result.result || [];
+  }
+
   async function getMe() {
     const result = await httpClient.post("getMe", {});
     return result.result || result;
   }
 
-  return { sendMessage, setWebhook, getMe };
+  return { sendMessage, setWebhook, getUpdates, getMe };
 }

@@ -156,3 +156,27 @@ test("signInWithTelegram returns error when no client", async () => {
   assert.ok(result.error);
   assert.match(result.error.message, /Supabase/);
 });
+
+test("forgotPassword calls supabase.auth.resetPasswordForEmail with redirectTo", async () => {
+  const { forgotPassword } = await import("./authClient.js");
+  let resetArgs = null;
+  const supabase = {
+    auth: {
+      resetPasswordForEmail: async (email, options) => {
+        resetArgs = { email, options };
+        return { data: {}, error: null };
+      }
+    }
+  };
+  const result = await forgotPassword(supabase, "user@test.com", { redirectTo: "https://hades.example.com/reset-password" });
+  assert.equal(result.error, null);
+  assert.equal(resetArgs.email, "user@test.com");
+  assert.equal(resetArgs.options.redirectTo, "https://hades.example.com/reset-password");
+});
+
+test("forgotPassword returns error when no client", async () => {
+  const { forgotPassword } = await import("./authClient.js");
+  const result = await forgotPassword(null, "user@test.com");
+  assert.ok(result.error);
+  assert.match(result.error.message, /Supabase/);
+});

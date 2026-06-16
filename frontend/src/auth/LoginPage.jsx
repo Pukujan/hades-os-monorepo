@@ -1,6 +1,6 @@
 import React from "react";
 import { useAuth } from "./AuthProvider.jsx";
-import { signInWithEmail, signUpWithEmail, signInWithDiscord, signInWithGoogle, signInWithApple, signInWithTelegram } from "./authClient.js";
+import { signInWithEmail, signUpWithEmail, signInWithDiscord, signInWithGoogle, signInWithApple, signInWithTelegram, forgotPassword } from "./authClient.js";
 import { extractLoginTemplateParts } from "./loginTemplateParts.js";
 import loginTemplate from "./loginTemplate.html?raw";
 import "../styles/login.css";
@@ -193,7 +193,7 @@ export function LoginPage({ view = "signin", onNavigate }) {
         window.alert("Enter your email first.");
         return;
       }
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      const { error } = await forgotPassword(supabase, email, {
         redirectTo: window.location.origin
       });
       if (error) window.alert(error.message);

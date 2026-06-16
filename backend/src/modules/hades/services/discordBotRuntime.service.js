@@ -1,3 +1,5 @@
+import { parseHadesCommand } from "./hadesCommandParser.js";
+
 function ensureFunction(fn, label) {
   if (typeof fn !== "function") {
     throw new Error(`${label} is not configured`);
@@ -14,6 +16,7 @@ function normalizeCommandName(content = "") {
 
 function buildHermesRequest({ session, discordAccountId, channelId, messageId, content }) {
   const commandName = normalizeCommandName(content);
+  const parsedCommand = parseHadesCommand(content);
   return {
     context: {
       userId: session.userId,
@@ -21,13 +24,15 @@ function buildHermesRequest({ session, discordAccountId, channelId, messageId, c
       provider: "discord",
       discordAccountId,
       channelId,
-      messageId
+      messageId,
+      ...(parsedCommand && { hadesParsedCommand: parsedCommand })
     },
     input: {
       content,
       messageId,
       channelId,
-      commandName
+      commandName,
+      ...(parsedCommand && { parsedCommand })
     },
     responseSchema: {
       type: "object",

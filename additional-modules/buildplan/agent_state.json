@@ -4,7 +4,7 @@
   "task": "Reorganize hades module files into reference folder structure (pages, components, services, utils, hooks, schemas, prompts)",
   "state": {
     "hadesFrontendRefactor": {
-      "status": "All files reorganized into pages/, components/, services/, utils/, hooks/, schemas/, prompts/. Tests moved to tests/unit/. Duplicate hadesViewModel.test.js renamed to hadesViewModel.logic.test.js. hadesRoutes.js renamed to index.jsx. All imports updated (source files, test files, core/App.jsx). module.json test globs updated. 176/176 frontend tests pass.",
+      "status": "All files reorganized into pages/, components/, services/, utils/, hooks/, schemas/, prompts/. Tests moved to tests/unit/. Duplicate hadesViewModel.test.js renamed to hadesViewModel.logic.test.js. hadesRoutes.js renamed to index.jsx. All imports updated (source files, test files, core/App.jsx). module.json test globs updated. 225/225 frontend tests pass (npm test). Fixed .jsx ESM loader issue: created test-hooks/jsx-loader.mjs + register.mjs using esbuild transform. Updated package.json to use --import register.mjs.",
       "gitMvExecuted": true,
       "directoriesCreated": ["pages", "components", "services", "utils", "hooks", "schemas", "prompts"],
       "testGlobsUpdated": true,
@@ -13,7 +13,7 @@
         "testFiles": true,
         "coreAppJsx": true
       },
-      "testCount": "176/176 pass",
+      "testCount": "225/225 pass (npm test), 176/176 pass (glob)",
       "filesMoved": [
         "ChatBubble.js -> components/ChatBubble.js",
         "ChatInput.jsx -> components/ChatInput.jsx",

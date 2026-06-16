@@ -137,4 +137,59 @@ describe("Telegram client", () => {
     assert.equal(requests[0].body.url, "https://hades.example.com/api/hades/triggers/telegram");
     assert.equal(result, true);
   });
+
+  test("getUpdates fetches pending updates with optional offset and timeout", async () => {
+    const { createTelegramClient } = await loadTelegramClient();
+
+    const requests = [];
+    const client = await createTelegramClient({
+      botToken: "test-telegram-token",
+      api: {
+        post: async (url, body) => {
+          requests.push({ url, body });
+          return { ok: true, result: [{ update_id: 1, message: { text: "hello" } }] };
+        },
+      },
+    });
+
+    const updates = await client.getUpdates({ offset: 0, timeout: 30, limit: 10 });
+
+    assert.equal(requests.length, 1);
+    assert.ok(requests[0].url.includes("getUpdates"), "URL should hit getUpdates endpoint");
+    assert.equal(requests[0].body.offset, 0);
+    assert.equal(requests[0].body.timeout, 30);
+    assert.equal(requests[0].body.limit, 10);
+    assert.equal(updates.length, 1);
+    assert.equal(updates[0].update_id, 1);
+  });
+
+  test("getUpdates returns empty array when no updates", async () => {
+    const { createTelegramClient } = await loadTelegramClient();
+
+    const client = await createTelegramClient({
+      botToken: "test-telegram-token",
+      api: {
+        post: async () => ({ ok: true, result: [] }),
+      },
+    });
+
+    const updates = await client.getUpdates();
+    assert.deepEqual(updates, []);
+  });
+
+  test("getUpdates rejects on Telegram API error", async () => {
+    const { createTelegramClient } = await loadTelegramClient();
+
+    const client = await createTelegramClient({
+      botToken: "test-telegram-token",
+      api: {
+        post: async () => ({ ok: false, error_code: 409, description: "Conflict: webhook is active" }),
+      },
+    });
+
+    await assert.rejects(
+      () => client.getUpdates(),
+      /409|conflict|webhook|telegram/i
+    );
+  });
 });

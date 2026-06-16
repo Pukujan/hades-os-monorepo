@@ -1,6 +1,6 @@
 import React from "react";
 import { THEME_CHOICES } from "../../modules/hades/hadesData.js";
-import { useHades } from "../../modules/hades/HadesPrototypeApp.jsx";
+import { useHades } from "../../modules/hades/pages/HadesPrototypeApp.jsx";
 
 function AppIcon({ name, className = "", size = 18, strokeWidth = 2.2, title }) {
   return <span className={className}>{name}</span>;

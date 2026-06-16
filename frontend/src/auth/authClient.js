@@ -46,6 +46,12 @@ export async function signInWithTelegram(supabase, location) {
   });
 }
 
+export async function forgotPassword(supabase, email, options = {}) {
+  if (!supabase) return clientError();
+  const redirectTo = options.redirectTo || (typeof window !== "undefined" ? `${window.location.origin}/reset-password` : "/reset-password");
+  return supabase.auth.resetPasswordForEmail(email, { redirectTo });
+}
+
 export async function signOutUser(supabase) {
   if (!supabase) return { error: new Error("Supabase auth client is not available."), data: null };
   return supabase.auth.signOut();
