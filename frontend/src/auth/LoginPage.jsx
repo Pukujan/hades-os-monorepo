@@ -1,6 +1,6 @@
 import React from "react";
 import { useAuth } from "./AuthProvider.jsx";
-import { signInWithEmail, signUpWithEmail, signInWithDiscord, signInWithGoogle, signInWithApple, signInWithTelegram, forgotPassword, needsEmailConfirmation } from "./authClient.js";
+import { signInWithEmail, signUpWithEmail, signInWithDiscord, signInWithGoogle, signInWithApple, forgotPassword, needsEmailConfirmation } from "./authClient.js";
 import { extractLoginTemplateParts } from "./loginTemplateParts.js";
 import { showInlineError, showConfirmationMessage, showSuccessMessage } from "./loginHelpers.js";
 import loginTemplate from "./loginTemplate.html?raw";
@@ -99,7 +99,6 @@ export function LoginPage({ view = "signin", onNavigate }) {
     const cta = root.querySelector(".cta");
     const links = root.querySelectorAll(".links a");
     const discordButton = root.querySelector(".social.discord");
-    const telegramButton = root.querySelector(".social.telegram");
     const googleButton = root.querySelector(".social.google");
     const appleButton = root.querySelector(".social.apple");
 
@@ -135,15 +134,6 @@ export function LoginPage({ view = "signin", onNavigate }) {
         return;
       }
       const { error } = await signInWithGoogle(supabase);
-      if (error) showInlineError(root, panelWrap, error.message);
-    };
-
-    const handleTelegramSignIn = async () => {
-      if (!supabase) {
-        showInlineError(root, panelWrap, "Supabase auth is not configured yet.");
-        return;
-      }
-      const { error } = await signInWithTelegram(supabase);
       if (error) showInlineError(root, panelWrap, error.message);
     };
 
@@ -278,7 +268,6 @@ export function LoginPage({ view = "signin", onNavigate }) {
     options.forEach((option) => option.addEventListener("click", () => setThemeChoice(option.dataset.themeChoice || "ember"), { signal: controller.signal }));
     cta?.addEventListener("click", handleCTA, { signal: controller.signal });
     discordButton?.addEventListener("click", handleDiscordSignIn, { signal: controller.signal });
-    telegramButton?.addEventListener("click", handleTelegramSignIn, { signal: controller.signal });
     googleButton?.addEventListener("click", handleGoogleSignIn, { signal: controller.signal });
     appleButton?.addEventListener("click", handleAppleSignIn, { signal: controller.signal });
     links.forEach((link, i) => link.addEventListener("click", handleLinkClick(i), { signal: controller.signal }));

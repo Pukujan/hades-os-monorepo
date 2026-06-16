@@ -48,10 +48,6 @@ describe("LoginPage.jsx — OAuth handlers use showInlineError", () => {
     assert.match(source, /handleGoogleSignIn[\s\S]*?if\s*\(error\)\s*showInlineError\(/);
   });
 
-  it("handleTelegramSignIn shows inline error instead of window.alert", () => {
-    assert.match(source, /handleTelegramSignIn[\s\S]*?if\s*\(error\)\s*showInlineError\(/);
-  });
-
   it("handleAppleSignIn shows inline error instead of window.alert", () => {
     assert.match(source, /handleAppleSignIn[\s\S]*?if\s*\(error\)\s*showInlineError\(/);
   });

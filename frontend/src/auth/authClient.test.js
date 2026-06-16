@@ -149,22 +149,6 @@ test("signInWithApple returns friendly error when provider not enabled", async (
   assert.match(result.error.message, /not available/i);
 });
 
-test("signInWithTelegram returns friendly error when provider not enabled", async () => {
-  const { signInWithTelegram } = await import("./authClient.js");
-  const supabase = {
-    auth: {
-      signInWithOAuth: async () => ({
-        data: null,
-        error: new Error("Unsupported provider: provider is not enabled")
-      })
-    }
-  };
-  const result = await signInWithTelegram(supabase);
-  assert.ok(result.error);
-  assert.doesNotMatch(result.error.message, /provider is not enabled/i);
-  assert.match(result.error.message, /not available/i);
-});
-
 test("signOutUser calls supabase.auth.signOut", async () => {
   const { signOutUser } = await import("./authClient.js");
   const supabase = mockSupabase();
@@ -233,23 +217,6 @@ test("signInWithApple calls supabase.auth.signInWithOAuth with apple provider", 
 test("signInWithApple returns error when no client", async () => {
   const { signInWithApple } = await import("./authClient.js");
   const result = await signInWithApple(null);
-  assert.ok(result.error);
-  assert.match(result.error.message, /Supabase/);
-});
-
-test("signInWithTelegram calls supabase.auth.signInWithOAuth with telegram provider", async () => {
-  const { signInWithTelegram } = await import("./authClient.js");
-  const supabase = mockSupabase();
-  const loc = makeLocation();
-  const result = await signInWithTelegram(supabase, loc);
-  assert.equal(result.data.provider, "telegram");
-  assert.equal(result.error, null);
-  assert.equal(result.data.url, "https://hades.example.com/app");
-});
-
-test("signInWithTelegram returns error when no client", async () => {
-  const { signInWithTelegram } = await import("./authClient.js");
-  const result = await signInWithTelegram(null);
   assert.ok(result.error);
   assert.match(result.error.message, /Supabase/);
 });
