@@ -153,6 +153,32 @@ test("Hermes runtime wraps timeout/exec errors with stderr", async () => {
   );
 });
 
+test("generateCommandResult bridges input/content to generateDraft and returns assistantText", async () => {
+  const calls = [];
+  const runtime = createHermesRuntimeService({
+    hermesBin: "/fake/hermes",
+    runCommand: async (bin, args, options) => {
+      calls.push({ bin, args });
+      return JSON.stringify({
+        assistantText: "Here is the result.",
+        suggestions: ["try !hades status"],
+        sessionId: "sess-1",
+      });
+    }
+  });
+
+  const result = await runtime.generateCommandResult({
+    input: { content: "!hades do something" },
+    context: { userId: "u1", tenantId: "t1", provider: "telegram", chatId: "-100123", messageId: 42 },
+  });
+
+  assert.equal(result.assistantText, "Here is the result.");
+  assert.deepEqual(result.outboundActions, []);
+  assert.equal(result.sessionId, "sess-1");
+  assert.equal(calls.length, 1);
+  assert.ok(calls[0].args.some(a => a.includes("!hades do something")));
+});
+
 test("Hermes runtime wrapper rejects non-JSON output and old context/provider blockers", async () => {
   const invalidRuntime = createHermesRuntimeService({
     hermesBin: "/fake/hermes",

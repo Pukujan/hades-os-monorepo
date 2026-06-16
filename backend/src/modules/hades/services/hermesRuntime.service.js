@@ -252,5 +252,20 @@ export function createHermesRuntimeService({
     }
   }
 
-  return { generateDraft };
+  async function generateCommandResult({ input, context } = {}) {
+    const draftResult = await generateDraft({
+      userId: context?.userId,
+      conversationId: context?.chatId || context?.messageId,
+      message: input?.content || "",
+      context: "forge",
+    });
+
+    return {
+      assistantText: draftResult.assistantText || "",
+      outboundActions: [],
+      sessionId: draftResult.sessionId,
+    };
+  }
+
+  return { generateDraft, generateCommandResult };
 }
