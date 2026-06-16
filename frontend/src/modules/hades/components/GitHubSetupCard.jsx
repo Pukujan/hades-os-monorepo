@@ -36,7 +36,7 @@ export function GitHubSetupCard({ connection, onSaveToken }) {
 
   if (status === "connected") {
     return (
-      <article className="permission" data-testid="github-card">
+      <article className="permission github-card" data-testid="github-card">
         <div className="social-main">
           <div className="avatar">{"\uD83D\uDC17"}</div>
           <div className="social-copy">
@@ -45,6 +45,16 @@ export function GitHubSetupCard({ connection, onSaveToken }) {
               Connected as {username || "GitHub User"} {scope ? `\u00B7 scope: ${scope}` : ""}
             </p>
           </div>
+        </div>
+        <div className="social-actions" data-testid="github-connected-actions">
+          <button
+            type="button"
+            className="secondary"
+            data-testid="github-connected-btn"
+            onClick={handleOpenTokenSettings}
+          >
+            Manage repository access
+          </button>
         </div>
       </article>
     );

@@ -73,4 +73,33 @@ describe("DiscordSetupCard rendering", () => {
     );
     assert.ok(!html.includes("Open Discord Developer Portal"));
   });
+
+  test("connected state has discord-card class on article", () => {
+    const html = renderToString(
+      React.createElement(DiscordSetupCard, {
+        connection: {
+          status: "connected",
+          botUsername: "HadesBot#1234",
+          tokenLast4: "abcd"
+        },
+        onSaveToken: async () => ({})
+      })
+    );
+    assert.ok(html.includes('class="permission discord-card"'));
+  });
+
+  test("connected state shows social-actions with call to action", () => {
+    const html = renderToString(
+      React.createElement(DiscordSetupCard, {
+        connection: {
+          status: "connected",
+          botUsername: "HadesBot#1234",
+          tokenLast4: "abcd"
+        },
+        onSaveToken: async () => ({})
+      })
+    );
+    assert.ok(html.includes('data-testid="discord-connected-actions"'));
+    assert.ok(html.includes("Configure server setup"));
+  });
 });

@@ -444,9 +444,18 @@ async function saveTelegramToken(body, authContext) {
     return { status: "connected", botUsername: botInfo.username || null, token_last4: last4(token) };
   }
 
+  const processedUpdates = new Set();
+
   async function handleTelegramWebhook({ update, userId, tenantId } = {}) {
     if (!scopedRepos?.telegramConnections) {
       throw new AppError("Telegram connections repository not available", 501);
+    }
+
+    if (update?.update_id != null) {
+      if (processedUpdates.has(update.update_id)) {
+        return { status: "duplicate_ignored", reason: "update_id_already_processed" };
+      }
+      processedUpdates.add(update.update_id);
     }
 
     const connection = await scopedRepos.telegramConnections.findPublicByUser({ userId, tenantId });
@@ -461,7 +470,9 @@ async function saveTelegramToken(body, authContext) {
       return { status: "ignored", reason: "no_token" };
     }
 
-    const tgClient = await createTelegramClient({ botToken: tokenResult.botToken });
+    const tgClient = telegramClientFactory
+      ? await telegramClientFactory(tokenResult.botToken)
+      : await createTelegramClient({ botToken: tokenResult.botToken });
     const resolveTelegramIdentity = async () => ({ userId, tenantId });
 
     const runtime = createTelegramBotRuntime({

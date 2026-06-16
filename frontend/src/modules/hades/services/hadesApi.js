@@ -67,6 +67,10 @@ export async function deleteHadesMessages(conversationId, accessToken) {
   return apiDelete(`/api/hades/conversations/${conversationId}/messages`, null, { accessToken });
 }
 
+export async function getSocialConnections(accessToken) {
+  return apiGet("/api/hades/socials", { accessToken });
+}
+
 export async function saveTelegramToken({ token }, accessToken) {
   return apiPost("/api/hades/socials/telegram/token", { token }, { accessToken });
 }

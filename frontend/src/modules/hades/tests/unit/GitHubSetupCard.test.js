@@ -73,4 +73,33 @@ describe("GitHubSetupCard rendering", () => {
     );
     assert.ok(!html.includes("Open GitHub token settings"));
   });
+
+  test("connected state has github-card class on article", () => {
+    const html = renderToString(
+      React.createElement(GitHubSetupCard, {
+        connection: {
+          status: "connected",
+          username: "hades-operator",
+          scope: "repo"
+        },
+        onSaveToken: async () => ({})
+      })
+    );
+    assert.ok(html.includes('class="permission github-card"'));
+  });
+
+  test("connected state shows social-actions with call to action", () => {
+    const html = renderToString(
+      React.createElement(GitHubSetupCard, {
+        connection: {
+          status: "connected",
+          username: "hades-operator",
+          scope: "repo"
+        },
+        onSaveToken: async () => ({})
+      })
+    );
+    assert.ok(html.includes('data-testid="github-connected-actions"'));
+    assert.ok(html.includes("Manage repository access"));
+  });
 });

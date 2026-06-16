@@ -36,7 +36,7 @@ export function DiscordSetupCard({ connection, onSaveToken }) {
 
   if (status === "connected") {
     return (
-      <article className="permission" data-testid="discord-card">
+      <article className="permission discord-card" data-testid="discord-card">
         <div className="social-main">
           <div className="avatar">{"\uD83D\uDCAC"}</div>
           <div className="social-copy">
@@ -45,6 +45,16 @@ export function DiscordSetupCard({ connection, onSaveToken }) {
               {botUsername ? `Connected to ${botUsername}` : "Connected"} {tokenLast4 ? `\u00B7 ${tokenLast4}` : ""}
             </p>
           </div>
+        </div>
+        <div className="social-actions" data-testid="discord-connected-actions">
+          <button
+            type="button"
+            className="secondary"
+            data-testid="discord-connected-btn"
+            onClick={handleOpenDevPortal}
+          >
+            Configure server setup
+          </button>
         </div>
       </article>
     );

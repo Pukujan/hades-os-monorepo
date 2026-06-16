@@ -26,7 +26,7 @@ import {
   formatSocialLabel,
   getSocialIcon
 } from "../utils/hadesData.js";
-import { saveTelegramToken, saveDiscordToken, saveGitHubToken } from "../services/hadesApi.js";
+import { saveTelegramToken, saveDiscordToken, saveGitHubToken, getSocialConnections } from "../services/hadesApi.js";
 import { getPendingCopy } from "../utils/chatPendingCopy.js";
 import { TelegramSetupCard } from "../components/TelegramSetupCard.jsx";
 import { DiscordSetupCard } from "../components/DiscordSetupCard.jsx";
@@ -1529,6 +1529,29 @@ function SocialsScreen() {
   const [telegramConnection, setTelegramConnection] = React.useState({
     status: SOCIAL_LINKS.find((s) => s.provider === "telegram")?.status || "disconnected"
   });
+
+  React.useEffect(() => {
+    if (!session?.access_token) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const socials = await getSocialConnections(session.access_token);
+        if (cancelled || !Array.isArray(socials)) return;
+        for (const s of socials) {
+          if (s.provider === "telegram") {
+            setTelegramConnection({ ...s, status: s.status || "connected" });
+          } else if (s.provider === "discord") {
+            setDiscordConnection({ ...s, status: s.status || "connected" });
+          } else if (s.provider === "github") {
+            setGithubConnection({ ...s, status: s.status || "connected" });
+          }
+        }
+      } catch {
+        // best-effort — default state stays
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [session?.access_token]);
 
   async function handleSaveTelegramToken({ token }) {
     const result = await saveTelegramToken({ token }, session?.access_token);
