@@ -893,6 +893,7 @@ function AppShell() {
                 </button>
               </div>
             </div>
+            {false && (
             <section className="status">
               <div>
                 <h2>{lvl.title}</h2>
@@ -905,6 +906,7 @@ function AppShell() {
                 <i style={{ width: `${Math.min(100, 38 + lvl.level * 18)}%` }} />
               </div>
             </section>
+            )}
           </header>
 
           <section className="content">
@@ -1419,6 +1421,8 @@ function MinionsScreen() {
     <>
       <ScreenHead title="Minions" subtitle="Speak to Hades, then inspect your minions and slots." />
       <div className="scroll">
+        {false && (
+        <>
         <div className="card row">
           <div>
             <h2 className="title">Your lesser court</h2>
@@ -1429,6 +1433,8 @@ function MinionsScreen() {
 
         <div className="section-head"><h2>Minion Slots</h2><span className="tiny">{activeCount} / 4 active</span></div>
         <MinionSlots minions={minions} />
+        </>
+        )}
 
         <div className="card">
           <div className="row">
