@@ -14,6 +14,7 @@
 | POST | `/api/hades/minions` | hades | Save a new minion |
 | POST | `/api/hades/assignments` | hades | Assign a minion to a social channel |
 | POST | `/api/hades/triggers` | hades | Handle an incoming social trigger (Discord, Telegram) |
+| POST | `/api/hades/triggers/telegram/:userId` | hades | Incoming Telegram webhook (called by Telegram servers, no auth) |
 | GET | `/api/hades/conversations/:id/messages` | hades | List messages in a conversation |
 | DELETE | `/api/hades/conversations/:id/messages` | hades | Clear all messages from a conversation |
 | GET | `/api/hades/socials` | hades | List user's social connections (Discord, Telegram) without tokens |

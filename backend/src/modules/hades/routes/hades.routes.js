@@ -114,6 +114,21 @@ export function createHadesRoutes({ service, requireHadesAuth, config, scopedRep
   );
 
   router.post(
+    "/triggers/telegram/:userId",
+    asyncRoute(async (req, res) => {
+      try {
+        const { userId } = req.params;
+        const tenantId = req.query.tenantId || userId;
+        const result = await service.handleTelegramWebhook({ update: req.body, userId, tenantId });
+        res.status(200).json(result);
+      } catch (err) {
+        const status = err.status || 400;
+        res.status(status).json({ code: err.code || "error", error: err.message });
+      }
+    })
+  );
+
+  router.post(
     "/triggers",
     asyncRoute(async (req, res) => {
       try {

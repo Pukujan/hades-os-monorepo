@@ -13,6 +13,7 @@
 | POST | `/minions` | Save a new minion |
 | POST | `/assignments` | Assign a minion to a social channel |
 | POST | `/triggers` | Handle an incoming social trigger (Discord, Telegram, etc.) |
+| POST | `/triggers/telegram/:userId` | Incoming Telegram webhook (called by Telegram servers, no auth) |
 | GET | `/conversations/:id/messages` | List messages in a conversation |
 | DELETE | `/conversations/:id/messages` | Clear all messages from a conversation |
 | GET | `/socials` | List user's social connections (Discord, Telegram) without tokens |

@@ -3,6 +3,8 @@ import { AppError } from "../../../shared/http/errors.js";
 import { buildTestOutput, createDraftFromMessage } from "../parser.js";
 import { createEmptyDraft, formatSocialLabel, getSocialById, missingDraftFields } from "../data.js";
 import { validateAssignmentRequest, validateChatRequest, validateSaveRequest, validateTestRequest } from "../validators.js";
+import { createTelegramClient } from "./telegramClient.js";
+import { createTelegramBotRuntime } from "./telegramBotRuntime.service.js";
 
 function createMessage(role, content, extra = {}) {
   return {
@@ -18,7 +20,7 @@ function createMessage(role, content, extra = {}) {
   };
 }
 
-export function createHadesService({ repository, scopedRepos, hermes, config = {}, minionAssignmentRuntime, context, telegramClientFactory, minionLogsRepo, notificationsRepo } = {}) {
+export function createHadesService({ repository, scopedRepos, hermes, config = {}, minionAssignmentRuntime, context, telegramClientFactory, minionLogsRepo, notificationsRepo, hermesRuntime, telegramWebhookBaseUrl } = {}) {
   function resolveUserId(authContext) {
     if (authContext?.userId) return authContext.userId;
     if (process.env.NODE_ENV !== "production") {
@@ -396,8 +398,7 @@ async function saveTelegramToken(body, authContext) {
     if (telegramClientFactory) {
       tgClient = await telegramClientFactory(token);
     } else {
-      const tgModule = await import("./telegramClient.js");
-      tgClient = await tgModule.createTelegramClient({ botToken: token });
+      tgClient = await createTelegramClient({ botToken: token });
     }
 
     let botInfo;
@@ -432,7 +433,48 @@ async function saveTelegramToken(body, authContext) {
       });
     }
 
+    if (telegramWebhookBaseUrl) {
+      try {
+        await tgClient.setWebhook({ url: `${telegramWebhookBaseUrl}/api/hades/triggers/telegram/${userId}` });
+      } catch (webhookErr) {
+        console.error(`Failed to register Telegram webhook for user ${userId}:`, webhookErr.message);
+      }
+    }
+
     return { status: "connected", botUsername: botInfo.username || null, token_last4: last4(token) };
+  }
+
+  async function handleTelegramWebhook({ update, userId, tenantId } = {}) {
+    if (!scopedRepos?.telegramConnections) {
+      throw new AppError("Telegram connections repository not available", 501);
+    }
+
+    const connection = await scopedRepos.telegramConnections.findPublicByUser({ userId, tenantId });
+    if (!connection) {
+      return { status: "ignored", reason: "no_connection" };
+    }
+
+    const tokenResult = await scopedRepos.telegramConnections.findRuntimeTokenByTelegramUserId({
+      telegramUserId: connection.telegram_user_id,
+    });
+    if (!tokenResult?.botToken) {
+      return { status: "ignored", reason: "no_token" };
+    }
+
+    const tgClient = await createTelegramClient({ botToken: tokenResult.botToken });
+    const resolveTelegramIdentity = async () => ({ userId, tenantId });
+
+    const runtime = createTelegramBotRuntime({
+      telegramClient: tgClient,
+      resolveTelegramIdentity,
+      hermesRuntime,
+      botTokenProvider: null,
+      repository: scopedRepos?.executions
+        ? { saveAgentExecution: ({ execution }) => scopedRepos.executions.create({ userId, tenantId, data: execution }) }
+        : null,
+    });
+
+    return runtime.handleTelegramUpdate({ update });
   }
 
   async function listMinions(authContext) {
@@ -508,6 +550,7 @@ async function saveTelegramToken(body, authContext) {
     clearMessages,
     listSocialConnections,
     saveTelegramToken,
+    handleTelegramWebhook,
     handleTrigger,
     listMinions,
     getMinion,

@@ -8,7 +8,6 @@ import { getHadesConfig } from "./config/index.js";
 import { createDiscordHermesCommandFlow } from "./services/discordHermesCommandFlow.service.js";
 import { createMinionAssignmentRuntime } from "./services/minionAssignmentRuntime.service.js";
 import { createGiphyProvider } from "./services/giphyProvider.service.js";
-import { createTelegramClient } from "./services/telegramClient.js";
 import { createBotTokenProvider } from "./services/botTokenProvider.js";
 import { requireHadesAuth } from "../auth/services/authMiddleware.js";
 import { createMinionRepository } from "./repositories/minionRepository.js";
@@ -54,12 +53,7 @@ export async function register(app, context) {
     giphyProvider = config.giphyApiKey ? createGiphyProvider({ apiKey: config.giphyApiKey }) : null;
   } catch { giphyProvider = null; }
 
-  let telegramClient = null;
-  try {
-    telegramClient = config.telegramBotToken
-      ? await createTelegramClient({ botToken: config.telegramBotToken })
-      : null;
-  } catch { telegramClient = null; }
+  const telegramWebhookBaseUrl = process.env.TELEGRAM_WEBHOOK_BASE_URL || null;
 
   const botTokenProvider = createBotTokenProvider({
     findSocialConnection: async () => null,
@@ -108,6 +102,8 @@ export async function register(app, context) {
     minionAssignmentRuntime,
     context,
     telegramClientFactory: overrides.telegramClientFactory || null,
+    hermesRuntime,
+    telegramWebhookBaseUrl,
   });
 
   const router = createHadesRoutes({
@@ -123,7 +119,6 @@ export async function register(app, context) {
     detail: "→ /api/hades",
     children: [
       { id: "hades", role: "api", mount: "/api/hades" },
-      ...(telegramClient ? [{ id: "telegram", role: "messaging", provider: "telegram" }] : []),
     ]
   };
 }
