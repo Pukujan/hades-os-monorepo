@@ -15,6 +15,7 @@
       },
       "testCount": "225/225 pass (npm test), 176/176 pass (glob)",
       "productionReactLazyFix": "Changed export function HadesPrototypeApp() to export default function HadesPrototypeApp() in pages/HadesPrototypeApp.jsx — React.lazy requires default export; resolves production React error #306 (dev was unaffected because Vite's dev server resolved the named export)",
+      "disabledSections": "Disabled status bar (lines 896-907), lesser court card, and minion slots section (lines 1422-1431) in pages/HadesPrototypeApp.jsx via {false && ...} wrappers — user doesn't want to use them right now",
       "filesMoved": [
         "ChatBubble.js -> components/ChatBubble.js",
         "ChatInput.jsx -> components/ChatInput.jsx",
