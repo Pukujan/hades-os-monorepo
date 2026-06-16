@@ -68,12 +68,18 @@ describe("Telegram bot runtime", () => {
     assert.equal(sentMessages[0].replyToMessageId, 100);
   });
 
-  test("handleTelegramUpdate returns ignored for non-hades messages", async () => {
+  test("handleTelegramUpdate sends help reply for non-hades messages", async () => {
     const { createTelegramBotRuntime } = await loadRuntime();
 
+    const sentMessages = [];
     let identityCalled = false;
     const runtime = createTelegramBotRuntime({
-      telegramClient: { sendMessage: async () => ({ providerMessageId: 0 }) },
+      telegramClient: {
+        sendMessage: async ({ chatId, text, replyToMessageId }) => {
+          sentMessages.push({ chatId, text, replyToMessageId });
+          return { providerMessageId: 0 };
+        },
+      },
       resolveTelegramIdentity: async () => {
         identityCalled = true;
         return { userId: "user_1", tenantId: "tenant_1" };
@@ -82,12 +88,16 @@ describe("Telegram bot runtime", () => {
       botTokenProvider: async () => "token",
     });
 
-    const update = makeTelegramUpdate({ text: "hello there" });
+    const update = makeTelegramUpdate({ text: "hello there", messageId: 55 });
     const result = await runtime.handleTelegramUpdate({ update });
 
-    assert.equal(result.status, "ignored");
+    assert.equal(result.status, "sent");
+    assert.equal(result.reason, "non_command_help");
     assert.equal(identityCalled, false);
-    assert.equal(result.reason, "not_a_hades_command");
+    assert.equal(sentMessages.length, 1);
+    assert.equal(sentMessages[0].chatId, "chat_1");
+    assert.ok(sentMessages[0].text.includes("!hades"));
+    assert.equal(sentMessages[0].replyToMessageId, 55);
   });
 
   test("handleTelegramUpdate throws when Telegram identity is not connected", async () => {

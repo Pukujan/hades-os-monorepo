@@ -1,14 +1,14 @@
 {
   "hardLimit": 64000,
-  "currentUsage": 48000,
-  "remaining": 16000,
+  "currentUsage": 8000,
+  "remaining": 56000,
   "warningAt": 51200,
   "compactAt": 57600,
   "stopAt": 62400,
   "lastCompactedAt": null,
   "compactionStrategy": "summarize completed work, preserve current phase, target files, failing tests, blockers",
   "sessionStart": "2026-06-15T18:46:34.752+00:00",
-  "sessionEnd": "2026-06-15T20:29:01.450+00:00",
+  "sessionEnd": "2026-06-16T21:34:13.471+00:00",
   "history": [
     {
       "endedAt": "2026-06-12T16:33:56.160+00:00",
@@ -267,6 +267,24 @@
       "peakUsage": 48000,
       "reason": "archive_session",
       "slug": "hermes-smoke-fix-and-final-verify"
+    },
+    {
+      "endedAt": "2026-06-16T21:21:11.082+00:00",
+      "peakUsage": 48000,
+      "reason": "archive_session",
+      "slug": "discord-github-cards-tdd"
+    },
+    {
+      "endedAt": "2026-06-16T21:29:49.009+00:00",
+      "peakUsage": 3800,
+      "reason": "archive_session",
+      "slug": "auth-signup-fixes"
+    },
+    {
+      "endedAt": "2026-06-16T21:34:13.471+00:00",
+      "peakUsage": 8000,
+      "reason": "archive_session",
+      "slug": "alert-to-inline-conversion"
     }
   ]
 }

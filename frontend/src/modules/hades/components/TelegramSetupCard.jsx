@@ -1,5 +1,5 @@
 import React from "react";
-import { buildBotFatherCommand, formatTokenDisplay } from "../services/telegramSetup.js";
+import { buildBotFatherCommand, buildBotFatherPrivacyInstructions, formatTokenDisplay } from "../services/telegramSetup.js";
 
 const BOTFATHER_URL = "https://t.me/BotFather";
 
@@ -17,6 +17,16 @@ export function TelegramSetupCard({ connection, currentUser, onSaveToken }) {
     const command = buildBotFatherCommand(username);
     try {
       await navigator.clipboard.writeText(command);
+    } catch {
+      // Clipboard not available
+    }
+    window.open(BOTFATHER_URL, "_blank", "noopener,noreferrer");
+  }
+
+  async function handleCopyPrivacyInstructions() {
+    const instructions = buildBotFatherPrivacyInstructions(botUsername);
+    try {
+      await navigator.clipboard.writeText(instructions);
     } catch {
       // Clipboard not available
     }
@@ -43,8 +53,9 @@ export function TelegramSetupCard({ connection, currentUser, onSaveToken }) {
   }
 
   if (status === "connected") {
+    const instructions = buildBotFatherPrivacyInstructions(botUsername);
     return (
-      <article className="permission" data-testid="telegram-card">
+      <article className="permission telegram-card" data-testid="telegram-card">
         <div className="social-main">
           <div className="avatar">{"\u2709"}</div>
           <div className="social-copy">
@@ -54,6 +65,19 @@ export function TelegramSetupCard({ connection, currentUser, onSaveToken }) {
               {tokenLast4 ? formatTokenDisplay(tokenLast4) : ""}
             </p>
           </div>
+        </div>
+        <div className="social-actions" data-testid="telegram-connected-actions">
+          <button
+            type="button"
+            className="secondary"
+            data-testid="telegram-privacy-btn"
+            onClick={handleCopyPrivacyInstructions}
+          >
+            Configure group chat access
+          </button>
+          <p className="instructions" data-testid="telegram-privacy-instructions" style={{ whiteSpace: "pre-wrap", fontSize: "0.85em", marginTop: "8px" }}>
+            {instructions}
+          </p>
         </div>
       </article>
     );

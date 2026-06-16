@@ -1,40 +1,14 @@
 {
-  "phase": "post-milestone",
-  "module": "hades-frontend-refactor",
-  "task": "Reorganize hades module files into reference folder structure (pages, components, services, utils, hooks, schemas, prompts)",
+  "phase": "current-task",
+  "module": "auth-signup-fixes",
+  "task": "Fix auth/signup issues (provider-not-enabled, database error, missing email confirmation UI, missing password validation)",
   "state": {
-    "hadesFrontendRefactor": {
-      "status": "All files reorganized into pages/, components/, services/, utils/, hooks/, schemas/, prompts/. Tests moved to tests/unit/. Duplicate hadesViewModel.test.js renamed to hadesViewModel.logic.test.js. hadesRoutes.js renamed to index.jsx. All imports updated (source files, test files, core/App.jsx). module.json test globs updated. 225/225 frontend tests pass (npm test). Fixed .jsx ESM loader issue: created test-hooks/jsx-loader.mjs + register.mjs using esbuild transform. Updated package.json to use --import register.mjs.",
-      "gitMvExecuted": true,
-      "directoriesCreated": ["pages", "components", "services", "utils", "hooks", "schemas", "prompts"],
-      "testGlobsUpdated": true,
-      "importsUpdated": {
-        "sourceFiles": true,
-        "testFiles": true,
-        "coreAppJsx": true
-      },
-      "testCount": "225/225 pass (npm test), 176/176 pass (glob)",
-      "productionReactLazyFix": "Changed export function HadesPrototypeApp() to export default function HadesPrototypeApp() in pages/HadesPrototypeApp.jsx — React.lazy requires default export; resolves production React error #306 (dev was unaffected because Vite's dev server resolved the named export)",
-      "disabledSections": "Disabled status bar (lines 896-907), lesser court card, and minion slots section (lines 1422-1431) in pages/HadesPrototypeApp.jsx via {false && ...} wrappers — user doesn't want to use them right now",
-      "filesMoved": [
-        "ChatBubble.js -> components/ChatBubble.js",
-        "ChatInput.jsx -> components/ChatInput.jsx",
-        "MinionDetailScreen.jsx -> pages/MinionDetailScreen.jsx",
-        "HadesPrototypeApp.jsx -> pages/HadesPrototypeApp.jsx",
-        "hadesRoutes.js -> index.jsx",
-        "hadesViewModel.js -> utils/hadesViewModel.js",
-        "hadesViewModelFactory.js -> utils/hadesViewModelFactory.js",
-        "hadesData.js -> utils/hadesData.js",
-        "parser.js -> utils/parser.js",
-        "chatActions.js -> utils/chatActions.js",
-        "stripTags.js -> utils/stripTags.js",
-        "tagParser.js -> utils/tagParser.js",
-        "hadesApi.js -> services/hadesApi.js",
-        "telegramSetup.js -> services/telegramSetup.js",
-        "themeEngine.js -> utils/themeEngine.js",
-        "TelegramSetupCard.jsx -> components/TelegramSetupCard.jsx",
-        "tests/*.test.js -> tests/unit/*.test.js",
-        "tests/hadesApi.test.js -> tests/unit/hadesApi.test.js"
+    "authSignupFixes": {
+      "status": "All window.alert calls in LoginPage.jsx handlers converted to showInlineError/showSuccessMessage. OAuth handlers (Discord, Google, Telegram, Apple), all guard clauses, and resetPassword handler now use inline DOM error display. Added showSuccessMessage helper for resetPassword success. 308/308 frontend tests pass (11 new structural source-check tests).",
+      "testCount": "308/308 pass",
+      "filesChanged": [
+        "frontend/src/auth/LoginPage.jsx",
+        "frontend/src/auth/LoginPage.test.js"
       ]
     }
   }

@@ -17,9 +17,19 @@ export function createTelegramBotRuntime({
       return { status: "ignored", reason: "no_text" };
     }
 
+    const chatId = String(message.chat?.id || "");
+    const messageId = message.message_id;
+
     const parsed = parseHadesCommand(message.text);
     if (!parsed) {
-      return { status: "ignored", reason: "not_a_hades_command" };
+      const replyText = `${message.text} — I only respond to !hades commands. Try: !hades <your request>`;
+      await telegramClient.sendMessage({
+        chatId,
+        text: replyText,
+        parseMode: "Markdown",
+        replyToMessageId: messageId,
+      });
+      return { status: "sent", reason: "non_command_help" };
     }
 
     const telegramAccountId = String(message.from?.id || "");
@@ -30,8 +40,6 @@ export function createTelegramBotRuntime({
     }
 
     const { userId, tenantId } = identity;
-    const chatId = String(message.chat?.id || "");
-    const messageId = message.message_id;
 
     let assistantText = "";
     let outboundActions = [];
