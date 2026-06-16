@@ -1,5 +1,7 @@
 import React from "react";
 
+const DISCORD_DEV_PORTAL = "https://discord.com/developers/applications";
+
 export function DiscordSetupCard({ connection, onSaveToken }) {
   const [token, setToken] = React.useState("");
   const [testing, setTesting] = React.useState(false);
@@ -8,6 +10,10 @@ export function DiscordSetupCard({ connection, onSaveToken }) {
   const status = connection?.status || "disconnected";
   const botUsername = connection?.botUsername || connection?.bot_username || null;
   const tokenLast4 = connection?.tokenLast4 || connection?.token_last4 || null;
+
+  function handleOpenDevPortal() {
+    window.open(DISCORD_DEV_PORTAL, "_blank", "noopener,noreferrer");
+  }
 
   async function handleSave() {
     if (!token.trim()) return;
@@ -45,7 +51,7 @@ export function DiscordSetupCard({ connection, onSaveToken }) {
   }
 
   return (
-    <article className="permission" data-testid="discord-card">
+    <article className="permission discord-card" data-testid="discord-card">
       <div className="social-main">
         <div className="avatar">{"\uD83D\uDCAC"}</div>
         <div className="social-copy">
@@ -58,6 +64,14 @@ export function DiscordSetupCard({ connection, onSaveToken }) {
         </div>
       </div>
       <div className="social-actions" data-testid="discord-actions">
+        <button
+          type="button"
+          className="secondary"
+          data-testid="discord-help-btn"
+          onClick={handleOpenDevPortal}
+        >
+          Open Discord Developer Portal
+        </button>
         <div className="telegram-token-row" data-testid="discord-token-row">
           <input
             type="password"

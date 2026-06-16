@@ -280,6 +280,8 @@ button{color:inherit;cursor:pointer}
 .telegram-token-row button{flex:0 0 auto;white-space:nowrap}
 .secondary{border:1px solid var(--line2);border-radius:16px;padding:0 13px;min-height:44px;background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 12%,rgba(255,255,255,.04)),rgba(0,0,0,.08));color:var(--gold);font-size:9px;white-space:nowrap;text-transform:uppercase;font-family:var(--font-title)}
 .telegram-card .telegram-command-button{width:100%}
+.discord-card .secondary{width:100%}
+.github-card .secondary{width:100%}
 @media(max-width:760px){.telegram-card{align-items:stretch;flex-direction:column}.social-main{min-width:0}.social-actions{margin-left:0;width:100%}.telegram-token-row{flex-direction:column;align-items:stretch}.telegram-token-row input,.telegram-token-row button{width:100%;min-width:0}}
 .toggle{width:46px;height:26px;border-radius:999px;border:1px solid var(--line2);background:linear-gradient(90deg,var(--accent),var(--gold));position:relative}.toggle:after{content:"";position:absolute;right:3px;top:3px;width:18px;height:18px;border-radius:50%;background:#1a0c05}
 .setting{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:12px}.setting span:first-child{font-size:20px}.setting span:last-child{font-size:17px;color:var(--muted);text-align:right}

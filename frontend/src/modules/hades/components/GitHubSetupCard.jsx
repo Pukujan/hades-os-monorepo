@@ -1,5 +1,7 @@
 import React from "react";
 
+const GITHUB_TOKEN_SETTINGS = "https://github.com/settings/tokens";
+
 export function GitHubSetupCard({ connection, onSaveToken }) {
   const [token, setToken] = React.useState("");
   const [testing, setTesting] = React.useState(false);
@@ -8,6 +10,10 @@ export function GitHubSetupCard({ connection, onSaveToken }) {
   const status = connection?.status || "disconnected";
   const username = connection?.username || null;
   const scope = connection?.scope || null;
+
+  function handleOpenTokenSettings() {
+    window.open(GITHUB_TOKEN_SETTINGS, "_blank", "noopener,noreferrer");
+  }
 
   async function handleSave() {
     if (!token.trim()) return;
@@ -45,7 +51,7 @@ export function GitHubSetupCard({ connection, onSaveToken }) {
   }
 
   return (
-    <article className="permission" data-testid="github-card">
+    <article className="permission github-card" data-testid="github-card">
       <div className="social-main">
         <div className="avatar">{"\uD83D\uDC17"}</div>
         <div className="social-copy">
@@ -58,6 +64,14 @@ export function GitHubSetupCard({ connection, onSaveToken }) {
         </div>
       </div>
       <div className="social-actions" data-testid="github-actions">
+        <button
+          type="button"
+          className="secondary"
+          data-testid="github-help-btn"
+          onClick={handleOpenTokenSettings}
+        >
+          Open GitHub token settings
+        </button>
         <div className="telegram-token-row" data-testid="github-token-row">
           <input
             type="password"

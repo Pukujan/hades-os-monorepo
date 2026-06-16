@@ -53,4 +53,24 @@ describe("DiscordSetupCard rendering", () => {
     );
     assert.ok(!html.includes('aria-label="Discord bot token"'));
   });
+
+  test("renders help button linking to Discord Developer Portal in disconnected state", () => {
+    const html = renderToString(
+      React.createElement(DiscordSetupCard, {
+        connection: { status: "disconnected" },
+        onSaveToken: async () => ({})
+      })
+    );
+    assert.ok(html.includes("Open Discord Developer Portal"));
+  });
+
+  test("connected state does not show help button", () => {
+    const html = renderToString(
+      React.createElement(DiscordSetupCard, {
+        connection: { status: "connected" },
+        onSaveToken: async () => ({})
+      })
+    );
+    assert.ok(!html.includes("Open Discord Developer Portal"));
+  });
 });

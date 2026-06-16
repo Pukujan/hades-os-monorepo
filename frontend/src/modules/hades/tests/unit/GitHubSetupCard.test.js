@@ -53,4 +53,24 @@ describe("GitHubSetupCard rendering", () => {
     );
     assert.ok(!html.includes('aria-label="GitHub personal access token"'));
   });
+
+  test("renders help button linking to GitHub token settings in disconnected state", () => {
+    const html = renderToString(
+      React.createElement(GitHubSetupCard, {
+        connection: { status: "disconnected" },
+        onSaveToken: async () => ({})
+      })
+    );
+    assert.ok(html.includes("Open GitHub token settings"));
+  });
+
+  test("connected state does not show help button", () => {
+    const html = renderToString(
+      React.createElement(GitHubSetupCard, {
+        connection: { status: "connected" },
+        onSaveToken: async () => ({})
+      })
+    );
+    assert.ok(!html.includes("Open GitHub token settings"));
+  });
 });
