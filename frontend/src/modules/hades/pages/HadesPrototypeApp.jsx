@@ -74,7 +74,7 @@ const ICONS = {
   building: Building2
 };
 
-function useHades() {
+export function useHades() {
   const context = React.useContext(HadesContext);
   if (!context) {
     throw new Error("useHades must be used within HadesContext");
@@ -1772,7 +1772,7 @@ function HadesRoutes() {
   );
 }
 
-export function HadesPrototypeApp() {
+export default function HadesPrototypeApp() {
   React.useEffect(() => {
     document.body.classList.add("hades-active");
     return () => document.body.classList.remove("hades-active");
