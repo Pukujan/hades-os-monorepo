@@ -26,9 +26,11 @@ import {
   formatSocialLabel,
   getSocialIcon
 } from "../utils/hadesData.js";
-import { saveTelegramToken } from "../services/hadesApi.js";
+import { saveTelegramToken, saveDiscordToken, saveGitHubToken } from "../services/hadesApi.js";
 import { getPendingCopy } from "../utils/chatPendingCopy.js";
 import { TelegramSetupCard } from "../components/TelegramSetupCard.jsx";
+import { DiscordSetupCard } from "../components/DiscordSetupCard.jsx";
+import { GitHubSetupCard } from "../components/GitHubSetupCard.jsx";
 import {
   buildMinionDetailViewModel,
   buildMinionScreenViewModel,
@@ -1539,6 +1541,36 @@ function SocialsScreen() {
     return result;
   }
 
+  const [discordConnection, setDiscordConnection] = React.useState({
+    status: SOCIAL_LINKS.find((s) => s.provider === "discord")?.status || "disconnected"
+  });
+
+  const [githubConnection, setGithubConnection] = React.useState({
+    status: SOCIAL_LINKS.find((s) => s.provider === "github")?.status || "disconnected"
+  });
+
+  async function handleSaveDiscordToken({ token }) {
+    const result = await saveDiscordToken({ token }, session?.access_token);
+    const connection = result?.connection || result;
+    setDiscordConnection({
+      status: connection?.status || "connected",
+      botUsername: connection?.botUsername || connection?.bot_username || null,
+      tokenLast4: connection?.tokenLast4 || connection?.token_last4 || null
+    });
+    return result;
+  }
+
+  async function handleSaveGithubToken({ token }) {
+    const result = await saveGitHubToken({ token }, session?.access_token);
+    const connection = result?.connection || result;
+    setGithubConnection({
+      status: connection?.status || "connected",
+      username: connection?.username || null,
+      scope: connection?.scope || null
+    });
+    return result;
+  }
+
   return (
     <>
       <ScreenHead title="Socials" subtitle="Connect channels only when minions need them." />
@@ -1557,6 +1589,24 @@ function SocialsScreen() {
                 connection={telegramConnection}
                 currentUser={currentUser}
                 onSaveToken={handleSaveTelegramToken}
+              />
+            );
+          }
+          if (social.provider === "discord") {
+            return (
+              <DiscordSetupCard
+                key={social.id}
+                connection={discordConnection}
+                onSaveToken={handleSaveDiscordToken}
+              />
+            );
+          }
+          if (social.provider === "github") {
+            return (
+              <GitHubSetupCard
+                key={social.id}
+                connection={githubConnection}
+                onSaveToken={handleSaveGithubToken}
               />
             );
           }

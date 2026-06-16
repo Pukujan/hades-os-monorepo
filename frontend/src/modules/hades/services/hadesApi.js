@@ -71,6 +71,14 @@ export async function saveTelegramToken({ token }, accessToken) {
   return apiPost("/api/hades/socials/telegram/token", { token }, { accessToken });
 }
 
+export async function saveDiscordToken({ token }, accessToken) {
+  return apiPost("/api/hades/socials/discord/token", { token }, { accessToken });
+}
+
+export async function saveGitHubToken({ token }, accessToken) {
+  return apiPost("/api/hades/socials/github/token", { token }, { accessToken });
+}
+
 export async function getMinion(minionId, accessToken) {
   return apiGet(`/api/hades/minions/${minionId}`, { accessToken });
 }
