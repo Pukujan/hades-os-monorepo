@@ -40,6 +40,24 @@ test("signUpWithEmail calls supabase.auth.signUp with email and password", async
   assert.equal(result.error, null);
 });
 
+test("signUpWithEmail rejects password shorter than 8 characters", async () => {
+  const { signUpWithEmail } = await import("./authClient.js");
+  const supabase = mockSupabase();
+  const result = await signUpWithEmail(supabase, "test@test.com", "1234567");
+  assert.ok(result.error);
+  assert.match(result.error.message, /at least 8|8 characters/i);
+  assert.equal(result.data, null);
+});
+
+test("signUpWithEmail rejects empty password", async () => {
+  const { signUpWithEmail } = await import("./authClient.js");
+  const supabase = mockSupabase();
+  const result = await signUpWithEmail(supabase, "test@test.com", "");
+  assert.ok(result.error);
+  assert.match(result.error.message, /password/i);
+  assert.equal(result.data, null);
+});
+
 test("signInWithEmail calls supabase.auth.signInWithPassword", async () => {
   const { signInWithEmail } = await import("./authClient.js");
   const supabase = mockSupabase();
@@ -66,6 +84,85 @@ test("signInWithDiscord calls supabase.auth.signInWithOAuth with discord provide
   assert.equal(result.data.provider, "discord");
   assert.equal(result.error, null);
   assert.equal(result.data.url, "https://hades.example.com/app");
+});
+
+test("signInWithDiscord returns friendly error when provider not enabled", async () => {
+  const { signInWithDiscord } = await import("./authClient.js");
+  const supabase = {
+    auth: {
+      signInWithOAuth: async () => ({
+        data: null,
+        error: new Error("Unsupported provider: provider is not enabled")
+      })
+    }
+  };
+  const result = await signInWithDiscord(supabase);
+  assert.ok(result.error);
+  assert.doesNotMatch(result.error.message, /provider is not enabled/i);
+  assert.match(result.error.message, /not available/i);
+});
+
+test("signInWithDiscord passes through non-provider OAuth errors", async () => {
+  const { signInWithDiscord } = await import("./authClient.js");
+  const supabase = {
+    auth: {
+      signInWithOAuth: async () => ({
+        data: null,
+        error: new Error("Network error")
+      })
+    }
+  };
+  const result = await signInWithDiscord(supabase);
+  assert.ok(result.error);
+  assert.equal(result.error.message, "Network error");
+});
+
+test("signInWithGoogle returns friendly error when provider not enabled", async () => {
+  const { signInWithGoogle } = await import("./authClient.js");
+  const supabase = {
+    auth: {
+      signInWithOAuth: async () => ({
+        data: null,
+        error: new Error("Unsupported provider: provider is not enabled")
+      })
+    }
+  };
+  const result = await signInWithGoogle(supabase);
+  assert.ok(result.error);
+  assert.doesNotMatch(result.error.message, /provider is not enabled/i);
+  assert.match(result.error.message, /not available/i);
+});
+
+test("signInWithApple returns friendly error when provider not enabled", async () => {
+  const { signInWithApple } = await import("./authClient.js");
+  const supabase = {
+    auth: {
+      signInWithOAuth: async () => ({
+        data: null,
+        error: new Error("Unsupported provider: provider is not enabled")
+      })
+    }
+  };
+  const result = await signInWithApple(supabase);
+  assert.ok(result.error);
+  assert.doesNotMatch(result.error.message, /provider is not enabled/i);
+  assert.match(result.error.message, /not available/i);
+});
+
+test("signInWithTelegram returns friendly error when provider not enabled", async () => {
+  const { signInWithTelegram } = await import("./authClient.js");
+  const supabase = {
+    auth: {
+      signInWithOAuth: async () => ({
+        data: null,
+        error: new Error("Unsupported provider: provider is not enabled")
+      })
+    }
+  };
+  const result = await signInWithTelegram(supabase);
+  assert.ok(result.error);
+  assert.doesNotMatch(result.error.message, /provider is not enabled/i);
+  assert.match(result.error.message, /not available/i);
 });
 
 test("signOutUser calls supabase.auth.signOut", async () => {
@@ -179,4 +276,24 @@ test("forgotPassword returns error when no client", async () => {
   const result = await forgotPassword(null, "user@test.com");
   assert.ok(result.error);
   assert.match(result.error.message, /Supabase/);
+});
+
+test("needsEmailConfirmation returns true when user created but no session", async () => {
+  const { needsEmailConfirmation } = await import("./authClient.js");
+  assert.equal(needsEmailConfirmation({ data: { user: { id: "1" }, session: null }, error: null }), true);
+});
+
+test("needsEmailConfirmation returns false when session exists", async () => {
+  const { needsEmailConfirmation } = await import("./authClient.js");
+  assert.equal(needsEmailConfirmation({ data: { user: { id: "1" }, session: { access_token: "tok" } }, error: null }), false);
+});
+
+test("needsEmailConfirmation returns false when there is an error", async () => {
+  const { needsEmailConfirmation } = await import("./authClient.js");
+  assert.equal(needsEmailConfirmation({ data: null, error: new Error("fail") }), false);
+});
+
+test("needsEmailConfirmation returns false when data is null", async () => {
+  const { needsEmailConfirmation } = await import("./authClient.js");
+  assert.equal(needsEmailConfirmation({ data: null, error: null }), false);
 });

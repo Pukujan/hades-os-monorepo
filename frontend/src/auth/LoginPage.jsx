@@ -1,7 +1,8 @@
 import React from "react";
 import { useAuth } from "./AuthProvider.jsx";
-import { signInWithEmail, signUpWithEmail, signInWithDiscord, signInWithGoogle, signInWithApple, signInWithTelegram, forgotPassword } from "./authClient.js";
+import { signInWithEmail, signUpWithEmail, signInWithDiscord, signInWithGoogle, signInWithApple, signInWithTelegram, forgotPassword, needsEmailConfirmation } from "./authClient.js";
 import { extractLoginTemplateParts } from "./loginTemplateParts.js";
+import { showInlineError, showConfirmationMessage, showSuccessMessage } from "./loginHelpers.js";
 import loginTemplate from "./loginTemplate.html?raw";
 import "../styles/login.css";
 
@@ -102,6 +103,8 @@ export function LoginPage({ view = "signin", onNavigate }) {
     const googleButton = root.querySelector(".social.google");
     const appleButton = root.querySelector(".social.apple");
 
+    const panelWrap = root.querySelector(".panel-wrap");
+
     const toggleSheet = (showSheet) => {
       if (!sheet) return;
       sheet.classList.toggle("show", showSheet);
@@ -119,85 +122,89 @@ export function LoginPage({ view = "signin", onNavigate }) {
 
     const handleDiscordSignIn = async () => {
       if (!supabase) {
-        window.alert("Supabase auth is not configured yet.");
+        showInlineError(root, panelWrap, "Supabase auth is not configured yet.");
         return;
       }
       const { error } = await signInWithDiscord(supabase);
-      if (error) window.alert(error.message);
+      if (error) showInlineError(root, panelWrap, error.message);
     };
 
     const handleGoogleSignIn = async () => {
       if (!supabase) {
-        window.alert("Supabase auth is not configured yet.");
+        showInlineError(root, panelWrap, "Supabase auth is not configured yet.");
         return;
       }
       const { error } = await signInWithGoogle(supabase);
-      if (error) window.alert(error.message);
+      if (error) showInlineError(root, panelWrap, error.message);
     };
 
     const handleTelegramSignIn = async () => {
       if (!supabase) {
-        window.alert("Supabase auth is not configured yet.");
+        showInlineError(root, panelWrap, "Supabase auth is not configured yet.");
         return;
       }
       const { error } = await signInWithTelegram(supabase);
-      if (error) window.alert(error.message);
+      if (error) showInlineError(root, panelWrap, error.message);
     };
 
     const handleAppleSignIn = async () => {
       if (!supabase) {
-        window.alert("Supabase auth is not configured yet.");
+        showInlineError(root, panelWrap, "Supabase auth is not configured yet.");
         return;
       }
       const { error } = await signInWithApple(supabase);
-      if (error) window.alert(error.message);
+      if (error) showInlineError(root, panelWrap, error.message);
     };
 
     const handleEmailSignIn = async () => {
       if (!supabase) {
-        window.alert("Supabase auth is not configured yet.");
+        showInlineError(root, panelWrap, "Supabase auth is not configured yet.");
         return;
       }
       const email = emailInput?.value?.trim() || "";
       const password = passwordInput?.value || "";
       if (!email || !password) {
-        window.alert("Enter an email and password first.");
+        showInlineError(root, panelWrap, "Enter an email and password first.");
         return;
       }
-      const { error } = await signInWithEmail(supabase, email, password);
-      if (error) window.alert(error.message);
+      const result = await signInWithEmail(supabase, email, password);
+      if (result.error) showInlineError(root, panelWrap, result.error.message);
     };
 
     const handleEmailSignUp = async () => {
       if (!supabase) {
-        window.alert("Supabase auth is not configured yet.");
+        showInlineError(root, panelWrap, "Supabase auth is not configured yet.");
         return;
       }
       const email = emailInput?.value?.trim() || "";
       const password = passwordInput?.value || "";
       if (!email || !password) {
-        window.alert("Enter an email and password first.");
+        showInlineError(root, panelWrap, "Enter an email and password first.");
         return;
       }
-      const { error } = await signUpWithEmail(supabase, email, password);
-      if (error) window.alert(error.message);
+      const result = await signUpWithEmail(supabase, email, password);
+      if (result.error) {
+        showInlineError(root, panelWrap, result.error.message);
+      } else if (needsEmailConfirmation(result)) {
+        showConfirmationMessage(panelWrap);
+      }
     };
 
     const resetPassword = async () => {
       if (!supabase) {
-        window.alert("Supabase auth is not configured yet.");
+        showInlineError(root, panelWrap, "Supabase auth is not configured yet.");
         return;
       }
       const email = emailInput?.value?.trim() || "";
       if (!email) {
-        window.alert("Enter your email first.");
+        showInlineError(root, panelWrap, "Enter your email first.");
         return;
       }
       const { error } = await forgotPassword(supabase, email, {
         redirectTo: window.location.origin
       });
-      if (error) window.alert(error.message);
-      else window.alert("Password reset link sent.");
+      if (error) showInlineError(root, panelWrap, error.message);
+      else showSuccessMessage(panelWrap, "Password reset link sent.");
     };
 
     const handleCTA = async () => {
