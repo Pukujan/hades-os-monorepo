@@ -183,6 +183,24 @@ export function createHadesRoutes({ service, requireHadesAuth, config, scopedRep
     })
   );
 
+  router.post(
+    "/socials/discord/token",
+    requireAuth,
+    asyncRoute(async (req, res) => {
+      const result = await service.saveDiscordToken(req.body, req.authContext);
+      res.status(200).json(result);
+    })
+  );
+
+  router.post(
+    "/socials/github/token",
+    requireAuth,
+    asyncRoute(async (req, res) => {
+      const result = await service.saveGitHubToken(req.body, req.authContext);
+      res.status(200).json(result);
+    })
+  );
+
   router.delete(
     "/socials/telegram/token",
     requireAuth,

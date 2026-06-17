@@ -381,6 +381,11 @@ export function createHadesService({ repository, scopedRepos, hermes, config = {
       if (telegram) socials.push({ provider: "telegram", ...telegram });
     }
 
+    if (scopedRepos?.gitHubConnections) {
+      const github = await scopedRepos.gitHubConnections.findPublicByUser({ userId, tenantId });
+      if (github) socials.push({ provider: "github", ...github });
+    }
+
     return socials;
   }
 
@@ -446,6 +451,52 @@ async function saveTelegramToken(body, authContext) {
     }
 
     return { status: "connected", botUsername: botInfo.username || null, token_last4: last4(token) };
+  }
+
+  async function saveDiscordToken(body, authContext) {
+    const userId = authContext?.userId;
+    const tenantId = authContext?.tenantId || userId;
+    const { token } = body || {};
+
+    if (!token) {
+      throw new AppError("Token is required", 400);
+    }
+
+    if (!scopedRepos?.discordConnections) {
+      throw new AppError("Discord connections repository not available", 501);
+    }
+
+    const result = await scopedRepos.discordConnections.saveToken({
+      userId,
+      tenantId,
+      token,
+      botUsername: null,
+    });
+
+    return { status: "connected", token_last4: last4(token) };
+  }
+
+  async function saveGitHubToken(body, authContext) {
+    const userId = authContext?.userId;
+    const tenantId = authContext?.tenantId || userId;
+    const { token } = body || {};
+
+    if (!token) {
+      throw new AppError("Token is required", 400);
+    }
+
+    if (!scopedRepos?.gitHubConnections) {
+      throw new AppError("GitHub connections repository not available", 501);
+    }
+
+    const result = await scopedRepos.gitHubConnections.saveToken({
+      userId,
+      tenantId,
+      token,
+      gitHubUsername: null,
+    });
+
+    return { status: "connected", token_last4: last4(token) };
   }
 
   async function deleteTelegramToken(authContext) {
@@ -597,6 +648,8 @@ async function saveTelegramToken(body, authContext) {
     clearMessages,
     listSocialConnections,
     saveTelegramToken,
+    saveDiscordToken,
+    saveGitHubToken,
     deleteTelegramToken,
     handleTelegramWebhook,
     handleTrigger,

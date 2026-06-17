@@ -269,7 +269,7 @@ button{color:inherit;cursor:pointer}
 .notification-body{overflow:auto;min-height:0;scrollbar-width:thin;scrollbar-color:var(--line2) transparent;padding-right:2px}
 .log-group{display:none}.log-group.active{display:grid;gap:8px}
 .permission{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;margin-bottom:10px}
-.telegram-card{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.telegram-card,.discord-card,.github-card{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
 .social-main{display:flex;align-items:center;gap:18px;min-width:220px;flex:0 0 auto}
 .social-copy{min-width:0}
 .social-actions{margin-left:auto;display:flex;flex-direction:column;gap:10px;min-width:min(440px,100%)}
@@ -282,7 +282,7 @@ button{color:inherit;cursor:pointer}
 .telegram-card .telegram-command-button{width:100%}
 .discord-card .secondary{width:100%}
 .github-card .secondary{width:100%}
-@media(max-width:760px){.telegram-card{align-items:stretch;flex-direction:column}.social-main{min-width:0}.social-actions{margin-left:0;width:100%}.telegram-token-row{flex-direction:column;align-items:stretch}.telegram-token-row input,.telegram-token-row button{width:100%;min-width:0}}
+@media(max-width:760px){.telegram-card,.discord-card,.github-card{align-items:stretch;flex-direction:column}.social-main{min-width:0}.social-actions{margin-left:0;width:100%}.telegram-token-row{flex-direction:column;align-items:stretch}.telegram-token-row input,.telegram-token-row button{width:100%;min-width:0}}
 .toggle{width:46px;height:26px;border-radius:999px;border:1px solid var(--line2);background:linear-gradient(90deg,var(--accent),var(--gold));position:relative}.toggle:after{content:"";position:absolute;right:3px;top:3px;width:18px;height:18px;border-radius:50%;background:#1a0c05}
 .setting{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:12px}.setting span:first-child{font-size:20px}.setting span:last-child{font-size:17px;color:var(--muted);text-align:right}
 .bottom{padding:8px 12px max(10px,env(safe-area-inset-bottom));background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--bg) 88%,transparent) 18%,color-mix(in srgb,var(--bg) 97%,transparent))}

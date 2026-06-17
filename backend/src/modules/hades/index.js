@@ -15,6 +15,7 @@ import { createAssignmentRepository } from "./repositories/assignmentRepository.
 import { createConversationRepository } from "./repositories/conversationRepository.js";
 import { createTelegramConnectionRepository } from "./repositories/telegramConnectionRepository.js";
 import { createDiscordConnectionRepository } from "./repositories/discordConnectionRepository.js";
+import { createGitHubConnectionRepository } from "./repositories/gitHubConnectionRepository.js";
 import { createAgentExecutionRepository } from "./repositories/agentExecutionRepository.js";
 import { createProcessedUpdateRepository } from "./repositories/processedUpdateRepository.js";
 import { createTelegramConversationModeRepository } from "./repositories/telegramConversationModeRepository.js";
@@ -65,7 +66,8 @@ export async function register(app, context) {
   const assignments = overrides.assignments || createAssignmentRepository({ storage: storageMode, supabaseClient });
   const conversations = overrides.conversations || createConversationRepository({ storage: storageMode, supabaseClient });
   const telegramConnections = overrides.telegramConnections || createTelegramConnectionRepository({ storage: storageMode, supabaseClient, crypto: tokenCrypto });
-  const discordConnections = overrides.discordConnections || createDiscordConnectionRepository({ storage: storageMode, supabaseClient });
+  const discordConnections = overrides.discordConnections || createDiscordConnectionRepository({ storage: storageMode, supabaseClient, crypto: tokenCrypto });
+  const gitHubConnections = overrides.gitHubConnections || createGitHubConnectionRepository({ storage: storageMode, supabaseClient, crypto: tokenCrypto });
   const executions = overrides.executions || createAgentExecutionRepository({ storage: storageMode, supabaseClient });
   const processedUpdates = overrides.processedUpdates || createProcessedUpdateRepository({ storage: storageMode, supabaseClient });
   const conversationModes = overrides.conversationModes || createTelegramConversationModeRepository({ storage: storageMode, supabaseClient });
@@ -84,6 +86,7 @@ export async function register(app, context) {
     conversations,
     telegramConnections,
     discordConnections,
+    gitHubConnections,
     executions,
     processedUpdates,
     conversationModes,

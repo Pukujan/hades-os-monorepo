@@ -6,9 +6,8 @@ function last4(token) {
   return token.slice(-4);
 }
 
-export function createDiscordConnectionRepository({ storage = "memory", supabaseClient, tableName = "hades_discord_connections", crypto = null } = {}) {
+export function createGitHubConnectionRepository({ storage = "memory", supabaseClient, tableName = "hades_github_connections", crypto = null } = {}) {
   const connections = new Map();
-  const byDiscordUserId = new Map();
   let hydrated = false;
 
   async function hydrate() {
@@ -17,9 +16,6 @@ export function createDiscordConnectionRepository({ storage = "memory", supabase
     for (const row of await readTableRows(supabaseClient, tableName)) {
       if (!row?.id) continue;
       connections.set(row.id, { ...row });
-      if (row.discord_user_id) {
-        byDiscordUserId.set(row.discord_user_id, connections.get(row.id));
-      }
     }
   }
 
@@ -29,36 +25,15 @@ export function createDiscordConnectionRepository({ storage = "memory", supabase
     }
   }
 
-  async function createOrUpdate({ userId, tenantId, discordUserId, guildId, channelId, status }) {
-    await hydrate();
-    const existing = byDiscordUserId.get(discordUserId);
-    const id = existing?.id || randomUUID();
-    const record = {
-      id,
-      user_id: userId,
-      tenant_id: tenantId,
-      discord_user_id: discordUserId,
-      guild_id: guildId || null,
-      channel_id: channelId || null,
-      status: status || "connected",
-      created_at: existing?.created_at || new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
-    connections.set(id, record);
-    byDiscordUserId.set(discordUserId, record);
-    await persist(record);
-    return record;
-  }
-
-  async function saveToken({ userId, tenantId, token, botUsername }) {
+  async function saveToken({ userId, tenantId, token, gitHubUsername }) {
     await hydrate();
     if (!crypto || typeof crypto.encrypt !== "function") {
       throw Object.assign(
-        new Error("Crypto dependency is required to store Discord bot tokens"),
+        new Error("Crypto dependency is required to store GitHub tokens"),
         { code: "missing_crypto" }
       );
     }
-    const existing = findByUserId({ userId, tenantId });
+    const existing = await findRecord({ userId, tenantId });
     const id = existing?.id || randomUUID();
     const encrypted = crypto.encrypt(token);
 
@@ -66,9 +41,9 @@ export function createDiscordConnectionRepository({ storage = "memory", supabase
       id,
       user_id: userId,
       tenant_id: tenantId,
-      encrypted_bot_token: encrypted,
+      encrypted_token: encrypted,
       token_last4: last4(token),
-      bot_username: botUsername || null,
+      github_username: gitHubUsername || null,
       status: "connected",
       created_at: existing?.created_at || new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -78,23 +53,7 @@ export function createDiscordConnectionRepository({ storage = "memory", supabase
     return record;
   }
 
-  async function findPublicByUser({ userId, tenantId }) {
-    await hydrate();
-    for (const record of connections.values()) {
-      if (record.user_id === userId && record.tenant_id === tenantId) {
-        const { encrypted_bot_token, bot_token, ...rest } = record;
-        return rest;
-      }
-    }
-    return null;
-  }
-
-  async function findByDiscordUserId({ discordUserId }) {
-    await hydrate();
-    return byDiscordUserId.get(discordUserId) || null;
-  }
-
-  async function findByUserId({ userId, tenantId }) {
+  async function findRecord({ userId, tenantId }) {
     await hydrate();
     for (const record of connections.values()) {
       if (record.user_id === userId && record.tenant_id === tenantId) {
@@ -104,17 +63,28 @@ export function createDiscordConnectionRepository({ storage = "memory", supabase
     return null;
   }
 
+  async function findPublicByUser({ userId, tenantId }) {
+    await hydrate();
+    for (const record of connections.values()) {
+      if (record.user_id === userId && record.tenant_id === tenantId) {
+        const { encrypted_token, token, ...rest } = record;
+        return rest;
+      }
+    }
+    return null;
+  }
+
   async function findRuntimeTokenByUserId({ userId, tenantId }) {
     await hydrate();
-    const record = await findByUserId({ userId, tenantId });
+    const record = await findRecord({ userId, tenantId });
     if (!record) return null;
     if (!crypto || typeof crypto.decrypt !== "function") {
       throw Object.assign(
-        new Error("Crypto dependency is required to decrypt Discord bot tokens"),
+        new Error("Crypto dependency is required to decrypt GitHub tokens"),
         { code: "missing_crypto" }
       );
     }
-    return { botToken: crypto.decrypt(record.encrypted_bot_token) };
+    return { botToken: crypto.decrypt(record.encrypted_token) };
   }
 
   async function deleteRecord({ id }) {
@@ -122,14 +92,11 @@ export function createDiscordConnectionRepository({ storage = "memory", supabase
     const record = connections.get(id) || null;
     if (!record) return null;
     connections.delete(id);
-    if (record.discord_user_id) {
-      byDiscordUserId.delete(record.discord_user_id);
-    }
     if (storage === "supabase") {
       await deleteTableRow(supabaseClient, tableName, id);
     }
     return record;
   }
 
-  return { createOrUpdate, saveToken, findPublicByUser, findByDiscordUserId, findByUserId, findRuntimeTokenByUserId, delete: deleteRecord };
+  return { saveToken, findPublicByUser, findRuntimeTokenByUserId, findRecord, delete: deleteRecord };
 }

@@ -21,6 +21,20 @@
         "backend/src/modules/hades/tests/unit/telegramConnectionRepository.test.js",
         "backend/src/modules/hades/tests/unit/telegramSocialRoutes.test.js"
       ]
+    },
+    "discordGithubTokenEncryption": {
+      "status": "Implemented encrypted token storage for Discord and GitHub social connections. Added crypto support to discordConnectionRepository, created gitHubConnectionRepository with encryption, added saveDiscordToken/saveGitHubToken service methods and POST routes, wired into index.js scopedRepos. TDD: wrote failing integration tests, all 430 tests pass.",
+      "testCount": "430/430 all pass",
+      "filesChanged": [
+        "backend/src/modules/hades/repositories/discordConnectionRepository.js",
+        "backend/src/modules/hades/repositories/gitHubConnectionRepository.js",
+        "backend/src/modules/hades/services/hades.service.js",
+        "backend/src/modules/hades/routes/hades.routes.js",
+        "backend/src/modules/hades/index.js",
+        "backend/src/modules/hades/__tests__/liveDiscordTokenScope.integration.test.js",
+        "backend/src/modules/hades/__tests__/liveGitHubTokenScope.integration.test.js",
+        "frontend/src/styles/hadesPrototype.css"
+      ]
     }
   }
 }
