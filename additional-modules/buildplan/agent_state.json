@@ -1,14 +1,23 @@
 {
   "phase": "current-task",
-  "module": "auth-signup-fixes",
-  "task": "Fix auth/signup issues (provider-not-enabled, database error, missing email confirmation UI, missing password validation)",
+  "module": "hades-telegram-fixes",
+  "task": "Inject minions context into Hermes runtime prompts",
   "state": {
-    "authSignupFixes": {
-      "status": "All window.alert calls in LoginPage.jsx handlers converted to showInlineError/showSuccessMessage. OAuth handlers (Discord, Google, Telegram, Apple), all guard clauses, and resetPassword handler now use inline DOM error display. Added showSuccessMessage helper for resetPassword success. 308/308 frontend tests pass (11 new structural source-check tests).",
-      "testCount": "308/308 pass",
+    "hadesTelegramFixes": {
+      "status": "Fixed generateCommandResult hardcoded forge context. Added cross-instance dedup. Added bare 'hades' prefix support, forge/general mode switching via 'forge'/'hades' triggers, and persistent conversation modes via telegramConversationModeRepository. All 30 unit tests pass.",
+      "testCount": "30/30 unit pass"
+    },
+    "minionInjection": {
+      "status": "Implemented minion context injection across Hermes pipeline. buildRuntimePrompt serializes minions into prompt payload. generateDraft, generateCommandResult, buildResponse forward minions. telegramBotRuntime accepts minions in context. hades.service loads minions via scopedRepos in chat() and handleTelegramWebhook(). 30/30 tests pass.",
+      "testCount": "30/30 unit pass",
       "filesChanged": [
-        "frontend/src/auth/LoginPage.jsx",
-        "frontend/src/auth/LoginPage.test.js"
+        "backend/src/modules/hades/services/hermesRuntime.service.js",
+        "backend/src/modules/hades/services/hermes.service.js",
+        "backend/src/modules/hades/services/telegramBotRuntime.service.js",
+        "backend/src/modules/hades/services/hades.service.js",
+        "backend/src/modules/hades/tests/unit/hermesRuntime.service.test.js",
+        "backend/src/modules/hades/tests/unit/hermes.service.test.js",
+        "backend/src/modules/hades/tests/unit/telegramBotRuntime.test.js"
       ]
     }
   }

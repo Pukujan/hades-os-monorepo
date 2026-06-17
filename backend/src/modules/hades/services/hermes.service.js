@@ -53,7 +53,7 @@ function wrapGeneralResult(result) {
 }
 
 export function createHermesService({ hermesRuntime = null } = {}) {
-  async function buildResponse({ userId = "local-user", conversationId, message, messages = [], currentDraft = createEmptyDraft(), context = "general" }) {
+  async function buildResponse({ userId = "local-user", conversationId, message, messages = [], currentDraft = createEmptyDraft(), context = "general", minions }) {
     const runtime = ensureRuntime(hermesRuntime);
     const result = await runtime.generateDraft({
       userId,
@@ -61,7 +61,8 @@ export function createHermesService({ hermesRuntime = null } = {}) {
       message,
       messages,
       currentDraft,
-      context
+      context,
+      minions
     });
 
     if (context === "general" || context === "minions") {

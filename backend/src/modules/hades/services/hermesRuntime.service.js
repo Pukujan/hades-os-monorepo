@@ -73,7 +73,7 @@ function readBackendEnv(envPath = DEFAULT_BACKEND_ENV_PATH) {
   return parseDotEnv(fs.readFileSync(envPath, "utf8"));
 }
 
-function buildRuntimePrompt({ userId, conversationId, message, currentDraft, contextLength, context = "forge", messages = [] }) {
+function buildRuntimePrompt({ userId, conversationId, message, currentDraft, contextLength, context = "forge", messages = [], minions }) {
   const payload = {
     userId,
     conversationId,
@@ -83,8 +83,17 @@ function buildRuntimePrompt({ userId, conversationId, message, currentDraft, con
     constraints: {
       contextFloor: MIN_CONTEXT_LENGTH,
       configuredContextLength: contextLength
-    }
+    },
   };
+
+  if (minions && minions.length > 0) {
+    payload.minions = minions.map(m => ({
+      id: m.id,
+      name: m.name,
+      description: m.description || "",
+      instructions: m.instructions || "",
+    }));
+  }
 
   const isGeneral = context === "general" || context === "minions";
   const jsonKeys = isGeneral
@@ -205,7 +214,8 @@ export function createHermesRuntimeService({
     message,
     messages = [],
     currentDraft = createEmptyDraft(),
-    context = "forge"
+    context = "forge",
+    minions
   } = {}) {
     const backendEnv = readBackendEnv(backendEnvPath);
     const provider = backendEnv.HERMES_PROVIDER || DEFAULT_PROVIDER;
@@ -219,7 +229,8 @@ export function createHermesRuntimeService({
       messages,
       currentDraft,
       contextLength,
-      context
+      context,
+      minions
     });
     const subprocessEnv = {
       ...process.env,
@@ -257,7 +268,8 @@ export function createHermesRuntimeService({
       userId: context?.userId,
       conversationId: context?.chatId || context?.messageId,
       message: input?.content || "",
-      context: "forge",
+      context: context?.conversationType || "general",
+      minions: context?.minions,
     });
 
     return {

@@ -112,6 +112,10 @@ export function createHadesService({ repository, scopedRepos, hermes, config = {
       ? await scopedRepos.executions.listByUser({ userId, tenantId })
       : [];
 
+    const chatMinions = scopedRepos?.minions
+      ? await scopedRepos.minions.listByUser({ userId, tenantId })
+      : [];
+
     const hermesResult = await hermes.buildResponse({
       userId,
       conversationId: conversation.id,
@@ -119,7 +123,7 @@ export function createHadesService({ repository, scopedRepos, hermes, config = {
       messages: recentMessages || [],
       currentDraft,
       context: conversationType,
-      scopedMemory,
+      minions: chatMinions,
     });
 
     try {
@@ -444,6 +448,7 @@ async function saveTelegramToken(body, authContext) {
     return { status: "connected", botUsername: botInfo.username || null, token_last4: last4(token) };
   }
 
+  const dedupStore = scopedRepos?.processedUpdates || null;
   const processedUpdates = new Set();
 
   async function handleTelegramWebhook({ update, userId, tenantId } = {}) {
@@ -452,10 +457,18 @@ async function saveTelegramToken(body, authContext) {
     }
 
     if (update?.update_id != null) {
-      if (processedUpdates.has(update.update_id)) {
-        return { status: "duplicate_ignored", reason: "update_id_already_processed" };
+      if (dedupStore) {
+        const existing = await dedupStore.has({ updateId: update.update_id, userId, tenantId });
+        if (existing) {
+          return { status: "duplicate_ignored", reason: "update_id_already_processed" };
+        }
+        await dedupStore.mark({ updateId: update.update_id, userId, tenantId });
+      } else {
+        if (processedUpdates.has(update.update_id)) {
+          return { status: "duplicate_ignored", reason: "update_id_already_processed" };
+        }
+        processedUpdates.add(update.update_id);
       }
-      processedUpdates.add(update.update_id);
     }
 
     const connection = await scopedRepos.telegramConnections.findPublicByUser({ userId, tenantId });
@@ -475,14 +488,20 @@ async function saveTelegramToken(body, authContext) {
       : await createTelegramClient({ botToken: tokenResult.botToken });
     const resolveTelegramIdentity = async () => ({ userId, tenantId });
 
+    const telegramMinions = scopedRepos?.minions
+      ? await scopedRepos.minions.listByUser({ userId, tenantId })
+      : [];
+
     const runtime = createTelegramBotRuntime({
       telegramClient: tgClient,
       resolveTelegramIdentity,
       hermesRuntime,
       botTokenProvider: null,
+      conversationModeRepo: scopedRepos?.conversationModes || null,
       repository: scopedRepos?.executions
         ? { saveAgentExecution: ({ execution }) => scopedRepos.executions.create({ userId, tenantId, data: execution }) }
         : null,
+      minions: telegramMinions,
     });
 
     return runtime.handleTelegramUpdate({ update });

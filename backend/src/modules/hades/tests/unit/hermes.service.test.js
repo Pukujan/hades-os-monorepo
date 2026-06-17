@@ -75,6 +75,35 @@ test("Hermes runtime invalid enum output fails fast", async () => {
   );
 });
 
+test("buildResponse forwards minions to generateDraft", async () => {
+  let generateDraftInput = null;
+  const hermes = createHermesService({
+    hermesRuntime: {
+      async generateDraft(input) {
+        generateDraftInput = input;
+        return {
+          source: "hermes_runtime",
+          sessionId: "sess-1",
+          assistantText: "Done",
+          draftPatch: { name: "Task Helper", category: "task", targetSocial: "private", triggerType: "manual" },
+          missingFields: [],
+          suggestions: []
+        };
+      }
+    }
+  });
+
+  const minions = [{ id: "m1", name: "TestMinion", instructions: "do stuff" }];
+  await hermes.buildResponse({
+    conversationId: "conv-1",
+    message: "Make a task helper",
+    currentDraft: createEmptyDraft(),
+    minions,
+  });
+
+  assert.equal(generateDraftInput.minions, minions, "should forward minions to generateDraft");
+});
+
 test("Hermes runtime failure bubbles instead of falling back", async () => {
   const hermes = createHermesService({
     hermesRuntime: {

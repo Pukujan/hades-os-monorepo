@@ -153,6 +153,52 @@ test("Hermes runtime wraps timeout/exec errors with stderr", async () => {
   );
 });
 
+test("generateCommandResult defaults to general context when caller does not provide conversationType", async () => {
+  const calls = [];
+  const runtime = createHermesRuntimeService({
+    hermesBin: "/fake/hermes",
+    runCommand: async (bin, args, options) => {
+      calls.push({ bin, args });
+      return JSON.stringify({
+        assistantText: "General reply.",
+        sessionId: "sess-1",
+      });
+    }
+  });
+
+  await runtime.generateCommandResult({
+    input: { content: "!hades status" },
+    context: { userId: "u1", tenantId: "t1", provider: "telegram", chatId: "-100123", messageId: 42 },
+  });
+
+  const prompt = calls[0].args.find(a => typeof a === "string" && a.includes("{"));
+  assert.ok(prompt, "prompt should be found in args");
+  assert.ok(!prompt.includes("Allowed categories"), "general context prompt should not include forge constraints");
+});
+
+test("generateCommandResult forwards conversationType from caller context to generateDraft", async () => {
+  const calls = [];
+  const runtime = createHermesRuntimeService({
+    hermesBin: "/fake/hermes",
+    runCommand: async (bin, args, options) => {
+      calls.push({ bin, args });
+      return JSON.stringify({
+        assistantText: "Forge reply.",
+        sessionId: "sess-2",
+      });
+    }
+  });
+
+  await runtime.generateCommandResult({
+    input: { content: "!hades create a minion" },
+    context: { userId: "u1", tenantId: "t1", provider: "telegram", chatId: "-100123", messageId: 42, conversationType: "forge" },
+  });
+
+  const prompt = calls[0].args.find(a => typeof a === "string" && a.includes("{"));
+  assert.ok(prompt, "prompt should be found in args");
+  assert.ok(prompt.includes("Allowed categories"), "forge context prompt should include forge constraints");
+});
+
 test("generateCommandResult bridges input/content to generateDraft and returns assistantText", async () => {
   const calls = [];
   const runtime = createHermesRuntimeService({
@@ -177,6 +223,69 @@ test("generateCommandResult bridges input/content to generateDraft and returns a
   assert.equal(result.sessionId, "sess-1");
   assert.equal(calls.length, 1);
   assert.ok(calls[0].args.some(a => a.includes("!hades do something")));
+});
+
+test("generateDraft includes minions in the buildRuntimePrompt payload when provided", async () => {
+  const calls = [];
+  const runtime = createHermesRuntimeService({
+    hermesBin: "/fake/hermes",
+    runCommand: async (bin, args) => {
+      calls.push({ bin, args });
+      return JSON.stringify({ assistantText: "ok" });
+    }
+  });
+
+  await runtime.generateDraft({
+    message: "hello",
+    currentDraft: createEmptyDraft(),
+    context: "general",
+    minions: [{ id: "m1", name: "Mochi", description: "Finds gifs", instructions: "search giphy" }],
+  });
+
+  const prompt = calls[0].args.find(a => typeof a === "string" && a.includes("hello"));
+  assert.ok(prompt, "prompt should be found in args");
+  assert.ok(prompt.includes("Mochi"), "prompt should contain minion name");
+});
+
+test("generateDraft works without minions when not provided", async () => {
+  const calls = [];
+  const runtime = createHermesRuntimeService({
+    hermesBin: "/fake/hermes",
+    runCommand: async (bin, args) => {
+      calls.push({ bin, args });
+      return JSON.stringify({ assistantText: "ok" });
+    }
+  });
+
+  await runtime.generateDraft({
+    message: "hello",
+    currentDraft: createEmptyDraft(),
+  });
+
+  assert.equal(calls.length, 1, "should still call hermes");
+});
+
+test("generateCommandResult forwards minions from context to generateDraft and includes them in prompt", async () => {
+  const calls = [];
+  const runtime = createHermesRuntimeService({
+    hermesBin: "/fake/hermes",
+    runCommand: async (bin, args) => {
+      calls.push({ bin, args });
+      return JSON.stringify({
+        assistantText: "Reply with minions known.",
+        sessionId: "sess-1",
+      });
+    }
+  });
+
+  await runtime.generateCommandResult({
+    input: { content: "!hades status" },
+    context: { userId: "u1", tenantId: "t1", provider: "telegram", chatId: "-100123", messageId: 42, minions: [{ id: "m1", name: "TestMinion" }] },
+  });
+
+  const prompt = calls[0].args.find(a => typeof a === "string" && a.includes("{"));
+  assert.ok(prompt, "prompt should be found in args");
+  assert.ok(prompt.includes("TestMinion"), "prompt should contain minion name from context");
 });
 
 test("Hermes runtime wrapper rejects non-JSON output and old context/provider blockers", async () => {

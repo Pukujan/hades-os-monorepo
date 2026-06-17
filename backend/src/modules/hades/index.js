@@ -16,6 +16,8 @@ import { createConversationRepository } from "./repositories/conversationReposit
 import { createTelegramConnectionRepository } from "./repositories/telegramConnectionRepository.js";
 import { createDiscordConnectionRepository } from "./repositories/discordConnectionRepository.js";
 import { createAgentExecutionRepository } from "./repositories/agentExecutionRepository.js";
+import { createProcessedUpdateRepository } from "./repositories/processedUpdateRepository.js";
+import { createTelegramConversationModeRepository } from "./repositories/telegramConversationModeRepository.js";
 import { createVerifySocialAccount } from "./runtime/verifySocialAccount.js";
 import { createTokenCrypto } from "./security/tokenCrypto.js";
 
@@ -65,6 +67,8 @@ export async function register(app, context) {
   const telegramConnections = overrides.telegramConnections || createTelegramConnectionRepository({ storage: storageMode, supabaseClient, crypto: tokenCrypto });
   const discordConnections = overrides.discordConnections || createDiscordConnectionRepository({ storage: storageMode, supabaseClient });
   const executions = overrides.executions || createAgentExecutionRepository({ storage: storageMode, supabaseClient });
+  const processedUpdates = overrides.processedUpdates || createProcessedUpdateRepository({ storage: storageMode, supabaseClient });
+  const conversationModes = overrides.conversationModes || createTelegramConversationModeRepository({ storage: storageMode, supabaseClient });
 
   const verifySocialAccount = overrides.verifySocialAccount || createVerifySocialAccount({
     discordConnections,
@@ -81,6 +85,8 @@ export async function register(app, context) {
     telegramConnections,
     discordConnections,
     executions,
+    processedUpdates,
+    conversationModes,
     verifySocialAccount,
   };
 

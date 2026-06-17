@@ -91,6 +91,84 @@ describe("Telegram webhook update_id deduplication", () => {
     assert.equal(hermesCallCount, 1, "Hermes should only be called once");
   });
 
+  test("deduplicates across separate service instances via shared processedUpdates repo", async () => {
+    const { createHadesService } = await loadService();
+
+    const sharedDedupStore = {
+      marked: new Map(),
+      async has({ updateId, userId, tenantId }) {
+        const key = `${updateId}:${userId}:${tenantId}`;
+        return sharedDedupStore.marked.has(key);
+      },
+      async mark({ updateId, userId, tenantId }) {
+        const key = `${updateId}:${userId}:${tenantId}`;
+        sharedDedupStore.marked.set(key, Date.now());
+      },
+    };
+
+    function makeInstance() {
+      let hermesCallCount = 0;
+      const service = createHadesService({
+        hermesRuntime: {
+          generateCommandResult: async () => {
+            hermesCallCount++;
+            return {
+              assistantText: "Hello!",
+              commandSpec: {},
+              outboundActions: [{ type: "send_message", content: "Hello!" }],
+              missingFields: [],
+              safety: { allowed: true },
+            };
+          },
+        },
+        scopedRepos: {
+          processedUpdates: sharedDedupStore,
+          telegramConnections: {
+            findPublicByUser: async () => ({
+              id: "conn_1",
+              telegram_user_id: "12345",
+              status: "connected",
+            }),
+            findRuntimeTokenByTelegramUserId: async () => ({
+              botToken: "fake:test-token",
+            }),
+          },
+        },
+        telegramClientFactory: async () => ({
+          sendMessage: async () => ({ providerMessageId: 200 }),
+          getMe: async () => ({ id: 12345, username: "TestBot", first_name: "Test" }),
+        }),
+      });
+      return { service, getCount: () => hermesCallCount };
+    }
+
+    const instanceA = makeInstance();
+    const instanceB = makeInstance();
+
+    const update = makeTelegramUpdate({ updateId: 42 });
+
+    const first = await instanceA.service.handleTelegramWebhook({
+      update,
+      userId: "user_1",
+      tenantId: "tenant_1",
+    });
+    assert.equal(first.status, "sent", "First instance should process the update");
+    assert.equal(instanceA.getCount(), 1, "Instance A hermes should be called once");
+
+    const second = await instanceB.service.handleTelegramWebhook({
+      update,
+      userId: "user_1",
+      tenantId: "tenant_1",
+    });
+    assert.equal(second.status, "duplicate_ignored", "Second instance should see update as already processed");
+    assert.equal(
+      second.reason,
+      "update_id_already_processed",
+      "Should include reason for ignoring"
+    );
+    assert.equal(instanceB.getCount(), 0, "Instance B hermes should NOT be called");
+  });
+
   test("allows different update_ids through", async () => {
     const { createHadesService } = await loadService();
 
