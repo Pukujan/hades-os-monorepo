@@ -479,6 +479,32 @@ describe("Telegram bot runtime", () => {
     assert.equal(minionRequest.context.provider, "telegram");
   });
 
+  test("handleTelegramUpdate executes slash command alias for bang-command minion", async () => {
+    const { createTelegramBotRuntime } = await loadRuntime();
+
+    let minionRequest = null;
+    const runtime = createTelegramBotRuntime({
+      telegramClient: { sendMessage: async () => ({ providerMessageId: 200 }) },
+      resolveTelegramIdentity: async () => ({ userId: "user_1", tenantId: "tenant_1" }),
+      hermesRuntime: {
+        generateCommandResult: async () => ({ assistantText: "", commandSpec: {}, outboundActions: [] }),
+        executeMinion: async (request) => {
+          minionRequest = request;
+          return { assistantText: "Slash alias worked.", outboundActions: [] };
+        },
+      },
+      botTokenProvider: async () => "token",
+      minions: [{ id: "minion_cat", name: "Cat Minion", commandName: "!sendcat", instructions: "Send cat GIFs" }],
+    });
+
+    const result = await runtime.handleTelegramUpdate({ update: makeTelegramUpdate({ text: "/sendcat lawyer cat" }) });
+
+    assert.equal(result.status, "sent");
+    assert.notEqual(minionRequest, null);
+    assert.equal(minionRequest.minion.id, "minion_cat");
+    assert.equal(minionRequest.trigger.commandName, "!sendcat");
+  });
+
   test("handleTelegramUpdate sends help when minion array empty and non-hades message", async () => {
     const { createTelegramBotRuntime } = await loadRuntime();
 

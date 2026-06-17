@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getEmojiForMinion } from "../utils/minionPreviewData.js";
+import { buildForgeEditUrl } from "../utils/minionFlow.js";
 
 function ActiveSwitch({ minion, onActivate, onDeactivate }) {
   const isOn = minion.slotIndex != null;
@@ -80,7 +81,7 @@ export function MinionDetailScreen({ minions, onActivate, onDeactivate }) {
             <button className="action primary" type="button" disabled={!isActive}>
               <strong>Manual summon</strong>
             </button>
-            <button className="action" type="button"><strong>Edit minion</strong></button>
+            <button className="action" type="button" onClick={() => navigate(buildForgeEditUrl(minion.id))}><strong>Edit minion</strong></button>
             <button className="action" type="button" onClick={() => navigate(`/app/minions/${minion.id}/logs`)}><strong>View logs</strong></button>
           </div>
         </div>

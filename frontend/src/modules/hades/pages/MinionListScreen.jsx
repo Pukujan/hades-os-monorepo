@@ -1,14 +1,21 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { getEmojiForMinion } from "../utils/minionPreviewData.js";
+import { paginateMinions } from "../utils/minionFlow.js";
 
 export function MinionListScreen({ minions }) {
   const navigate = useNavigate();
   const [search, setSearch] = React.useState("");
+  const [page, setPage] = React.useState(0);
 
   const filtered = minions.filter((m) =>
     (m.name + " " + (m.description || "")).toLowerCase().includes(search.toLowerCase())
   );
+  const { visibleMinions, hasPrevious, hasNext, totalPages, page: currentPage } = paginateMinions(filtered, page, 10);
+
+  React.useEffect(() => {
+    setPage(0);
+  }, [search]);
 
   return (
     <>
@@ -27,8 +34,19 @@ export function MinionListScreen({ minions }) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
+          <div className="row" style={{ marginBottom: 12 }}>
+            <span className="tiny">Page {currentPage + 1} of {totalPages}</span>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button className="pill-btn" type="button" onClick={() => setPage((current) => Math.max(0, current - 1))} disabled={!hasPrevious}>
+                Previous
+              </button>
+              <button className="pill-btn" type="button" onClick={() => setPage((current) => current + 1)} disabled={!hasNext}>
+                Next
+              </button>
+            </div>
+          </div>
           <div className="grid4">
-            {filtered.slice(0, 16).map((m) => (
+            {visibleMinions.map((m) => (
               <button key={m.id} type="button" className="minion-tile" onClick={() => navigate(`/app/minions/${m.id}`)}>
                 <span className="owner">User</span>
                 <div className="emoji">{getEmojiForMinion(m)}</div>

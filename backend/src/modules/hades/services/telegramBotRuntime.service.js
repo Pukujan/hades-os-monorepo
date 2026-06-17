@@ -1,4 +1,5 @@
 import { parseHadesCommand } from "./hadesCommandParser.js";
+import { findMinionByCommand, normalizeSocialCommandName } from "./socialCommandRouting.js";
 
 export function createTelegramBotRuntime({
   telegramClient,
@@ -59,14 +60,14 @@ export function createTelegramBotRuntime({
       }
 
       if (minions?.length > 0) {
-        const [firstToken] = text.trim().split(/\s+/);
-        const matchedMinion = minions.find(m => (m.commandName || m.command_name) === firstToken);
+        const matchedMinion = findMinionByCommand(text, minions);
         if (matchedMinion) {
+          const commandName = normalizeSocialCommandName(text);
           const execResult = await hermesRuntime.executeMinion({
             context: { userId, tenantId, provider: "telegram", accountId: telegramAccountId, channelId: chatId, messageId },
             minion: matchedMinion,
             assignment: null,
-            trigger: { content: text, commandName: firstToken, triggerType: "command", provider: "telegram" },
+            trigger: { content: text, commandName, triggerType: "command", provider: "telegram" },
           });
 
           const replyText = buildTelegramReply({ assistantText: execResult?.assistantText || "", outboundActions: execResult?.outboundActions || [] });

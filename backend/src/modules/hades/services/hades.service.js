@@ -235,6 +235,14 @@ export function createHadesService({ repository, scopedRepos, hermes, config = {
           command_name: payload.draft.commandName,
           status: "active",
           target_social: payload.draft.targetSocial,
+          schema_version: "hades.minion.v2",
+          version: "1.0.0",
+          metadata: {
+            schemaVersion: "hades.minion.v2",
+            version: "1.0.0",
+            responseStyle: payload.draft.responseStyle || "helpful",
+            safetyMode: payload.draft.safetyMode || "ask_first",
+          },
         },
       });
       return { minion };
@@ -253,6 +261,14 @@ export function createHadesService({ repository, scopedRepos, hermes, config = {
         commandName: payload.draft.commandName,
         status: "active",
         targetSocial: payload.draft.targetSocial,
+        schemaVersion: "hades.minion.v2",
+        version: "1.0.0",
+        metadata: {
+          schemaVersion: "hades.minion.v2",
+          version: "1.0.0",
+          responseStyle: payload.draft.responseStyle || "helpful",
+          safetyMode: payload.draft.safetyMode || "ask_first",
+        },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       },
@@ -616,16 +632,18 @@ async function saveTelegramToken(body, authContext) {
       throw new AppError("Updates body is required", 400);
     }
     const userId = resolveUserId(authContext);
+    const tenantId = authContext?.tenantId || userId;
     if (scopedRepos?.minions) {
-      return scopedRepos.minions.update({ id: minionId, userId, data: updates });
+      return scopedRepos.minions.update({ id: minionId, userId, tenantId, patch: updates });
     }
     return repository.updateMinion(minionId, updates);
   }
 
   async function deleteMinion(minionId, authContext) {
     const userId = resolveUserId(authContext);
+    const tenantId = authContext?.tenantId || userId;
     if (scopedRepos?.minions) {
-      return scopedRepos.minions.delete({ id: minionId, userId });
+      return scopedRepos.minions.delete({ id: minionId, userId, tenantId });
     }
     return repository.deleteMinion(minionId);
   }

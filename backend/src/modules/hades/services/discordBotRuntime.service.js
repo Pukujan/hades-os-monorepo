@@ -1,4 +1,5 @@
 import { parseHadesCommand } from "./hadesCommandParser.js";
+import { normalizeSocialCommandName } from "./socialCommandRouting.js";
 
 function ensureFunction(fn, label) {
   if (typeof fn !== "function") {
@@ -8,10 +9,7 @@ function ensureFunction(fn, label) {
 }
 
 function normalizeCommandName(content = "") {
-  const trimmed = String(content || "").trim();
-  if (!trimmed) return null;
-  const [firstToken] = trimmed.split(/\s+/);
-  return firstToken || null;
+  return normalizeSocialCommandName(content);
 }
 
 function buildHermesRequest({ session, discordAccountId, channelId, messageId, content }) {

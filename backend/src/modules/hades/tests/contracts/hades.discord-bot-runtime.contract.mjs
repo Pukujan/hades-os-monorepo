@@ -148,3 +148,42 @@ test("Discord bot runtime fails closed when the bot token is unavailable", async
   assert.equal(hermesCalls, 0);
 });
 
+test("Discord bot runtime normalizes slash social commands before Hermes", async () => {
+  const { createDiscordBotRuntime } = await loadRuntimeFactory();
+  const hermesRequests = [];
+  const savedExecutions = [];
+
+  const runtime = createDiscordBotRuntime({
+    botTokenProvider: async () => "server-side-bot-secret",
+    resolveDiscordIdentity: async () => createVerifiedSession(),
+    createDiscordClient: async () => ({ sendMessage: async () => ({ providerMessageId: "discord-message-2" }) }),
+    hermesRuntime: {
+      async generateCommandResult(request) {
+        hermesRequests.push(request);
+        return {
+          assistantText: "Sending.",
+          sessionId: "hermes-session-2",
+          commandSpec: {},
+          outboundActions: [{ type: "send_message", content: "Sending." }],
+          missingFields: [],
+          safety: { allowed: true }
+        };
+      }
+    },
+    repository: {
+      async saveAgentExecution({ execution }) {
+        savedExecutions.push(execution);
+      }
+    }
+  });
+
+  await runtime.handleDiscordMessage({
+    discordAccountId: "discord_456",
+    channelId: "channel_abc",
+    messageId: "discord-input-3",
+    content: "/sendcat lawyer cat"
+  });
+
+  assert.equal(hermesRequests[0].input.commandName, "!sendcat");
+  assert.equal(savedExecutions[0].commandName, "!sendcat");
+});

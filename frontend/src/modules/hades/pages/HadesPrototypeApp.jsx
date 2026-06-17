@@ -37,6 +37,12 @@ import {
   buildNotificationViewModel,
   normalizeMessage
 } from "../utils/hadesViewModel.js";
+import {
+  buildForgeDraftFromMinion,
+  getForgeDraftActionLabel,
+  getForgeTriggerLabel,
+  normalizeSavedMinion
+} from "../utils/minionFlow.js";
 import { MinionSlots } from "./MinionSlots.jsx";
 import { MinionListScreen } from "./MinionListScreen.jsx";
 import { MinionDetailScreen } from "./MinionDetailScreen.jsx";
@@ -53,6 +59,7 @@ import {
   sendForgeChat,
   sendGeneralChat,
   postHadesMinion,
+  updateMinion,
   postHadesMinionTest
 } from "../services/hadesApi.js";
 
@@ -263,6 +270,7 @@ function HadesProvider({ children }) {
     }
   ]);
   const [detailMinionId, setDetailMinionId] = React.useState(null);
+  const [forgeEditMinionId, setForgeEditMinionId] = usePersistentState("hades.forgeEditMinionId", null);
   const [sending, setSending] = React.useState(false);
   const [pendingCopy, setPendingCopy] = React.useState("Hades is thinking.");
   const [notificationOpen, setNotificationOpen] = React.useState(false);
@@ -520,10 +528,14 @@ function HadesProvider({ children }) {
           cards: response.cards || [],
         }))
       );
-      updateDraft(response.draft);
+      if (isForge && response.draft) {
+        updateDraft(response.draft);
+      }
     } catch (error) {
       const parsed = buildLocalDraftFallback(text, draft);
-      updateDraft(parsed.draft);
+      if (isForge) {
+        updateDraft(parsed.draft);
+      }
       const assistantReply = buildAssistantReply(parsed);
       setMsgs((current) =>
         current.map((entry) => (entry.id === userMessageId ? { ...entry, status: "completed" } : entry)).concat(normalizeMessage({
@@ -626,22 +638,32 @@ function HadesProvider({ children }) {
       return;
     }
 
+    const now = new Date().toISOString();
+
     try {
-      const response = await postHadesMinion({
-        draft,
-        idempotencyKey: createId("minion")
-      }, accessToken);
-      const saved = {
-        ...response.minion,
-        commandName: response.minion.commandName || response.minion.command_name,
-        targetSocial: response.minion.targetSocial || response.minion.target_social,
-        triggerType: response.minion.triggerType || response.minion.trigger_type,
-      };
+      const isEditing = Boolean(forgeEditMinionId);
+      const response = isEditing
+        ? await updateMinion(forgeEditMinionId, {
+            name: draft.name,
+            description: draft.description,
+            instructions: draft.action,
+            category: draft.category,
+            trigger_type: draft.triggerType,
+            command_name: draft.commandName,
+            status: "active",
+            target_social: draft.targetSocial,
+          }, accessToken)
+        : await postHadesMinion({
+            draft,
+            idempotencyKey: createId("minion")
+          }, accessToken);
+      const saved = normalizeSavedMinion(response.minion || response);
       setMinions((current) => {
-        const filtered = current.filter((entry) => entry.name !== saved.name || (entry.commandName || entry.command_name) !== saved.commandName);
+        const filtered = current.filter((entry) => entry.id !== saved.id && !(entry.name === saved.name && (entry.commandName || entry.command_name) === saved.commandName));
         return [...filtered, saved];
       });
       setSelectedMinionId(saved.id);
+      setForgeEditMinionId(null);
       updateDraft({ ...draft, status: "saved" });
       pushInbox("sparkles", "Minion saved", `${saved.name} was added to your inventory.`, "success");
       pushNotification({
@@ -667,7 +689,6 @@ function HadesProvider({ children }) {
       });
       showToast(`${saved.name} saved.`);
     } catch {
-      const now = new Date().toISOString();
       const id = createId("minion");
       const saved = {
         id,
@@ -690,6 +711,7 @@ function HadesProvider({ children }) {
         return [...filtered, saved];
       });
       setSelectedMinionId(id);
+      setForgeEditMinionId(null);
       updateDraft({ ...draft, status: "saved" });
       pushInbox("sparkles", "Minion saved", `${saved.name} was added to your inventory.`, "success");
       pushNotification({
@@ -1715,8 +1737,38 @@ function SettingsScreen() {
 }
 
 function ForgeScreen() {
-  const { forgeMessages: messages, draft, sending, pendingCopy, composerText, setComposerText, sendMessage, clearMessages, runDraftTest, saveDraft, minions, openMinionDetail } = useHades();
+  const location = useLocation();
+  const {
+    forgeMessages: messages,
+    draft,
+    sending,
+    pendingCopy,
+    composerText,
+    setComposerText,
+    sendMessage,
+    clearMessages,
+    runDraftTest,
+    saveDraft,
+    minions,
+    openMinionDetail,
+    updateDraft,
+    forgeEditMinionId,
+    setForgeEditMinionId,
+  } = useHades();
   const visibleSummons = minions.filter((minion) => minion.status === "active").slice(0, 4);
+  const editMinionId = new URLSearchParams(location.search).get("edit");
+  const isEditing = Boolean(editMinionId || forgeEditMinionId);
+  const saveLabel = getForgeDraftActionLabel({ isEditing });
+
+  React.useEffect(() => {
+    if (!editMinionId) return;
+    if (forgeEditMinionId === editMinionId && draft?.name) return;
+    const match = minions.find((minion) => minion.id === editMinionId);
+    if (!match) return;
+    setForgeEditMinionId(editMinionId);
+    updateDraft(buildForgeDraftFromMinion(match));
+  }, [draft?.name, editMinionId, forgeEditMinionId, minions, setForgeEditMinionId, updateDraft]);
+
   const templateChips = [
     { id: "sendcat", label: "SEND CAT", text: "Create a command called !sendcat that sends cat memes in Discord." },
     { id: "tracker", label: "PRICE TRACK", text: "Make a minion that checks product prices every 5 hours." },
@@ -1728,10 +1780,10 @@ function ForgeScreen() {
 
   return (
     <>
-      <ScreenHead title="Forge" subtitle="Create a helper from plain English." />
+      <ScreenHead title="Forge" subtitle={isEditing ? "Refine a saved helper from plain English." : "Create a helper from plain English."} />
       <div className="scroll">
         <section className="card chat-card expanded">
-          <p className="kicker">Forge your minion
+          <p className="kicker">{isEditing ? "Edit your minion" : "Forge your minion"}
             {messages.length > 0 ? <button className="tiny" type="button" style={{ float: "right" }} onClick={() => clearMessages("forge")}>Clear</button> : null}
           </p>
           <div className="chips">
@@ -1779,12 +1831,20 @@ function ForgeScreen() {
         </section>
 
         <section className="card config">
-          <p className="kicker">Required details</p>
+          <p className="kicker">{isEditing ? "Editing draft" : "Live draft"}</p>
           <div className="config">
             <div className="config-row"><span>Template</span><b>{draft.name || "Not selected"}</b></div>
-            <div className="config-row"><span>Mode</span><b>{draft.triggerType === "automatic" ? "Automatic" : "Manual"}</b></div>
+            <div className="config-row"><span>Trigger</span><b>{getForgeTriggerLabel(draft)}</b></div>
             <div className="config-row"><span>Channel</span><b>{formatSocialLabel(draft.targetSocial || "private")}</b></div>
             <div className="config-row"><span>Approval</span><b>{draft.safetyMode === "ask_first" ? "Required" : "Optional"}</b></div>
+          </div>
+          <div className="draft-actions" style={{ marginTop: 16 }}>
+            <button className="btn secondary" type="button" onClick={runDraftTest}>
+              Test draft
+            </button>
+            <button className="btn secondary" type="button" onClick={saveDraft}>
+              {saveLabel}
+            </button>
           </div>
         </section>
 
@@ -1870,5 +1930,3 @@ export default function HadesPrototypeApp() {
     </HadesProvider>
   );
 }
-
-
