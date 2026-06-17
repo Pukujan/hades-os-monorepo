@@ -273,8 +273,8 @@ export function createHermesRuntimeService({
     });
 
     return {
-      assistantText: draftResult.assistantText || "",
-      outboundActions: [],
+      assistantText: draftResult.assistantText || draftResult.reply || "",
+      outboundActions: draftResult.actions || [],
       sessionId: draftResult.sessionId,
     };
   }

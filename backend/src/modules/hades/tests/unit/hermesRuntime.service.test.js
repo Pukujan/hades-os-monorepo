@@ -225,6 +225,31 @@ test("generateCommandResult bridges input/content to generateDraft and returns a
   assert.ok(calls[0].args.some(a => a.includes("!hades do something")));
 });
 
+test("generateCommandResult falls back to reply when assistantText is empty (general context)", async () => {
+  const calls = [];
+  const runtime = createHermesRuntimeService({
+    hermesBin: "/fake/hermes",
+    runCommand: async (bin, args, options) => {
+      calls.push({ bin, args });
+      return JSON.stringify({
+        reply: "General reply from AI.",
+        actions: [],
+        sessionId: "sess-1",
+      });
+    }
+  });
+
+  const result = await runtime.generateCommandResult({
+    input: { content: "hades hello" },
+    context: { userId: "u1", tenantId: "t1", provider: "telegram", chatId: "-100123", messageId: 42 },
+  });
+
+  assert.equal(result.assistantText, "General reply from AI.");
+  assert.ok(Array.isArray(result.outboundActions), "outboundActions should be an array");
+  assert.equal(result.sessionId, "sess-1");
+  assert.equal(calls.length, 1);
+});
+
 test("generateDraft includes minions in the buildRuntimePrompt payload when provided", async () => {
   const calls = [];
   const runtime = createHermesRuntimeService({
