@@ -10,17 +10,17 @@ const distDir = join(extensionRoot, "dist");
 const zipPath = join(distDir, "extension.zip");
 
 const files = [
-  "popup.html",
-  "public/manifest.json",
-  "src/popup.jsx",
-  "src/hades-extension.css",
-  "src/surfaces/HadesExtensionApp.jsx",
-  "src/surfaces/HadesChatPanel.jsx",
-  "src/surfaces/WorkflowListPanel.jsx",
-  "src/surfaces/ContextUploadPanel.jsx",
-  "src/surfaces/TextContextSpacesPanel.jsx",
-  "src/surfaces/PageCapturePanel.jsx",
-  "src/surfaces/ApprovalQueuePanel.jsx",
+  { src: "popup.html", name: "popup.html" },
+  { src: "public/manifest.json", name: "manifest.json" },
+  { src: "src/popup.jsx", name: "src/popup.jsx" },
+  { src: "src/hades-extension.css", name: "src/hades-extension.css" },
+  { src: "src/surfaces/HadesExtensionApp.jsx", name: "src/surfaces/HadesExtensionApp.jsx" },
+  { src: "src/surfaces/HadesChatPanel.jsx", name: "src/surfaces/HadesChatPanel.jsx" },
+  { src: "src/surfaces/WorkflowListPanel.jsx", name: "src/surfaces/WorkflowListPanel.jsx" },
+  { src: "src/surfaces/ContextUploadPanel.jsx", name: "src/surfaces/ContextUploadPanel.jsx" },
+  { src: "src/surfaces/TextContextSpacesPanel.jsx", name: "src/surfaces/TextContextSpacesPanel.jsx" },
+  { src: "src/surfaces/PageCapturePanel.jsx", name: "src/surfaces/PageCapturePanel.jsx" },
+  { src: "src/surfaces/ApprovalQueuePanel.jsx", name: "src/surfaces/ApprovalQueuePanel.jsx" },
 ];
 
 function crc32(buf) {
@@ -45,16 +45,16 @@ function buildZip() {
   let localHeaderOffset = 0;
 
   for (const file of files) {
-    const absPath = join(extensionRoot, file);
+    const absPath = join(extensionRoot, file.src);
     if (!existsSync(absPath)) {
-      console.warn(`WARN: ${file} not found, skipping`);
+      console.warn(`WARN: ${file.src} not found, skipping`);
       continue;
     }
 
     const data = readFileSync(absPath);
     const compressed = deflateRawSync(data);
     const crc = crc32(data);
-    const name = Buffer.from(file.replace(/\//g, "/"), "utf8");
+    const name = Buffer.from(file.name, "utf8");
 
     const localHeader = Buffer.concat([
       Buffer.from("PK\x03\x04"),
