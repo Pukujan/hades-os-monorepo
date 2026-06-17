@@ -1,40 +1,17 @@
 {
   "phase": "current-task",
-  "module": "hades-telegram-fixes",
-  "task": "Inject minions context into Hermes runtime prompts",
+  "module": "hades-minion-listing-bug",
+  "task": "Fix created minions not appearing in UI (Past Summons / Minion List)",
   "state": {
-    "hadesTelegramFixes": {
-      "status": "Fixed generateCommandResult hardcoded forge context. Added cross-instance dedup. Added bare 'hades' prefix support, forge/general mode switching via 'forge'/'hades' triggers, and persistent conversation modes via telegramConversationModeRepository. All 30 unit tests pass.",
-      "testCount": "30/30 unit pass"
-    },
-    "minionInjection": {
-      "status": "Implemented minion context injection across Hermes pipeline. buildRuntimePrompt serializes minions into prompt payload. generateDraft, generateCommandResult, buildResponse forward minions. telegramBotRuntime accepts minions in context. hades.service loads minions via scopedRepos in chat() and handleTelegramWebhook(). 30/30 tests pass.",
-      "testCount": "30/30 unit pass"
-    },
-    "telegramTokenDelete": {
-      "status": "Implemented DELETE /socials/telegram/token route + deleteTelegramToken service + findByUserId/listByUser/delete on telegramConnectionRepository. TDD: wrote failing tests, implemented, all 214 tests pass (197 unit + 5 integration + 12 contract).",
-      "testCount": "214/214 all pass",
-      "filesChanged": [
-        "backend/src/modules/hades/repositories/telegramConnectionRepository.js",
-        "backend/src/modules/hades/services/hades.service.js",
-        "backend/src/modules/hades/routes/hades.routes.js",
-        "backend/src/modules/hades/tests/unit/telegramConnectionRepository.test.js",
-        "backend/src/modules/hades/tests/unit/telegramSocialRoutes.test.js"
-      ]
-    },
-    "discordGithubTokenEncryption": {
-      "status": "Implemented encrypted token storage for Discord and GitHub social connections. Added crypto support to discordConnectionRepository, created gitHubConnectionRepository with encryption, added saveDiscordToken/saveGitHubToken service methods and POST routes, wired into index.js scopedRepos. TDD: wrote failing integration tests, all 430 tests pass.",
-      "testCount": "430/430 all pass",
-      "filesChanged": [
-        "backend/src/modules/hades/repositories/discordConnectionRepository.js",
-        "backend/src/modules/hades/repositories/gitHubConnectionRepository.js",
-        "backend/src/modules/hades/services/hades.service.js",
-        "backend/src/modules/hades/routes/hades.routes.js",
-        "backend/src/modules/hades/index.js",
-        "backend/src/modules/hades/__tests__/liveDiscordTokenScope.integration.test.js",
-        "backend/src/modules/hades/__tests__/liveGitHubTokenScope.integration.test.js",
-        "frontend/src/styles/hadesPrototype.css"
-      ]
+    "minionListingBug": {
+      "status": "Fixed: three changes applied and verified.",
+      "diagnosis": "Root cause 1: backend scoped repo stores snake_case keys (command_name, target_social, trigger_type, user_id) but frontend accessed camelCase (commandName, targetSocial, ownerType). Root cause 2: dedup filter in saveDraft had `||` instead of `&&` combined with undefined commandName causing valid entries filtered out.",
+      "fixes": [
+        "HadesPrototypeApp.jsx:634 — normalize snake_case to camelCase on saved minion (commandName, targetSocial, triggerType)",
+        "HadesPrototypeApp.jsx:636 — dedup filter now checks (entry.commandName || entry.command_name) to handle both old localStorage and new API entries",
+        "MinionListScreen.jsx:33 — removed m.ownerType access (scoped repos store user_id, not ownerType); hardcoded to 'User'"
+      ],
+      "testsPassed": "334 frontend unit tests + 6 backend minion route tests + 8 bootstrap/repo tests"
     }
   }
 }
