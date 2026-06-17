@@ -1,4 +1,4 @@
-import { persistTable, readTableRows } from "./_supabase.js";
+import { persistTable, readTableRows, deleteTableRow } from "./_supabase.js";
 import { randomUUID } from "node:crypto";
 
 function last4(token) {
@@ -88,5 +88,36 @@ export function createTelegramConnectionRepository({ storage = "memory", supabas
     return byTelegramUserId.get(telegramUserId) || null;
   }
 
-  return { createOrUpdate, findPublicByUser, findRuntimeTokenByTelegramUserId, findByTelegramUserId };
+  async function findByUserId({ userId, tenantId }) {
+    await hydrate();
+    for (const record of connections.values()) {
+      if (record.user_id === userId && record.tenant_id === tenantId) {
+        return record;
+      }
+    }
+    return null;
+  }
+
+  async function listByUser({ userId, tenantId }) {
+    await hydrate();
+    return [...connections.values()].filter(
+      (r) => r.user_id === userId && r.tenant_id === tenantId
+    );
+  }
+
+  async function deleteRecord({ id }) {
+    await hydrate();
+    const record = connections.get(id) || null;
+    if (!record) return null;
+    connections.delete(id);
+    if (record.telegram_user_id) {
+      byTelegramUserId.delete(record.telegram_user_id);
+    }
+    if (storage === "supabase") {
+      await deleteTableRow(supabaseClient, tableName, id);
+    }
+    return record;
+  }
+
+  return { createOrUpdate, findPublicByUser, findRuntimeTokenByTelegramUserId, findByTelegramUserId, findByUserId, listByUser, delete: deleteRecord };
 }

@@ -448,6 +448,23 @@ async function saveTelegramToken(body, authContext) {
     return { status: "connected", botUsername: botInfo.username || null, token_last4: last4(token) };
   }
 
+  async function deleteTelegramToken(authContext) {
+    const userId = authContext?.userId;
+    const tenantId = authContext?.tenantId || userId;
+
+    if (!scopedRepos?.telegramConnections) {
+      throw new AppError("Telegram connections repository not available", 501);
+    }
+
+    const connection = await scopedRepos.telegramConnections.findByUserId({ userId, tenantId });
+    if (!connection) {
+      throw new AppError("No Telegram connection found", 404);
+    }
+
+    await scopedRepos.telegramConnections.delete({ id: connection.id });
+    return { deleted: true };
+  }
+
   const dedupStore = scopedRepos?.processedUpdates || null;
   const processedUpdates = new Set();
 
@@ -580,6 +597,7 @@ async function saveTelegramToken(body, authContext) {
     clearMessages,
     listSocialConnections,
     saveTelegramToken,
+    deleteTelegramToken,
     handleTelegramWebhook,
     handleTrigger,
     listMinions,

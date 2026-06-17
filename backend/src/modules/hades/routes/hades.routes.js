@@ -183,6 +183,15 @@ export function createHadesRoutes({ service, requireHadesAuth, config, scopedRep
     })
   );
 
+  router.delete(
+    "/socials/telegram/token",
+    requireAuth,
+    asyncRoute(async (req, res) => {
+      const result = await service.deleteTelegramToken(req.authContext);
+      res.status(200).json(result);
+    })
+  );
+
   router.get(
     "/minions",
     requireAuth,

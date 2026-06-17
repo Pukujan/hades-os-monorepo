@@ -36,3 +36,21 @@ export async function readTableRows(supabaseClient, tableName) {
   }
   return [];
 }
+
+export async function deleteTableRow(supabaseClient, tableName, id) {
+  if (!supabaseClient) return false;
+  if (typeof supabaseClient.from === "function") {
+    const { error } = await supabaseClient.from(tableName).delete().eq("id", id);
+    if (error) throw new Error(`Supabase delete error (${tableName}): ${error.message}`);
+    return true;
+  }
+  if (typeof supabaseClient.table === "function") {
+    const rows = supabaseClient?.tables?.[tableName];
+    if (!Array.isArray(rows)) return false;
+    const idx = rows.findIndex((r) => r.id === id);
+    if (idx === -1) return false;
+    rows.splice(idx, 1);
+    return true;
+  }
+  return false;
+}

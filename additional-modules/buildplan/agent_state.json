@@ -9,15 +9,17 @@
     },
     "minionInjection": {
       "status": "Implemented minion context injection across Hermes pipeline. buildRuntimePrompt serializes minions into prompt payload. generateDraft, generateCommandResult, buildResponse forward minions. telegramBotRuntime accepts minions in context. hades.service loads minions via scopedRepos in chat() and handleTelegramWebhook(). 30/30 tests pass.",
-      "testCount": "30/30 unit pass",
+      "testCount": "30/30 unit pass"
+    },
+    "telegramTokenDelete": {
+      "status": "Implemented DELETE /socials/telegram/token route + deleteTelegramToken service + findByUserId/listByUser/delete on telegramConnectionRepository. TDD: wrote failing tests, implemented, all 214 tests pass (197 unit + 5 integration + 12 contract).",
+      "testCount": "214/214 all pass",
       "filesChanged": [
-        "backend/src/modules/hades/services/hermesRuntime.service.js",
-        "backend/src/modules/hades/services/hermes.service.js",
-        "backend/src/modules/hades/services/telegramBotRuntime.service.js",
+        "backend/src/modules/hades/repositories/telegramConnectionRepository.js",
         "backend/src/modules/hades/services/hades.service.js",
-        "backend/src/modules/hades/tests/unit/hermesRuntime.service.test.js",
-        "backend/src/modules/hades/tests/unit/hermes.service.test.js",
-        "backend/src/modules/hades/tests/unit/telegramBotRuntime.test.js"
+        "backend/src/modules/hades/routes/hades.routes.js",
+        "backend/src/modules/hades/tests/unit/telegramConnectionRepository.test.js",
+        "backend/src/modules/hades/tests/unit/telegramSocialRoutes.test.js"
       ]
     }
   }
