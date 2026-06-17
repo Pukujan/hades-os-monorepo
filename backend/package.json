@@ -21,6 +21,8 @@
     "test:hades-workflow-durable-run-state": "node --test src/modules/hades/tests/unit/hades.workflow-durable-run-state.tdd.test.js",
     "test:hades-extension-install": "node --test src/modules/hades/tests/unit/hades.extension-install.tdd.test.js",
     "test:hades-extension-auth": "node --test src/modules/hades/tests/unit/hades.extension-auth.tdd.test.js",
+    "test:hades-media-verification": "node --test src/modules/hades/tests/unit/mediaUrlVerifier.tdd.test.js src/modules/hades/tests/unit/discordGifMediaVerification.tdd.test.js src/modules/hades/tests/unit/giphyProvider.test.js",
+    "test:hades-instagram-social": "node --test src/modules/hades/tests/unit/instagramSocialRoutes.tdd.test.js",
     "test:evals": "node ../scripts/run-module-evals.mjs"
   },
   "dependencies": {

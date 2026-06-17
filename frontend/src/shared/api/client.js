@@ -71,7 +71,20 @@ async function parseResponse(response) {
   const body = await readResponseBody(response);
 
   if (!response.ok) {
-    throw new Error(errorMessageFromBody(body, response.status));
+    const message = errorMessageFromBody(body, response.status);
+    const suffix = message.includes(`HTTP ${response.status}`) ? "" : ` (HTTP ${response.status})`;
+    const error = new Error(`${message}${suffix}`);
+    error.status = response.status;
+    if (body && typeof body === "object") {
+      error.code = body.code || body.errorCode || null;
+      error.requestId = body.requestId || body.request_id || response.headers.get("x-request-id") || null;
+      error.responseBody = body;
+    } else {
+      error.code = null;
+      error.requestId = response.headers.get("x-request-id") || null;
+      error.responseBody = body;
+    }
+    throw error;
   }
 
   return body;

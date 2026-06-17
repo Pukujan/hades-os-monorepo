@@ -49,6 +49,44 @@ describe("Giphy provider", () => {
     assert.equal(result.title, "Test GIF");
   });
 
+  test("searchGif returns a direct media URL instead of the provider landing page", async () => {
+    const { createGiphyProvider } = await loadGiphyProvider();
+
+    const provider = createGiphyProvider({
+      apiKey: "test-key",
+      fetch: async () => ({
+        ok: true,
+        json: async () => ({
+          data: [{
+            id: "gif_1",
+            url: "https://giphy.com/gifs/not-direct-page",
+            title: "Direct GIF",
+            images: {
+              original: {
+                url: "https://media.giphy.com/media/gif_1/giphy.gif",
+                webp: "https://media.giphy.com/media/gif_1/giphy.webp"
+              },
+              fixed_height: {
+                url: "https://media.giphy.com/media/gif_1/200.gif"
+              }
+            }
+          }],
+        }),
+      }),
+    });
+
+    const result = await provider.searchGif({
+      query: "direct gif",
+      rating: "pg-13",
+      limit: 1,
+    });
+
+    assert.equal(result.id, "gif_1");
+    assert.equal(result.url, "https://media.giphy.com/media/gif_1/giphy.gif");
+    assert.equal(result.providerPageUrl, "https://giphy.com/gifs/not-direct-page");
+    assert.notEqual(result.url, result.providerPageUrl);
+  });
+
   test("searchGif passes rating and limit to the API", async () => {
     const { createGiphyProvider } = await loadGiphyProvider();
 

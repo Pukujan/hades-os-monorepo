@@ -82,6 +82,7 @@ export function createDiscordHermesCommandFlow({
   verifyDiscordAccount,
   hermesRuntime,
   gifProvider,
+  mediaVerifier,
   discordClient,
   repository = {}
 } = {}) {
@@ -131,6 +132,7 @@ export function createDiscordHermesCommandFlow({
 
     const gifAction = pickGifAction(commandResult?.outboundActions || []);
     let gif = null;
+    let mediaVerificationResult = null;
     if (gifAction) {
       gif = await ensureFunction(gifProvider?.searchGif, "GIF provider")({
         query: gifAction.query || gifAction.searchQuery || commandResult?.commandSpec?.action || commandName || content,
@@ -139,12 +141,30 @@ export function createDiscordHermesCommandFlow({
         tenantId: session.tenantId,
         userId: session.userId
       });
+
+      if (gif?.url && typeof mediaVerifier?.verifyMediaUrl === "function") {
+        mediaVerificationResult = await mediaVerifier.verifyMediaUrl({
+          url: gif.url,
+          allowedContentTypes: ["image/gif", "image/webp"],
+        });
+      }
+    }
+
+    let gifUrl = gif?.url || gif?.gifUrl || null;
+    let assistantText = commandResult?.assistantText || "";
+
+    if (mediaVerificationResult && !mediaVerificationResult.ok) {
+      gifUrl = null;
+      assistantText = assistantText || "I found a GIF, but it appears to be unavailable.";
+      if (!assistantText.toLowerCase().includes("unavailable")) {
+        assistantText = assistantText + " (GIF media unavailable after verification)";
+      }
     }
 
     const sendResult = await ensureFunction(discordClient?.sendMessage, "Discord client")({
       channelId,
-      content: commandResult?.assistantText || "",
-      gifUrl: gif?.url || gif?.gifUrl || null,
+      content: assistantText,
+      gifUrl,
       replyToMessageId: messageId
     });
 
@@ -176,8 +196,9 @@ export function createDiscordHermesCommandFlow({
         channelId,
         messageId,
         providerMessageId: sendResult?.providerMessageId || null,
-        content: commandResult?.assistantText || "",
-        gifUrl: gif?.url || gif?.gifUrl || null,
+        content: assistantText,
+        gifUrl,
+        mediaVerification: mediaVerificationResult || undefined,
         source: "discord_hermes_command_flow"
       });
     }

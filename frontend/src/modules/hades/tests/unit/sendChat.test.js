@@ -63,3 +63,35 @@ test("sendForgeChat posts to /chat/forge with correct payload", async () => {
     global.fetch = originalFetch;
   }
 });
+
+test("sendGeneralChat preserves HTTP 500 diagnostics for production chat failures", async () => {
+  const originalFetch = global.fetch;
+  global.fetch = async () => new Response(JSON.stringify({
+    code: "hades_chat_runtime_failed",
+    message: "Hermes runtime crashed while generating the reply.",
+    requestId: "railway-request-500"
+  }), {
+    status: 500,
+    headers: { "Content-Type": "application/json" }
+  });
+
+  try {
+    const { sendGeneralChat } = await import("../../services/hadesApi.js");
+    await assert.rejects(
+      () => sendGeneralChat({
+        message: "hello hades",
+        conversationId: "conv-prod-500",
+        idempotencyKey: "idem-prod-500"
+      }, TEST_TOKEN),
+      (error) => {
+        assert.equal(error.status, 500);
+        assert.equal(error.code, "hades_chat_runtime_failed");
+        assert.equal(error.requestId, "railway-request-500");
+        assert.match(error.message, /Hermes runtime crashed|HTTP 500/i);
+        return true;
+      }
+    );
+  } finally {
+    global.fetch = originalFetch;
+  }
+});

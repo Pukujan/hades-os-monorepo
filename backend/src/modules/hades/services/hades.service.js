@@ -407,6 +407,11 @@ export function createHadesService({ repository, scopedRepos, hermes, config = {
       if (github) socials.push({ provider: "github", ...github });
     }
 
+    if (scopedRepos?.instagramConnections) {
+      const instagram = await scopedRepos.instagramConnections.findPublicByUser({ userId, tenantId });
+      if (instagram) socials.push({ provider: "instagram", ...instagram });
+    }
+
     return socials;
   }
 
@@ -657,6 +662,85 @@ async function saveTelegramToken(body, authContext) {
     return repository.deleteMinion(minionId);
   }
 
+  async function createInstagramAuthLink(body, authContext) {
+    const userId = resolveUserId(authContext);
+    const tenantId = authContext?.tenantId || userId;
+
+    return {
+      provider: "instagram",
+      connector: body.connector || "composio",
+      authUrl: `https://composio.example/connect/instagram/${userId}`,
+      connectionIntentId: `ig-intent-${userId}`,
+    };
+  }
+
+  async function saveInstagramConnection(body, authContext) {
+    const userId = resolveUserId(authContext);
+    const tenantId = authContext?.tenantId || userId;
+
+    if (scopedRepos?.instagramConnections) {
+      await scopedRepos.instagramConnections.createOrUpdate({
+        userId,
+        tenantId,
+        connector: body.connector || "composio",
+        externalConnectionId: body.externalConnectionId,
+        instagramBusinessAccountId: body.instagramBusinessAccountId,
+        handle: body.handle,
+        status: "connected",
+        capabilities: ["dm.read", "dm.send"],
+      });
+    }
+
+    return {
+      provider: "instagram",
+      status: "connected",
+      handle: body.handle || "instagram_user",
+      connector: body.connector || "composio",
+    };
+  }
+
+  async function deleteInstagramConnection(authContext) {
+    const userId = resolveUserId(authContext);
+    const tenantId = authContext?.tenantId || userId;
+
+    if (scopedRepos?.instagramConnections) {
+      await scopedRepos.instagramConnections.delete({ userId, tenantId });
+    }
+
+    return { deleted: true, provider: "instagram" };
+  }
+
+  async function handleInstagramWebhook(body, headers) {
+    if (!scopedRepos?.instagramConnections) {
+      throw new AppError("Instagram connections repository not available", 501);
+    }
+
+    const externalConnectionId = body?.externalConnectionId;
+    if (!externalConnectionId) {
+      throw new AppError("Missing externalConnectionId", 400);
+    }
+
+    const runtime = await scopedRepos.instagramConnections.findRuntimeByExternalConnectionId({
+      externalConnectionId,
+    });
+
+    if (!runtime) {
+      throw new AppError("Unknown Instagram connection", 404);
+    }
+
+    if (typeof minionAssignmentRuntime?.handleSocialTrigger === "function") {
+      await minionAssignmentRuntime.handleSocialTrigger({
+        provider: "instagram",
+        eventType: body.eventType,
+        userId: runtime.userId,
+        tenantId: runtime.tenantId,
+        payload: body,
+      });
+    }
+
+    return { status: "queued" };
+  }
+
   async function handleTrigger(body, authContext = null) {
     if (!minionAssignmentRuntime) {
       throw new AppError("Minion assignment runtime is not configured", 501);
@@ -782,6 +866,10 @@ async function saveTelegramToken(body, authContext) {
     saveDiscordToken,
     saveGitHubToken,
     deleteTelegramToken,
+    createInstagramAuthLink,
+    saveInstagramConnection,
+    deleteInstagramConnection,
+    handleInstagramWebhook,
     handleTelegramWebhook,
     handleTrigger,
     listMinions,

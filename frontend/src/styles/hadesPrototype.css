@@ -156,6 +156,11 @@ button{color:inherit;cursor:pointer}
 .screen-title{margin:0;color:var(--gold);font-size:14px;line-height:1.4;text-transform:uppercase}
 .screen-sub{margin:3px 0 0;color:var(--muted2);font-size:18px;line-height:1}
 .scroll{overflow:auto;min-height:0;scrollbar-width:thin;scrollbar-color:var(--line2) transparent;padding-bottom:60px}
+.minions-scroll{height:100%;display:flex;flex-direction:column;gap:0;overflow:hidden;padding-bottom:0}
+.minions-scroll>.card:not(.chat-card){flex:none;margin-bottom:0}
+.minions-scroll>.card:not(.chat-card)+.chat-card{margin-top:0}
+.minions-scroll .chat-card{flex:1 1 auto;min-height:0;margin-bottom:0}
+.minions-scroll .chat-card.focused,.minions-scroll .chat-card.expanded{height:auto;min-height:0}
 .scroll::-webkit-scrollbar,.contained-list::-webkit-scrollbar,.chat-log::-webkit-scrollbar,.detail-scroll::-webkit-scrollbar,.notification-body::-webkit-scrollbar{width:4px}
 .scroll::-webkit-scrollbar-thumb,.contained-list::-webkit-scrollbar-thumb,.chat-log::-webkit-scrollbar-thumb,.detail-scroll::-webkit-scrollbar-thumb,.notification-body::-webkit-scrollbar-thumb{background:var(--line2);border-radius:999px}
 .card{border:1px solid var(--line);border-radius:24px;padding:14px;background:linear-gradient(180deg,color-mix(in srgb,var(--panel) 90%,transparent),color-mix(in srgb,var(--panel2) 88%,transparent));box-shadow:0 14px 36px rgba(0,0,0,.16);backdrop-filter:blur(12px)}

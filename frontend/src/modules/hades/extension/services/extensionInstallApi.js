@@ -1,3 +1,5 @@
+import { apiUrl, apiGet, apiPost } from "../../../../shared/api/client.js";
+
 const BASE_PATH = "/api/hades/extension";
 
 export const EXTENSION_API_CONTRACT = {
@@ -10,45 +12,30 @@ export const EXTENSION_API_CONTRACT = {
   },
 };
 
-async function apiFetch(path, options = {}) {
-  const response = await fetch(`${BASE_PATH}${path}`, {
-    headers: { "content-type": "application/json", ...options.headers },
-    ...options,
-  });
-  if (!response.ok) {
-    throw new Error(`API error: ${response.status}`);
-  }
-  return response;
-}
-
 export async function listExtensionApiKeys() {
-  const res = await apiFetch("/keys");
-  return res.json();
+  return apiGet(`${BASE_PATH}/keys`);
 }
 
 export async function generateExtensionApiKey({ name, scopes }) {
-  const res = await apiFetch("/keys", {
-    method: "POST",
-    body: JSON.stringify({ name, scopes }),
-  });
-  return res.json();
+  return apiPost(`${BASE_PATH}/keys`, { name, scopes });
 }
 
 export async function rotateExtensionApiKey(id) {
-  const res = await apiFetch(`/keys/${id}/rotate`, { method: "POST" });
-  return res.json();
+  return apiPost(`${BASE_PATH}/keys/${id}/rotate`);
 }
 
 export async function revokeExtensionApiKey(id) {
-  const res = await apiFetch(`/keys/${id}/revoke`, { method: "POST" });
-  return res.json();
+  return apiPost(`${BASE_PATH}/keys/${id}/revoke`);
 }
 
 export async function downloadExtensionBundle() {
-  const res = await apiFetch("/download");
-  return res.blob();
+  const response = await fetch(apiUrl(`${BASE_PATH}/download`));
+  if (!response.ok) {
+    throw new Error(`API error: ${response.status}`);
+  }
+  return response.blob();
 }
 
 export function buildExtensionDownloadUrl() {
-  return `${BASE_PATH}/download`;
+  return apiUrl(`${BASE_PATH}/download`);
 }

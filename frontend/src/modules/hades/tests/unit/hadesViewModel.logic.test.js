@@ -240,3 +240,26 @@ test("normalizeMessage preserves message with no URLs and no actions", () => {
   const result = normalizeMessage(msg);
   assert.deepEqual(result.actions, []);
 });
+
+test("normalizeMessage preserves verified media fields for chat rendering", () => {
+  const msg = {
+    id: "msg-media-1",
+    role: "assistant",
+    content: "Here is the verified GIF.",
+    gifUrl: "https://media.example.com/cat.gif",
+    mediaUrl: "https://media.example.com/cat.gif",
+    mediaType: "image/gif",
+    mediaAlt: "Verified cat GIF",
+    mediaVerificationStatus: "verified",
+    mediaVerificationReason: null
+  };
+
+  const result = normalizeMessage(msg);
+
+  assert.equal(result.gifUrl, "https://media.example.com/cat.gif");
+  assert.equal(result.mediaUrl, "https://media.example.com/cat.gif");
+  assert.equal(result.mediaType, "image/gif");
+  assert.equal(result.mediaAlt, "Verified cat GIF");
+  assert.equal(result.mediaVerificationStatus, "verified");
+  assert.equal(result.mediaVerificationReason, null);
+});

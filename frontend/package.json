@@ -10,7 +10,9 @@
     "test": "node --import ./test-hooks/register.mjs --test",
     "test:hades-workflow-ui": "node --import ./test-hooks/register.mjs --test src/modules/hades/tests/unit/workflowExplanation.tdd.test.js",
     "test:hades-workflow-build-phases-ui": "node --import ./test-hooks/register.mjs --test src/modules/hades/tests/unit/workflowBuildPhases.tdd.test.js",
-    "test:hades-extension-install-ui": "node --import ./test-hooks/register.mjs --test src/modules/hades/tests/unit/extensionInstallModule.tdd.test.js"
+    "test:hades-extension-install-ui": "node --import ./test-hooks/register.mjs --test src/modules/hades/tests/unit/extensionInstallModule.tdd.test.js",
+    "test:hades-chat-media-ui": "node --import ./test-hooks/register.mjs --test src/modules/hades/tests/unit/ChatBubble.test.js src/modules/hades/tests/unit/hadesViewModel.logic.test.js src/modules/hades/tests/unit/sendChat.test.js",
+    "test:hades-instagram-social-ui": "node --import ./test-hooks/register.mjs --test src/modules/hades/tests/unit/instagramSocial.tdd.test.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.108.1",

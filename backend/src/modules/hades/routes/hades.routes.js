@@ -232,6 +232,46 @@ export function createHadesRoutes({ service, requireHadesAuth, config, scopedRep
     })
   );
 
+  router.post(
+    "/socials/instagram/connect",
+    requireAuth,
+    asyncRoute(async (req, res) => {
+      const result = await service.createInstagramAuthLink(req.body, req.authContext);
+      res.status(200).json(result);
+    })
+  );
+
+  router.post(
+    "/socials/instagram/connection",
+    requireAuth,
+    asyncRoute(async (req, res) => {
+      const result = await service.saveInstagramConnection(req.body, req.authContext);
+      res.status(200).json(result);
+    })
+  );
+
+  router.delete(
+    "/socials/instagram/connection",
+    requireAuth,
+    asyncRoute(async (req, res) => {
+      const result = await service.deleteInstagramConnection(req.authContext);
+      res.status(200).json(result);
+    })
+  );
+
+  router.post(
+    "/triggers/instagram",
+    asyncRoute(async (req, res) => {
+      try {
+        const result = await service.handleInstagramWebhook(req.body, req.headers);
+        res.status(200).json(result);
+      } catch (err) {
+        const status = err.status || 400;
+        res.status(status).json({ code: err.code || "error", error: err.message });
+      }
+    })
+  );
+
   router.get(
     "/minions",
     requireAuth,

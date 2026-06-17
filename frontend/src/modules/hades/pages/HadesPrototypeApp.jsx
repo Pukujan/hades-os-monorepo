@@ -26,11 +26,12 @@ import {
   formatSocialLabel,
   getSocialIcon
 } from "../utils/hadesData.js";
-import { saveTelegramToken, saveDiscordToken, saveGitHubToken, getSocialConnections } from "../services/hadesApi.js";
+import { saveTelegramToken, saveDiscordToken, saveGitHubToken, getSocialConnections, createInstagramAuthLink, saveInstagramConnection, deleteInstagramConnection } from "../services/hadesApi.js";
 import { getPendingCopy } from "../utils/chatPendingCopy.js";
 import { TelegramSetupCard } from "../components/TelegramSetupCard.jsx";
 import { DiscordSetupCard } from "../components/DiscordSetupCard.jsx";
 import { GitHubSetupCard } from "../components/GitHubSetupCard.jsx";
+import { InstagramSetupCard } from "../components/InstagramSetupCard.jsx";
 import { ExtensionInstallCard } from "../extension/components/ExtensionInstallCard.jsx";
 import {
   buildMinionDetailViewModel,
@@ -533,6 +534,17 @@ function HadesProvider({ children }) {
         updateDraft(response.draft);
       }
     } catch (error) {
+      console.error("[Hades chat] Hermes request failed; using local fallback.", {
+        context: conversationType,
+        conversationId: currentConvId || null,
+        clientMessageId: userMessageId,
+        status: error?.status || null,
+        code: error?.code || null,
+        requestId: error?.requestId || null,
+        message: error?.message || String(error),
+        responseBody: error?.responseBody || null,
+        error,
+      });
       const parsed = buildLocalDraftFallback(text, draft);
       if (isForge) {
         updateDraft(parsed.draft);
@@ -1450,7 +1462,7 @@ function MinionsScreen() {
   return (
     <>
       <ScreenHead title="Minions" subtitle="Speak to Hades, then inspect your minions and slots." />
-      <div className="scroll">
+      <div className="scroll minions-scroll">
         {false && (
         <>
         <div className="card row">
@@ -1600,6 +1612,10 @@ function SocialsScreen() {
     status: SOCIAL_LINKS.find((s) => s.provider === "github")?.status || "disconnected"
   });
 
+  const [instagramConnection, setInstagramConnection] = React.useState({
+    status: SOCIAL_LINKS.find((s) => s.provider === "instagram")?.status || "not_connected"
+  });
+
   async function handleSaveDiscordToken({ token }) {
     const result = await saveDiscordToken({ token }, session?.access_token);
     const connection = result?.connection || result;
@@ -1607,6 +1623,37 @@ function SocialsScreen() {
       status: connection?.status || "connected",
       botUsername: connection?.botUsername || connection?.bot_username || null,
       tokenLast4: connection?.tokenLast4 || connection?.token_last4 || null
+    });
+    return result;
+  }
+
+  async function handleCreateInstagramAuthLink(payload) {
+    const result = await createInstagramAuthLink(payload, session?.access_token);
+    const authUrl = result?.authUrl;
+    if (authUrl) {
+      window.open(authUrl, "_blank", "noopener,noreferrer");
+    }
+    setInstagramConnection({ status: "connecting", connector: "composio" });
+    return result;
+  }
+
+  async function handleSaveInstagramConnection(payload) {
+    const result = await saveInstagramConnection(payload, session?.access_token);
+    const connection = result?.connection || result;
+    setInstagramConnection({
+      status: connection?.status || "connected",
+      handle: connection?.handle || null,
+      connector: connection?.connector || "composio",
+    });
+    return result;
+  }
+
+  async function handleDeleteInstagramConnection() {
+    const result = await deleteInstagramConnection(session?.access_token);
+    setInstagramConnection({
+      status: "not_connected",
+      handle: null,
+      connector: "composio",
     });
     return result;
   }
@@ -1658,6 +1705,18 @@ function SocialsScreen() {
                 key={social.id}
                 connection={githubConnection}
                 onSaveToken={handleSaveGithubToken}
+              />
+            );
+          }
+          if (social.provider === "instagram") {
+            return (
+              <InstagramSetupCard
+                key={social.id}
+                connection={instagramConnection}
+                currentUser={currentUser}
+                onCreateAuthLink={handleCreateInstagramAuthLink}
+                onSaveConnection={handleSaveInstagramConnection}
+                onDeleteConnection={handleDeleteInstagramConnection}
               />
             );
           }

@@ -85,6 +85,51 @@ test("ChatBubble renders no actions div when actions is empty", async () => {
   assert.ok(!html.includes("hades-message-actions"));
 });
 
+test("ChatBubble renders a verified GIF media attachment", async () => {
+  const mod = await import("../../components/ChatBubble.js");
+  const { ChatBubble } = mod;
+  const html = renderToString(
+    React.createElement(MemoryRouter, null,
+      React.createElement(ChatBubble, {
+        message: {
+          role: "hades",
+          content: "Here is a verified cat GIF.",
+          gifUrl: "https://media.example.com/cat.gif",
+          mediaVerificationStatus: "verified",
+          mediaAlt: "Verified cat GIF"
+        }
+      })
+    )
+  );
+
+  assert.ok(html.includes('data-testid="chat-gif"'));
+  assert.ok(html.includes('src="https://media.example.com/cat.gif"'));
+  assert.ok(html.includes('alt="Verified cat GIF"'));
+});
+
+test("ChatBubble does not render rejected GIF media as a broken image", async () => {
+  const mod = await import("../../components/ChatBubble.js");
+  const { ChatBubble } = mod;
+  const badUrl = "https://media1.tenor.com/m/-DoRykX0LwcAAAAd/anime-girl-dark-hair.gif";
+  const html = renderToString(
+    React.createElement(MemoryRouter, null,
+      React.createElement(ChatBubble, {
+        message: {
+          role: "hades",
+          content: "I found a GIF, but it needs verification.",
+          gifUrl: badUrl,
+          mediaVerificationStatus: "rejected",
+          mediaVerificationReason: "content_unavailable"
+        }
+      })
+    )
+  );
+
+  assert.ok(!html.includes(`src="${badUrl}"`));
+  assert.ok(!html.includes('data-testid="chat-gif"'));
+  assert.match(html, /gif unavailable|media unavailable|content unavailable/i);
+});
+
 test("ChatBubble renders user bubble with user class", async () => {
   const mod = await import("../../components/ChatBubble.js");
   const { ChatBubble } = mod;

@@ -6,6 +6,8 @@ import { fileURLToPath } from "node:url";
 
 const DIR = path.dirname(fileURLToPath(import.meta.url));
 const APP_PATH = path.resolve(DIR, "../../pages/HadesPrototypeApp.jsx");
+const RAILWAY_API_BASE = "https://hades-os-monorepo-production.up.railway.app";
+const VERCEL_ORIGIN = "https://hades-os-monorepo.vercel.app";
 
 async function loadModule(modulePath, message) {
   try {
@@ -113,6 +115,52 @@ describe("Hades extension install frontend module TDD contract", () => {
       "latestCreatedSecret",
     ]) {
       assert.ok(source.includes(requiredHook), `ExtensionInstallCard missing required behavior hook: ${requiredHook}`);
+    }
+  });
+
+  test("extension install API uses VITE_API_BASE_URL in production instead of Vercel same-origin /api", async () => {
+    const originalFetch = globalThis.fetch;
+    const originalEnvShim = globalThis.importMetaEnvShim;
+    const calls = [];
+    globalThis.importMetaEnvShim = {
+      MODE: "production",
+      VITE_API_BASE_URL: RAILWAY_API_BASE,
+    };
+    globalThis.fetch = async (url, options) => {
+      calls.push({ url, options });
+      return new Response(JSON.stringify({
+        key: {
+          id: "key-1",
+          secretPreview: "hades_ext_...1234",
+        },
+        secret: "hades_ext_live_once",
+      }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    };
+
+    try {
+      const api = await loadModule(
+        "../../extension/services/extensionInstallApi.js",
+        "Missing frontend Hades extension install API client module.",
+      );
+
+      await api.generateExtensionApiKey({
+        name: "Chrome extension",
+        scopes: ["workflow:read"],
+      });
+
+      assert.equal(calls.length, 1);
+      assert.equal(
+        calls[0].url,
+        `${RAILWAY_API_BASE}/api/hades/extension/keys`,
+      );
+      assert.notEqual(calls[0].url, "/api/hades/extension/keys");
+      assert.notEqual(calls[0].url, `${VERCEL_ORIGIN}/api/hades/extension/keys`);
+    } finally {
+      globalThis.fetch = originalFetch;
+      globalThis.importMetaEnvShim = originalEnvShim;
     }
   });
 });

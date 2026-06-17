@@ -52,7 +52,8 @@ export function createGiphyProvider({ apiKey, fetch: fetchFn } = {}) {
     const gif = body.data[0];
     const result = {
       id: gif.id,
-      url: gif.url,
+      url: gif.images?.original?.url || gif.url,
+      providerPageUrl: gif.url,
       title: gif.title,
     };
 

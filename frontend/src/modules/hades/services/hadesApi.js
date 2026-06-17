@@ -83,6 +83,18 @@ export async function saveGitHubToken({ token }, accessToken) {
   return apiPost("/api/hades/socials/github/token", { token }, { accessToken });
 }
 
+export async function createInstagramAuthLink(payload, accessToken) {
+  return apiPost("/api/hades/socials/instagram/connect", payload, { accessToken });
+}
+
+export async function saveInstagramConnection(payload, accessToken) {
+  return apiPost("/api/hades/socials/instagram/connection", payload, { accessToken });
+}
+
+export async function deleteInstagramConnection(accessToken) {
+  return apiDelete("/api/hades/socials/instagram/connection", null, { accessToken });
+}
+
 export async function getMinion(minionId, accessToken) {
   return apiGet(`/api/hades/minions/${minionId}`, { accessToken });
 }

@@ -71,6 +71,13 @@ export const SOCIAL_LINKS = [
     commandName: null
   },
   {
+    id: "instagram",
+    provider: "instagram",
+    displayName: "Instagram",
+    status: "not_connected",
+    commandName: null
+  },
+  {
     id: "email",
     provider: "email",
     displayName: "Email",
@@ -164,6 +171,8 @@ export function formatSocialLabel(provider) {
       return "Telegram";
     case "github":
       return "GitHub";
+    case "instagram":
+      return "Instagram";
     case "email":
       return "Email";
     case "private":
@@ -181,6 +190,8 @@ export function getSocialIcon(provider) {
       return "telegram";
     case "github":
       return "github";
+    case "instagram":
+      return "instagram";
     case "email":
       return "email";
     case "private":
