@@ -313,6 +313,82 @@ test("generateCommandResult forwards minions from context to generateDraft and i
   assert.ok(prompt.includes("TestMinion"), "prompt should contain minion name from context");
 });
 
+test("executeMinion calls generateDraft with general context and the minion instructions", async () => {
+  const calls = [];
+  const runtime = createHermesRuntimeService({
+    hermesBin: "/fake/hermes",
+    runCommand: async (bin, args) => {
+      calls.push({ bin, args });
+      return JSON.stringify({
+        assistantText: "Here is a funny cat GIF.",
+        actions: [{ type: "send_message", content: "Here is a funny cat GIF." }],
+        sessionId: "sess-exec-1",
+      });
+    }
+  });
+
+  const result = await runtime.executeMinion({
+    context: { userId: "u1", tenantId: "t1", provider: "telegram", accountId: "tg1", channelId: "chat_1", messageId: 42 },
+    minion: { id: "m1", name: "CatGIF", instructions: "Search for funny cat GIFs" },
+    assignment: { id: "a1" },
+    trigger: { provider: "telegram", triggerType: "command", commandName: "!sendcat", content: "!sendcat hello" },
+  });
+
+  assert.equal(result.assistantText, "Here is a funny cat GIF.");
+  assert.equal(result.outboundActions.length, 1);
+  assert.equal(result.sessionId, "sess-exec-1");
+
+  const prompt = calls[0].args.find(a => typeof a === "string" && a.includes("!sendcat hello"));
+  assert.ok(prompt, "prompt should contain the trigger content");
+  assert.ok(prompt.includes("CatGIF"), "prompt should contain minion name");
+  assert.ok(prompt.includes("Search for funny cat GIFs"), "prompt should contain minion instructions");
+  assert.ok(!prompt.includes("Allowed categories"), "executeMinion should use general context (no forge constraints)");
+});
+
+test("executeMinion works without assignment or trigger content (schedule trigger)", async () => {
+  const calls = [];
+  const runtime = createHermesRuntimeService({
+    hermesBin: "/fake/hermes",
+    runCommand: async (bin, args) => {
+      calls.push({ bin, args });
+      return JSON.stringify({
+        assistantText: "Daily digest posted.",
+        sessionId: "sess-sched-1",
+      });
+    }
+  });
+
+  const result = await runtime.executeMinion({
+    context: { userId: "u1", tenantId: "t1", provider: "discord", channelId: "ch_1" },
+    minion: { id: "m2", name: "Digest", instructions: "Post a daily channel digest" },
+    assignment: null,
+    trigger: { provider: "discord", triggerType: "schedule", commandName: null, content: null, scheduleId: "daily-9am" },
+  });
+
+  assert.equal(result.assistantText, "Daily digest posted.");
+  assert.equal(calls.length, 1);
+  const prompt = calls[0].args.find(a => typeof a === "string" && a.includes("{"));
+  assert.ok(prompt, "prompt should be found in args");
+  assert.ok(prompt.includes("Digest"), "prompt should contain minion name");
+});
+
+test("executeMinion returns empty strings when hermes returns no output", async () => {
+  const runtime = createHermesRuntimeService({
+    hermesBin: "/fake/hermes",
+    runCommand: async () => JSON.stringify({}),
+  });
+
+  const result = await runtime.executeMinion({
+    context: { userId: "u1", tenantId: "t1", provider: "telegram" },
+    minion: { id: "m1", name: "Test", instructions: "Do nothing" },
+    trigger: { content: "" },
+  });
+
+  assert.equal(result.assistantText, "");
+  assert.deepEqual(result.outboundActions, []);
+  assert.equal(result.sessionId, null);
+});
+
 test("Hermes runtime wrapper rejects non-JSON output and old context/provider blockers", async () => {
   const invalidRuntime = createHermesRuntimeService({
     hermesBin: "/fake/hermes",

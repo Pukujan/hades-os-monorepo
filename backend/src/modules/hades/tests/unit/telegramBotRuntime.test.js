@@ -436,4 +436,100 @@ describe("Telegram bot runtime", () => {
     assert.equal(result.reason, "non_command_help");
     assert.ok(sentMessages[0].text.includes("hades"));
   });
+
+  test("handleTelegramUpdate executes minion command via executeMinion when commandName matches", async () => {
+    const { createTelegramBotRuntime } = await loadRuntime();
+
+    const sentMessages = [];
+    let minionRequest = null;
+    const minionCat = { id: "minion_cat", name: "Cat Minion", commandName: "!sendcat", instructions: "Send cat GIFs" };
+
+    const runtime = createTelegramBotRuntime({
+      telegramClient: {
+        sendMessage: async ({ chatId, text, parseMode, replyToMessageId }) => {
+          sentMessages.push({ chatId, text, parseMode, replyToMessageId });
+          return { providerMessageId: 200 };
+        },
+      },
+      resolveTelegramIdentity: async () => ({ userId: "user_1", tenantId: "tenant_1" }),
+      hermesRuntime: {
+        generateCommandResult: async () => ({ assistantText: "", commandSpec: {}, outboundActions: [] }),
+        executeMinion: async (request) => {
+          minionRequest = request;
+          return {
+            assistantText: "Here is a cat GIF!",
+            sessionId: "session-minion-cat-1",
+            outboundActions: [{ type: "send_message", content: "Here is a cat GIF!" }],
+          };
+        },
+      },
+      botTokenProvider: async () => "token",
+      minions: [minionCat],
+    });
+
+    const update = makeTelegramUpdate({ text: "!sendcat show me a funny cat" });
+    const result = await runtime.handleTelegramUpdate({ update });
+
+    assert.equal(result.status, "sent");
+    assert.equal(sentMessages.length, 1);
+    assert.ok(sentMessages[0].text.includes("cat GIF"));
+    assert.notEqual(minionRequest, null);
+    assert.equal(minionRequest.minion.id, "minion_cat");
+    assert.equal(minionRequest.trigger.commandName, "!sendcat");
+    assert.equal(minionRequest.context.provider, "telegram");
+  });
+
+  test("handleTelegramUpdate sends help when minion array empty and non-hades message", async () => {
+    const { createTelegramBotRuntime } = await loadRuntime();
+
+    const sentMessages = [];
+    const runtime = createTelegramBotRuntime({
+      telegramClient: {
+        sendMessage: async ({ chatId, text }) => {
+          sentMessages.push({ chatId, text });
+          return { providerMessageId: 0 };
+        },
+      },
+      resolveTelegramIdentity: async () => ({ userId: "user_1", tenantId: "tenant_1" }),
+      hermesRuntime: {
+        generateCommandResult: async () => ({ assistantText: "", commandSpec: {}, outboundActions: [] }),
+        executeMinion: async () => ({}),
+      },
+      botTokenProvider: async () => "token",
+      minions: [],
+    });
+
+    const update = makeTelegramUpdate({ text: "!sendcat hello" });
+    const result = await runtime.handleTelegramUpdate({ update });
+
+    assert.equal(result.status, "sent");
+    assert.equal(result.reason, "non_command_help");
+  });
+
+  test("handleTelegramUpdate sends help when minion commandName does not match", async () => {
+    const { createTelegramBotRuntime } = await loadRuntime();
+
+    const sentMessages = [];
+    const runtime = createTelegramBotRuntime({
+      telegramClient: {
+        sendMessage: async ({ chatId, text }) => {
+          sentMessages.push({ chatId, text });
+          return { providerMessageId: 0 };
+        },
+      },
+      resolveTelegramIdentity: async () => ({ userId: "user_1", tenantId: "tenant_1" }),
+      hermesRuntime: {
+        generateCommandResult: async () => ({ assistantText: "", commandSpec: {}, outboundActions: [] }),
+        executeMinion: async () => ({}),
+      },
+      botTokenProvider: async () => "token",
+      minions: [{ id: "m1", commandName: "!other" }],
+    });
+
+    const update = makeTelegramUpdate({ text: "!sendcat hello" });
+    const result = await runtime.handleTelegramUpdate({ update });
+
+    assert.equal(result.status, "sent");
+    assert.equal(result.reason, "non_command_help");
+  });
 });

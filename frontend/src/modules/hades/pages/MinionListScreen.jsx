@@ -30,7 +30,7 @@ export function MinionListScreen({ minions }) {
           <div className="grid4">
             {filtered.slice(0, 16).map((m) => (
               <button key={m.id} type="button" className="minion-tile" onClick={() => navigate(`/app/minions/${m.id}`)}>
-                <span className="owner">{m.ownerType === "user_owned" ? "User" : "Default"}</span>
+                <span className="owner">User</span>
                 <div className="emoji">{getEmojiForMinion(m)}</div>
                 <strong>{m.name}</strong>
                 <small>{m.slotIndex != null ? "Active" : "Inactive"} · {m.type === "auto" ? "auto" : "manual"}</small>

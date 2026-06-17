@@ -77,7 +77,7 @@ export async function register(app, context) {
     telegramConnections,
   });
 
-  const runtimeHermes = overrides.hermesRuntime || null;
+  const runtimeHermes = overrides.hermesRuntime || hermesRuntime;
   const runtimeSocialClient = overrides.socialClient || null;
 
   const scopedRepos = {

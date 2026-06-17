@@ -263,6 +263,23 @@ export function createHermesRuntimeService({
     }
   }
 
+  async function executeMinion({ context, minion, assignment, trigger } = {}) {
+    const userMessage = trigger?.content || "";
+    const draftResult = await generateDraft({
+      userId: context?.userId,
+      conversationId: context?.channelId || context?.messageId,
+      message: userMessage,
+      context: "general",
+      minions: minion ? [minion] : [],
+    });
+
+    return {
+      assistantText: draftResult.assistantText || draftResult.reply || "",
+      outboundActions: draftResult.actions || [],
+      sessionId: draftResult.sessionId,
+    };
+  }
+
   async function generateCommandResult({ input, context } = {}) {
     const draftResult = await generateDraft({
       userId: context?.userId,
@@ -279,5 +296,5 @@ export function createHermesRuntimeService({
     };
   }
 
-  return { generateDraft, generateCommandResult };
+  return { generateDraft, generateCommandResult, executeMinion };
 }

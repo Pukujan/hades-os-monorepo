@@ -321,3 +321,107 @@ test("automation triggers use the same minion runtime shape without Discord comm
   assert.equal(hermesRequests[0].trigger.commandName, null);
 });
 
+test("global fallback: executes minion by commandName when no assignment exists", async () => {
+  const { createMinionAssignmentRuntime } = await loadRuntimeFactory();
+  const hermesRequests = [];
+  const savedExecutions = [];
+  const sentMessages = [];
+  const minion = createMinion({ id: "minion_sendcat", commandName: "!sendcat" });
+
+  const runtime = createMinionAssignmentRuntime({
+    verifySocialAccount: async () => createSession(),
+    scopedRepos: {
+      assignments: {
+        findActiveAssignment: async () => null
+      },
+      minions: {
+        listByUser: async ({ userId, tenantId }) => {
+          assert.equal(userId, "user_123");
+          assert.equal(tenantId, "tenant_personal_user_123");
+          return [minion];
+        }
+      }
+    },
+    repository: {
+      findActiveAssignment: async () => null,
+      saveAgentExecution({ execution }) {
+        savedExecutions.push(execution);
+        return { id: "agentexec_global_1", ...execution };
+      }
+    },
+    hermesRuntime: {
+      async executeMinion(request) {
+        hermesRequests.push(request);
+        return {
+          assistantText: "Here is a cat GIF.",
+          sessionId: "hermes-global-session-1",
+          outboundActions: [
+            { type: "send_message", content: "Here is a cat GIF." }
+          ],
+          safety: { allowed: true }
+        };
+      }
+    },
+    socialClient: {
+      async sendMessage(opts) {
+        sentMessages.push(opts);
+        return { providerMessageId: "discord-global-msg-1" };
+      }
+    }
+  });
+
+  const result = await runtime.handleSocialTrigger({
+    provider: "discord",
+    accountId: "discord_456",
+    channelId: "channel_abc",
+    content: "!sendcat hello"
+  });
+
+  assert.equal(result.status, "sent");
+  assert.equal(result.minionId, "minion_sendcat");
+  assert.equal(result.assignmentId, null);
+  assert.equal(hermesRequests.length, 1);
+  assert.equal(hermesRequests[0].assignment, null);
+  assert.equal(hermesRequests[0].minion.id, "minion_sendcat");
+  assert.equal(savedExecutions.length, 1);
+  assert.equal(savedExecutions[0].assignmentId, null);
+  assert.equal(savedExecutions[0].minionId, "minion_sendcat");
+  assert.equal(sentMessages.length, 1);
+});
+
+test("global fallback: returns unassigned when no minion matches commandName either", async () => {
+  const { createMinionAssignmentRuntime } = await loadRuntimeFactory();
+  const otherMinion = createMinion({ id: "minion_other", commandName: "!other" });
+
+  const runtime = createMinionAssignmentRuntime({
+    verifySocialAccount: async () => createSession(),
+    scopedRepos: {
+      assignments: {
+        findActiveAssignment: async () => null
+      },
+      minions: {
+        listByUser: async () => [otherMinion]
+      }
+    },
+    repository: {
+      findActiveAssignment: async () => null
+    },
+    hermesRuntime: {
+      async executeMinion() { return {}; }
+    },
+    socialClient: {
+      async sendMessage() { return {}; }
+    }
+  });
+
+  const result = await runtime.handleSocialTrigger({
+    provider: "discord",
+    accountId: "discord_456",
+    channelId: "channel_abc",
+    content: "!sendcat hello"
+  });
+
+  assert.equal(result.status, "unassigned");
+  assert.equal(result.reason, "no_active_assignment");
+});
+

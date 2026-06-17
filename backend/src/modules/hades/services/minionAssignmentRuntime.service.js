@@ -66,18 +66,26 @@ export function createMinionAssignmentRuntime({
       triggerType
     });
 
-    if (!assignment) {
-      return { status: "unassigned", reason: "no_active_assignment" };
-    }
+    let minion = null;
 
-    const minion = await (async () => {
-      if (scopedRepos?.minions?.findById) {
-        return scopedRepos.minions.findById({ id: assignment.minion_id || assignment.minionId, userId: session.userId, tenantId: session.tenantId });
+    if (!assignment) {
+      if (commandName && scopedRepos?.minions?.listByUser) {
+        const userMinions = await scopedRepos.minions.listByUser({ userId: session.userId, tenantId: session.tenantId });
+        minion = userMinions.find(m => (m.commandName || m.command_name) === commandName) || null;
       }
-      return ensureFunction(repository?.getMinion, "Minion lookup")(assignment.minionId);
-    })();
-    if (!minion) {
-      return { status: "unassigned", reason: "missing_minion" };
+      if (!minion) {
+        return { status: "unassigned", reason: "no_active_assignment" };
+      }
+    } else {
+      minion = await (async () => {
+        if (scopedRepos?.minions?.findById) {
+          return scopedRepos.minions.findById({ id: assignment.minion_id || assignment.minionId, userId: session.userId, tenantId: session.tenantId });
+        }
+        return ensureFunction(repository?.getMinion, "Minion lookup")(assignment.minionId);
+      })();
+      if (!minion) {
+        return { status: "unassigned", reason: "missing_minion" };
+      }
     }
 
     const commandTrigger = {
@@ -98,7 +106,7 @@ export function createMinionAssignmentRuntime({
         messageId
       },
       minion,
-      assignment,
+      assignment: assignment || null,
       trigger: commandTrigger
     });
 
@@ -126,7 +134,7 @@ export function createMinionAssignmentRuntime({
           triggerType,
           commandName,
           minionId: minion.id,
-          assignmentId: assignment.id,
+          assignmentId: assignment?.id || null,
           sessionId: executionResult?.sessionId || null,
           status: "sent",
           source: "minion_assignment_runtime",
@@ -139,7 +147,7 @@ export function createMinionAssignmentRuntime({
     return {
       status: "sent",
       minionId: minion.id,
-      assignmentId: assignment.id,
+      assignmentId: assignment?.id || null,
       sessionId: executionResult?.sessionId || null,
       providerMessageId: sendResult?.providerMessageId || null
     };

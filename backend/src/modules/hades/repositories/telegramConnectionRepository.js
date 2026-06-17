@@ -9,11 +9,9 @@ function last4(token) {
 export function createTelegramConnectionRepository({ storage = "memory", supabaseClient, tableName = "hades_telegram_connections", crypto = null } = {}) {
   const connections = new Map();
   const byTelegramUserId = new Map();
-  let hydrated = false;
 
   async function hydrate() {
-    if (storage !== "supabase" || hydrated) return;
-    hydrated = true;
+    if (storage !== "supabase") return;
     for (const row of await readTableRows(supabaseClient, tableName)) {
       if (!row?.id) continue;
       connections.set(row.id, { ...row });

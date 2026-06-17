@@ -631,9 +631,14 @@ function HadesProvider({ children }) {
         draft,
         idempotencyKey: createId("minion")
       }, accessToken);
-      const saved = response.minion;
+      const saved = {
+        ...response.minion,
+        commandName: response.minion.commandName || response.minion.command_name,
+        targetSocial: response.minion.targetSocial || response.minion.target_social,
+        triggerType: response.minion.triggerType || response.minion.trigger_type,
+      };
       setMinions((current) => {
-        const filtered = current.filter((entry) => entry.name !== saved.name || entry.commandName !== saved.commandName);
+        const filtered = current.filter((entry) => entry.name !== saved.name || (entry.commandName || entry.command_name) !== saved.commandName);
         return [...filtered, saved];
       });
       setSelectedMinionId(saved.id);

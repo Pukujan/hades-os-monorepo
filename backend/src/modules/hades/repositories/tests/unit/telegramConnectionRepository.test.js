@@ -155,6 +155,52 @@ describe("telegramConnectionRepository", () => {
     assert.match(record.id, uuidV4, `id "${record.id}" is not a valid UUID v4`);
   });
 
+  test("re-reads from Supabase after cross-instance write (no hydrated guard)", async () => {
+    const rows = [];
+    const mockSupabase = {
+      table: () => ({
+        upsert: async (row) => {
+          const idx = rows.findIndex(r => r.id === row.id);
+          if (idx >= 0) rows[idx] = { ...row };
+          else rows.push({ ...row });
+        },
+      }),
+      tables: { hades_telegram_connections: rows },
+    };
+
+    const mod = await loadRepo();
+    const supabaseRepo = mod.createTelegramConnectionRepository({ storage: "supabase", supabaseClient: mockSupabase, crypto });
+
+    await supabaseRepo.createOrUpdate({
+      userId: "user_a",
+      tenantId: "tenant_a",
+      telegramUserId: "tg_123",
+      botToken: "111:FIRST",
+      botUsername: "hades_bot",
+      status: "connected",
+    });
+
+    // Simulate another instance writing a new row directly to Supabase
+    const crossInstanceRow = {
+      id: randomUUID(),
+      user_id: "user_a",
+      tenant_id: "tenant_a",
+      telegram_user_id: "tg_456",
+      encrypted_bot_token: "encrypted:222:SECOND",
+      token_last4: "COND",
+      bot_username: "hades_bot2",
+      status: "connected",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    rows.push({ ...crossInstanceRow });
+
+    const after = await supabaseRepo.findByTelegramUserId({ telegramUserId: "tg_456" });
+
+    assert.notEqual(after, null, "should see cross-instance row after re-read");
+    assert.equal(after.id, crossInstanceRow.id);
+  });
+
   test("reuses existing id on update", async () => {
     const first = await repo.createOrUpdate({
       userId: "user_a",

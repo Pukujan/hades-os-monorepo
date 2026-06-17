@@ -58,6 +58,30 @@ export function createTelegramBotRuntime({
         return processAsHermesCommand({ text, parsed: { prefix: "hades", rawArgs: text, action: text || null }, conversationType: "forge" });
       }
 
+      if (minions?.length > 0) {
+        const [firstToken] = text.trim().split(/\s+/);
+        const matchedMinion = minions.find(m => (m.commandName || m.command_name) === firstToken);
+        if (matchedMinion) {
+          const execResult = await hermesRuntime.executeMinion({
+            context: { userId, tenantId, provider: "telegram", accountId: telegramAccountId, channelId: chatId, messageId },
+            minion: matchedMinion,
+            assignment: null,
+            trigger: { content: text, commandName: firstToken, triggerType: "command", provider: "telegram" },
+          });
+
+          const replyText = buildTelegramReply({ assistantText: execResult?.assistantText || "", outboundActions: execResult?.outboundActions || [] });
+          await telegramClient.sendMessage({ chatId, text: replyText, parseMode: "Markdown", replyToMessageId: messageId });
+
+          if (repository?.saveAgentExecution) {
+            await repository.saveAgentExecution({
+              execution: { provider: "telegram", userId, tenantId, chatId, input: text, response: replyText, providerMessageId: null, timestamp: new Date().toISOString() },
+            });
+          }
+
+          return { status: "sent", reason: "minion_command" };
+        }
+      }
+
       const replyText = `${text} — I only respond to hades or forge commands. Try: hades <your request>`;
       await telegramClient.sendMessage({
         chatId,
