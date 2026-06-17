@@ -814,18 +814,25 @@ async function saveTelegramToken(body, authContext) {
     const { readFileSync, existsSync } = await import("node:fs");
     const { fileURLToPath } = await import("node:url");
     const serviceDir = path.dirname(fileURLToPath(import.meta.url));
-    const monorepoRoot = path.resolve(serviceDir, "../../../../..");
-    const extensionDir = path.join(monorepoRoot, "extension");
-    const bundlePath = path.join(extensionDir, "dist", "extension.zip");
-    if (existsSync(bundlePath)) {
-      const buffer = readFileSync(bundlePath);
-      return {
-        filename: `hades-extension-${userId}.zip`,
-        contentType: "application/zip",
-        buffer,
-      };
+
+    const candidates = [
+      process.env.EXTENSION_BUNDLE_PATH,
+      path.resolve(serviceDir, "../../../../extension/dist/extension.zip"),
+      path.resolve(serviceDir, "../../../../../extension/dist/extension.zip"),
+    ];
+
+    for (const candidate of candidates) {
+      if (candidate && existsSync(candidate)) {
+        const buffer = readFileSync(candidate);
+        return {
+          filename: `hades-extension-${userId}.zip`,
+          contentType: "application/zip",
+          buffer,
+        };
+      }
     }
-    throw new AppError("Extension bundle is not available.", 404, "extension_bundle_unavailable");
+
+    throw new AppError("Extension bundle is not available. Run `npm --prefix extension run package` first.", 404, "extension_bundle_unavailable");
   }
 
   async function createWorkflow(body, authContext) {
