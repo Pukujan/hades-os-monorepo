@@ -8,6 +8,7 @@ import { getHadesConfig } from "./config/index.js";
 import { createDiscordHermesCommandFlow } from "./services/discordHermesCommandFlow.service.js";
 import { createMinionAssignmentRuntime } from "./services/minionAssignmentRuntime.service.js";
 import { createGiphyProvider } from "./services/giphyProvider.service.js";
+import { createMediaUrlVerifier } from "./services/mediaUrlVerifier.js";
 import { createBotTokenProvider } from "./services/botTokenProvider.js";
 import { requireHadesAuth } from "../auth/services/authMiddleware.js";
 import { createMinionRepository } from "./repositories/minionRepository.js";
@@ -39,7 +40,8 @@ export async function register(app, context) {
   const config = getHadesConfig();
   const repository = createHadesRepository();
   const hermesRuntime = overrides.runtimeService || createHermesRuntimeService();
-  const hermes = createHermesService({ hermesRuntime });
+  const mediaVerifier = overrides.mediaVerifier || createMediaUrlVerifier();
+  const hermes = createHermesService({ hermesRuntime, mediaVerifier });
 
   const supabaseConfigured = Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
   const supabaseClient = overrides.supabaseClient || (supabaseConfigured ? createSupabaseClient() : null);

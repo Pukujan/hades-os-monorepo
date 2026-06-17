@@ -6,8 +6,26 @@ import { validateAssignmentRequest, validateChatRequest, validateSaveRequest, va
 import { createTelegramClient } from "./telegramClient.js";
 import { createTelegramBotRuntime } from "./telegramBotRuntime.service.js";
 
+const COMPOSIO_CONNECT_LINK_URL = "https://backend.composio.dev/api/v3.1/connected_accounts/link";
+
+function resolvePublicAppOrigin() {
+  const explicitAppUrl = (process.env.APP_URL || "").trim().replace(/\/+$/, "");
+  if (explicitAppUrl) return explicitAppUrl;
+
+  const corsOrigins = (process.env.CORS_ORIGIN || "")
+    .split(",")
+    .map((origin) => origin.trim().replace(/\/+$/, ""))
+    .filter(Boolean);
+
+  if (corsOrigins.length > 0) {
+    return corsOrigins[0];
+  }
+
+  return "http://localhost:5173";
+}
+
 function createMessage(role, content, extra = {}) {
-  return {
+  const message = {
     id: randomUUID(),
     role,
     content,
@@ -18,6 +36,21 @@ function createMessage(role, content, extra = {}) {
     actions: extra.actions || [],
     created_at: extra.created_at || new Date().toISOString()
   };
+
+  for (const key of [
+    "gifUrl",
+    "mediaUrl",
+    "mediaType",
+    "mediaAlt",
+    "mediaVerificationStatus",
+    "mediaVerificationReason",
+  ]) {
+    if (extra[key] !== undefined && extra[key] !== null) {
+      message[key] = extra[key];
+    }
+  }
+
+  return message;
 }
 
 export function createHadesService({ repository, scopedRepos, hermes, config = {}, minionAssignmentRuntime, context, telegramClientFactory, minionLogsRepo, notificationsRepo, hermesRuntime, telegramWebhookBaseUrl } = {}) {
@@ -170,6 +203,12 @@ export function createHadesService({ repository, scopedRepos, hermes, config = {
             status: hermesResult.assistantMessage.status,
             suggestions: hermesResult.assistantMessage.suggestions,
             actions: messageActions,
+            gifUrl: hermesResult.assistantMessage.gifUrl,
+            mediaUrl: hermesResult.assistantMessage.mediaUrl,
+            mediaType: hermesResult.assistantMessage.mediaType,
+            mediaAlt: hermesResult.assistantMessage.mediaAlt,
+            mediaVerificationStatus: hermesResult.assistantMessage.mediaVerificationStatus,
+            mediaVerificationReason: hermesResult.assistantMessage.mediaVerificationReason,
           }),
           idempotencyKey: assistantKey,
         })
@@ -180,6 +219,12 @@ export function createHadesService({ repository, scopedRepos, hermes, config = {
             status: hermesResult.assistantMessage.status,
             suggestions: hermesResult.assistantMessage.suggestions,
             actions: messageActions,
+            gifUrl: hermesResult.assistantMessage.gifUrl,
+            mediaUrl: hermesResult.assistantMessage.mediaUrl,
+            mediaType: hermesResult.assistantMessage.mediaType,
+            mediaAlt: hermesResult.assistantMessage.mediaAlt,
+            mediaVerificationStatus: hermesResult.assistantMessage.mediaVerificationStatus,
+            mediaVerificationReason: hermesResult.assistantMessage.mediaVerificationReason,
           }),
         });
 
@@ -665,12 +710,54 @@ async function saveTelegramToken(body, authContext) {
   async function createInstagramAuthLink(body, authContext) {
     const userId = resolveUserId(authContext);
     const tenantId = authContext?.tenantId || userId;
+    const connector = body.connector || "composio";
+
+    if (connector !== "composio") {
+      throw new AppError(`Unsupported Instagram connector: ${connector}`, 400);
+    }
+
+    const apiKey = (process.env.COMPOSIO_API_KEY || "").trim();
+    const authConfigId = (process.env.COMPOSIO_INSTAGRAM_AUTH_CONFIG_ID || "").trim();
+
+    if (!apiKey || !authConfigId) {
+      throw new AppError(
+        "Instagram connect is not configured. Set COMPOSIO_API_KEY and COMPOSIO_INSTAGRAM_AUTH_CONFIG_ID.",
+        501,
+        "instagram_connect_not_configured",
+      );
+    }
+
+    const callbackUrl = `${resolvePublicAppOrigin()}/app/socials?provider=instagram`;
+    const response = await fetch(COMPOSIO_CONNECT_LINK_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
+      },
+      body: JSON.stringify({
+        auth_config_id: authConfigId,
+        user_id: userId,
+        alias: `hades-${tenantId}-instagram`,
+        callback_url: callbackUrl,
+      }),
+    });
+
+    const payload = await response.json().catch(() => null);
+    if (!response.ok) {
+      const errorMessage = payload?.error || payload?.message || `Failed to create Instagram connect link (HTTP ${response.status})`;
+      throw new AppError(errorMessage, response.status || 500, "instagram_connect_link_failed");
+    }
+
+    const authUrl = payload?.redirect_url || payload?.redirectUrl;
+    if (!authUrl) {
+      throw new AppError("Composio did not return a redirect_url for Instagram connect.", 502, "instagram_connect_missing_redirect");
+    }
 
     return {
       provider: "instagram",
-      connector: body.connector || "composio",
-      authUrl: `https://composio.example/connect/instagram/${userId}`,
-      connectionIntentId: `ig-intent-${userId}`,
+      connector,
+      authUrl,
+      connectionIntentId: payload?.connected_account_id || `ig-intent-${userId}`,
     };
   }
 

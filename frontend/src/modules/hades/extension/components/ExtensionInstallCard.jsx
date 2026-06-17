@@ -59,7 +59,9 @@ export function ExtensionInstallCard({ providerId, accessToken } = {}) {
       anchor.href = url;
       anchor.download = "hades-extension.zip";
       anchor.click();
-      URL.revokeObjectURL(url);
+      window.setTimeout(function () {
+        URL.revokeObjectURL(url);
+      }, 1000);
     }).catch(function () {});
   }
 

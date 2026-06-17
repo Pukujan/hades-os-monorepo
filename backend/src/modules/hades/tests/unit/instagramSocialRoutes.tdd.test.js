@@ -36,7 +36,7 @@ function createApp(overrides = {}) {
       calls.push({ method: "createInstagramAuthLink", body, authContext });
       return {
         provider: "instagram",
-        authUrl: "https://composio.example/connect/instagram/user_123",
+        authUrl: "https://connect.composio.dev/connect/instagram/user_123",
         connectionIntentId: "ig-intent-1",
       };
     },

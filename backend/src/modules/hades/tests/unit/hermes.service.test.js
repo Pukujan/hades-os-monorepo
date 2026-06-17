@@ -124,7 +124,7 @@ test("Hermes runtime failure bubbles instead of falling back", async () => {
 });
 
 test("general chat promotes verified direct GIF URLs from Hermes text into media fields", async () => {
-  const tenorUrl = "https://media.tenor.com/9E6S0OziLzEAAAAC/anime-girl-anime.gif";
+  const tenorUrl = "https://media1.tenor.com/v/6Nh8dK4IzXYAAAAd/anime-girls.gif";
   const verifiedUrls = [];
   const hermes = createHermesService({
     hermesRuntime: {
@@ -165,6 +165,53 @@ test("general chat promotes verified direct GIF URLs from Hermes text into media
   assert.equal(result.assistantMessage.mediaType, "image/gif");
   assert.equal(result.assistantMessage.mediaVerificationStatus, "verified");
   assert.equal(result.assistantMessage.mediaVerificationReason, null);
+});
+
+test("Hades service chat preserves verified inline GIF fields in assistant response", async () => {
+  const tenorUrl = "https://media1.tenor.com/v/6Nh8dK4IzXYAAAAd/anime-girls.gif";
+  const repository = createHadesRepository({ now: () => "2026-06-17T00:00:00.000Z" });
+  const hermes = createHermesService({
+    hermesRuntime: {
+      async generateDraft() {
+        return {
+          source: "hermes_runtime",
+          sessionId: "session-inline-gif-service",
+          assistantText: `${tenorUrl}\n\nBlack hair, red ribbons, a quiet gesture.`,
+          actions: [],
+          cards: [],
+        };
+      }
+    },
+    mediaVerifier: {
+      async verifyMediaUrl({ url }) {
+        assert.equal(url, tenorUrl);
+        return {
+          ok: true,
+          url,
+          contentType: "image/gif",
+        };
+      }
+    }
+  });
+  const service = createHadesService({ repository, hermes });
+
+  const result = await service.chat(
+    {
+      clientMessageId: "msg-inline-gif-1",
+      idempotencyKey: "idem-inline-gif-1",
+      message: "send pic",
+      currentDraft: createEmptyDraft(),
+      conversationType: "general"
+    },
+    {
+      userId: "user_123",
+      tenantId: "tenant_123",
+    }
+  );
+
+  assert.equal(result.assistantMessage.gifUrl, tenorUrl);
+  assert.equal(result.assistantMessage.mediaUrl, tenorUrl);
+  assert.equal(result.assistantMessage.mediaVerificationStatus, "verified");
 });
 
 test("Hades service chat uses backend-authenticated user context when provided", async () => {

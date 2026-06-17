@@ -206,4 +206,14 @@ describe("Hades extension install frontend module TDD contract", () => {
       globalThis.importMetaEnvShim = originalEnvShim;
     }
   });
+
+  test("ExtensionInstallCard delays URL revocation after clicking download", () => {
+    const cardPath = path.resolve(DIR, "../../extension/components/ExtensionInstallCard.jsx");
+    const source = readFileSync(cardPath, "utf8");
+
+    assert.ok(
+      source.includes("window.setTimeout(function () {\n        URL.revokeObjectURL(url);\n      }, 1000);"),
+      "ExtensionInstallCard must delay URL.revokeObjectURL so the browser can finish writing the zip file.",
+    );
+  });
 });

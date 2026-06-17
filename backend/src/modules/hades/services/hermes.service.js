@@ -4,7 +4,7 @@ import { guardGeneralChatScope } from "./chatModeGuard.js";
 import { normalizeChatActions } from "./chatActions.js";
 import { normalizeChatCards } from "./chatCards.js";
 
-const GIF_URL_RE = /https:\/\/media\.(?:tenor|giphy)\.com\/[^\s"'<>]+\.gif/gi;
+const GIF_URL_RE = /https:\/\/media\d*\.(?:tenor|giphy)\.com\/[^\s"'<>]+\.gif/gi;
 
 function isValidEnum(value, allowed) {
   return value == null || allowed.includes(value);

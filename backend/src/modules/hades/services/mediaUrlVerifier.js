@@ -17,7 +17,19 @@ export function createMediaUrlVerifier({ fetch: fetchFn } = {}) {
           signal: AbortSignal.timeout(timeoutMs),
         });
       } catch {
-        return { ok: false, url, reason: "fetch_failed" };
+        response = null;
+      }
+
+      if (!response?.ok) {
+        try {
+          response = await httpFetch(url, {
+            method: "GET",
+            headers: { range: "bytes=0-1023" },
+            signal: AbortSignal.timeout(timeoutMs),
+          });
+        } catch {
+          return { ok: false, url, reason: "fetch_failed" };
+        }
       }
 
       if (!response.ok) {
