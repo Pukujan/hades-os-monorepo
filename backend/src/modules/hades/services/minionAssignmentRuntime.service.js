@@ -70,6 +70,9 @@ export function createMinionAssignmentRuntime({
 
     if (!assignment) {
       if (commandName && scopedRepos?.minions?.listByUser) {
+        if (typeof scopedRepos.minions.refresh === "function") {
+          await scopedRepos.minions.refresh();
+        }
         const userMinions = await scopedRepos.minions.listByUser({ userId: session.userId, tenantId: session.tenantId });
         minion = userMinions.find(m => (m.commandName || m.command_name) === commandName) || null;
       }

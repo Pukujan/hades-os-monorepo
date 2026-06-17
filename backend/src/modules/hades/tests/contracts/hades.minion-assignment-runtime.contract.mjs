@@ -243,6 +243,58 @@ test("unassigned commands return an inactive result before Hermes", async () => 
   assert.equal(hermesCalls, 0);
 });
 
+test("assignment runtime refreshes scoped minions before fallback command lookup", async () => {
+  const { createMinionAssignmentRuntime } = await loadRuntimeFactory();
+  let refreshCalls = 0;
+
+  const runtime = createMinionAssignmentRuntime({
+    verifySocialAccount: async () => createSession(),
+    repository: {
+      async findActiveAssignment() {
+        return null;
+      },
+      async saveAgentExecution() {}
+    },
+    scopedRepos: {
+      minions: {
+        async refresh() {
+          refreshCalls += 1;
+        },
+        async listByUser() {
+          return [createMinion()];
+        }
+      }
+    },
+    hermesRuntime: {
+      async executeMinion() {
+        return {
+          assistantText: "Here is one biochemical cat GIF.",
+          sessionId: "hermes-runtime-session-refresh",
+          outboundActions: [{ type: "send_message", content: "Here is one biochemical cat GIF." }],
+          safety: { allowed: true }
+        };
+      }
+    },
+    socialClient: {
+      async sendMessage() {
+        return { providerMessageId: "discord-message-refresh-1" };
+      }
+    }
+  });
+
+  const result = await runtime.handleSocialTrigger({
+    provider: "discord",
+    accountId: "discord_456",
+    channelId: "channel_abc",
+    messageId: "discord-incoming-refresh",
+    content: "!catgif",
+    triggerType: "command"
+  });
+
+  assert.equal(result.status, "sent");
+  assert.equal(refreshCalls, 1);
+});
+
 test("automation triggers use the same minion runtime shape without Discord command text", async () => {
   const { createMinionAssignmentRuntime } = await loadRuntimeFactory();
   const hermesRequests = [];
@@ -424,4 +476,3 @@ test("global fallback: returns unassigned when no minion matches commandName eit
   assert.equal(result.status, "unassigned");
   assert.equal(result.reason, "no_active_assignment");
 });
-

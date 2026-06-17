@@ -217,4 +217,52 @@ describe("Telegram webhook update_id deduplication", () => {
     });
     assert.equal(second.status, "sent", "Different update_id should also process");
   });
+
+  test("refreshes scoped minions before building Telegram runtime context", async () => {
+    const { createHadesService } = await loadService();
+
+    let refreshCalls = 0;
+    const service = createHadesService({
+      hermesRuntime: {
+        generateCommandResult: async () => ({
+          assistantText: "Hello!",
+          commandSpec: {},
+          outboundActions: [{ type: "send_message", content: "Hello!" }],
+          missingFields: [],
+          safety: { allowed: true },
+        }),
+      },
+      scopedRepos: {
+        telegramConnections: {
+          findPublicByUser: async () => ({
+            id: "conn_1",
+            telegram_user_id: "12345",
+            status: "connected",
+          }),
+          findRuntimeTokenByTelegramUserId: async () => ({
+            botToken: "fake:test-token",
+          }),
+        },
+        minions: {
+          refresh: async () => {
+            refreshCalls += 1;
+          },
+          listByUser: async () => [],
+        },
+      },
+      telegramClientFactory: async () => ({
+        sendMessage: async () => ({ providerMessageId: 200 }),
+        getMe: async () => ({ id: 12345, username: "TestBot", first_name: "Test" }),
+      }),
+    });
+
+    const result = await service.handleTelegramWebhook({
+      update: makeTelegramUpdate({ updateId: 777 }),
+      userId: "user_1",
+      tenantId: "tenant_1",
+    });
+
+    assert.equal(result.status, "sent");
+    assert.equal(refreshCalls, 1);
+  });
 });

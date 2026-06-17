@@ -34,6 +34,12 @@
         "saveMinion now persists hades.minion.v2 metadata and version fields for scoped and in-memory saves",
         "Forge draft panel now uses Trigger wording and save/update labels that match the new edit flow",
         "Red tests from handoff 014 are now green"
+      ],
+      "repositoryFollowup": [
+        "Reviewed local minionRepository hydration diff and found it was reloading the full Supabase table on every read/write",
+        "Restored one-time hydration caching and added explicit refresh() for deliberate resync",
+        "Added repository tests covering one-time Supabase hydration and explicit refresh behavior",
+        "Wired refresh() into Telegram webhook runtime bootstrapping and scoped minion fallback lookup in minion assignment runtime"
       ]
     }
   }

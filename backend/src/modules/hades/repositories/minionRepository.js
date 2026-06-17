@@ -9,9 +9,12 @@ export function createMinionRepository({ storage = "memory", supabaseClient, tab
   const minions = new Map();
   let hydrated = false;
 
-  async function hydrate() {
-    if (storage !== "supabase" || hydrated) return;
+  async function hydrate({ force = false } = {}) {
+    if (storage !== "supabase") return;
+    if (hydrated && !force) return;
+
     hydrated = true;
+    minions.clear();
     for (const row of await readTableRows(supabaseClient, tableName)) {
       if (!row?.id) continue;
       minions.set(row.id, { ...row });
@@ -74,5 +77,9 @@ export function createMinionRepository({ storage = "memory", supabaseClient, tab
     return true;
   }
 
-  return { create, findById, listByUser, update, delete: remove };
+  async function refresh() {
+    await hydrate({ force: true });
+  }
+
+  return { create, findById, listByUser, update, delete: remove, refresh };
 }

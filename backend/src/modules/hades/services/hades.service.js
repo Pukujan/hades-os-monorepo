@@ -572,6 +572,10 @@ async function saveTelegramToken(body, authContext) {
       : await createTelegramClient({ botToken: tokenResult.botToken });
     const resolveTelegramIdentity = async () => ({ userId, tenantId });
 
+    if (typeof scopedRepos?.minions?.refresh === "function") {
+      await scopedRepos.minions.refresh();
+    }
+
     const telegramMinions = scopedRepos?.minions
       ? await scopedRepos.minions.listByUser({ userId, tenantId })
       : [];
