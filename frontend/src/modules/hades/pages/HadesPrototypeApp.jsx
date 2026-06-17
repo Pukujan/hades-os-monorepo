@@ -31,6 +31,7 @@ import { getPendingCopy } from "../utils/chatPendingCopy.js";
 import { TelegramSetupCard } from "../components/TelegramSetupCard.jsx";
 import { DiscordSetupCard } from "../components/DiscordSetupCard.jsx";
 import { GitHubSetupCard } from "../components/GitHubSetupCard.jsx";
+import { ExtensionInstallCard } from "../extension/components/ExtensionInstallCard.jsx";
 import {
   buildMinionDetailViewModel,
   buildMinionScreenViewModel,
@@ -1662,6 +1663,7 @@ function SocialsScreen() {
           }
           return <PermissionsCard key={social.id} social={social} />;
         })}
+        <ExtensionInstallCard providerId="hades-browser-extension" />
       </div>
     </>
   );

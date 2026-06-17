@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hades Extension — Extension-Only React Styled Prototype</title>
+  <style>
+    :root{
+      --bg:#020805;
+      --bg2:#000302;
+      --panel:#061b0e;
+      --panel2:#0a2715;
+      --panel3:#12351d;
+      --line:#245b36;
+      --line2:#407b4a;
+      --lime:#d8ff86;
+      --mint:#c6f5bf;
+      --soft:#9cc990;
+      --muted:#66815f;
+      --danger:#ff6b84;
+      --warn:#ffd36e;
+      --ok:#7dff9f;
+      --black:#000503;
+      --radius:24px;
+      --shadow:0 0 48px rgba(91,255,123,.12), inset 0 0 30px rgba(91,255,123,.045);
+      --font:"Courier New", Courier, monospace;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:radial-gradient(circle at 50% 4%,rgba(112,255,135,.15),transparent 28%),
+                 radial-gradient(circle at 12% 88%,rgba(216,255,134,.08),transparent 26%),
+                 radial-gradient(circle at 88% 72%,rgba(64,123,74,.1),transparent 24%),
+                 linear-gradient(180deg,#031008,#000302);
+      color:var(--mint);
+      font-family:var(--font);
+      padding:22px;
+      overflow-x:hidden;
+    }
+    button,input,textarea,select{font-family:inherit}
+    button{cursor:pointer}
+    .page-shell{max-width:1440px;margin:0 auto;display:grid;gap:18px}
+    .hero{
+      border:1px solid rgba(122,223,77,.2);
+      border-radius:32px;
+      background:linear-gradient(180deg,rgba(4,20,10,.94),rgba(0,8,3,.94));
+      box-shadow:var(--shadow);
+      padding:18px;
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:16px;
+      align-items:start;
+      position:relative;
+      overflow:hidden;
+    }
+    .hero:after,.device:after,.popup-device:after{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background:repeating-linear-gradient(to bottom,rgba(255,255,255,.025),rgba(255,255,255,.025) 1px,transparent 1px,transparent 4px);
+      opacity:.22;
+    }
+    .hero h1{margin:0;color:#f0ffe9;font-size:32px;letter-spacing:1px;text-shadow:0 0 12px rgba(216,255,134,.25)}
+    .hero p{margin:8px 0 0;color:var(--soft);font-size:13px;font-weight:900;line-height:1.45;max-width:900px}
+    .scope-chip{border:1px solid rgba(216,255,134,.46);border-radius:999px;padding:9px 12px;color:var(--lime);background:rgba(216,255,134,.06);font-size:12px;font-weight:900;white-space:nowrap}
+    .layout{display:grid;grid-template-columns:390px minmax(420px,1fr) 430px;gap:18px;align-items:start}
+    .popup-device,.device,.spec-panel{
+      border:1px solid rgba(122,223,77,.2);
+      background:rgba(1,10,5,.88);
+      box-shadow:var(--shadow);
+      position:relative;
+      overflow:hidden;
+    }
+    .popup-device{border-radius:30px;height:640px;display:flex;flex-direction:column}
+    .device{border-radius:36px;height:860px;display:flex;flex-direction:column}
+    .spec-panel{border-radius:30px;min-height:860px;max-height:860px;overflow:auto;padding:14px;scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+    .top{padding:16px 16px 8px;display:flex;justify-content:space-between;gap:12px;align-items:flex-start;z-index:3}
+    .brand h2,.brand h3{margin:0;color:#f0ffe9;letter-spacing:1px;text-shadow:0 0 12px rgba(216,255,134,.22)}
+    .brand h2{font-size:28px}.brand h3{font-size:22px}
+    .brand p{margin:6px 0 0;color:var(--soft);font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.08em}
+    .icon-row{display:flex;gap:8px;align-items:center}
+    .icon-btn,.pill-btn,.ghost-btn,.danger-btn,.ok-btn{
+      min-height:38px;
+      border-radius:16px;
+      padding:0 12px;
+      font-size:12px;
+      font-weight:900;
+      cursor:pointer;
+      transition:.16s ease;
+    }
+    .icon-btn{width:40px;padding:0;font-size:17px;border:1px solid rgba(216,255,134,.42);background:rgba(24,57,26,.82);color:var(--lime)}
+    .pill-btn{border:1px solid rgba(216,255,134,.56);background:rgba(24,57,26,.82);color:var(--lime)}
+    .ghost-btn{border:1px solid rgba(122,223,77,.25);background:rgba(10,39,21,.55);color:var(--mint)}
+    .danger-btn{border:1px solid rgba(255,107,132,.5);background:rgba(255,107,132,.08);color:#ffd8df}
+    .ok-btn{border:1px solid rgba(125,255,159,.6);background:rgba(125,255,159,.08);color:var(--ok)}
+    .pill-btn:hover,.ghost-btn:hover,.icon-btn:hover,.danger-btn:hover,.ok-btn:hover,.action:hover,.nav:hover{filter:brightness(1.15)}
+    .body{flex:1;overflow:auto;padding:0 14px 86px;z-index:2;scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+    .popup-body{flex:1;overflow:auto;padding:0 14px 14px;z-index:2;scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+    .card{border:1px solid var(--line);border-radius:22px;background:linear-gradient(180deg,rgba(7,31,15,.98),rgba(3,18,9,.98));box-shadow:inset 0 0 28px rgba(83,245,116,.05);padding:14px;margin:11px 0}
+    .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .stack{display:grid;gap:10px}.stack-tight{display:grid;gap:7px}
+    .title{margin:0;color:#f1ffe9;font-size:21px;line-height:1.12}
+    .subtitle{margin:7px 0 0;color:var(--soft);font-size:12px;line-height:1.45;font-weight:800}
+    .tiny{font-size:10px;color:var(--muted);font-weight:900;text-transform:uppercase;letter-spacing:.08em}
+    .chip{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(216,255,134,.35);border-radius:999px;padding:5px 9px;color:var(--lime);font-size:11px;font-weight:900;background:rgba(216,255,134,.07);white-space:nowrap}
+    .chip.ok{color:var(--ok);border-color:rgba(125,255,159,.45)}
+    .chip.warn{color:var(--warn);border-color:rgba(255,211,110,.45)}
+    .chip.danger{color:var(--danger);border-color:rgba(255,107,132,.45)}
+    .chip.off{color:var(--muted);border-color:rgba(156,201,144,.24)}
+    .tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}
+    .tab{border:1px solid rgba(122,223,77,.25);border-radius:15px;padding:9px 6px;text-align:center;cursor:pointer;color:var(--soft);font-size:11px;font-weight:900;background:rgba(10,39,21,.5)}
+    .tab.active{color:var(--lime);border-color:rgba(216,255,134,.52);background:rgba(216,255,134,.08)}
+    .screen{display:none}.screen.active{display:block}
+    .field{display:grid;gap:7px;margin-top:10px}
+    .field label{font-size:10px;color:var(--soft);font-weight:900;text-transform:uppercase;letter-spacing:.08em}
+    .input,.textarea{
+      width:100%;border:1px solid rgba(122,223,77,.28);border-radius:16px;background:rgba(0,0,0,.2);color:var(--mint);padding:12px;font-size:13px;font-weight:800;outline:none;
+    }
+    .textarea{min-height:92px;resize:vertical;line-height:1.45}
+    .input:focus,.textarea:focus{border-color:rgba(216,255,134,.55);box-shadow:0 0 0 2px rgba(216,255,134,.06)}
+    .action-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+    .action{border:1px solid rgba(216,255,134,.35);border-radius:18px;background:rgba(16,48,25,.82);color:var(--mint);padding:11px;text-align:left;cursor:pointer;min-height:68px}
+    .action strong{display:block;color:#f1ffe9;font-size:13px}.action span{display:block;color:var(--soft);font-size:11px;font-weight:800;margin-top:4px;line-height:1.32}
+    .action.primary{border-color:rgba(216,255,134,.72);background:linear-gradient(180deg,rgba(75,98,39,.9),rgba(22,62,28,.9));color:#f5ffe7}
+    .list-item{border:1px solid rgba(122,223,77,.18);border-radius:18px;padding:12px;margin:8px 0;background:rgba(8,31,16,.56);cursor:pointer;position:relative}
+    .list-item strong{color:#f1ffe9;font-size:13px}.list-item p{margin:6px 0 0;color:var(--soft);font-size:11px;line-height:1.35;font-weight:800}
+    .list-item.active{outline:1px solid rgba(216,255,134,.6);box-shadow:0 0 18px rgba(216,255,134,.12)}
+    .list-meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+    .bottom-nav{height:76px;position:absolute;bottom:0;left:0;right:0;border-top:1px solid rgba(122,223,77,.18);background:rgba(0,8,3,.92);display:grid;grid-template-columns:repeat(5,1fr);z-index:4}
+    .nav{border:0;background:transparent;color:var(--muted);font-weight:900;font-size:10px;cursor:pointer}.nav.active{color:var(--lime)}
+    .popup-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+    .mini-card{border:1px solid rgba(122,223,77,.22);border-radius:18px;background:rgba(0,0,0,.14);padding:11px}
+    .mini-card strong{display:block;color:#f1ffe9;font-size:12px}.mini-card span{display:block;color:var(--soft);font-size:11px;font-weight:800;margin-top:5px;line-height:1.35}
+    .safety-strip{border:1px solid rgba(255,211,110,.38);background:rgba(255,211,110,.06);border-radius:18px;padding:11px;color:#ffe9ae;font-size:12px;line-height:1.42;font-weight:800}
+    .danger-strip{border:1px solid rgba(255,107,132,.42);background:rgba(255,107,132,.08);border-radius:18px;padding:11px;color:#ffd8df;font-size:12px;line-height:1.42;font-weight:800}
+    .ok-strip{border:1px solid rgba(125,255,159,.42);background:rgba(125,255,159,.07);border-radius:18px;padding:11px;color:#d9ffe1;font-size:12px;line-height:1.42;font-weight:800}
+    .chat-window{display:grid;gap:10px;margin-top:10px}
+    .bubble{border:1px solid rgba(122,223,77,.25);border-radius:18px;padding:12px;background:rgba(10,39,21,.7);font-size:13px;line-height:1.45;color:var(--mint)}
+    .bubble.hades{border-color:rgba(216,255,134,.35);background:rgba(12,39,19,.88)}
+    .bubble.user{margin-left:28px;background:rgba(16,48,25,.72)}
+    .composer{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:10px}
+    .progress{height:9px;background:rgba(0,0,0,.32);border:1px solid rgba(122,223,77,.25);border-radius:999px;overflow:hidden;margin-top:9px}.bar{height:100%;width:62%;background:linear-gradient(90deg,var(--line2),var(--lime));box-shadow:0 0 10px rgba(216,255,134,.35)}
+    .mermaid-box{border:1px solid rgba(122,223,77,.25);border-radius:18px;background:rgba(0,0,0,.18);padding:12px;margin-top:10px}
+    .flow{display:grid;grid-template-columns:1fr;gap:8px;align-items:center;text-align:center}.flow-node{border:1px solid rgba(216,255,134,.34);border-radius:14px;padding:9px;background:rgba(216,255,134,.06);font-size:12px;font-weight:900;color:var(--mint)}.flow-arrow{color:var(--lime);font-weight:900}
+    .markdown{border:1px solid rgba(122,223,77,.22);border-radius:18px;padding:12px;background:rgba(0,0,0,.16);font-size:12px;line-height:1.5;color:var(--soft);font-weight:800}.markdown h4{color:#f1ffe9;margin:0 0 8px;font-size:14px}.markdown code{color:var(--lime)}
+    .capture-preview{border:1px solid rgba(122,223,77,.22);border-radius:18px;overflow:hidden;background:rgba(0,0,0,.16)}
+    .capture-head{padding:12px;border-bottom:1px solid rgba(122,223,77,.16);display:grid;gap:4px}.capture-head strong{color:#f1ffe9;font-size:13px}.capture-head span{font-size:11px;color:var(--soft);font-weight:800;word-break:break-all}
+    .field-row{display:grid;grid-template-columns:1fr auto;gap:10px;padding:10px 12px;border-top:1px solid rgba(122,223,77,.1);font-size:12px;color:var(--soft);font-weight:800}.lock{color:var(--warn)}
+    .approval-card{border:1px solid rgba(255,211,110,.38);border-radius:20px;padding:13px;background:rgba(255,211,110,.06);margin:9px 0}.approval-card strong{color:#f1ffe9}.approval-card p{color:#ffe9ae;font-size:12px;line-height:1.42;font-weight:800}.approval-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+    .toast{position:fixed;right:22px;bottom:22px;z-index:100;border:1px solid rgba(216,255,134,.38);border-radius:18px;padding:12px 14px;background:rgba(3,18,9,.98);color:var(--mint);font-size:12px;font-weight:900;box-shadow:0 18px 60px rgba(0,0,0,.5);display:none}.toast.show{display:block}.toast.error{border-color:rgba(255,107,132,.48);color:#ffd8df}
+    table{width:100%;border-collapse:collapse;font-size:11px;line-height:1.35;margin:10px 0;color:var(--soft)}th,td{border:1px solid rgba(122,223,77,.18);padding:8px;vertical-align:top}th{color:var(--lime);background:rgba(216,255,134,.06);text-align:left}
+    .spec-panel h2{margin:4px 0 8px;color:#f1ffe9;font-size:20px}.spec-panel h3{margin:16px 0 8px;color:#f1ffe9;font-size:15px}.spec-panel p,.spec-panel li{font-size:12px;line-height:1.45;color:var(--soft);font-weight:800}.spec-panel ul{padding-left:18px}.code{border:1px solid rgba(122,223,77,.18);border-radius:16px;background:rgba(0,0,0,.22);padding:10px;color:var(--mint);font-size:11px;line-height:1.45;white-space:pre-wrap}
+    .state-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.state-tile{border:1px solid rgba(122,223,77,.18);border-radius:16px;background:rgba(8,31,16,.56);padding:10px}.state-tile strong{font-size:12px;color:#f1ffe9}.state-tile span{display:block;color:var(--soft);font-size:10px;line-height:1.35;margin-top:4px;font-weight:800}
+    .hidden{display:none!important}
+    @media(max-width:1260px){.layout{grid-template-columns:390px 1fr}.spec-panel{grid-column:1 / -1;max-height:none}.device{height:820px}}
+    @media(max-width:860px){body{padding:12px}.hero{grid-template-columns:1fr}.layout{grid-template-columns:1fr}.popup-device,.device,.spec-panel{height:auto;min-height:680px;max-height:none}.bottom-nav{position:sticky}.body{padding-bottom:18px}.hero h1{font-size:26px}}
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <div>
+        <h1>HADES EXTENSION DESIGN</h1>
+        <p>Extension-only React-style prototype. Socials install card and main-app API key generation are intentionally excluded under the updated scope. The extension accepts a pasted one-time key, then runs chat, workflows, uploads, page capture, text spaces, and approval review.</p>
+      </div>
+      <span class="scope-chip">EXTENSION ONLY · NO SOCIALS CARD</span>
+    </header>
+
+    <section class="layout">
+      <aside class="popup-device" aria-label="Extension popup prototype">
+        <div class="top">
+          <div class="brand">
+            <h3>HADES</h3>
+            <p>Popup · Quick command</p>
+          </div>
+          <div class="icon-row"><button class="icon-btn" onclick="setSideScreen('approvals')">⚠</button><button class="icon-btn" onclick="setSideScreen('connect')">⚙</button></div>
+        </div>
+        <div class="popup-body">
+          <div class="card" id="popupConnectedCard">
+            <div class="row"><div><h2 class="title" style="font-size:18px">Browser bound</h2><p class="subtitle">Current page can be captured. Hades can draft and fill. Submission remains yours.</p></div><span class="chip ok" id="popupStatus">ready</span></div>
+          </div>
+          <div class="card hidden" id="popupNeedsKeyCard">
+            <div class="row"><div><h2 class="title" style="font-size:18px">Extension not connected</h2><p class="subtitle">Paste the one-time API key from Hades OS. The key is not generated here.</p></div><span class="chip warn">needs key</span></div>
+            <button class="pill-btn" style="width:100%;margin-top:10px" onclick="setSideScreen('connect')">Paste API key</button>
+          </div>
+          <div class="safety-strip">Safety boundary: Hades may read selected/page text, draft messages, and prepare form fills. Send, submit, purchase, or destructive actions require explicit approval.</div>
+          <div class="popup-actions">
+            <button class="action primary" onclick="setSideScreen('chat')"><strong>Ask Hades</strong><span>Open chat with page context</span></button>
+            <button class="action" onclick="capturePage()"><strong>Capture page</strong><span>URL, title, selection, forms</span></button>
+            <button class="action" onclick="setSideScreen('workflows')"><strong>Workflows</strong><span>Run minions from browser</span></button>
+            <button class="action" onclick="setSideScreen('approvals')"><strong>Approvals</strong><span id="approvalMiniCount">2 waiting</span></button>
+          </div>
+          <div class="card">
+            <div class="row"><div><span class="tiny">Current page</span><h2 class="title" style="font-size:16px">Apply - Senior Frontend Engineer</h2></div><span class="chip warn">forms found</span></div>
+            <p class="subtitle">Selected: React, accessibility, Playwright</p>
+          </div>
+          <div class="card">
+            <div class="row"><div><span class="tiny">Last Hades note</span><h2 class="title" style="font-size:16px">Approval required</h2></div><span class="chip warn">review</span></div>
+            <p class="subtitle">A form fill proposal is ready. Nothing has been submitted.</p>
+          </div>
+        </div>
+      </aside>
+
+      <main class="device" aria-label="Extension side panel prototype">
+        <div class="top">
+          <div class="brand">
+            <h2>HADES</h2>
+            <p>Extension side panel · command cockpit</p>
+          </div>
+          <div class="icon-row"><button class="pill-btn" onclick="simulateRotatedKey()">Rotated key</button><button class="icon-btn" onclick="setSideScreen('connect')">⚙</button></div>
+        </div>
+        <div class="body">
+          <div class="tabs">
+            <button class="tab active" data-screen="chat" onclick="setSideScreen('chat')">Chat</button>
+            <button class="tab" data-screen="workflows" onclick="setSideScreen('workflows')">Workflows</button>
+            <button class="tab" data-screen="capture" onclick="setSideScreen('capture')">Capture</button>
+            <button class="tab" data-screen="approvals" onclick="setSideScreen('approvals')">Approvals</button>
+          </div>
+
+          <section class="screen" id="screen-connect">
+            <div class="card">
+              <div class="row"><div><span class="tiny">Connection</span><h2 class="title">Paste extension key</h2><p class="subtitle">Generate the key in Hades OS, copy the one-time secret, then paste it here. This extension does not generate keys.</p></div><span class="chip warn" id="connectChip">not connected</span></div>
+              <div class="field"><label>Extension API key</label><input class="input" id="apiKeyInput" value="" placeholder="hades_ext_live_secret_once" /></div>
+              <div class="action-grid" style="margin-top:10px"><button class="action primary" onclick="connectKey()"><strong>Connect extension</strong><span>Stores key locally for runtime API auth</span></button><button class="action" onclick="clearKey()"><strong>Forget key</strong><span>Remove saved extension credential</span></button></div>
+            </div>
+            <div class="card" id="keyStateCard">
+              <div class="row"><div><span class="tiny">Saved state</span><h2 class="title" style="font-size:18px">No extension key yet</h2></div><span class="chip off">empty</span></div>
+              <p class="subtitle">User sees only paste/connect guidance. Secret generation belongs to the Hades OS app.</p>
+            </div>
+            <div class="safety-strip">Do not show the full secret again after connect. Local UI may show a redacted preview like <strong>hades_ext_...abcd</strong>.</div>
+          </section>
+
+          <section class="screen active" id="screen-chat">
+            <div class="card">
+              <div class="row"><div><span class="tiny">Hades chat</span><h2 class="title">Ask with page context</h2><p class="subtitle">Use the selected text, visible page text, uploaded docs, and saved text spaces as context.</p></div><span class="chip ok" id="chatStateChip">ready</span></div>
+              <div class="chat-window" id="chatWindow">
+                <div class="bubble hades">The page has a form and a suspicious number of promises. I can draft answers, map fields, and prepare a fill proposal. I will not submit it.</div>
+                <div class="bubble user">Use the current job page and my resume context. Draft the short answer.</div>
+                <div class="bubble hades">Draft ready. It references React, accessibility, Playwright, and workflow automation. A form-fill proposal is waiting in approvals.</div>
+              </div>
+              <div class="composer"><input class="input" id="chatInput" placeholder="Ask Hades about this page..." /><button class="pill-btn" onclick="sendChat()">Send</button></div>
+            </div>
+          </section>
+
+          <section class="screen" id="screen-workflows">
+            <div class="card">
+              <div class="row"><div><span class="tiny">Workflows</span><h2 class="title">Browser minions</h2><p class="subtitle">Available workflows returned by <code>GET /api/hades/extension/workflows</code>.</p></div><span class="chip">3 active</span></div>
+              <div id="workflowList"></div>
+            </div>
+          </section>
+
+          <section class="screen" id="screen-workflow-detail">
+            <button class="ghost-btn" onclick="setSideScreen('workflows')">← Back to workflows</button>
+            <div class="card">
+              <div class="row"><div><span class="tiny">Workflow detail</span><h2 class="title" id="wfTitle">Apply to targeted job</h2><p class="subtitle" id="wfDesc">Tailors resume, drafts cover letter, fills form after approval.</p></div><span class="chip warn" id="wfStatus">approval_required</span></div>
+              <div class="markdown">
+                <h4>Markdown explanation</h4>
+                <p><strong>What this workflow does:</strong> reads the current job page, compares it to saved resume context, drafts answers, and prepares a form-fill proposal.</p>
+                <p><strong>Boundary:</strong> Hades can fill fields after approval, but submit remains manual unless a future approval explicitly permits it.</p>
+                <p><code>nextAction:</code> Review form fill proposal</p>
+              </div>
+              <div class="mermaid-box">
+                <span class="tiny">Mermaid-style explanation</span>
+                <div class="flow">
+                  <div class="flow-node">Page context</div><div class="flow-arrow">↓</div>
+                  <div class="flow-node">Resume + text spaces</div><div class="flow-arrow">↓</div>
+                  <div class="flow-node">Draft answers</div><div class="flow-arrow">↓</div>
+                  <div class="flow-node">Approval required</div>
+                </div>
+              </div>
+              <div class="action-grid" style="margin-top:10px"><button class="action primary" onclick="setSideScreen('approvals')"><strong>Review proposal</strong><span>Open pending approval</span></button><button class="action" onclick="setSideScreen('chat')"><strong>Ask about workflow</strong><span>Discuss before approving</span></button></div>
+            </div>
+          </section>
+
+          <section class="screen" id="screen-upload">
+            <div class="card">
+              <div class="row"><div><span class="tiny">Documents</span><h2 class="title">Upload PDFs/files</h2><p class="subtitle">Uploads to the shared context store through <code>POST /api/hades/extension/documents</code>.</p></div><span class="chip" id="uploadChip">idle</span></div>
+              <div class="mini-card" style="margin-top:10px"><strong>Drop zone</strong><span>Drag PDFs, DOCX, screenshots, or text files here. The extension shows progress and result state.</span></div>
+              <div id="uploadProgress" class="hidden"><div class="progress"><div class="bar"></div></div><p class="subtitle">Uploading plaintiff-notes.pdf · 62%</p></div>
+              <div class="action-grid" style="margin-top:10px"><button class="action primary" onclick="simulateUpload('progress')"><strong>Simulate upload</strong><span>Progress state</span></button><button class="action" onclick="simulateUpload('error')"><strong>Simulate error</strong><span>Rejected/failed state</span></button></div>
+              <div id="uploadMessage" style="margin-top:10px"></div>
+            </div>
+          </section>
+
+          <section class="screen" id="screen-textspaces">
+            <div class="card">
+              <div class="row"><div><span class="tiny">Text context spaces</span><h2 class="title">Reusable browser memory</h2><p class="subtitle">List, create, or update spaces using extension runtime APIs.</p></div><span class="chip">4 spaces</span></div>
+              <div class="list-item"><strong>Resume facts</strong><p>Used for job forms and cover-letter drafts.</p><div class="list-meta"><span class="chip ok">active</span><span class="chip">updated today</span></div></div>
+              <div class="list-item"><strong>Legal ops notes</strong><p>Used for NYSCEF / court workflow explanations.</p><div class="list-meta"><span class="chip">private</span></div></div>
+              <div class="field"><label>Editor</label><textarea class="textarea">React, accessibility, Playwright, workflow automation, legal/document-heavy systems...</textarea></div>
+              <button class="pill-btn" style="width:100%;margin-top:10px" onclick="toast('Text context space saved.')">Save text space</button>
+            </div>
+          </section>
+
+          <section class="screen" id="screen-capture">
+            <div class="card">
+              <div class="row"><div><span class="tiny">Page capture</span><h2 class="title">Preview before saving</h2><p class="subtitle">Captured data matches the Page Context contract. Sensitive field values are not displayed.</p></div><span class="chip ok" id="captureChip">captured</span></div>
+              <div class="capture-preview" style="margin-top:10px">
+                <div class="capture-head"><strong>Apply - Senior Frontend Engineer</strong><span>https://jobs.example.test/apply</span></div>
+                <div class="field-row"><span>Selected text</span><span>React, accessibility, Playwright</span></div>
+                <div class="field-row"><span>Visible text</span><span>Job description...</span></div>
+                <div class="field-row"><span>Form</span><span>form#apply</span></div>
+                <div class="field-row"><span>Email field</span><span class="lock">sensitive value hidden</span></div>
+                <div class="field-row"><span>Submit selector</span><span>button[type=submit]</span></div>
+              </div>
+              <div class="action-grid" style="margin-top:10px"><button class="action primary" onclick="savePageContext()"><strong>Save page context</strong><span>POST /page-context</span></button><button class="action" onclick="setSideScreen('chat')"><strong>Ask Hades</strong><span>Use this context in chat</span></button></div>
+            </div>
+          </section>
+
+          <section class="screen" id="screen-approvals">
+            <div class="card">
+              <div class="row"><div><span class="tiny">Approval queue</span><h2 class="title">User decides</h2><p class="subtitle">Every send, submit, destructive, or external action pauses here.</p></div><span class="chip warn" id="approvalCount">2 pending</span></div>
+              <div id="approvalList"></div>
+            </div>
+          </section>
+        </div>
+        <div class="bottom-nav">
+          <button class="nav active" data-screen="chat" onclick="setSideScreen('chat')">CHAT</button>
+          <button class="nav" data-screen="workflows" onclick="setSideScreen('workflows')">MINIONS</button>
+          <button class="nav" data-screen="upload" onclick="setSideScreen('upload')">UPLOAD</button>
+          <button class="nav" data-screen="textspaces" onclick="setSideScreen('textspaces')">SPACES</button>
+          <button class="nav" data-screen="approvals" onclick="setSideScreen('approvals')">APPROVE</button>
+        </div>
+      </main>
+
+      <aside class="spec-panel" aria-label="Design specification">
+        <h2>Extension Design Spec</h2>
+        <p><strong>Scope:</strong> browser extension only. No Socials install card, no main-app key generation screen, no main-app download card.</p>
+        <h3>Layout + spacing</h3>
+        <ul>
+          <li><strong>Popup:</strong> 360–390px wide, 600–640px tall, optimized for quick capture/chat/approval entry.</li>
+          <li><strong>Side panel:</strong> 420–462px wide mobile-style command surface with persistent nav.</li>
+          <li><strong>Cards:</strong> 22px radius, 14–16px padding, 10–12px vertical gaps.</li>
+          <li><strong>Buttons:</strong> pill/command buttons, 38px minimum height, strong labels with small helper text.</li>
+        </ul>
+        <h3>React component map</h3>
+        <div class="code">ExtensionApp
+├─ ExtensionPopup
+│  ├─ PopupStatusCard
+│  ├─ PopupQuickActions
+│  └─ PopupCurrentPageCard
+├─ ExtensionSidePanel
+│  ├─ ExtensionConnectScreen
+│  ├─ ExtensionChatScreen
+│  ├─ WorkflowListScreen
+│  ├─ WorkflowDetailScreen
+│  ├─ DocumentUploadPanel
+│  ├─ TextContextSpacesPanel
+│  ├─ PageCapturePreview
+│  └─ ApprovalQueue
+├─ Shared
+│  ├─ HadesCard
+│  ├─ StatusChip
+│  ├─ SafetyStrip
+│  ├─ CommandButton
+│  └─ Toast</div>
+        <h3>Data mapping</h3>
+        <table>
+          <thead><tr><th>UI</th><th>Reads</th><th>Endpoint / contract</th></tr></thead>
+          <tbody>
+            <tr><td>Connect screen</td><td>Pasted extension key, redacted preview, local connection state</td><td>Runtime auth uses Authorization: Bearer &lt;extension-key&gt;</td></tr>
+            <tr><td>Workflow row</td><td>id, title, description, status, lastRunStatus, nextAction</td><td>GET /api/hades/extension/workflows</td></tr>
+            <tr><td>Chat</td><td>message, page context, active context spaces</td><td>POST /api/hades/extension/chat</td></tr>
+            <tr><td>Upload panel</td><td>files, upload progress, result/error</td><td>POST /api/hades/extension/documents</td></tr>
+            <tr><td>Text spaces</td><td>space list/editor content</td><td>GET/POST /api/hades/extension/text-context-spaces</td></tr>
+            <tr><td>Capture preview</td><td>url, title, selectedText, visibleText, forms, fields</td><td>POST /api/hades/extension/page-context</td></tr>
+            <tr><td>Approval queue</td><td>approval id, action, risk, diff/proposal, status</td><td>GET /api/hades/extension/approvals + POST /decision</td></tr>
+          </tbody>
+        </table>
+        <h3>Copy deck</h3>
+        <table>
+          <tbody>
+            <tr><th>Connect empty</th><td>Paste the one-time extension key from Hades OS. This extension does not generate keys.</td></tr>
+            <tr><th>Connected</th><td>Browser bound. Hades can use this page after you approve capture.</td></tr>
+            <tr><th>Revoked/rotated</th><td>This key no longer works. Paste the new one-time key from Hades OS.</td></tr>
+            <tr><th>Approval warning</th><td>Nothing is sent or submitted until you approve it.</td></tr>
+            <tr><th>Upload success</th><td>File added to shared context. Hades may use it in this browser session.</td></tr>
+            <tr><th>Capture success</th><td>Page context saved. Sensitive field values stayed hidden.</td></tr>
+          </tbody>
+        </table>
+        <h3>State gallery</h3>
+        <div class="state-grid">
+          <div class="state-tile"><strong>No key yet</strong><span>Connect screen shows paste field and explanation.</span></div>
+          <div class="state-tile"><strong>Secret visible once</strong><span>Shown in app only; extension receives pasted value.</span></div>
+          <div class="state-tile"><strong>Secret copied</strong><span>Extension prompt says paste copied key here.</span></div>
+          <div class="state-tile"><strong>Redacted preview</strong><span>Extension may show hades_ext_...abcd.</span></div>
+          <div class="state-tile"><strong>Revoked</strong><span>Show reconnect required with danger chip.</span></div>
+          <div class="state-tile"><strong>Rotated</strong><span>Old key fails; paste new one-time secret.</span></div>
+          <div class="state-tile"><strong>Bundle available</strong><span>Out of extension UI; mention only in install instructions.</span></div>
+          <div class="state-tile"><strong>Bundle unavailable</strong><span>Out of extension UI; app handles download error.</span></div>
+          <div class="state-tile"><strong>Chat loading/error/success</strong><span>Chip switches ready/thinking/error.</span></div>
+          <div class="state-tile"><strong>Upload progress/error/success</strong><span>Progress bar, danger strip, ok strip.</span></div>
+          <div class="state-tile"><strong>Page captured</strong><span>Preview captured fields before save.</span></div>
+          <div class="state-tile"><strong>Approval required</strong><span>Warn chip, approve/reject buttons.</span></div>
+          <div class="state-tile"><strong>Approved</strong><span>Ok strip and status changed.</span></div>
+          <div class="state-tile"><strong>Rejected</strong><span>Rejected status, no action taken.</span></div>
+        </div>
+        <h3>Safety / approval UX</h3>
+        <ul>
+          <li>Always say what Hades wants to do before approve/reject.</li>
+          <li>Show target surface: form, URL, destination, or file context.</li>
+          <li>Show sensitive-field handling: values hidden unless the user explicitly reveals them.</li>
+          <li>Separate <strong>Fill fields</strong> from <strong>Submit form</strong>.</li>
+          <li>Default for external actions is draft/prep, not send/submit.</li>
+          <li>Approval cards must remain calm but visually distinct with warning color.</li>
+        </ul>
+      </aside>
+    </section>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+  const workflows = [
+    {id:'workflow_123',title:'Apply to targeted job',description:'Tailors resume, drafts cover letter, fills form after approval.',status:'active',lastRunStatus:'approval_required',nextAction:'Review form fill proposal'},
+    {id:'workflow_456',title:'Summarize current page',description:'Captures URL, selected text, visible page text, and returns a concise summary.',status:'active',lastRunStatus:'success',nextAction:'Ask follow-up'},
+    {id:'workflow_789',title:'Upload document to context',description:'Sends PDFs/files into the shared context store for later chat and workflows.',status:'active',lastRunStatus:'idle',nextAction:'Upload file'}
+  ];
+  const approvals = [
+    {id:'appr_1',title:'Fill job application form',risk:'Form fill only — no submit',body:'Hades proposes filling email, name, portfolio URL, and short-answer fields on jobs.example.test/apply.',status:'pending'},
+    {id:'appr_2',title:'Create cover letter draft',risk:'Draft creation',body:'Hades will create a draft answer using resume facts and current job page context.',status:'pending'}
+  ];
+  let connected = true;
+  let selectedWorkflow = workflows[0];
+
+  function $(id){return document.getElementById(id)}
+  function toast(msg, error=false){const t=$('toast');t.textContent=msg;t.className='toast show'+(error?' error':'');setTimeout(()=>t.className='toast',2700)}
+
+  function setSideScreen(screen){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    const el = $('screen-'+screen);
+    if(el) el.classList.add('active');
+    document.querySelectorAll('.tab,.nav').forEach(n=>n.classList.toggle('active', n.dataset.screen===screen));
+    if(screen==='workflows') renderWorkflows();
+    if(screen==='approvals') renderApprovals();
+  }
+
+  function renderWorkflows(){
+    $('workflowList').innerHTML = workflows.map(w => `
+      <div class="list-item" onclick="openWorkflow('${w.id}')">
+        <div class="row"><strong>${w.title}</strong><span class="chip ${w.lastRunStatus==='approval_required'?'warn':'ok'}">${w.lastRunStatus}</span></div>
+        <p>${w.description}</p>
+        <div class="list-meta"><span class="chip">${w.status}</span><span class="chip off">${w.nextAction}</span></div>
+      </div>
+    `).join('');
+  }
+
+  function openWorkflow(id){
+    selectedWorkflow = workflows.find(w=>w.id===id) || workflows[0];
+    $('wfTitle').textContent = selectedWorkflow.title;
+    $('wfDesc').textContent = selectedWorkflow.description;
+    $('wfStatus').textContent = selectedWorkflow.lastRunStatus;
+    $('wfStatus').className = 'chip ' + (selectedWorkflow.lastRunStatus==='approval_required'?'warn':'ok');
+    setSideScreen('workflow-detail');
+  }
+
+  function renderApprovals(){
+    const pending = approvals.filter(a=>a.status==='pending').length;
+    $('approvalCount').textContent = `${pending} pending`;
+    $('approvalMiniCount').textContent = `${pending} waiting`;
+    $('approvalList').innerHTML = approvals.map(a => `
+      <div class="approval-card">
+        <div class="row"><strong>${a.title}</strong><span class="chip ${a.status==='pending'?'warn':a.status==='approved'?'ok':'danger'}">${a.status}</span></div>
+        <p><strong>Boundary:</strong> ${a.risk}<br>${a.body}</p>
+        ${a.status==='pending' ? `<div class="approval-actions"><button class="ok-btn" onclick="decideApproval('${a.id}','approved')">Approve</button><button class="danger-btn" onclick="decideApproval('${a.id}','rejected')">Reject</button></div>` : `<div class="${a.status==='approved'?'ok-strip':'danger-strip'}">${a.status==='approved'?'Approved. Hades may proceed with the proposed non-submit action.':'Rejected. No browser action was taken.'}</div>`}
+      </div>
+    `).join('');
+  }
+
+  function decideApproval(id,status){
+    const a = approvals.find(x=>x.id===id);
+    if(!a) return;
+    a.status = status;
+    renderApprovals();
+    toast(status==='approved' ? 'Approved. Hades may proceed inside the stated boundary.' : 'Rejected. No action was taken.', status==='rejected');
+  }
+
+  function connectKey(){
+    const input = $('apiKeyInput').value.trim();
+    if(!input){toast('Paste the one-time API key first.', true);return;}
+    connected = true;
+    $('connectChip').className='chip ok';
+    $('connectChip').textContent='connected';
+    $('keyStateCard').innerHTML = `<div class="row"><div><span class="tiny">Saved state</span><h2 class="title" style="font-size:18px">Extension key saved</h2></div><span class="chip ok">hades_ext_...once</span></div><p class="subtitle">Full secret is hidden after connection. Runtime calls use Authorization: Bearer &lt;extension-key&gt;.</p>`;
+    $('popupConnectedCard').classList.remove('hidden');
+    $('popupNeedsKeyCard').classList.add('hidden');
+    toast('Extension connected. The full secret is now hidden.');
+  }
+  function clearKey(){
+    connected = false;
+    $('connectChip').className='chip warn';
+    $('connectChip').textContent='not connected';
+    $('keyStateCard').innerHTML = `<div class="row"><div><span class="tiny">Saved state</span><h2 class="title" style="font-size:18px">No extension key yet</h2></div><span class="chip off">empty</span></div><p class="subtitle">Paste the one-time secret from Hades OS to connect again.</p>`;
+    $('popupConnectedCard').classList.add('hidden');
+    $('popupNeedsKeyCard').classList.remove('hidden');
+    toast('Extension key forgotten. Reconnect required.');
+  }
+  function simulateRotatedKey(){
+    connected = false;
+    setSideScreen('connect');
+    $('connectChip').className='chip danger';
+    $('connectChip').textContent='key invalid';
+    $('keyStateCard').innerHTML = `<div class="row"><div><span class="tiny">Saved state</span><h2 class="title" style="font-size:18px">Key rotated or revoked</h2></div><span class="chip danger">reconnect</span></div><p class="subtitle">This saved key no longer works. Paste the new one-time secret generated in Hades OS.</p>`;
+    $('popupConnectedCard').classList.add('hidden');
+    $('popupNeedsKeyCard').classList.remove('hidden');
+    toast('Key is invalid. Paste the rotated key from Hades OS.', true);
+  }
+
+  function sendChat(){
+    const text = $('chatInput').value.trim() || 'Use current page context.';
+    $('chatInput').value='';
+    $('chatStateChip').className='chip warn';
+    $('chatStateChip').textContent='thinking';
+    const w = $('chatWindow');
+    w.innerHTML += `<div class="bubble user">${escapeHtml(text)}</div>`;
+    setTimeout(()=>{
+      w.innerHTML += `<div class="bubble hades">I prepared a safe draft. Any form fill or submit-shaped action has been moved to approvals. Naturally, I am the only one here respecting boundaries.</div>`;
+      $('chatStateChip').className='chip ok';
+      $('chatStateChip').textContent='success';
+      w.scrollTop = w.scrollHeight;
+    },650);
+  }
+  function escapeHtml(s){return s.replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+
+  function capturePage(){setSideScreen('capture');toast('Page context captured. Review before saving.')}
+  function savePageContext(){toast('Page context saved. Sensitive values stayed hidden.')}
+  function simulateUpload(mode){
+    setSideScreen('upload');
+    $('uploadProgress').classList.remove('hidden');
+    $('uploadChip').textContent = mode==='error'?'error':'uploading';
+    $('uploadChip').className = 'chip ' + (mode==='error'?'danger':'warn');
+    setTimeout(()=>{
+      if(mode==='error'){
+        $('uploadMessage').innerHTML = `<div class="danger-strip">Upload failed. File type rejected or network interrupted. No context was saved.</div>`;
+        $('uploadChip').textContent='error';
+      } else {
+        $('uploadMessage').innerHTML = `<div class="ok-strip">Upload complete. File added to shared context.</div>`;
+        $('uploadChip').className='chip ok';
+        $('uploadChip').textContent='success';
+      }
+    },650);
+  }
+
+  renderWorkflows();
+  renderApprovals();
+</script>
+</body>
+</html>

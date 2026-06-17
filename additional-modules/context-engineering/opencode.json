@@ -3,18 +3,24 @@
   "compaction": {
     "auto": true,
     "prune": true,
-    "reserved": 10000,
+    "reserved": 4000,
     "tail_turns": 2
   },
   "mcp": {
     "supabase": {
-      "type": "local",
-      "command": ["npx", "-y", "@supabase/mcp-server-sdk"],
-      "enabled": true,
-      "env": {
-        "SUPABASE_ACCESS_TOKEN": "{env:SUPABASE_ACCESS_TOKEN}",
-        "SUPABASE_PROJECT_REF": "{env:SUPABASE_PROJECT_REF}"
-      }
+      "type": "remote",
+      "url": "https://mcp.supabase.com/mcp?project_ref=herzhouazsssxaqqbmiq",
+      "oauth": {}
+    },
+    "vercel": {
+      "type": "remote",
+      "url": "https://mcp.vercel.com",
+      "oauth": {}
+    },
+    "railway": {
+      "type": "remote",
+      "url": "https://mcp.railway.com",
+      "oauth": {}
     }
   },
   "provider": {

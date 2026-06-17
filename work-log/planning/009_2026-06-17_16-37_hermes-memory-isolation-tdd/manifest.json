@@ -1,0 +1,17 @@
+{
+  "id": "009_2026-06-17_16-37_hermes-memory-isolation-tdd",
+  "slug": "hermes-memory-isolation-tdd",
+  "status": "planned",
+  "createdAt": "2026-06-17T16:37:00-04:00",
+  "scope": "backend-hermes-memory-isolation",
+  "artifacts": {
+    "studyLogMd": "work-log/study-docs/003_2026-06-17_16-37_study-log_hermes-memory-isolation.md",
+    "planLogMd": "work-log/planning/009_2026-06-17_16-37_hermes-memory-isolation-tdd/plan-log.md",
+    "handoffMd": "work-log/handoffs/008_2026-06-17_16-37_handoff_hermes-memory-isolation-tdd.md",
+    "tddTests": "backend/src/modules/hades/tests/unit/hades.memory-isolation.tdd.test.js"
+  },
+  "gates": [
+    "npm run test:hades-memory-isolation",
+    "npm --prefix backend test"
+  ]
+}

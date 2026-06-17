@@ -45,12 +45,21 @@ def save_state(path: str, state: dict) -> None:
 
 
 def run_lint(repo_root: str) -> tuple[int, str]:
-    result = subprocess.run(
-        ["npm", "run", "lint:architecture"],
-        cwd=repo_root,
-        capture_output=True,
-        text=True,
-    )
+    if os.name == "nt":
+        result = subprocess.run(
+            "npm run lint:architecture",
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+            shell=True,
+        )
+    else:
+        result = subprocess.run(
+            ["npm", "run", "lint:architecture"],
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+        )
     return result.returncode, (result.stdout + result.stderr).strip()
 
 
@@ -76,7 +85,7 @@ def main() -> int:
     args = parser.parse_args()
 
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    repo_root = os.path.dirname(script_dir)
+    repo_root = os.path.dirname(os.path.dirname(script_dir))
 
     print(f"Gate check for module: {args.module}")
     print(f"Running lint:architecture ...")

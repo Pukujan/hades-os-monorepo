@@ -17,6 +17,9 @@ import { createTelegramConnectionRepository } from "./repositories/telegramConne
 import { createDiscordConnectionRepository } from "./repositories/discordConnectionRepository.js";
 import { createGitHubConnectionRepository } from "./repositories/gitHubConnectionRepository.js";
 import { createAgentExecutionRepository } from "./repositories/agentExecutionRepository.js";
+import { createMemoryRecordRepository } from "./repositories/memoryRecordRepository.js";
+import { createExtensionKeyRepository } from "./workflows/extensionKeyRepository.js";
+import { createWorkflowRepository } from "./workflows/workflowRepository.js";
 import { createProcessedUpdateRepository } from "./repositories/processedUpdateRepository.js";
 import { createTelegramConversationModeRepository } from "./repositories/telegramConversationModeRepository.js";
 import { createVerifySocialAccount } from "./runtime/verifySocialAccount.js";
@@ -71,6 +74,9 @@ export async function register(app, context) {
   const executions = overrides.executions || createAgentExecutionRepository({ storage: storageMode, supabaseClient });
   const processedUpdates = overrides.processedUpdates || createProcessedUpdateRepository({ storage: storageMode, supabaseClient });
   const conversationModes = overrides.conversationModes || createTelegramConversationModeRepository({ storage: storageMode, supabaseClient });
+  const memoryRecords = overrides.memoryRecords || createMemoryRecordRepository({ storage: storageMode, supabaseClient });
+  const extensionKeys = overrides.extensionKeys || createExtensionKeyRepository({ storage: storageMode });
+  const workflowDefinitions = overrides.workflowDefinitions || createWorkflowRepository({ storage: storageMode, supabaseClient });
 
   const verifySocialAccount = overrides.verifySocialAccount || createVerifySocialAccount({
     discordConnections,
@@ -90,6 +96,9 @@ export async function register(app, context) {
     executions,
     processedUpdates,
     conversationModes,
+    memoryRecords,
+    extensionKeys,
+    workflowDefinitions,
     verifySocialAccount,
   };
 

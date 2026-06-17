@@ -15,6 +15,11 @@
     "condense-prompts": "node ../scripts/condense-prompts.mjs",
     "condense-file-structure": "node ../scripts/condense-file-structure.mjs",
     "test:contracts": "node --test src/**/*.contract.mjs",
+    "test:hades-memory-isolation": "node --test src/modules/hades/tests/unit/hades.memory-isolation.tdd.test.js",
+    "test:hades-workflow-orchestrator": "node --test src/modules/hades/tests/unit/hades.workflow-orchestrator.tdd.test.js",
+    "test:hades-workflow-build-phases": "node --test src/modules/hades/tests/unit/hades.workflow-build-phases.tdd.test.js",
+    "test:hades-extension-install": "node --test src/modules/hades/tests/unit/hades.extension-install.tdd.test.js",
+    "test:hades-extension-auth": "node --test src/modules/hades/tests/unit/hades.extension-auth.tdd.test.js",
     "test:evals": "node ../scripts/run-module-evals.mjs"
   },
   "dependencies": {

@@ -112,6 +112,10 @@ export function createHadesService({ repository, scopedRepos, hermes, config = {
       ? await scopedRepos.executions.listByUser({ userId, tenantId })
       : [];
 
+    const memoryRecords = scopedRepos?.memoryRecords
+      ? await scopedRepos.memoryRecords.listByUser({ userId, tenantId })
+      : [];
+
     const chatMinions = scopedRepos?.minions
       ? await scopedRepos.minions.listByUser({ userId, tenantId })
       : [];
@@ -124,6 +128,7 @@ export function createHadesService({ repository, scopedRepos, hermes, config = {
       currentDraft,
       context: conversationType,
       minions: chatMinions,
+      memoryRecords,
     });
 
     try {
@@ -659,6 +664,107 @@ async function saveTelegramToken(body, authContext) {
     return minionAssignmentRuntime.handleSocialTrigger(body);
   }
 
+  function formatKeyRecord(record) {
+    return {
+      id: record.id,
+      name: record.name,
+      scopes: record.scopes,
+      secretPreview: record.name
+        ? `hades_ext_...${record.id?.slice(-4) || "xxxx"}`
+        : null,
+      createdAt: record.created_at || null,
+      rotatedAt: record.rotated_at || null,
+      revokedAt: record.revoked_at || null,
+    };
+  }
+
+  async function createExtensionKey(body, authContext) {
+    const userId = resolveUserId(authContext);
+    const tenantId = authContext?.tenantId || userId;
+    if (!scopedRepos?.extensionKeys) {
+      throw new AppError("Extension key repository is not configured", 501);
+    }
+    const { plaintextKey, record } = await scopedRepos.extensionKeys.createKey({
+      userId,
+      tenantId,
+      data: { name: body.name, scopes: body.scopes || [] },
+    });
+    return { record: formatKeyRecord(record), secret: plaintextKey };
+  }
+
+  async function listExtensionKeys(authContext) {
+    const userId = resolveUserId(authContext);
+    const tenantId = authContext?.tenantId || userId;
+    if (!scopedRepos?.extensionKeys) {
+      return { keys: [] };
+    }
+    const records = await scopedRepos.extensionKeys.listKeys({ userId, tenantId });
+    return { keys: records.map(formatKeyRecord) };
+  }
+
+  async function rotateExtensionKey(id, authContext) {
+    const userId = resolveUserId(authContext);
+    const tenantId = authContext?.tenantId || userId;
+    if (!scopedRepos?.extensionKeys) {
+      throw new AppError("Extension key repository is not configured", 501);
+    }
+    const result = await scopedRepos.extensionKeys.rotateKey({ id, userId, tenantId });
+    if (!result) throw new AppError("Extension key not found", 404);
+    return { record: formatKeyRecord(result.record), secret: result.plaintextKey };
+  }
+
+  async function revokeExtensionKey(id, authContext) {
+    const userId = resolveUserId(authContext);
+    const tenantId = authContext?.tenantId || userId;
+    if (!scopedRepos?.extensionKeys) {
+      throw new AppError("Extension key repository is not configured", 501);
+    }
+    const result = await scopedRepos.extensionKeys.revokeKey({ id, userId, tenantId });
+    if (!result) throw new AppError("Extension key not found", 404);
+    return { record: { id: result.id, revokedAt: result.revoked_at } };
+  }
+
+  async function downloadExtensionBundle(authContext) {
+    const userId = resolveUserId(authContext);
+    const path = await import("node:path");
+    const { readFileSync, existsSync } = await import("node:fs");
+    const extensionDir = path.join(process.cwd(), "extension");
+    const bundlePath = path.join(extensionDir, "dist", "extension.zip");
+    if (existsSync(bundlePath)) {
+      const buffer = readFileSync(bundlePath);
+      return {
+        filename: `hades-extension-${userId}.zip`,
+        contentType: "application/zip",
+        buffer,
+      };
+    }
+    throw new AppError("Extension bundle is not available.", 404, "extension_bundle_unavailable");
+  }
+
+  async function createWorkflow(body, authContext) {
+    const userId = resolveUserId(authContext);
+    const tenantId = authContext?.tenantId || userId;
+    if (!scopedRepos?.workflowDefinitions) {
+      throw new AppError("Workflow repository is not configured", 501);
+    }
+    const workflow = await scopedRepos.workflowDefinitions.createDefinition({
+      userId,
+      tenantId,
+      data: { name: body.name, goal: body.goal, prompt: body.prompt },
+    });
+    return { workflow };
+  }
+
+  async function listWorkflows(authContext) {
+    const userId = resolveUserId(authContext);
+    const tenantId = authContext?.tenantId || userId;
+    if (!scopedRepos?.workflowDefinitions) {
+      return { workflows: [] };
+    }
+    const workflows = await scopedRepos.workflowDefinitions.listDefinitions({ userId, tenantId });
+    return { workflows };
+  }
+
   return {
     readiness,
     bootstrap,
@@ -681,5 +787,12 @@ async function saveTelegramToken(body, authContext) {
     listNotifications,
     updateMinion,
     deleteMinion,
+    createExtensionKey,
+    listExtensionKeys,
+    rotateExtensionKey,
+    revokeExtensionKey,
+    downloadExtensionBundle,
+    createWorkflow,
+    listWorkflows,
   };
 }

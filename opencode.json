@@ -1,1 +1,39 @@
-additional-modules/context-engineering/opencode.json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "compaction": {
+    "auto": true,
+    "prune": true,
+    "reserved": 4000,
+    "tail_turns": 2
+  },
+  "mcp": {
+    "supabase": {
+      "type": "remote",
+      "url": "https://mcp.supabase.com/mcp?project_ref=herzhouazsssxaqqbmiq",
+      "oauth": {}
+    },
+    "vercel": {
+      "type": "remote",
+      "url": "https://mcp.vercel.com",
+      "oauth": {}
+    },
+    "railway": {
+      "type": "remote",
+      "url": "https://mcp.railway.com",
+      "oauth": {}
+    }
+  },
+  "provider": {
+    "opencode-go": {
+      "id": "opencode-go",
+      "models": {
+        "deepseek-v4-pro": {
+          "limit": { "context": 64000, "output": 16384 }
+        },
+        "deepseek-v4-flash": {
+          "limit": { "context": 64000, "output": 16384 }
+        }
+      }
+    }
+  }
+}

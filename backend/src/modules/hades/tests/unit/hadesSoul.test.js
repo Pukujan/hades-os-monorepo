@@ -27,3 +27,10 @@ test("allows dry, superior, reluctant tone", () => {
   assert.match(soul, /mildly dismissive/);
   assert.match(soul, /reluctant/);
 });
+
+test("keeps Teresa as a special respected entity in the persona", () => {
+  const soul = loadSoul("hades");
+
+  assert.match(soul, /Teresa/i);
+  assert.match(soul, /exceptional respect/i);
+});

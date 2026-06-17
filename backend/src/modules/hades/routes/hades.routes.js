@@ -30,6 +30,28 @@ function createAuthGuard(requireHadesAuth) {
   };
 }
 
+function resolveExtensionAuth(scopedRepos) {
+  return async function requireExtensionAuth(req, res, next) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ code: "missing_extension_key" });
+    }
+    const plaintextKey = authHeader.slice("Bearer ".length).trim();
+    if (!plaintextKey) {
+      return res.status(401).json({ code: "missing_extension_key" });
+    }
+    const authContext = await scopedRepos.extensionKeys.verifyKey({
+      plaintextKey,
+      requiredScope: "workflow:read",
+    });
+    if (!authContext) {
+      return res.status(401).json({ code: "invalid_extension_key" });
+    }
+    req.authContext = authContext;
+    next();
+  };
+}
+
 export function createHadesRoutes({ service, requireHadesAuth, config, scopedRepos } = {}) {
   const router = Router();
   const requireAuth = createAuthGuard(requireHadesAuth);
@@ -159,7 +181,7 @@ export function createHadesRoutes({ service, requireHadesAuth, config, scopedRep
     asyncRoute(async (req, res) => {
       const result = await service.clearMessages(req.params.id, req.authContext);
       if (result === null) {
-        return res.status(200).json({ cleared: true, stale: true });
+        return res.status(404).json({ code: "not_found" });
       }
       res.status(200).json(result);
     })
@@ -260,6 +282,82 @@ export function createHadesRoutes({ service, requireHadesAuth, config, scopedRep
     requireAuth,
     asyncRoute(async (req, res) => {
       const result = await service.deleteMinion(req.params.id, req.authContext);
+      res.status(200).json(result);
+    })
+  );
+
+  const requireExtensionAuth = scopedRepos?.extensionKeys ? resolveExtensionAuth(scopedRepos) : null;
+
+  router.get(
+    "/extension/download",
+    requireAuth,
+    asyncRoute(async (req, res) => {
+      const result = await service.downloadExtensionBundle(req.authContext);
+      res.setHeader("content-type", result.contentType);
+      res.setHeader("content-disposition", `attachment; filename="${result.filename}"`);
+      res.end(result.buffer);
+    })
+  );
+
+  router.post(
+    "/extension/keys",
+    requireAuth,
+    asyncRoute(async (req, res) => {
+      const result = await service.createExtensionKey(req.body, req.authContext);
+      res.status(201).json(result);
+    })
+  );
+
+  router.get(
+    "/extension/keys",
+    requireAuth,
+    asyncRoute(async (req, res) => {
+      const result = await service.listExtensionKeys(req.authContext);
+      res.status(200).json(result);
+    })
+  );
+
+  router.post(
+    "/extension/keys/:id/rotate",
+    requireAuth,
+    asyncRoute(async (req, res) => {
+      const result = await service.rotateExtensionKey(req.params.id, req.authContext);
+      res.status(200).json(result);
+    })
+  );
+
+  router.post(
+    "/extension/keys/:id/revoke",
+    requireAuth,
+    asyncRoute(async (req, res) => {
+      const result = await service.revokeExtensionKey(req.params.id, req.authContext);
+      res.status(200).json(result);
+    })
+  );
+
+  router.get(
+    "/extension/workflows",
+    requireExtensionAuth || requireAuth,
+    asyncRoute(async (req, res) => {
+      const result = await service.listExtensionWorkflows(req.authContext);
+      res.status(200).json(result);
+    })
+  );
+
+  router.post(
+    "/workflows",
+    requireAuth,
+    asyncRoute(async (req, res) => {
+      const result = await service.createWorkflow(req.body, req.authContext);
+      res.status(201).json(result);
+    })
+  );
+
+  router.get(
+    "/workflows",
+    requireAuth,
+    asyncRoute(async (req, res) => {
+      const result = await service.listWorkflows(req.authContext);
       res.status(200).json(result);
     })
   );

@@ -1,0 +1,22 @@
+{
+  "id": "010_2026-06-17_16-51_hermes-workflow-orchestrator",
+  "slug": "hermes-workflow-orchestrator",
+  "status": "planned",
+  "createdAt": "2026-06-17T16:51:00-04:00",
+  "scope": "backend-hermes-workflow-orchestration",
+  "artifacts": {
+    "studyLogMd": "work-log/study-docs/004_2026-06-17_16-51_study-log_hermes-workflow-orchestrator.md",
+    "planLogMd": "work-log/planning/010_2026-06-17_16-51_hermes-workflow-orchestrator/plan-log.md",
+    "buildPhaseContractsMd": "work-log/planning/010_2026-06-17_16-51_hermes-workflow-orchestrator/build-phase-contracts.md",
+    "handoffMd": "work-log/handoffs/009_2026-06-17_16-51_handoff_hermes-workflow-orchestrator.md"
+  },
+  "dependsOn": [
+    "009_2026-06-17_16-37_hermes-memory-isolation-tdd"
+  ],
+  "gates": [
+    "npm run test:hades-workflow-orchestrator",
+    "npm run test:hades-workflow-build-phases",
+    "npm run test:hades-memory-isolation",
+    "npm --prefix backend test"
+  ]
+}

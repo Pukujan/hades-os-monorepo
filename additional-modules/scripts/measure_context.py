@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""measure_context.py — token budget tracking with warnings (never aborts agents).
+"""measure_context.py - token budget tracking with warnings (never aborts agents).
 
 Usage:
     python additional-modules/scripts/measure_context.py --tokens <current_count>
@@ -8,7 +8,7 @@ Usage:
     python additional-modules/scripts/measure_context.py --archive-session --slug <slug> --tokens <count>
 
 Rules:
-    - Ceiling: 64000 tokens (warn-only — always exits 0 so agents keep working).
+    - Ceiling: 64000 tokens (warn-only - always exits 0 so agents keep working).
     - Warning at 51.2k (80%); compact at 57.6k (90%); stop at 62.4k (97.5%).
     - Updates context_budget.json with current usage.
 
@@ -95,7 +95,7 @@ def archive_session(slug: str, usage: int, budget_path: str) -> str:
     path = os.path.join(sessions_dir, filename)
     now = datetime.now(timezone.utc).isoformat(timespec="milliseconds")
     body = (
-        f"# Session archive — {today}-{stripped}\n\n"
+        f"# Session archive - {today}-{stripped}\n\n"
         f"- **Archived:** {now}\n"
         f"- **Peak usage:** {usage:,} tokens\n"
         f"- **Budget file:** `{budget_path}`\n"
@@ -107,7 +107,7 @@ def archive_session(slug: str, usage: int, budget_path: str) -> str:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Measure context budget — warn-only, never aborts agents"
+        description="Measure context budget - warn-only, never aborts agents"
     )
     parser.add_argument("--tokens", type=int, default=None, help="Current token usage count")
     parser.add_argument("--budget", default=DEFAULT_BUDGET, help="Path to context_budget.json")
@@ -174,20 +174,20 @@ def main() -> int:
     stop_at = budget.get("stopAt", int(limit * 0.975))
 
     if usage >= limit:
-        print(f"🔴 CRITICAL: {usage:,} / {limit:,} tokens ({pct:.0f}%)")
-        print("   At or above ceiling — compact context and archive the session.")
+        print(f"CRITICAL: {usage:,} / {limit:,} tokens ({pct:.0f}%)")
+        print("   At or above ceiling - compact context and archive the session.")
         print("   Run: python additional-modules/scripts/measure_context.py --archive-session --slug <topic> --tokens <count>")
     elif usage >= stop_at:
-        print(f"🔴 STOP: {usage:,} / {limit:,} tokens ({pct:.0f}%)")
-        print(f"   Remaining: {remaining:,} — archive immediately, then compact.")
+        print(f"STOP: {usage:,} / {limit:,} tokens ({pct:.0f}%)")
+        print(f"   Remaining: {remaining:,} - archive immediately, then compact.")
     elif usage >= compact_at:
-        print(f"🔴 COMPACT: {usage:,} / {limit:,} tokens ({pct:.0f}%)")
-        print(f"   Remaining: {remaining:,} — compact context soon.")
+        print(f"COMPACT: {usage:,} / {limit:,} tokens ({pct:.0f}%)")
+        print(f"   Remaining: {remaining:,} - compact context soon.")
     elif usage >= warn_at:
-        print(f"⚠️  WARNING: {usage:,} / {limit:,} tokens ({pct:.0f}%)")
+        print(f"WARNING: {usage:,} / {limit:,} tokens ({pct:.0f}%)")
         print(f"   Remaining: {remaining:,} tokens")
     else:
-        print(f"✅ Budget OK: {usage:,} / {limit:,} tokens ({pct:.0f}%)")
+        print(f"Budget OK: {usage:,} / {limit:,} tokens ({pct:.0f}%)")
         print(f"   Remaining: {remaining:,} tokens")
 
     return 0

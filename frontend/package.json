@@ -7,7 +7,10 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --import ./test-hooks/register.mjs --test"
+    "test": "node --import ./test-hooks/register.mjs --test",
+    "test:hades-workflow-ui": "node --import ./test-hooks/register.mjs --test src/modules/hades/tests/unit/workflowExplanation.tdd.test.js",
+    "test:hades-workflow-build-phases-ui": "node --import ./test-hooks/register.mjs --test src/modules/hades/tests/unit/workflowBuildPhases.tdd.test.js",
+    "test:hades-extension-install-ui": "node --import ./test-hooks/register.mjs --test src/modules/hades/tests/unit/extensionInstallModule.tdd.test.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.108.1",
