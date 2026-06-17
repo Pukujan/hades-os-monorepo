@@ -4,6 +4,8 @@ import { guardGeneralChatScope } from "./chatModeGuard.js";
 import { normalizeChatActions } from "./chatActions.js";
 import { normalizeChatCards } from "./chatCards.js";
 
+const GIF_URL_RE = /https:\/\/media\.(?:tenor|giphy)\.com\/[^\s"'<>]+\.gif/gi;
+
 function isValidEnum(value, allowed) {
   return value == null || allowed.includes(value);
 }
@@ -25,7 +27,41 @@ function ensureRuntime(hermesRuntime) {
   return hermesRuntime;
 }
 
-function wrapGeneralResult(result) {
+async function extractAndVerifyMedia(text, mediaVerifier) {
+  if (typeof mediaVerifier?.verifyMediaUrl !== "function") return null;
+
+  GIF_URL_RE.lastIndex = 0;
+  const match = GIF_URL_RE.exec(text);
+  if (!match) return null;
+
+  const url = match[0];
+  const result = await mediaVerifier.verifyMediaUrl({
+    url,
+    allowedContentTypes: ["image/gif", "image/webp"],
+  });
+
+  if (result.ok) {
+    return {
+      gifUrl: url,
+      mediaUrl: url,
+      mediaType: result.contentType || "image/gif",
+      mediaAlt: "GIF media",
+      mediaVerificationStatus: "verified",
+      mediaVerificationReason: null,
+    };
+  }
+
+  return {
+    gifUrl: null,
+    mediaUrl: null,
+    mediaType: null,
+    mediaAlt: null,
+    mediaVerificationStatus: "rejected",
+    mediaVerificationReason: result.reason || "verification_failed",
+  };
+}
+
+async function wrapGeneralResult(result, mediaVerifier) {
   const rawActions = Array.isArray(result.actions) ? result.actions : [];
   const normalized = normalizeChatActions(rawActions);
   const cards = normalizeChatCards(result.cards);
@@ -34,6 +70,7 @@ function wrapGeneralResult(result) {
     actions: normalized,
   };
   const guarded = guardGeneralChatScope(response);
+  const mediaFields = await extractAndVerifyMedia(guarded.reply, mediaVerifier);
   return {
     assistantMessage: {
       role: "assistant",
@@ -41,6 +78,7 @@ function wrapGeneralResult(result) {
       status: "completed",
       suggestions: [],
       actions: Array.isArray(guarded.actions) ? guarded.actions : [],
+      ...(mediaFields || {}),
     },
     cards,
     draft: createEmptyDraft(),
@@ -52,7 +90,7 @@ function wrapGeneralResult(result) {
   };
 }
 
-export function createHermesService({ hermesRuntime = null } = {}) {
+export function createHermesService({ hermesRuntime = null, mediaVerifier = null } = {}) {
   async function buildResponse({ userId = "local-user", conversationId, message, messages = [], currentDraft = createEmptyDraft(), context = "general", minions }) {
     const runtime = ensureRuntime(hermesRuntime);
     const result = await runtime.generateDraft({
@@ -66,7 +104,7 @@ export function createHermesService({ hermesRuntime = null } = {}) {
     });
 
     if (context === "general" || context === "minions") {
-      return wrapGeneralResult(result);
+      return wrapGeneralResult(result, mediaVerifier);
     }
 
     if (

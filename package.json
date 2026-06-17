@@ -49,6 +49,7 @@
     "test:hades-extension-real-build": "node --test scripts/hades-extension-real-build.tdd.test.mjs",
     "test:hades-gif-media-reliability": "npm --prefix backend run test:hades-media-verification && npm --prefix frontend run test:hades-chat-media-ui",
     "test:hades-instagram-social": "npm --prefix backend run test:hades-instagram-social && npm --prefix frontend run test:hades-instagram-social-ui",
+    "test:hades-inline-gif-media": "npm --prefix backend run test:hades-inline-gif-media && npm --prefix frontend run test:hades-inline-gif-media-ui",
     "test:auth-discord-connection-contract": "node --test backend/src/modules/auth/tests/unit/auth.discord.connection.contract.test.js",
     "test:hades-discord-bot-runtime-contract": "node --test backend/src/modules/hades/tests/contracts/hades.discord-bot-runtime.contract.mjs",
     "test:discord-login-bot-contracts": "npm run test:auth-discord-connection-contract && npm run test:hades-discord-bot-runtime-contract",

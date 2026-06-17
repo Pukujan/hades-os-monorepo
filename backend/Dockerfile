@@ -10,5 +10,12 @@ WORKDIR /app
 COPY backend/package.json backend/package-lock.json* ./
 RUN npm ci --omit=dev
 COPY backend/ ./
+
+# Build the browser extension zip for the authenticated download route
+COPY extension/ ./extension/
+RUN npm install --prefix extension --omit=dev 2>/dev/null; exit 0
+COPY scripts/ ./scripts/
+RUN node scripts/package-hades-extension.mjs
+
 EXPOSE ${PORT:-3001}
 CMD ["node", "src/core/server.js"]

@@ -123,6 +123,50 @@ test("Hermes runtime failure bubbles instead of falling back", async () => {
   );
 });
 
+test("general chat promotes verified direct GIF URLs from Hermes text into media fields", async () => {
+  const tenorUrl = "https://media.tenor.com/9E6S0OziLzEAAAAC/anime-girl-anime.gif";
+  const verifiedUrls = [];
+  const hermes = createHermesService({
+    hermesRuntime: {
+      async generateDraft() {
+        return {
+          source: "hermes_runtime",
+          sessionId: "session-media-inline-1",
+          assistantText: `Testing, got it. Here's a fresh one:\n\n${tenorUrl}`,
+          actions: [],
+          cards: [],
+        };
+      }
+    },
+    mediaVerifier: {
+      async verifyMediaUrl({ url, allowedContentTypes }) {
+        verifiedUrls.push({ url, allowedContentTypes });
+        return {
+          ok: true,
+          url,
+          contentType: "image/gif",
+        };
+      }
+    }
+  });
+
+  const result = await hermes.buildResponse({
+    conversationId: "conv-media-1",
+    message: "send direct tenor gif",
+    currentDraft: createEmptyDraft(),
+    context: "general"
+  });
+
+  assert.equal(verifiedUrls.length, 1);
+  assert.equal(verifiedUrls[0].url, tenorUrl);
+  assert.ok(verifiedUrls[0].allowedContentTypes.includes("image/gif"));
+  assert.equal(result.assistantMessage.gifUrl, tenorUrl);
+  assert.equal(result.assistantMessage.mediaUrl, tenorUrl);
+  assert.equal(result.assistantMessage.mediaType, "image/gif");
+  assert.equal(result.assistantMessage.mediaVerificationStatus, "verified");
+  assert.equal(result.assistantMessage.mediaVerificationReason, null);
+});
+
 test("Hades service chat uses backend-authenticated user context when provided", async () => {
   const repository = createHadesRepository({ now: () => "2026-06-12T00:00:00.000Z" });
   const hermes = createHermesService({

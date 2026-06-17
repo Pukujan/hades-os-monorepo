@@ -28,7 +28,7 @@ export function ChatBubble({ message, showStamp = true, sendMessage, ProductCard
   const className = `bubble ${message.role === "user" ? "user" : "hades"} ${message.status === "queued" ? "pending" : ""}`;
   const onSendMessage = sendMessage;
 
-  const gifUrl = message.gifUrl;
+  const gifUrl = message.gifUrl || message.mediaUrl;
   const gifStatus = message.mediaVerificationStatus;
   const gifAlt = message.mediaAlt || "GIF media";
 

@@ -528,6 +528,12 @@ function HadesProvider({ children }) {
           suggestions: response.assistantMessage?.suggestions || [],
           actions: response.actions || response.assistantMessage?.actions || [],
           cards: response.cards || [],
+          gifUrl: response.assistantMessage?.gifUrl ?? undefined,
+          mediaUrl: response.assistantMessage?.mediaUrl ?? undefined,
+          mediaType: response.assistantMessage?.mediaType ?? undefined,
+          mediaAlt: response.assistantMessage?.mediaAlt ?? undefined,
+          mediaVerificationStatus: response.assistantMessage?.mediaVerificationStatus ?? undefined,
+          mediaVerificationReason: response.assistantMessage?.mediaVerificationReason ?? undefined,
         }))
       );
       if (isForge && response.draft) {
