@@ -118,6 +118,49 @@ describe("Hades extension install frontend module TDD contract", () => {
     }
   });
 
+  test("downloadExtensionBundle sends auth headers for the authenticated download request", async () => {
+    const originalFetch = globalThis.fetch;
+    const originalStorage = globalThis.localStorage;
+    const calls = [];
+    globalThis.localStorage = {
+      getItem: (key) => key === "hermes.auth.accessToken" ? "test-access-token" : null,
+    };
+    globalThis.fetch = async (url, options) => {
+      calls.push({ url, options });
+      return new Response(new Blob(["fake-zip"]), { status: 200, headers: { "Content-Type": "application/zip" } });
+    };
+
+    try {
+      const api = await loadModule(
+        "../../extension/services/extensionInstallApi.js",
+        "Missing frontend Hades extension install API client module.",
+      );
+
+      await api.downloadExtensionBundle();
+      assert.equal(calls.length, 1);
+      assert.equal(calls[0].url, "/api/hades/extension/download");
+      assert.equal(calls[0].options.headers.authorization, "Bearer test-access-token");
+      assert.equal(calls[0].options.method, undefined);
+    } finally {
+      globalThis.fetch = originalFetch;
+      globalThis.localStorage = originalStorage;
+    }
+  });
+
+  test("ExtensionInstallCard uses an authenticated download handler instead of a plain href link", () => {
+    const cardPath = path.resolve(DIR, "../../extension/components/ExtensionInstallCard.jsx");
+    const source = readFileSync(cardPath, "utf8");
+
+    assert.ok(
+      source.includes("handleDownload") || source.includes("downloadExtensionBundle("),
+      "ExtensionInstallCard must use an authenticated download handler, not a plain <a> href.",
+    );
+    assert.ok(
+      !source.includes('href: buildExtensionDownloadUrl') && !source.includes('href={buildExtensionDownloadUrl('),
+      "ExtensionInstallCard must not use a plain href for download — it cannot send auth headers.",
+    );
+  });
+
   test("extension install API uses VITE_API_BASE_URL in production instead of Vercel same-origin /api", async () => {
     const originalFetch = globalThis.fetch;
     const originalEnvShim = globalThis.importMetaEnvShim;

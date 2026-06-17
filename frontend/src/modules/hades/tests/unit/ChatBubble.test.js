@@ -1,5 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import React from "react";
 import { renderToString } from "react-dom/server";
 import { MemoryRouter } from "react-router-dom";
@@ -128,6 +129,16 @@ test("ChatBubble does not render rejected GIF media as a broken image", async ()
   assert.ok(!html.includes(`src="${badUrl}"`));
   assert.ok(!html.includes('data-testid="chat-gif"'));
   assert.match(html, /gif unavailable|media unavailable|content unavailable/i);
+});
+
+test("MinionsScreen chat is always open without focused/expanded state toggles", async () => {
+  const mod = await import("../../pages/HadesPrototypeApp.jsx");
+  const source = readFileSync(new URL("../../pages/HadesPrototypeApp.jsx", import.meta.url), "utf8");
+
+  assert.ok(
+    !source.includes("chatFocused") && !source.includes("chatExpanded"),
+    "MinionsScreen must not use chatFocused/chatExpanded state — chat should always be open.",
+  );
 });
 
 test("ChatBubble renders user bubble with user class", async () => {

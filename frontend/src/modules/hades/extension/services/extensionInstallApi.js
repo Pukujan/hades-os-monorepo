@@ -28,8 +28,14 @@ export async function revokeExtensionApiKey(id) {
   return apiPost(`${BASE_PATH}/keys/${id}/revoke`);
 }
 
-export async function downloadExtensionBundle() {
-  const response = await fetch(apiUrl(`${BASE_PATH}/download`));
+export async function downloadExtensionBundle(accessToken) {
+  const headers = {};
+  const storage = typeof window !== "undefined" ? window.localStorage : globalThis.localStorage;
+  const token = accessToken || storage?.getItem("hermes.auth.accessToken");
+  if (token) {
+    headers.authorization = `Bearer ${token}`;
+  }
+  const response = await fetch(apiUrl(`${BASE_PATH}/download`), { headers });
   if (!response.ok) {
     throw new Error(`API error: ${response.status}`);
   }

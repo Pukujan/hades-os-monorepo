@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { buildExtensionDownloadUrl, generateExtensionApiKey, listExtensionApiKeys, rotateExtensionApiKey, revokeExtensionApiKey } from "../services/extensionInstallApi.js";
+import React, { useState, useEffect, useCallback } from "react";
+import { downloadExtensionBundle, generateExtensionApiKey, listExtensionApiKeys, rotateExtensionApiKey, revokeExtensionApiKey } from "../services/extensionInstallApi.js";
 
-export function ExtensionInstallCard({ providerId } = {}) {
+export function ExtensionInstallCard({ providerId, accessToken } = {}) {
   const [keys, setKeys] = useState([]);
   const [latestCreatedSecret, setLatestCreatedSecret] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -52,6 +52,17 @@ export function ExtensionInstallCard({ providerId } = {}) {
     }).catch(function () {});
   }
 
+  function handleDownload() {
+    downloadExtensionBundle(accessToken).then(function (blob) {
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = "hades-extension.zip";
+      anchor.click();
+      URL.revokeObjectURL(url);
+    }).catch(function () {});
+  }
+
   return React.createElement("div", { className: "card extension-install-card", "data-provider": providerId },
     React.createElement("div", { className: "card-header" },
       React.createElement("h3", null, "Hades Browser Extension")),
@@ -75,7 +86,7 @@ export function ExtensionInstallCard({ providerId } = {}) {
       React.createElement("div", { className: "card-actions" },
         React.createElement("button", { className: "primary", onClick: handleGenerateKey, disabled: isGenerating },
           isGenerating ? "Generating..." : "Generate new API key"),
-        React.createElement("a", { href: buildExtensionDownloadUrl(), className: "secondary", download: true }, "Download extension"))));
+        React.createElement("button", { className: "secondary", onClick: handleDownload }, "Download extension"))));
 }
 
 export default ExtensionInstallCard;

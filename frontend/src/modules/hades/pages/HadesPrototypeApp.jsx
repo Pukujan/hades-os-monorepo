@@ -1438,11 +1438,9 @@ function MinionLogsScreenWrapped() {
 }
 
 function MinionsScreen() {
-  const [chatFocused, setChatFocused] = React.useState(false);
-  const [chatExpanded, setChatExpanded] = React.useState(false);
   const navigate = useNavigate();
   const { minions, messages, sending, pendingCopy, composerText, setComposerText, sendMessage, clearMessages } = useHades();
-  const chatClass = chatExpanded ? "card chat-card expanded" : `card chat-card${chatFocused ? " focused" : ""}`;
+  const chatClass = "card chat-card expanded";
   const activeCount = minions.filter((m) => m.slotIndex != null).length;
 
   const suggestionButtons = [
@@ -1455,8 +1453,6 @@ function MinionsScreen() {
 
   function handleSend() {
     sendMessage(composerText, "minions");
-    setChatFocused(false);
-    setChatExpanded(true);
   }
 
   return (
@@ -1492,7 +1488,7 @@ function MinionsScreen() {
           <p className="kicker">Speak to Hades
             {messages.length > 0 ? <button className="tiny" type="button" style={{ float: "right" }} onClick={() => clearMessages("general")}>Clear</button> : null}
           </p>
-          {!chatExpanded && messages.length === 0 ? <h3 className="bigline chat-intro">Hades is listening. Speak, ask, or choose a door.</h3> : null}
+          {messages.length === 0 ? <h3 className="bigline chat-intro">Hades is listening. Speak, ask, or choose a door.</h3> : null}
           {messages.length === 0 ? (
             <div className="suggest">
               {suggestionButtons.map((btn) => (
@@ -1521,8 +1517,6 @@ function MinionsScreen() {
               className="input"
               value={composerText}
               placeholder="Speak thy mind..."
-              onFocus={() => { if (!chatExpanded) setChatFocused(true); }}
-              onBlur={() => setChatFocused(false)}
               onChange={(event) => setComposerText(event.target.value)}
               onKeyDown={(event) => {
                 if (event.key === "Enter" && !event.shiftKey) {
@@ -1722,7 +1716,7 @@ function SocialsScreen() {
           }
           return <PermissionsCard key={social.id} social={social} />;
         })}
-        <ExtensionInstallCard providerId="hades-browser-extension" />
+        <ExtensionInstallCard providerId="hades-browser-extension" accessToken={session?.access_token} />
       </div>
     </>
   );

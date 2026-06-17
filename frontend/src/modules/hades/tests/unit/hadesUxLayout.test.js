@@ -34,7 +34,7 @@ test("minions chat stretches to available space above the bottom nav", () => {
   assert.match(css, /\.minions-scroll[^}]*height:\s*100%/s);
   assert.match(css, /\.minions-scroll[^}]*display:\s*flex/s);
   assert.match(css, /\.minions-scroll \.chat-card[^}]*flex:\s*1 1 auto/s);
-  assert.match(css, /\.minions-scroll \.chat-card\.focused,\s*\.minions-scroll \.chat-card\.expanded[^}]*height:\s*auto/s);
+  assert.match(css, /\.minions-scroll \.chat-card\.expanded[^}]*height:\s*auto/s);
 });
 
 test("Hermes chat failures are logged to the browser console before local fallback", () => {
