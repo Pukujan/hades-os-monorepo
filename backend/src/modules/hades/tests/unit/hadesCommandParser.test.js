@@ -88,4 +88,82 @@ describe("Hades command parser", () => {
     assert.equal(result.source, "chat");
     assert.equal(result.count, 10);
   });
+
+  test("parseHadesCommand accepts bare hades prefix (no ! or /)", async () => {
+    const { parseHadesCommand } = await loadParser();
+    const result = parseHadesCommand("hades list my todos");
+    assert.notEqual(result, null);
+    assert.equal(result.prefix, "hades");
+    assert.equal(result.action, "list");
+    assert.equal(result.rawArgs, "list my todos");
+  });
+
+  test("parseHadesCommand bare hades with no args returns action null", async () => {
+    const { parseHadesCommand } = await loadParser();
+    const result = parseHadesCommand("hades");
+    assert.notEqual(result, null);
+    assert.equal(result.prefix, "hades");
+    assert.equal(result.rawArgs, "");
+    assert.equal(result.action, null);
+  });
+
+  test("parseHadesCommand still rejects non-hades text", async () => {
+    const { parseHadesCommand } = await loadParser();
+    assert.equal(parseHadesCommand("hello world"), null);
+    assert.equal(parseHadesCommand("hadesomething"), null);
+    assert.equal(parseHadesCommand(""), null);
+  });
+
+  test("parseHadesCommand bare hades preserves case insensitivity", async () => {
+    const { parseHadesCommand } = await loadParser();
+    const result = parseHadesCommand("  HADES  summarize   chat  5  ");
+    assert.notEqual(result, null);
+    assert.equal(result.prefix, "hades");
+    assert.equal(result.action, "summarize");
+    assert.equal(result.source, "chat");
+    assert.equal(result.count, 5);
+  });
+
+  test("parseHadesCommand accepts bare forge prefix", async () => {
+    const { parseHadesCommand } = await loadParser();
+    const result = parseHadesCommand("forge create minion");
+    assert.notEqual(result, null);
+    assert.equal(result.prefix, "forge");
+    assert.equal(result.action, "create");
+    assert.equal(result.rawArgs, "create minion");
+  });
+
+  test("parseHadesCommand accepts !forge prefix", async () => {
+    const { parseHadesCommand } = await loadParser();
+    const result = parseHadesCommand("!forge list minions");
+    assert.notEqual(result, null);
+    assert.equal(result.prefix, "!forge");
+    assert.equal(result.action, "list");
+  });
+
+  test("parseHadesCommand accepts /forge prefix", async () => {
+    const { parseHadesCommand } = await loadParser();
+    const result = parseHadesCommand("/forge deploy");
+    assert.notEqual(result, null);
+    assert.equal(result.prefix, "/forge");
+    assert.equal(result.action, "deploy");
+  });
+
+  test("parseHadesCommand bare forge with no args returns null action", async () => {
+    const { parseHadesCommand } = await loadParser();
+    const result = parseHadesCommand("forge");
+    assert.notEqual(result, null);
+    assert.equal(result.prefix, "forge");
+    assert.equal(result.rawArgs, "");
+    assert.equal(result.action, null);
+  });
+
+  test("parseHadesCommand bare forge preserves case insensitivity", async () => {
+    const { parseHadesCommand } = await loadParser();
+    const result = parseHadesCommand("  FORGE  create   minion  ");
+    assert.notEqual(result, null);
+    assert.equal(result.prefix, "forge");
+    assert.equal(result.action, "create");
+    assert.equal(result.rawArgs, "create   minion");
+  });
 });

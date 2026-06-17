@@ -63,7 +63,7 @@ test("Telegram bot runtime replies with help text for non-!hades messages instea
   assert.equal(result.status, "sent");
   assert.equal(hermesCalls.length, 0);
   assert.equal(sends.length, 1);
-  assert.ok(sends[0].text.includes("!hades"));
+  assert.ok(sends[0].text.includes("hades"));
   assert.ok(sends[0].text.includes("HI"));
 });
 

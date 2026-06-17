@@ -6,6 +6,8 @@ export function createTelegramBotRuntime({
   hermesRuntime,
   botTokenProvider,
   repository,
+  conversationModeRepo,
+  minions,
 } = {}) {
   if (!telegramClient || !resolveTelegramIdentity || !hermesRuntime) {
     throw new Error("telegramBotRuntime: telegramClient, resolveTelegramIdentity, and hermesRuntime are required");
@@ -20,18 +22,6 @@ export function createTelegramBotRuntime({
     const chatId = String(message.chat?.id || "");
     const messageId = message.message_id;
 
-    const parsed = parseHadesCommand(message.text);
-    if (!parsed) {
-      const replyText = `${message.text} — I only respond to !hades commands. Try: !hades <your request>`;
-      await telegramClient.sendMessage({
-        chatId,
-        text: replyText,
-        parseMode: "Markdown",
-        replyToMessageId: messageId,
-      });
-      return { status: "sent", reason: "non_command_help" };
-    }
-
     const telegramAccountId = String(message.from?.id || "");
     const identity = await resolveTelegramIdentity({ telegramAccountId });
 
@@ -41,59 +31,109 @@ export function createTelegramBotRuntime({
 
     const { userId, tenantId } = identity;
 
-    let assistantText = "";
-    let outboundActions = [];
+    const modeRepo = conversationModeRepo || null;
+    const conversationMode = modeRepo ? await modeRepo.getMode({ chatId, userId, tenantId }) : "general";
 
-    try {
-      const result = await hermesRuntime.generateCommandResult({
-        input: {
-          content: message.text,
-          parsedCommand: parsed,
-        },
-        context: {
-          provider: "telegram",
-          userId,
-          tenantId,
-          chatId,
-          messageId,
-        },
-      });
+    const text = message.text.trim();
+    const modeSwitch = detectModeSwitch(text, conversationMode);
 
-      assistantText = result?.assistantText || "";
-      outboundActions = result?.outboundActions || [];
-    } catch (hermesError) {
-      assistantText = `Hermes processing failed: ${hermesError.message}`;
+    if (modeSwitch === "forge") {
+      if (modeRepo) await modeRepo.setMode({ chatId, userId, tenantId, mode: "forge" });
+      const replyText = "Switched to **Forge** mode. I am now ready to create, edit, and manage minions.";
+      await telegramClient.sendMessage({ chatId, text: replyText, parseMode: "Markdown", replyToMessageId: messageId });
+      return { status: "sent", reason: "mode_switch_forge" };
     }
 
-    const replyText = buildTelegramReply({ assistantText, outboundActions });
-
-    const sendResult = await telegramClient.sendMessage({
-      chatId,
-      text: replyText,
-      parseMode: "Markdown",
-      replyToMessageId: messageId,
-    });
-
-    if (repository?.saveAgentExecution) {
-      await repository.saveAgentExecution({
-        execution: {
-          provider: "telegram",
-          userId,
-          tenantId,
-          chatId,
-          input: message.text,
-          parsedCommand: parsed,
-          response: replyText,
-          providerMessageId: sendResult?.providerMessageId,
-          timestamp: new Date().toISOString(),
-        },
-      });
+    if (modeSwitch === "general") {
+      if (modeRepo) await modeRepo.setMode({ chatId, userId, tenantId, mode: "general" });
+      const replyText = "Switched to **General** mode. I am now ready for general Hades commands.";
+      await telegramClient.sendMessage({ chatId, text: replyText, parseMode: "Markdown", replyToMessageId: messageId });
+      return { status: "sent", reason: "mode_switch_general" };
     }
 
-    return { status: "sent", providerMessageId: sendResult?.providerMessageId };
+    const parsed = parseHadesCommand(text);
+
+    if (!parsed) {
+      if (conversationMode === "forge") {
+        return processAsHermesCommand({ text, parsed: { prefix: "hades", rawArgs: text, action: text || null }, conversationType: "forge" });
+      }
+
+      const replyText = `${text} — I only respond to hades or forge commands. Try: hades <your request>`;
+      await telegramClient.sendMessage({
+        chatId,
+        text: replyText,
+        parseMode: "Markdown",
+        replyToMessageId: messageId,
+      });
+      return { status: "sent", reason: "non_command_help" };
+    }
+
+    return processAsHermesCommand({ text, parsed, conversationType: conversationMode });
+
+    async function processAsHermesCommand({ text, parsed, conversationType }) {
+      let assistantText = "";
+      let outboundActions = [];
+
+      try {
+        const result = await hermesRuntime.generateCommandResult({
+          input: {
+            content: text,
+            parsedCommand: parsed,
+          },
+          context: {
+            provider: "telegram",
+            userId,
+            tenantId,
+            chatId,
+            messageId,
+            conversationType,
+            minions,
+          },
+        });
+
+        assistantText = result?.assistantText || "";
+        outboundActions = result?.outboundActions || [];
+      } catch (hermesError) {
+        assistantText = `Hermes processing failed: ${hermesError.message}`;
+      }
+
+      const replyText = buildTelegramReply({ assistantText, outboundActions });
+
+      const sendResult = await telegramClient.sendMessage({
+        chatId,
+        text: replyText,
+        parseMode: "Markdown",
+        replyToMessageId: messageId,
+      });
+
+      if (repository?.saveAgentExecution) {
+        await repository.saveAgentExecution({
+          execution: {
+            provider: "telegram",
+            userId,
+            tenantId,
+            chatId,
+            input: text,
+            parsedCommand: parsed,
+            response: replyText,
+            providerMessageId: sendResult?.providerMessageId,
+            timestamp: new Date().toISOString(),
+          },
+        });
+      }
+
+      return { status: "sent", providerMessageId: sendResult?.providerMessageId };
+    }
   }
 
   return { handleTelegramUpdate };
+}
+
+function detectModeSwitch(text, currentMode) {
+  const lower = text.toLowerCase();
+  if (lower === "forge") return "forge";
+  if (lower === "hades" && currentMode === "forge") return "general";
+  return null;
 }
 
 function buildTelegramReply({ assistantText, outboundActions }) {

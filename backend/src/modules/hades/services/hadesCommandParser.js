@@ -1,4 +1,4 @@
-const HADES_PREFIXES = /^[!/]hades\b/i;
+const HADES_PREFIXES = /^(?:[!/]?(?:hades|forge))\b/i;
 
 export function parseHadesCommand(content) {
   if (!content || typeof content !== "string") return null;
@@ -7,12 +7,12 @@ export function parseHadesCommand(content) {
   if (!HADES_PREFIXES.test(trimmed)) return null;
 
   const withoutPrefix = trimmed.replace(HADES_PREFIXES, "").trim();
-  if (!withoutPrefix) return { prefix: "!hades", rawArgs: "", action: null };
+  if (!withoutPrefix) return { prefix: detectPrefix(trimmed), rawArgs: "", action: null };
 
   const tokens = withoutPrefix.split(/\s+/);
 
   const result = {
-    prefix: trimmed.startsWith("/") ? "/hades" : "!hades",
+    prefix: detectPrefix(trimmed),
     rawArgs: withoutPrefix,
     action: tokens[0] || null,
   };
@@ -35,4 +35,11 @@ export function parseHadesCommand(content) {
   }
 
   return result;
+}
+
+function detectPrefix(trimmed) {
+  const isForge = /^[!/]?forge\b/i.test(trimmed);
+  if (trimmed.startsWith("/")) return isForge ? "/forge" : "/hades";
+  if (trimmed.startsWith("!")) return isForge ? "!forge" : "!hades";
+  return isForge ? "forge" : "hades";
 }
