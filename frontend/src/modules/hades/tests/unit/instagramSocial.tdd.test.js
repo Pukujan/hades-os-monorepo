@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 
 const DIR = path.dirname(fileURLToPath(import.meta.url));
 const APP_PATH = path.resolve(DIR, "../../pages/HadesPrototypeApp.jsx");
+const CSS_PATH = path.resolve(DIR, "../../../../styles/hadesPrototype.css");
 
 describe("Instagram social connector frontend contract", () => {
   test("SOCIAL_LINKS includes Instagram as a connectable social channel", async () => {
@@ -85,6 +86,36 @@ describe("Instagram social connector frontend contract", () => {
     assert.ok(
       source.includes("handleCreateInstagramAuthLink"),
       "Socials UI must provide an Instagram auth-link handler.",
+    );
+  });
+
+  test("InstagramSetupCard CSS uses flex layout consistent with other social cards", () => {
+    const css = readFileSync(CSS_PATH, "utf8");
+
+    assert.ok(
+      css.includes(".instagram-card"),
+      "CSS must define .instagram-card layout rules.",
+    );
+    assert.ok(
+      css.includes("social-footer") || css.includes("instagram-card .social-footer"),
+      "CSS must handle .social-footer spacing within instagram-card.",
+    );
+  });
+
+  test("HadesProvider useEffect loads Instagram connections from server response", () => {
+    const source = readFileSync(APP_PATH, "utf8");
+
+    const effectStart = source.indexOf("const socials = await getSocialConnections(accessToken);");
+    assert.ok(effectStart >= 0, "HadesProvider must fetch social connections from server.");
+    const effectBody = source.slice(effectStart);
+
+    assert.ok(
+      effectBody.includes('} else if (s.provider === "instagram")'),
+      "HadesProvider must handle instagram provider from server response.",
+    );
+    assert.ok(
+      effectBody.includes("setInstagramConnection"),
+      "HadesProvider must call setInstagramConnection when loading Instagram connection.",
     );
   });
 });

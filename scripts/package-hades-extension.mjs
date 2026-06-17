@@ -58,9 +58,8 @@ function buildZip() {
 
     const localHeader = Buffer.concat([
       Buffer.from("PK\x03\x04"),
-      u16(20), u16(0), u16(0), u16(8),
-      u16(0), u16(0),
-      u32(crc),
+      u16(20), u16(0), u16(8), u16(0),
+      u16(0), u32(crc),
       u32(compressed.length),
       u32(data.length),
       u16(name.length), u16(0),
@@ -86,13 +85,13 @@ function buildZip() {
   for (const e of entries) {
     const central = Buffer.concat([
       Buffer.from("PK\x01\x02"),
-      u16(20), u16(20), u16(0), u16(0),
-      u16(8), u16(0), u16(0),
+      u16(20), u16(20), u16(0), u16(8),
+      u16(0), u16(0),
       u32(e.crc),
       u32(e.compressedSize),
       u32(e.uncompressedSize),
       u16(e.name.length), u16(0), u16(0), u16(0),
-      u16(0), u16(0), u16(0),
+      u16(0), u32(0),
       u32(e.localHeaderOffset),
       e.name,
     ]);

@@ -15,6 +15,7 @@ const requiredTables = [
   "hades_documents",
   "hades_document_chunks",
   "hades_tool_results",
+  "hades_extension_keys",
 ];
 
 test("documents required Hades tables for Supabase schema", () => {

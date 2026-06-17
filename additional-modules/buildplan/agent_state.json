@@ -1,12 +1,32 @@
 {
   "phase": "task-complete",
-  "module": "hades-conversational-minion-flow",
-  "task": "Fix conversational minion creation/edit flow across Forge, general chat, Telegram, and minion list/detail UI",
+  "module": "hades-extension-and-social-fixes",
+  "task": "Fix extension zip, API key persistence, extension connect panel, Instagram wiring, Instagram CSS, GIF sizing/click-to-open",
   "state": {
-    "conversationFlow": {
+    "extensionZip": {
       "status": "completed",
-      "summary": "All focus items implemented and verified. Handoff #008 (memory isolation), #009 (workflow orchestrator), and #010 (extension install) also completed. 32/32 TDD tests pass across all three handoffs.",
-      "completedAt": "2026-06-17"
-    }
+      "summary": "Fixed CRC/header alignment bug in package-hades-extension.mjs — local and central directory headers had 2-byte CRC shift. Zip now extracts correctly (11 files, 4720 bytes, all deflate method 8)."
+    },
+    "extensionKeyPersistence": {
+      "status": "completed",
+      "summary": "extensionKeyRepository now supports Supabase persistence via hydrate/persist pattern. Created migration 005_hades_extension_keys.sql. Wired supabaseClient in index.js. 6/6 TDD tests pass."
+    },
+    "extensionConnectPanel": {
+      "status": "completed",
+      "summary": "HadesExtensionApp.jsx now imports getApiKey/setApiKey from hadesExtensionClient.js, persists key on connect via useEffect + handleConnect async function. Auto-connects if key exists in storage."
+    },
+    "instagramWiring": {
+      "status": "completed",
+      "summary": "SocialsScreen useEffect now handles instagram provider from getSocialConnections response. Added else-if branch for instagram."
+    },
+    "instagramCSS": {
+      "status": "completed",
+      "summary": "Added .instagram-card flex layout (matching telegram/discord/github cards) and .social-footer full-width styling. Added to responsive media query."
+    },
+    "gifSizing": {
+      "status": "completed",
+      "summary": "Added .chat-gif CSS: max-width:100%, max-height:300px, cursor:pointer, object-fit:contain, border-radius:12px. Added onClick handler to open GIF in new tab via window.open."
+    },
+    "completedAt": "2026-06-17"
   }
 }

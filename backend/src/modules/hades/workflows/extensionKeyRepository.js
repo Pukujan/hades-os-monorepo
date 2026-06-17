@@ -1,4 +1,7 @@
 import { randomUUID, createHash } from "node:crypto";
+import { persistTable, readTableRows } from "../repositories/_supabase.js";
+
+const TABLE = "hades_extension_keys";
 
 function hashKey(key) {
   return createHash("sha256").update(key).digest("hex");
@@ -8,11 +11,29 @@ function generateKey() {
   return "hx_" + randomUUID().replace(/-/g, "") + randomUUID().replace(/-/g, "");
 }
 
-export function createExtensionKeyRepository({ storage = "memory" } = {}) {
+export function createExtensionKeyRepository({ storage = "memory", supabaseClient } = {}) {
   const keys = new Map();
   const keyHashes = new Map();
+  let hydrated = false;
+
+  async function hydrate() {
+    if (hydrated || storage !== "supabase") return;
+    for (const row of await readTableRows(supabaseClient, TABLE)) {
+      if (!row?.id) continue;
+      keys.set(row.id, { ...row });
+      if (row.key_hash) keyHashes.set(row.key_hash, row.id);
+    }
+    hydrated = true;
+  }
+
+  async function persist(row, mode = "insert") {
+    if (storage === "supabase") {
+      await persistTable(supabaseClient, TABLE, mode, row);
+    }
+  }
 
   async function createKey({ userId, tenantId, data }) {
+    await hydrate();
     const plaintextKey = generateKey();
     const keyHash = hashKey(plaintextKey);
     const record = {
@@ -28,10 +49,12 @@ export function createExtensionKeyRepository({ storage = "memory" } = {}) {
     };
     keys.set(record.id, record);
     keyHashes.set(keyHash, record.id);
+    await persist(record, "insert");
     return { plaintextKey, record };
   }
 
   async function rotateKey({ id, userId, tenantId }) {
+    await hydrate();
     const record = keys.get(id);
     if (!record) return null;
     if (record.user_id !== userId || record.tenant_id !== tenantId) return null;
@@ -42,20 +65,24 @@ export function createExtensionKeyRepository({ storage = "memory" } = {}) {
     record.updated_at = new Date().toISOString();
     keys.set(id, record);
     keyHashes.set(newHash, id);
+    await persist(record, "upsert");
     return { plaintextKey: newPlaintext, record };
   }
 
   async function revokeKey({ id, userId, tenantId }) {
+    await hydrate();
     const record = keys.get(id);
     if (!record) return null;
     if (record.user_id !== userId || record.tenant_id !== tenantId) return null;
     record.revoked_at = new Date().toISOString();
     record.updated_at = new Date().toISOString();
     keys.set(id, record);
+    await persist(record, "upsert");
     return record;
   }
 
   async function verifyKey({ plaintextKey, requiredScope }) {
+    await hydrate();
     const keyHash = hashKey(plaintextKey);
     const recordId = keyHashes.get(keyHash);
     if (!recordId) return null;
@@ -67,6 +94,7 @@ export function createExtensionKeyRepository({ storage = "memory" } = {}) {
   }
 
   async function listKeys({ userId, tenantId }) {
+    await hydrate();
     return [...keys.values()].filter(
       (k) => k.user_id === userId && k.tenant_id === tenantId
     );

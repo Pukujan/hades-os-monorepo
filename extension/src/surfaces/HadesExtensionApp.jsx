@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { getApiKey, setApiKey } from "../api/hadesExtensionClient.js";
 import { HadesChatPanel } from "./HadesChatPanel.jsx";
 import { WorkflowListPanel } from "./WorkflowListPanel.jsx";
 import { ContextUploadPanel } from "./ContextUploadPanel.jsx";
@@ -7,7 +8,7 @@ import { PageCapturePanel } from "./PageCapturePanel.jsx";
 import { ApprovalQueuePanel } from "./ApprovalQueuePanel.jsx";
 
 function ExtensionConnectPanel({ onConnect }) {
-  const [apiKey, setApiKey] = useState("");
+  const [apiKey, setApiKeyState] = useState("");
 
   return React.createElement("div", { className: "connect-panel" },
     React.createElement("h2", null, "Extension API key"),
@@ -16,7 +17,7 @@ function ExtensionConnectPanel({ onConnect }) {
       type: "text",
       placeholder: "Paste extension API key",
       value: apiKey,
-      onChange: function (e) { setApiKey(e.target.value); },
+      onChange: function (e) { setApiKeyState(e.target.value); },
     }),
     React.createElement("button", {
       className: "primary",
@@ -28,9 +29,20 @@ export function HadesExtensionApp() {
   const [connected, setConnected] = useState(false);
   const [activeTab, setActiveTab] = useState("chat");
 
+  useEffect(function () {
+    getApiKey().then(function (stored) {
+      if (stored) setConnected(true);
+    });
+  }, []);
+
+  async function handleConnect(apiKey) {
+    await setApiKey(apiKey);
+    setConnected(true);
+  }
+
   if (!connected) {
     return React.createElement("div", { className: "hades-extension" },
-      React.createElement(ExtensionConnectPanel, { onConnect: function () { setConnected(true); } }));
+      React.createElement(ExtensionConnectPanel, { onConnect: handleConnect }));
   }
 
   const tabs = [

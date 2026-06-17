@@ -247,6 +247,14 @@ function HadesProvider({ children }) {
     }
   ]);
   const [futurePlanDraft, setFuturePlanDraft] = React.useState("");
+
+  const defaultConnection = (provider) => ({
+    status: SOCIAL_LINKS.find((s) => s.provider === provider)?.status || "disconnected",
+  });
+  const [telegramConnection, setTelegramConnection] = usePersistentState("hades.telegramConnection", defaultConnection("telegram"));
+  const [discordConnection, setDiscordConnection] = usePersistentState("hades.discordConnection", defaultConnection("discord"));
+  const [githubConnection, setGithubConnection] = usePersistentState("hades.githubConnection", defaultConnection("github"));
+  const [instagramConnection, setInstagramConnection] = usePersistentState("hades.instagramConnection", defaultConnection("instagram"));
   const [notifications, setNotifications] = usePersistentState("hades.notifications", [
     {
       id: "note-discord",
@@ -336,6 +344,31 @@ function HadesProvider({ children }) {
     };
   }, []);
 
+  React.useEffect(() => {
+    if (!accessToken) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const socials = await getSocialConnections(accessToken);
+        if (cancelled || !Array.isArray(socials)) return;
+        for (const s of socials) {
+          if (s.provider === "telegram") {
+            setTelegramConnection({ ...s, status: s.status || "connected" });
+          } else if (s.provider === "discord") {
+            setDiscordConnection({ ...s, status: s.status || "connected" });
+          } else if (s.provider === "github") {
+            setGithubConnection({ ...s, status: s.status || "connected" });
+          } else if (s.provider === "instagram") {
+            setInstagramConnection({ ...s, status: s.status || "connected" });
+          }
+        }
+      } catch {
+        // best-effort — default state stays
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [accessToken]);
+
   const showToast = React.useCallback((message) => {
     setToast(message);
     if (toastTimerRef.current) {
@@ -391,6 +424,66 @@ function HadesProvider({ children }) {
     setFuturePlanCache([]);
     showToast("Future plan cache cleared.");
   }, [setFuturePlanCache, showToast]);
+
+  const handleSaveTelegramToken = React.useCallback(async ({ token }) => {
+    const result = await saveTelegramToken({ token }, accessToken);
+    const connection = result?.connection || result;
+    setTelegramConnection({
+      status: connection?.status || "connected",
+      botUsername: connection?.botUsername || connection?.bot_username || null,
+      tokenLast4: connection?.tokenLast4 || connection?.token_last4 || null,
+    });
+    return result;
+  }, [accessToken]);
+
+  const handleSaveDiscordToken = React.useCallback(async ({ token }) => {
+    const result = await saveDiscordToken({ token }, accessToken);
+    const connection = result?.connection || result;
+    setDiscordConnection({
+      status: connection?.status || "connected",
+      botUsername: connection?.botUsername || connection?.bot_username || null,
+      tokenLast4: connection?.tokenLast4 || connection?.token_last4 || null,
+    });
+    return result;
+  }, [accessToken]);
+
+  const handleSaveGithubToken = React.useCallback(async ({ token }) => {
+    const result = await saveGitHubToken({ token }, accessToken);
+    const connection = result?.connection || result;
+    setGithubConnection({
+      status: connection?.status || "connected",
+      username: connection?.username || null,
+      scope: connection?.scope || null,
+    });
+    return result;
+  }, [accessToken]);
+
+  const handleCreateInstagramAuthLink = React.useCallback(async (payload) => {
+    const result = await createInstagramAuthLink(payload, accessToken);
+    const authUrl = result?.authUrl;
+    if (authUrl) {
+      window.open(authUrl, "_blank", "noopener,noreferrer");
+    }
+    setInstagramConnection({ status: "connecting", connector: "composio" });
+    return result;
+  }, [accessToken]);
+
+  const handleSaveInstagramConnection = React.useCallback(async (payload) => {
+    const result = await saveInstagramConnection(payload, accessToken);
+    const connection = result?.connection || result;
+    setInstagramConnection({
+      status: connection?.status || "connected",
+      handle: connection?.handle || null,
+      connector: connection?.connector || "composio",
+    });
+    return result;
+  }, [accessToken]);
+
+  const handleDeleteInstagramConnection = React.useCallback(async () => {
+    const result = await deleteInstagramConnection(accessToken);
+    setInstagramConnection({ status: "not_connected", handle: null, connector: "composio" });
+    return result;
+  }, [accessToken]);
 
   const openMinionDetail = React.useCallback((minionId) => {
     setDetailMinionId(minionId);
@@ -885,7 +978,17 @@ function HadesProvider({ children }) {
         pendingCopy,
         activateMinion,
         deactivateMinion,
-        maxSlots
+        maxSlots,
+        telegramConnection,
+        discordConnection,
+        githubConnection,
+        instagramConnection,
+        handleSaveTelegramToken,
+        handleSaveDiscordToken,
+        handleSaveGithubToken,
+        handleCreateInstagramAuthLink,
+        handleSaveInstagramConnection,
+        handleDeleteInstagramConnection
       }}
     >
       {children}
@@ -1566,108 +1669,18 @@ function PermissionsCard({ social }) {
 function SocialsScreen() {
   const { session } = useAuth();
   const currentUser = session?.user || { id: "local-user" };
-  const [telegramConnection, setTelegramConnection] = React.useState({
-    status: SOCIAL_LINKS.find((s) => s.provider === "telegram")?.status || "disconnected"
-  });
-
-  React.useEffect(() => {
-    if (!session?.access_token) return;
-    let cancelled = false;
-    (async () => {
-      try {
-        const socials = await getSocialConnections(session.access_token);
-        if (cancelled || !Array.isArray(socials)) return;
-        for (const s of socials) {
-          if (s.provider === "telegram") {
-            setTelegramConnection({ ...s, status: s.status || "connected" });
-          } else if (s.provider === "discord") {
-            setDiscordConnection({ ...s, status: s.status || "connected" });
-          } else if (s.provider === "github") {
-            setGithubConnection({ ...s, status: s.status || "connected" });
-          }
-        }
-      } catch {
-        // best-effort — default state stays
-      }
-    })();
-    return () => { cancelled = true; };
-  }, [session?.access_token]);
-
-  async function handleSaveTelegramToken({ token }) {
-    const result = await saveTelegramToken({ token }, session?.access_token);
-    const connection = result?.connection || result;
-    setTelegramConnection({
-      status: connection?.status || "connected",
-      botUsername: connection?.botUsername || connection?.bot_username || null,
-      tokenLast4: connection?.tokenLast4 || connection?.token_last4 || null
-    });
-    return result;
-  }
-
-  const [discordConnection, setDiscordConnection] = React.useState({
-    status: SOCIAL_LINKS.find((s) => s.provider === "discord")?.status || "disconnected"
-  });
-
-  const [githubConnection, setGithubConnection] = React.useState({
-    status: SOCIAL_LINKS.find((s) => s.provider === "github")?.status || "disconnected"
-  });
-
-  const [instagramConnection, setInstagramConnection] = React.useState({
-    status: SOCIAL_LINKS.find((s) => s.provider === "instagram")?.status || "not_connected"
-  });
-
-  async function handleSaveDiscordToken({ token }) {
-    const result = await saveDiscordToken({ token }, session?.access_token);
-    const connection = result?.connection || result;
-    setDiscordConnection({
-      status: connection?.status || "connected",
-      botUsername: connection?.botUsername || connection?.bot_username || null,
-      tokenLast4: connection?.tokenLast4 || connection?.token_last4 || null
-    });
-    return result;
-  }
-
-  async function handleCreateInstagramAuthLink(payload) {
-    const result = await createInstagramAuthLink(payload, session?.access_token);
-    const authUrl = result?.authUrl;
-    if (authUrl) {
-      window.open(authUrl, "_blank", "noopener,noreferrer");
-    }
-    setInstagramConnection({ status: "connecting", connector: "composio" });
-    return result;
-  }
-
-  async function handleSaveInstagramConnection(payload) {
-    const result = await saveInstagramConnection(payload, session?.access_token);
-    const connection = result?.connection || result;
-    setInstagramConnection({
-      status: connection?.status || "connected",
-      handle: connection?.handle || null,
-      connector: connection?.connector || "composio",
-    });
-    return result;
-  }
-
-  async function handleDeleteInstagramConnection() {
-    const result = await deleteInstagramConnection(session?.access_token);
-    setInstagramConnection({
-      status: "not_connected",
-      handle: null,
-      connector: "composio",
-    });
-    return result;
-  }
-
-  async function handleSaveGithubToken({ token }) {
-    const result = await saveGitHubToken({ token }, session?.access_token);
-    const connection = result?.connection || result;
-    setGithubConnection({
-      status: connection?.status || "connected",
-      username: connection?.username || null,
-      scope: connection?.scope || null
-    });
-    return result;
-  }
+  const {
+    telegramConnection,
+    discordConnection,
+    githubConnection,
+    instagramConnection,
+    handleSaveTelegramToken,
+    handleSaveDiscordToken,
+    handleSaveGithubToken,
+    handleCreateInstagramAuthLink,
+    handleSaveInstagramConnection,
+    handleDeleteInstagramConnection,
+  } = useHades();
 
   return (
     <>

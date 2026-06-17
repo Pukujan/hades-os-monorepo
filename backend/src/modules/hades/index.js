@@ -77,7 +77,7 @@ export async function register(app, context) {
   const processedUpdates = overrides.processedUpdates || createProcessedUpdateRepository({ storage: storageMode, supabaseClient });
   const conversationModes = overrides.conversationModes || createTelegramConversationModeRepository({ storage: storageMode, supabaseClient });
   const memoryRecords = overrides.memoryRecords || createMemoryRecordRepository({ storage: storageMode, supabaseClient });
-  const extensionKeys = overrides.extensionKeys || createExtensionKeyRepository({ storage: storageMode });
+  const extensionKeys = overrides.extensionKeys || createExtensionKeyRepository({ storage: storageMode, supabaseClient });
   const workflowDefinitions = overrides.workflowDefinitions || createWorkflowRepository({ storage: storageMode, supabaseClient });
 
   const verifySocialAccount = overrides.verifySocialAccount || createVerifySocialAccount({

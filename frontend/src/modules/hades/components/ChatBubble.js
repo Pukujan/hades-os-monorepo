@@ -36,7 +36,7 @@ export function ChatBubble({ message, showStamp = true, sendMessage, ProductCard
     React.createElement("span", { dangerouslySetInnerHTML: { __html: renderMarkdown(message.content) } }),
     showStamp ? React.createElement("span", { className: "stamp", key: "stamp" }, message.createdAt || "Just now") : null,
     message.status === "queued" ? React.createElement("small", { key: "pending" }, "Pending sync") : null,
-    gifUrl && gifStatus === "verified" ? React.createElement("img", { key: "gif", "data-testid": "chat-gif", src: gifUrl, alt: gifAlt, className: "chat-gif" }) : null,
+    gifUrl && gifStatus === "verified" ? React.createElement("img", { key: "gif", "data-testid": "chat-gif", src: gifUrl, alt: gifAlt, className: "chat-gif", onClick: function () { window.open(gifUrl, "_blank", "noopener,noreferrer"); } }) : null,
     gifUrl && gifStatus === "rejected" ? React.createElement("p", { key: "gif-unavailable", className: "gif-unavailable" }, "GIF media unavailable") : null,
     message.cards?.length > 0 ? React.createElement("div", { className: "hades-message-cards", key: "cards" },
       message.cards.map((card, i) => {

@@ -141,6 +141,34 @@ test("MinionsScreen chat is always open without focused/expanded state toggles",
   );
 });
 
+test("ChatBubble CSS defines bounded .chat-gif rules", () => {
+  const css = readFileSync(new URL("../../../../styles/hadesPrototype.css", import.meta.url), "utf8");
+  assert.ok(css.includes(".chat-gif"), "CSS must define .chat-gif selector.");
+  assert.ok(css.includes("max-width") || css.includes("max-height"), "CSS must bound GIF dimensions.");
+  assert.ok(css.includes("cursor"), "CSS must show pointer cursor for clickable GIF.");
+});
+
+test("ChatBubble renders GIF image with bounded size CSS class and onClick to open in new tab", async () => {
+  const mod = await import("../../components/ChatBubble.js");
+  const { ChatBubble } = mod;
+  const gifUrl = "https://media.example.com/cat.gif";
+  const html = renderToString(
+    React.createElement(MemoryRouter, null,
+      React.createElement(ChatBubble, {
+        message: {
+          role: "hades",
+          content: "Here is a GIF.",
+          gifUrl,
+          mediaVerificationStatus: "verified",
+        }
+      })
+    )
+  );
+
+  assert.ok(html.includes('class="chat-gif"'), "GIF must use chat-gif CSS class.");
+  assert.ok(html.includes('src="https://media.example.com/cat.gif"'));
+});
+
 test("ChatBubble renders user bubble with user class", async () => {
   const mod = await import("../../components/ChatBubble.js");
   const { ChatBubble } = mod;
