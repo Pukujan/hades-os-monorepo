@@ -2,6 +2,7 @@
 
 **Date:** 2026-06-17
 **Depends on:** `work-log/handoffs/009_2026-06-17_16-51_handoff_hermes-workflow-orchestrator.md`
+**Follow-up build handoff:** `work-log/handoffs/011_2026-06-17_handoff_real-browser-extension-build-download.md`
 **Primary TDD gate:** `npm run test:hades-extension-install`
 
 ## Objective

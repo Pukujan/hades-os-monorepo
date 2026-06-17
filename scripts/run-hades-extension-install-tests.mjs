@@ -4,6 +4,7 @@ const commands = [
   ["npm", ["--prefix", "backend", "run", "test:hades-extension-install"]],
   ["npm", ["--prefix", "backend", "run", "test:hades-extension-auth"]],
   ["npm", ["--prefix", "frontend", "run", "test:hades-extension-install-ui"]],
+  ["node", ["--test", "scripts/hades-extension-real-build.tdd.test.mjs"]],
   ["node", ["--test", "scripts/hades-extension-design-handoff.contract.test.mjs"]],
 ];
 

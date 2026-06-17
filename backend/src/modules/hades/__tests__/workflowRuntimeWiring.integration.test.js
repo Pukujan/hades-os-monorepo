@@ -92,12 +92,12 @@ describe("workflow runtime wiring", () => {
 
     assert.equal(res.status, 201);
     const body = JSON.parse(res.body);
-    assert.equal(typeof body.plaintextKey, "string");
-    assert.ok(body.plaintextKey.startsWith("hx_"));
+    assert.equal(typeof body.secret, "string");
+    assert.ok(body.secret.startsWith("hx_"));
     assert.equal(body.record.name, "Chrome extension");
-    assert.equal(body.record.user_id, "user_a");
-    assert.equal(body.record.tenant_id, "tenant_a");
-    assert.equal(JSON.stringify(body.record).includes(body.plaintextKey), false);
+    assert.ok(body.record.secretPreview);
+    assert.equal(body.record.secretPreview.includes(body.secret), false);
+    assert.equal(JSON.stringify(body.record).includes(body.secret), false);
   });
 
   test("GET /api/hades/extension/keys lists only the authenticated user's keys", async () => {
@@ -131,8 +131,8 @@ describe("workflow runtime wiring", () => {
 
     assert.equal(res.status, 200);
     const body = JSON.parse(res.body);
-    assert.equal(typeof body.plaintextKey, "string");
-    assert.ok(body.plaintextKey.startsWith("hx_"));
+    assert.equal(typeof body.secret, "string");
+    assert.ok(body.secret.startsWith("hx_"));
   });
 
   test("POST /api/hades/extension/keys/:id/revoke revokes the key", async () => {
@@ -147,7 +147,7 @@ describe("workflow runtime wiring", () => {
 
     assert.equal(res.status, 200);
     const body = JSON.parse(res.body);
-    assert.ok(body.record.revoked_at, "revoked_at should be set after revoke");
+    assert.ok(body.record.revokedAt, "revokedAt should be set after revoke");
   });
 
   test("POST /api/hades/workflows creates a workflow definition", async () => {

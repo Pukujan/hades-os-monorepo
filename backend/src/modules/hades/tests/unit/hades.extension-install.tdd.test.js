@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import express from "express";
 import { describe, test } from "node:test";
 import { createHadesRoutes } from "../../routes/hades.routes.js";
+import { createHadesRepository } from "../../repositories/hades.repository.js";
+import { createHadesService } from "../../services/hades.service.js";
 
 async function request(app, { method = "GET", path, body } = {}) {
   const server = app.listen(0);
@@ -98,5 +100,22 @@ describe("Hades extension install API TDD contract", () => {
     assert.equal(listed.response.status, 200);
     assert.equal(Object.hasOwn(listed.payload.keys[0], "secret"), false);
     assert.equal(listed.payload.keys[0].secretPreview, "hades_ext_...abcd");
+  });
+
+  test("real service download route returns the packaged extension zip artifact", async () => {
+    const service = createHadesService({
+      repository: createHadesRepository(),
+      scopedRepos: {},
+      hermes: { buildResponse: async () => ({ assistantMessage: { content: "ok" } }) },
+    });
+    const app = makeApp(service);
+
+    const { response, payload } = await request(app, { path: "/api/hades/extension/download" });
+
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get("content-type"), "application/zip");
+    assert.match(response.headers.get("content-disposition") || "", /extension\.zip|hades-extension/);
+    assert.equal(Buffer.isBuffer(payload), true);
+    assert.equal(payload.subarray(0, 2).toString("utf8"), "PK");
   });
 });

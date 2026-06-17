@@ -45,12 +45,9 @@ test("hermes --version succeeds in Docker image", { timeout: 30_000 }, (t) => {
 
 test("resolveHermesBin finds hermes at Docker path inside container", { timeout: 30_000 }, (t) => {
   if (!dockerAvailable()) { t.skip("Docker daemon not running"); return; }
+  const script = "import { resolveHermesBin } from '/app/src/modules/hades/services/hermesRuntime.service.js'; const bin = resolveHermesBin(); console.log('RESOLVED=' + bin);";
   const out = execSync(
-    `docker run --rm -e HERMES_BIN_PATH=${HERMES_PATH} ${IMAGE} node -e "
-      import { resolveHermesBin } from '/app/src/modules/hades/services/hermesRuntime.service.js';
-      const bin = resolveHermesBin();
-      console.log('RESOLVED=' + bin);
-    "`,
+    `docker run --rm -e HERMES_BIN_PATH=${HERMES_PATH} ${IMAGE} node --input-type=module -e "${script}"`,
     { encoding: "utf8", cwd }
   );
   assert.match(out, /RESOLVED=/, "resolveHermesBin must resolve to a path");

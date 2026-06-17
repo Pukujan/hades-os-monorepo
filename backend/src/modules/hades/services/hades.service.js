@@ -728,7 +728,10 @@ async function saveTelegramToken(body, authContext) {
     const userId = resolveUserId(authContext);
     const path = await import("node:path");
     const { readFileSync, existsSync } = await import("node:fs");
-    const extensionDir = path.join(process.cwd(), "extension");
+    const { fileURLToPath } = await import("node:url");
+    const serviceDir = path.dirname(fileURLToPath(import.meta.url));
+    const monorepoRoot = path.resolve(serviceDir, "../../../../..");
+    const extensionDir = path.join(monorepoRoot, "extension");
     const bundlePath = path.join(extensionDir, "dist", "extension.zip");
     if (existsSync(bundlePath)) {
       const buffer = readFileSync(bundlePath);

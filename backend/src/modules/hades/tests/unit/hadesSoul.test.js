@@ -6,8 +6,8 @@ test("loads Hades soul markdown with core identity", () => {
   const soul = loadSoul("hades");
 
   assert.match(soul, /Hades is the quiet command layer/);
-  assert.match(soul, /not eager to help/);
-  assert.match(soul, /A little contempt is allowed/);
+  assert.match(soul, /Not too eager to help/);
+  assert.match(soul, /Hades is not a cheerful SaaS assistant/);
 });
 
 test("defines scope boundaries", () => {
@@ -23,9 +23,8 @@ test("allows dry, superior, reluctant tone", () => {
   const soul = loadSoul("hades");
 
   assert.match(soul, /dry/);
-  assert.match(soul, /superior/);
-  assert.match(soul, /mildly dismissive/);
-  assert.match(soul, /reluctant/);
+  assert.match(soul, /sarcastic sense of humour/);
+  assert.match(soul, /short/);
 });
 
 test("keeps Teresa as a special respected entity in the persona", () => {

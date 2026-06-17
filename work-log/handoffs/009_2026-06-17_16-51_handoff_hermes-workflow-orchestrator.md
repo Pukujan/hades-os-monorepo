@@ -111,6 +111,7 @@ The current green tests are contract/unit/package-shape tests. They do not yet p
 Next work should add integration and app-wiring tests before implementation:
 
 - Extension install/design handoff: `work-log/handoffs/010_2026-06-17_handoff_hades-extension-install-and-design.md`.
+- Durable workflow run state and recovery handoff: `work-log/handoffs/012_2026-06-17_handoff_durable-workflow-run-state-recovery.md`.
 - Mount extension key routes and prove create/list/rotate/revoke/auth behavior through Hades HTTP routes.
 - Wire workflow definitions, runs, audit repository, tool registry, and approval queues into Hades service/routes.
 - Wire memory/document tools into the orchestrator run loop using authenticated context.
