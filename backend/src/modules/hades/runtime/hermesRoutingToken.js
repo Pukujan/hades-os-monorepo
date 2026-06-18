@@ -1,6 +1,6 @@
 import { randomUUID, createHmac } from "node:crypto";
 
-export function createHermesRoutingTokenService({ secret }) {
+export function createHermesRoutingTokenService({ secret, repository } = {}) {
   const tasks = new Map();
 
   function sign(payload) {
@@ -12,11 +12,38 @@ export function createHermesRoutingTokenService({ secret }) {
     const payload = { taskId, userId, tenantId, processId };
     const routingToken = sign(payload);
     tasks.set(taskId, { userId, tenantId, processId, destination, routingToken });
+
+    if (repository) {
+      await repository.createTaskRoute({
+        taskId,
+        userId,
+        tenantId,
+        processId,
+        routingToken,
+        routingTokenHash: routingToken,
+        destination,
+      });
+    }
+
     return { taskId, routingToken };
   }
 
   async function verifyResponse({ taskId, routingToken, processId, userId, tenantId }) {
-    const stored = tasks.get(taskId);
+    let stored = tasks.get(taskId);
+
+    if (!stored && repository) {
+      const route = await repository.findTaskRoute({ taskId, userId, tenantId });
+      if (route) {
+        const routeProcessId = route.processId || route.process_id;
+        const payload = { taskId, userId, tenantId, processId: routeProcessId };
+        const computedHash = sign(payload);
+        if (computedHash !== routingToken) {
+          throw new Error("Invalid route: token mismatch");
+        }
+        return { userId: route.userId || route.user_id, tenantId: route.tenantId || route.tenant_id, destination: route.destination };
+      }
+    }
+
     if (!stored) {
       throw new Error("Invalid route: task not found");
     }

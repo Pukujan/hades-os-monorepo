@@ -32,11 +32,28 @@ export function createHermesStateRepository({ storage = "memory", supabaseClient
       byte_size: byteSize,
       created_at: new Date().toISOString(),
     };
+
+    if (storage === "supabase") {
+      const { error } = await supabaseClient.from("hades_hermes_state_objects").insert(record);
+      if (error) throw error;
+    }
+
     stateObjects.set(id, record);
     return clone(record);
   }
 
   async function listStateObjects({ userId, tenantId }) {
+    if (storage === "supabase") {
+      const { data, error } = await supabaseClient
+        .from("hades_hermes_state_objects")
+        .select("*")
+        .eq("user_id", userId)
+        .eq("tenant_id", tenantId)
+        .order("created_at");
+      if (error) throw error;
+      return (data || []).map((r) => clone(r));
+    }
+
     return Array.from(stateObjects.values())
       .filter((r) => r.user_id === userId && r.tenant_id === tenantId)
       .map((r) => clone(r));
@@ -53,11 +70,29 @@ export function createHermesStateRepository({ storage = "memory", supabaseClient
       capability_envelope: capabilityEnvelope || null,
       created_at: new Date().toISOString(),
     };
+
+    if (storage === "supabase") {
+      const { error } = await supabaseClient.from("hades_hermes_task_routes").insert(record);
+      if (error) throw error;
+    }
+
     taskRoutes.set(taskId, record);
     return stripSecrets(clone(record), ["routingToken"]);
   }
 
   async function findTaskRoute({ taskId, userId, tenantId }) {
+    if (storage === "supabase") {
+      const { data, error } = await supabaseClient
+        .from("hades_hermes_task_routes")
+        .select("*")
+        .eq("task_id", taskId)
+        .eq("user_id", userId)
+        .eq("tenant_id", tenantId)
+        .maybeSingle();
+      if (error) throw error;
+      return data ? stripSecrets(clone(data), ["routingToken"]) : null;
+    }
+
     const record = taskRoutes.get(taskId);
     if (!record) return null;
     if (record.user_id !== userId || record.tenant_id !== tenantId) return null;

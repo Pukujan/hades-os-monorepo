@@ -1,11 +1,23 @@
 import { createClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
+import path from "node:path";
 import { createHadesRoutes } from "./routes/hades.routes.js";
 import { createHadesRepository } from "./repositories/hades.repository.js";
 import { createHermesService } from "./services/hermes.service.js";
 import { createHermesRuntimeService } from "./services/hermesRuntime.service.js";
 import { createHadesService } from "./services/hades.service.js";
 import { getHadesConfig } from "./config/index.js";
+import { createHermesWorkspaceService } from "./runtime/hermesWorkspace.js";
+import { createHermesStateStore } from "./runtime/hermesStateStore.js";
+import { createHermesStateRepository } from "./repositories/hermesStateRepository.js";
+import { createHermesRoutingTokenService } from "./runtime/hermesRoutingToken.js";
+import { createHermesCapabilityEnvelope } from "./runtime/hermesCapabilityEnvelope.js";
+import { createHermesBoundaryActionBroker } from "./runtime/hermesBoundaryActionBroker.js";
+import { createHermesProcessManager } from "./runtime/hermesProcessManager.js";
+import { createHermesObjectStore } from "./runtime/hermesObjectStore.js";
+import { createHermesFilesystem } from "./runtime/hermesFilesystem.js";
+import { createHermesRuntimeSpawner } from "./runtime/hermesRuntimeSpawn.js";
+import { createHermesArtifactStore } from "./runtime/hermesArtifactStore.js";
 import { createDiscordHermesCommandFlow } from "./services/discordHermesCommandFlow.service.js";
 import { createMinionAssignmentRuntime } from "./services/minionAssignmentRuntime.service.js";
 import { createGiphyProvider } from "./services/giphyProvider.service.js";
@@ -63,6 +75,39 @@ export async function register(app, context) {
   const supabaseConfigured = Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
   const supabaseClient = overrides.supabaseClient || (supabaseConfigured ? createSupabaseClient() : null);
   const storageMode = supabaseClient ? "supabase" : "memory";
+
+  const hermesHomeDir = process.env.HERMES_HOME || path.join(process.cwd(), ".hermes-home");
+  const hermesWorkspace = createHermesWorkspaceService({ homeDir: hermesHomeDir });
+  const hermesStateRepository = overrides.hermesStateRepository || createHermesStateRepository({ storage: storageMode, supabaseClient });
+  const hermesObjectStore = overrides.hermesObjectStore || createHermesObjectStore({ mode: storageMode, supabaseClient, bucket: "hermes-artifacts" });
+  const hermesFilesystem = overrides.hermesFilesystem || createHermesFilesystem({ homeDir: hermesHomeDir });
+  const hermesArtifactStore = overrides.hermesArtifactStore || createHermesArtifactStore({ objectStore: hermesObjectStore, defaultTtlSeconds: 3600 });
+  const hermesRoutingTokenService = overrides.hermesRoutingTokenService || createHermesRoutingTokenService({
+    secret: process.env.HERMES_ROUTING_SECRET || "dev-routing-secret",
+    repository: hermesStateRepository,
+  });
+  const hermesCapabilityEnvelope = overrides.hermesCapabilityEnvelope || createHermesCapabilityEnvelope();
+  const hermesBoundaryActionBroker = overrides.hermesBoundaryActionBroker || createHermesBoundaryActionBroker({
+    capabilityEnvelope: hermesCapabilityEnvelope,
+    approvalRepository: extensionApprovals,
+    telegramClientFactory: null,
+    artifactStore: hermesArtifactStore,
+  });
+  const hermesStateStore = overrides.hermesStateStore || createHermesStateStore({
+    objectStore: hermesObjectStore,
+    filesystem: hermesFilesystem,
+    repository: hermesStateRepository,
+  });
+  const hermesRuntimeSpawner = overrides.hermesRuntimeSpawner || createHermesRuntimeSpawner({
+    hermesRuntimeServiceFactory: () => hermesRuntime,
+  });
+  const hermesProcessManager = overrides.hermesProcessManager || createHermesProcessManager({
+    workspaceService: hermesWorkspace,
+    stateStore: hermesStateStore,
+    routing: hermesRoutingTokenService,
+    spawnRuntime: hermesRuntimeSpawner.spawnRuntime,
+    artifactStore: hermesArtifactStore,
+  });
 
   let tokenCrypto = null;
   if (overrides.crypto) {
