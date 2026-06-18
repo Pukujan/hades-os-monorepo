@@ -1084,6 +1084,59 @@ async function saveTelegramToken(body, authContext) {
     return { approval: result };
   }
 
+  async function findWorkflowDefinition(workflowId, authContext) {
+    const userId = resolveUserId(authContext);
+    const tenantId = authContext?.tenantId || userId;
+    if (!scopedRepos?.workflowDefinitions) {
+      throw new AppError("Workflow repository is not configured", 501);
+    }
+    const wf = await scopedRepos.workflowDefinitions.findDefinitionById({ id: workflowId, userId, tenantId });
+    if (!wf) throw new AppError("Workflow not found", 404);
+    return wf;
+  }
+
+  async function executeWorkflow(workflowId, body, authContext) {
+    const userId = resolveUserId(authContext);
+    const tenantId = authContext?.tenantId || userId;
+    if (!scopedRepos?.workflowOrchestrator || !scopedRepos?.workflowDefinitions || !scopedRepos?.workflowRunStateRepo) {
+      throw new AppError("Workflow orchestrator is not configured", 501);
+    }
+    const workflow = await findWorkflowDefinition(workflowId, authContext);
+    const runState = await scopedRepos.workflowRunStateRepo.createRun({
+      userId, tenantId, workflowDefinitionId: workflowId,
+      input: body.input || body,
+      idempotencyKey: body.idempotencyKey || null,
+    });
+    const result = await scopedRepos.workflowOrchestrator.run({
+      authContext: { userId, tenantId },
+      workflow,
+      input: body.input || body,
+      runId: runState.id,
+    });
+    await scopedRepos.workflowDefinitions.createRun({
+      userId, tenantId,
+      data: {
+        id: runState.id,
+        workflow_definition_id: workflowId,
+        status: result.status,
+        input: body.input || body,
+        output: result,
+        idempotency_key: body.idempotencyKey || null,
+      },
+    });
+    return { run: { id: runState.id, status: result.status, result } };
+  }
+
+  async function listWorkflowRuns(workflowId, authContext) {
+    const userId = resolveUserId(authContext);
+    const tenantId = authContext?.tenantId || userId;
+    if (!scopedRepos?.workflowDefinitions) {
+      return { runs: [] };
+    }
+    const runs = await scopedRepos.workflowDefinitions.listRuns({ userId, tenantId, workflowDefinitionId: workflowId });
+    return { runs };
+  }
+
   return {
     readiness,
     bootstrap,
@@ -1130,5 +1183,8 @@ async function saveTelegramToken(body, authContext) {
     saveExtensionApproval,
     listExtensionApprovals,
     decideExtensionApproval,
+    executeWorkflow,
+    listWorkflowRuns,
+    findWorkflowDefinition,
   };
 }

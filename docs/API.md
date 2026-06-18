@@ -25,6 +25,11 @@
 | GET | `/api/hades/notifications` | hades | List notifications for the authenticated user |
 | PATCH | `/api/hades/minions/:id` | hades | Update a minion's configuration |
 | DELETE | `/api/hades/minions/:id` | hades | Delete a minion |
+| POST | `/api/hades/workflows` | hades | Create a workflow definition |
+| GET | `/api/hades/workflows` | hades | List workflow definitions for the user |
+| GET | `/api/hades/workflows/:id` | hades | Get a workflow definition by ID |
+| POST | `/api/hades/workflows/:id/execute` | hades | Execute a workflow, creating a run and orchestrating tool calls |
+| GET | `/api/hades/workflows/:id/runs` | hades | List runs for a workflow definition |
 | GET | `/api/_reference/health` | _reference | Example module health check |
 | GET | `/api/model-condenser/health` | model-condenser | Module health and config summary |
 | POST | `/api/model-condenser/condense` | model-condenser | Regenerate consolidated-models.json |

@@ -20,17 +20,20 @@ export function createApprovalRepository({ storage = "memory", supabaseClient, t
     }
   }
 
-  async function create({ userId, tenantId, actionType, description, payload }) {
+  async function create({ userId, tenantId, actionType, description, payload, toolName, input, workflowId, workflow_run_id, tool_call_id, status, ...rest }) {
     await hydrate();
     const id = randomUUID();
+    const normalizedActionType = actionType || toolName || null;
     const record = {
       id,
       user_id: userId,
       tenant_id: tenantId,
-      action_type: actionType || null,
-      description: description || null,
-      payload: payload || {},
-      status: "pending",
+      action_type: normalizedActionType,
+      description: description || (toolName ? `Approval for tool: ${toolName}` : null),
+      payload: payload || { workflowId, toolName, input, ...rest },
+      workflow_run_id: workflow_run_id || rest.workflow_run_id || null,
+      tool_call_id: tool_call_id || rest.toolCallId || rest.tool_call_id || null,
+      status: status || "pending",
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
@@ -46,6 +49,13 @@ export function createApprovalRepository({ storage = "memory", supabaseClient, t
     ).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   }
 
+  async function findApprovedForRun(runId) {
+    await hydrate();
+    return [...approvals.values()]
+      .filter((r) => r.workflow_run_id === runId && r.status === "approved")
+      .map((r) => ({ toolCallId: r.tool_call_id, status: r.status }));
+  }
+
   async function decide({ id, userId, tenantId, status }) {
     await hydrate();
     const record = approvals.get(id) || null;
@@ -58,5 +68,5 @@ export function createApprovalRepository({ storage = "memory", supabaseClient, t
     return record;
   }
 
-  return { create, listPending, decide };
+  return { create, listPending, findApprovedForRun, decide };
 }

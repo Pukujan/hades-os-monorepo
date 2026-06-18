@@ -24,6 +24,11 @@
 | GET | `/notifications` | List notifications for the authenticated user |
 | PATCH | `/minions/:id` | Update a minion's configuration |
 | DELETE | `/minions/:id` | Delete a minion |
+| POST | `/workflows` | Create a workflow definition |
+| GET | `/workflows` | List workflow definitions for the user |
+| GET | `/workflows/:id` | Get a workflow definition by ID |
+| POST | `/workflows/:id/execute` | Execute a workflow, creating a run and orchestrating tool calls |
+| GET | `/workflows/:id/runs` | List runs for a workflow definition |
 
 ## Endpoint details
 
@@ -91,5 +96,80 @@ Send a forge chat message to Hermes. Forge is the only place where minions are c
   },
   "draft": {"name": "string", "category": "string"},
   "missingFields": ["string"]
+}
+```
+
+### POST /workflows
+
+Create a new workflow definition.
+
+**Request body:**
+
+```json
+{
+  "name": "string (required) — workflow name",
+  "goal": "string (required) — workflow goal",
+  "prompt": "string (optional) — instruction prompt",
+  "guardrails": ["string (optional)"],
+  "allowedTools": ["string (optional)"],
+  "approvalPolicy": {"requireApprovalFor": ["string"]},
+  "requiredContext": ["string (optional)"]
+}
+```
+
+### GET /workflows/:id
+
+Get a workflow definition by ID.
+
+### POST /workflows/:id/execute
+
+Execute a workflow, creating a run and orchestrating tool calls through the Hermes planner.
+
+**Request body:**
+
+```json
+{
+  "input": {
+    "message": "string (optional) — execution input"
+  },
+  "idempotencyKey": "string (optional)"
+}
+```
+
+**Response:**
+
+```json
+{
+  "run": {
+    "id": "uuid",
+    "status": "running | completed | approval_required | failed",
+    "result": {
+      "status": "string",
+      "toolResults": [{"toolName": "string", "result": {}}],
+      "approvalRequests": [{"id": "uuid", "action_type": "string"}],
+      "auditEntries": [{"id": "uuid", "toolName": "string", "status": "string"}]
+    }
+  }
+}
+```
+
+### GET /workflows/:id/runs
+
+List runs for a workflow definition.
+
+**Response:**
+
+```json
+{
+  "runs": [
+    {
+      "id": "uuid",
+      "workflow_definition_id": "uuid",
+      "status": "running | completed | approval_required | failed",
+      "input": {},
+      "output": {},
+      "created_at": "ISO timestamp"
+    }
+  ]
 }
 ```

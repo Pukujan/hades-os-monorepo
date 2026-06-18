@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { randomUUID } from "node:crypto";
 import { createHadesRoutes } from "./routes/hades.routes.js";
 import { createHadesRepository } from "./repositories/hades.repository.js";
 import { createHermesService } from "./services/hermes.service.js";
@@ -30,6 +31,16 @@ import { createDocumentRepository } from "./repositories/documentRepository.js";
 import { createContextSpaceRepository } from "./repositories/contextSpaceRepository.js";
 import { createPageCaptureRepository } from "./repositories/pageCaptureRepository.js";
 import { createApprovalRepository } from "./repositories/approvalRepository.js";
+import { createToolRegistry } from "./workflows/toolRegistry.js";
+import { createWorkflowOrchestrator } from "./workflows/workflowOrchestrator.js";
+import { createDurableWorkflowOrchestrator } from "./workflows/durableWorkflowOrchestrator.js";
+import { createWorkflowRunStateRepository } from "./workflows/workflowRunStateRepository.js";
+import { createWorkflowRecoveryService } from "./workflows/workflowRecoveryService.js";
+import { createWorkflowAuditRepository } from "./workflows/workflowAuditRepository.js";
+import { createMemoryDocumentTools } from "./workflows/memoryDocumentTools.js";
+import { createJobApplicationPlanner } from "./workflows/jobApplicationPlanner.js";
+import { createExternalAdapterRegistry } from "./workflows/externalAdapterRegistry.js";
+import { createBrowserExtensionContract } from "./workflows/browserExtensionContract.js";
 
 function createSupabaseClient() {
   const url = process.env.SUPABASE_URL;
@@ -90,6 +101,46 @@ export async function register(app, context) {
   const extensionPageCaptures = overrides.extensionPageCaptures || createPageCaptureRepository({ storage: storageMode, supabaseClient });
   const extensionApprovals = overrides.extensionApprovals || createApprovalRepository({ storage: storageMode, supabaseClient });
 
+  const toolRegistry = overrides.toolRegistry || createToolRegistry();
+  const workflowRunStateRepo = overrides.workflowRunStateRepo || createWorkflowRunStateRepository({ storage: storageMode, supabaseClient });
+  const workflowAuditRepo = overrides.workflowAuditRepo || createWorkflowAuditRepository();
+  const memoryDocumentTools = overrides.memoryDocumentTools || createMemoryDocumentTools({});
+  const browserExtensionContract = overrides.browserExtensionContract || createBrowserExtensionContract();
+  const externalAdapterRegistry = overrides.externalAdapterRegistry || createExternalAdapterRegistry({});
+  const jobApplicationPlanner = overrides.jobApplicationPlanner || createJobApplicationPlanner();
+
+  toolRegistry.registerMany(memoryDocumentTools);
+  toolRegistry.registerMany(externalAdapterRegistry.listToolDefinitions());
+
+  const hermesPlanner = overrides.hermesPlanner || {
+    async plan({ workflow, input }) {
+      const toolCalls = (workflow.allowedTools || []).map((toolName) => ({
+        id: randomUUID(),
+        toolName,
+        input: { message: input?.message || "", workflowId: workflow.id },
+      }));
+      return { toolCalls };
+    },
+  };
+
+  const workflowOrchestrator = overrides.workflowOrchestrator || createWorkflowOrchestrator({
+    hermesPlanner,
+    toolRegistry,
+    approvalRepository: extensionApprovals,
+    auditRepository: workflowAuditRepo,
+  });
+
+  const durableWorkflowOrchestrator = overrides.durableWorkflowOrchestrator || createDurableWorkflowOrchestrator({
+    runStateRepository: workflowRunStateRepo,
+    planner: hermesPlanner,
+    toolRegistry,
+    approvalRepository: extensionApprovals,
+  });
+
+  const workflowRecoveryService = overrides.workflowRecoveryService || createWorkflowRecoveryService({
+    runStateRepository: workflowRunStateRepo,
+  });
+
   const verifySocialAccount = overrides.verifySocialAccount || createVerifySocialAccount({
     discordConnections,
     telegramConnections,
@@ -117,6 +168,17 @@ export async function register(app, context) {
     extensionPageCaptures,
     extensionApprovals,
     verifySocialAccount,
+    toolRegistry,
+    workflowOrchestrator,
+    durableWorkflowOrchestrator,
+    workflowRunStateRepo,
+    workflowRecoveryService,
+    workflowAuditRepo,
+    memoryDocumentTools,
+    browserExtensionContract,
+    externalAdapterRegistry,
+    jobApplicationPlanner,
+    hermesPlanner,
   };
 
   const minionAssignmentRuntime = createMinionAssignmentRuntime({

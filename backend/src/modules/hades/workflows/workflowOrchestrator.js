@@ -29,6 +29,7 @@ export function createWorkflowOrchestrator({ hermesPlanner, toolRegistry, approv
           workflowId: workflow.id,
           toolName: toolCall.toolName,
           input: toolCall.input,
+          toolCallId: toolCall.id,
           status: "pending",
           userId: authContext.userId,
           tenantId: authContext.tenantId,
@@ -65,7 +66,7 @@ export function createWorkflowOrchestrator({ hermesPlanner, toolRegistry, approv
     }
 
     for (const entry of auditEntries) {
-      await auditRepository.create(entry);
+      await (auditRepository.recordToolCall || auditRepository.create)(entry);
     }
 
     if (approvalRequests.length > 0) {

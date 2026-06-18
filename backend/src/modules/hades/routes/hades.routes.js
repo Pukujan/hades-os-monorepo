@@ -510,5 +510,32 @@ export function createHadesRoutes({ service, requireHadesAuth, config, scopedRep
     })
   );
 
+  router.post(
+    "/workflows/:id/execute",
+    requireAuth,
+    asyncRoute(async (req, res) => {
+      const result = await service.executeWorkflow(req.params.id, req.body, req.authContext);
+      res.status(201).json(result);
+    })
+  );
+
+  router.get(
+    "/workflows/:id/runs",
+    requireAuth,
+    asyncRoute(async (req, res) => {
+      const result = await service.listWorkflowRuns(req.params.id, req.authContext);
+      res.status(200).json(result);
+    })
+  );
+
+  router.get(
+    "/workflows/:id",
+    requireAuth,
+    asyncRoute(async (req, res) => {
+      const result = await service.findWorkflowDefinition(req.params.id, req.authContext);
+      res.status(200).json(result);
+    })
+  );
+
   return router;
 }
