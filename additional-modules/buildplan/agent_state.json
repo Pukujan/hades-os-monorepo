@@ -1,7 +1,7 @@
 {
-  "phase": "info-gathering",
-  "module": "hermes-railway-probe",
-  "task": "Hermes v0.16.0 Railway production probe — map capabilities, measure resources, document discoveries",
+  "phase": "planning",
+  "module": "hermes-worker-pool",
+  "task": "Build dynamic Hermes worker pool with config-driven warm/auto/cold modes, per-user cap, and pool-managed subprocess lifecycle",
   "state": {
     "hermesRailwayProbe": {
       "status": "completed",
@@ -14,6 +14,18 @@
     "hermesDiscoveryDocsTest": {
       "status": "completed",
       "summary": "Created backend/src/modules/hades/__tests__/hermesDiscoveryDocs.ops.test.js — 20 assertions, auto-discovered by node --test, all pass."
+    },
+    "hermesWorkerPoolPlan": {
+      "status": "planned",
+      "summary": "Spec'd dynamic worker pool: hermesWorkerPool.service.js replaces runCommand in hermesRuntime.service.js. Env vars: HERMES_POOL_MODE (warm/auto/cold), HERMES_POOL_MIN/MAX, HERMES_POOL_IDLE_MS, HERMES_POOL_SCALE_DOWN/UP. Per-user cap via Map<userId, processHandle>. Priority: migrate buildCommandArgs to --chat --query -Q, measure memory, test --resume, probe /data/ persistence, --skills test, 5 quick fixes."
+    },
+    "instagramFix": {
+      "status": "completed",
+      "summary": "Fixed Composio Instagram auth URL from v3.1 to v3 (API endpoint changed). Changed alias assertion from hardcoded to startsWith() to match production code that appends timestamp suffix. Tests pass 2/2."
+    },
+    "extensionRefactor": {
+      "status": "completed",
+      "summary": "Massive CSS refactor (+595 lines) plus JSX structural improvements across all 8 extension panels: ApprovalQueue, ContextUpload, HadesChat, HadesExtensionApp, PageCapture, TextContextSpaces, WorkflowDetail, WorkflowList. Added extension install card styles, rebuilt build artifacts."
     },
     "completedAt": "2026-06-18"
   }

@@ -2,6 +2,8 @@
 
 | Date | Slug | Summary | Reference |
 |------|------|---------|-----------|
+| 2026-06-18 | instagram-extension-pool-plan | Instagram auth fix (v3.1→v3 URL), extension CSS/JSX refactor, hermes worker pool plan doc | [→](./2026-06-18-instagram-extension-pool-plan.md) |
+| 2026-06-18 | hermes-worker-pool-plan | Dynamic Hermes worker pool: warm/auto/cold modes, per-user cap, pool-managed subprocess lifecycle | [→](./2026-06-18-hermes-worker-pool-plan.md) |
 | 2026-06-18 | slack-oauth-extension-css-rls | Slack OAuth sign-in + backend social channel + extension card CSS + RLS migration | [→](./2026-06-18-slack-oauth-extension-css-rls.md) |
 | 2026-06-18 | workflow-orchestrator-wiring | Telegram GIF pipeline + minion→workflow CRUD routes + safe migrations | [→](./2026-06-18-workflow-orchestrator-wiring.md) |
 | 2026-06-14 | runtime-compaction-smoke-test | Smoke test utilities: payload gen, markers, log watcher, runtime docs | [→](./2026-06-14-runtime-compaction-smoke-test.md) |

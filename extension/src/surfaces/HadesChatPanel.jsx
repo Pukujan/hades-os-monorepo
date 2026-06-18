@@ -1,44 +1,67 @@
-import React, { useState } from "react";
-import { sendChatMessage } from "../api/hadesExtensionClient.js";
+import { useState, useRef } from 'react';
+import { sendChatMessage } from '../api/hadesExtensionClient.js';
 
-export function HadesChatPanel() {
-  const [message, setMessage] = useState("");
-  const [reply, setReply] = useState("");
+export default function HadesChatPanel({ onToast }) {
+  const [messages, setMessages] = useState([
+    { role: 'hades', text: 'Connected. Ask me anything about your workflows.' }
+  ]);
+  const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const inputRef = useRef(null);
 
-  async function handleSend() {
-    if (!message.trim()) return;
+  const handleSend = async () => {
+    const text = input.trim();
+    if (!text || loading) return;
+    setInput('');
+    setMessages((prev) => [...prev, { role: 'user', text }]);
     setLoading(true);
-    setError("");
-    setReply("");
     try {
-      const result = await sendChatMessage(message);
-      setReply(result.reply || "(no response)");
-      setMessage("");
+      const data = await sendChatMessage(text);
+      setMessages((prev) => [...prev, { role: 'hades', text: data.response || data.message || data.text || JSON.stringify(data) }]);
     } catch (err) {
-      setError(err.message);
+      setMessages((prev) => [...prev, { role: 'hades', text: `Error: ${err.message}` }]);
+      onToast?.(err.message, 'error');
     } finally {
       setLoading(false);
+      inputRef.current?.focus();
     }
-  }
+  };
 
-  return React.createElement("div", { className: "chat-panel", style: { padding: "8px" } },
-    React.createElement("textarea", {
-      placeholder: "Type a message...",
-      rows: 4,
-      value: message,
-      onChange: function (e) { setMessage(e.target.value); },
-      style: { width: "100%", background: "#16213e", color: "#e2e8f0", border: "1px solid #334155", borderRadius: "8px", padding: "8px", boxSizing: "border-box" },
-    }),
-    React.createElement("button", {
-      className: "primary",
-      onClick: handleSend,
-      disabled: loading || !message.trim(),
-      style: { marginTop: "8px", width: "100%" },
-    }, loading ? "Sending..." : "Send"),
-    error ? React.createElement("p", { style: { color: "#ef4444", marginTop: "8px", fontSize: "12px" } }, error) : null,
-    reply ? React.createElement("div", { style: { marginTop: "8px", padding: "8px", background: "#1e293b", borderRadius: "8px", color: "#e2e8f0", fontSize: "13px", whiteSpace: "pre-wrap" } }, reply) : null);
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  return (
+    <>
+      <div className="screen active">
+        <div className="card chat-window">
+          {messages.length === 0 && !loading && (
+            <div className="empty-state">No messages yet. Start a conversation.</div>
+          )}
+          {messages.map((msg, i) => (
+            <div key={i} className={`bubble ${msg.role}`}>{msg.text}</div>
+          ))}
+          {loading && <div className="bubble hades typing">Typing...</div>}
+        </div>
+        <div className="composer">
+          <input
+            ref={inputRef}
+            type="text"
+            className="input"
+            placeholder="Ask Hades anything..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            disabled={loading}
+          />
+          <button className="btn btn-primary btn-icon" onClick={handleSend} disabled={loading}>
+            →
+          </button>
+        </div>
+      </div>
+    </>
+  );
 }
-
-export default HadesChatPanel;

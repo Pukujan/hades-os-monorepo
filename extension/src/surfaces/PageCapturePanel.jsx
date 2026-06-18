@@ -1,72 +1,69 @@
-import React, { useState } from "react";
-import { capturePage } from "../api/hadesExtensionClient.js";
+import { useState } from 'react';
+import { capturePage } from '../api/hadesExtensionClient.js';
 
-export function PageCapturePanel() {
+export default function PageCapturePanel({ onToast }) {
+  const [url, setUrl] = useState('');
+  const [locked, setLocked] = useState(false);
   const [capturing, setCapturing] = useState(false);
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  const [captured, setCaptured] = useState(null);
 
-  async function handleCapture() {
+  const handleCapture = async () => {
+    if (!url.trim() || capturing) return;
     setCapturing(true);
-    setError("");
-    setResult(null);
-
-    let pageData = { url: "", title: "", selectedText: "", fullText: "" };
-
     try {
-      if (typeof chrome !== "undefined" && chrome.tabs?.query) {
-        const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-        const tab = tabs[0];
-        pageData.url = tab.url || "";
-        pageData.title = tab.title || "";
-
-        const results = await chrome.scripting?.executeScript({
-          target: { tabId: tab.id },
-          func: function () {
-            return {
-              selectedText: window.getSelection()?.toString() || "",
-              fullText: document.body?.innerText?.slice(0, 10000) || "",
-            };
-          },
-        });
-        if (results && results[0]?.result) {
-          pageData.selectedText = results[0].result.selectedText;
-          pageData.fullText = results[0].result.fullText;
-        }
-      } else {
-        pageData.url = window.location?.href || "dev-mode";
-        pageData.title = document?.title || "Dev Mode";
-        pageData.selectedText = window.getSelection?.()?.toString() || "";
-        pageData.fullText = document.body?.innerText?.slice(0, 10000) || "(page context not available)";
-      }
-
-      const apiResult = await capturePage(pageData);
-      setResult(apiResult.pageCapture);
+      const pageData = { url: url.trim(), locked, capturedAt: new Date().toISOString() };
+      const result = await capturePage(pageData);
+      setCaptured(result);
+      onToast?.('Page captured successfully', 'success');
     } catch (err) {
-      setError(err.message);
+      onToast?.(`Error: ${err.message}`, 'error');
     } finally {
       setCapturing(false);
     }
-  }
+  };
 
-  return React.createElement("div", { className: "capture-panel", style: { padding: "8px" } },
-    React.createElement("p", { style: { color: "#94a3b8", fontSize: "12px", marginBottom: "8px" } },
-      "Capture the current page for context. This reads the page title, URL, selected text, and page body text."),
-
-    React.createElement("button", {
-      className: "primary",
-      onClick: handleCapture,
-      disabled: capturing,
-      style: { width: "100%" },
-    }, capturing ? "Capturing..." : "Capture This Page"),
-
-    error ? React.createElement("p", { style: { color: "#ef4444", fontSize: "12px", marginTop: "8px" } }, error) : null,
-
-    result ? React.createElement("div", { style: { marginTop: "8px", padding: "8px", background: "#1e293b", borderRadius: "8px", fontSize: "12px" } },
-      React.createElement("p", { style: { color: "#22c55e", margin: "0 0 4px" } }, "Page captured."),
-      React.createElement("p", { style: { color: "#94a3b8", margin: "0" } }, "URL: " + (result.url || "N/A")),
-      React.createElement("p", { style: { color: "#94a3b8", margin: "0" } }, "Title: " + (result.title || "N/A")),
-      result.selected_text ? React.createElement("p", { style: { color: "#94a3b8", margin: "0" } }, "Selected: " + result.selected_text.slice(0, 100)) : null) : null);
+  return (
+    <div className="screen active">
+      <div className="card">
+        <div className="capture-preview">
+          <div className="capture-head">
+            {captured ? (
+              <div className="placeholder-img" style={{ background: '#0d1f0d', padding: '20px', borderRadius: '14px' }}>
+                ✓ Captured: {url.substring(0, 40)}...
+              </div>
+            ) : (
+              <div className="placeholder-img">
+                📸 Capture Preview
+              </div>
+            )}
+          </div>
+          <div className="field-row">
+            <div className="field">
+              <label>URL</label>
+              <input
+                type="text"
+                className="input"
+                placeholder="https://example.com"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                disabled={capturing}
+              />
+            </div>
+            <button
+              className="btn btn-icon"
+              onClick={() => setLocked(!locked)}
+              title={locked ? 'Unlock URL' : 'Lock URL'}
+            >
+              {locked ? '🔒' : '🔓'}
+            </button>
+          </div>
+        </div>
+        <div className="action-row">
+          <button className="btn btn-primary" onClick={handleCapture} disabled={capturing}>
+            {capturing ? 'Capturing...' : 'Capture Page'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
-
-export default PageCapturePanel;

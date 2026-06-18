@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "Hades Extension",
+  "version": "0.1.0",
+  "description": "Browser extension for Hades workflow orchestration",
+  "permissions": ["storage", "activeTab"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Hades"
+  },
+  "host_permissions": ["https://*/*"]
+}

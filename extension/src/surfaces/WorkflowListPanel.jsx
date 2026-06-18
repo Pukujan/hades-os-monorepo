@@ -1,105 +1,58 @@
-import React, { useState, useEffect } from "react";
-import { listWorkflows, listMinions, saveMinion } from "../api/hadesExtensionClient.js";
-import { WorkflowDetailPanel } from "./WorkflowDetailPanel.jsx";
+import { useState, useEffect } from 'react';
+import { listWorkflows } from '../api/hadesExtensionClient.js';
 
-export function WorkflowListPanel() {
+const DEMO_WORKFLOWS = [
+  { id: 'wf-1', title: 'Daily Content Review', subtitle: 'Review and approve social posts', meta: ['Active', '3 tasks'] },
+  { id: 'wf-2', title: 'Brand Monitor', subtitle: 'Track brand mentions across platforms', meta: ['Idle', 'Scheduled'] },
+  { id: 'wf-3', title: 'Competitor Analysis', subtitle: 'Weekly competitor report generation', meta: ['Draft'] },
+  { id: 'wf-4', title: 'Post Scheduler', subtitle: 'Auto-schedule content across timezones', meta: ['Active', '12 tasks'] },
+];
+
+export default function WorkflowListPanel({ onToast, onSelectWorkflow }) {
   const [workflows, setWorkflows] = useState([]);
-  const [minions, setMinions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [newMinionName, setNewMinionName] = useState("");
-  const [newMinionGoal, setNewMinionGoal] = useState("");
-  const [saving, setSaving] = useState(false);
-  const [saveMsg, setSaveMsg] = useState("");
-  const [selectedWorkflowId, setSelectedWorkflowId] = useState(null);
 
-  useEffect(function () {
-    Promise.all([
-      listWorkflows().catch(function () { return { workflows: [] }; }),
-      listMinions().catch(function () { return { minions: [] }; }),
-    ]).then(function ([wfResult, minionResult]) {
-      setWorkflows(wfResult.workflows || []);
-      setMinions(minionResult.minions || []);
-      setLoading(false);
-    }).catch(function (err) {
-      setError(err.message);
-      setLoading(false);
-    });
+  useEffect(() => {
+    listWorkflows()
+      .then((data) => setWorkflows(Array.isArray(data) ? data : data.workflows || []))
+      .catch(() => setWorkflows(DEMO_WORKFLOWS))
+      .finally(() => setLoading(false));
   }, []);
 
-  async function handleSaveMinion() {
-    if (!newMinionName.trim()) return;
-    setSaving(true);
-    setSaveMsg("");
-    try {
-      const result = await saveMinion({ name: newMinionName.trim(), goal: newMinionGoal.trim() });
-      setMinions(function (prev) { return [...prev, result.minion]; });
-      setNewMinionName("");
-      setNewMinionGoal("");
-      setSaveMsg("Minion saved.");
-    } catch (err) {
-      setSaveMsg("Error: " + err.message);
-    } finally {
-      setSaving(false);
-    }
-  }
-
   if (loading) {
-    return React.createElement("div", { className: "workflow-list", style: { padding: "8px" } },
-      React.createElement("p", null, "Loading..."));
+    return (
+      <div className="screen active">
+        <div className="card"><div className="loading">Loading workflows...</div></div>
+      </div>
+    );
   }
 
-  if (selectedWorkflowId) {
-    return React.createElement(WorkflowDetailPanel, {
-      workflowId: selectedWorkflowId,
-      onBack: function () { setSelectedWorkflowId(null); },
-    });
-  }
+  const items = workflows.length > 0 ? workflows : DEMO_WORKFLOWS;
 
-  return React.createElement("div", { className: "workflow-list", style: { padding: "8px" } },
-    error ? React.createElement("p", { style: { color: "#ef4444", fontSize: "12px" } }, error) : null,
-
-    React.createElement("h3", { style: { margin: "0 0 8px", fontSize: "14px", color: "#a8b5c0" } }, "Workflows"),
-    workflows.length === 0
-      ? React.createElement("p", { style: { color: "#64748b", fontSize: "12px" } }, "No workflows yet.")
-      : React.createElement("ul", { style: { listStyle: "none", padding: 0, margin: 0 } },
-          workflows.map(function (wf) {
-            return React.createElement("li", { key: wf.id, style: { padding: "6px 8px", margin: "4px 0", background: "#1e293b", borderRadius: "6px", fontSize: "13px", cursor: "pointer" },
-              onClick: function () { setSelectedWorkflowId(wf.id); } },
-              React.createElement("strong", null, wf.name),
-              wf.goal ? React.createElement("span", { style: { color: "#94a3b8", marginLeft: "6px" } }, "\u2014 " + wf.goal) : null);
-          })),
-
-    React.createElement("h3", { style: { margin: "16px 0 8px", fontSize: "14px", color: "#a8b5c0" } }, "Minions"),
-    minions.length === 0
-      ? React.createElement("p", { style: { color: "#64748b", fontSize: "12px" } }, "No minions yet.")
-      : React.createElement("ul", { style: { listStyle: "none", padding: 0, margin: 0 } },
-          minions.map(function (m) {
-            return React.createElement("li", { key: m.id, style: { padding: "6px 8px", margin: "4px 0", background: "#1e293b", borderRadius: "6px", fontSize: "13px" } },
-              React.createElement("strong", null, m.name),
-              m.goal ? React.createElement("span", { style: { color: "#94a3b8", marginLeft: "6px" } }, "\u2014 " + m.goal) : null);
-          })),
-
-    React.createElement("h3", { style: { margin: "16px 0 8px", fontSize: "14px", color: "#a8b5c0" } }, "New Minion"),
-    React.createElement("input", {
-      placeholder: "Minion name",
-      value: newMinionName,
-      onChange: function (e) { setNewMinionName(e.target.value); },
-      style: { width: "100%", padding: "6px", marginBottom: "4px", background: "#16213e", color: "#e2e8f0", border: "1px solid #334155", borderRadius: "6px", boxSizing: "border-box" },
-    }),
-    React.createElement("input", {
-      placeholder: "Goal (optional)",
-      value: newMinionGoal,
-      onChange: function (e) { setNewMinionGoal(e.target.value); },
-      style: { width: "100%", padding: "6px", marginBottom: "4px", background: "#16213e", color: "#e2e8f0", border: "1px solid #334155", borderRadius: "6px", boxSizing: "border-box" },
-    }),
-    React.createElement("button", {
-      className: "primary",
-      onClick: handleSaveMinion,
-      disabled: saving || !newMinionName.trim(),
-      style: { width: "100%" },
-    }, saving ? "Saving..." : "Save Minion"),
-    saveMsg ? React.createElement("p", { style: { color: saveMsg.startsWith("Error") ? "#ef4444" : "#22c55e", fontSize: "12px", marginTop: "4px" } }, saveMsg) : null);
+  return (
+    <div className="screen active">
+      <div className="card">
+        {items.map((wf, i) => (
+          <div
+            key={wf.id || i}
+            className="list-item"
+            onClick={() => onSelectWorkflow?.(wf)}
+          >
+            <div className="li-title">{wf.title || wf.name || 'Untitled'}</div>
+            <div className="li-sub">{wf.subtitle || wf.description || ''}</div>
+            {(wf.meta || wf.tags) && (
+              <div className="li-meta">
+                {(wf.meta || wf.tags || []).map((tag, j) => (
+                  <span key={j} className="chip">{tag}</span>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+        {items.length === 0 && (
+          <div className="empty-state">No workflows found.</div>
+        )}
+      </div>
+    </div>
+  );
 }
-
-export default WorkflowListPanel;

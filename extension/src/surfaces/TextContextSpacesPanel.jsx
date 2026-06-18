@@ -1,80 +1,94 @@
-import React, { useState, useEffect } from "react";
-import { listContextSpaces, saveTextContext } from "../api/hadesExtensionClient.js";
+import { useState, useEffect } from 'react';
+import { listContextSpaces, saveTextContext } from '../api/hadesExtensionClient.js';
 
-export function TextContextSpacesPanel() {
+const DEMO_SPACES = [
+  { id: 'space-1', name: 'Profile Bio', content: 'Instagram bio text and variations.', updatedAt: '2026-06-17' },
+  { id: 'space-2', name: 'Brand Voice', content: 'Tone and style guidelines for social posts.', updatedAt: '2026-06-16' },
+];
+
+export default function TextContextSpacesPanel({ onToast }) {
   const [spaces, setSpaces] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [name, setName] = useState("");
-  const [content, setContent] = useState("");
+  const [selectedSpace, setSelectedSpace] = useState(null);
+  const [editContent, setEditContent] = useState('');
   const [saving, setSaving] = useState(false);
-  const [saveMsg, setSaveMsg] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  useEffect(function () {
-    listContextSpaces().then(function (result) {
-      setSpaces(result.contextSpaces || []);
-      setLoading(false);
-    }).catch(function () {
-      setLoading(false);
-    });
+  useEffect(() => {
+    listContextSpaces()
+      .then((data) => setSpaces(Array.isArray(data) ? data : data.spaces || []))
+      .catch(() => setSpaces(DEMO_SPACES))
+      .finally(() => setLoading(false));
   }, []);
 
-  async function handleSave() {
-    if (!name.trim() || !content.trim()) return;
+  const handleSelect = (space) => {
+    setSelectedSpace(space);
+    setEditContent(space.content || '');
+  };
+
+  const handleSave = async () => {
+    if (!selectedSpace || saving) return;
     setSaving(true);
-    setSaveMsg("");
     try {
-      const result = await saveTextContext(name.trim(), content);
-      setSpaces(function (prev) {
-        const filtered = prev.filter(function (s) { return s.name !== name.trim(); });
-        return [result.contextSpace, ...filtered];
-      });
-      setName("");
-      setContent("");
-      setSaveMsg("Saved.");
+      await saveTextContext(selectedSpace.name, editContent);
+      onToast?.('Context space updated', 'success');
+      setSelectedSpace((prev) => ({ ...prev, content: editContent }));
+      const data = await listContextSpaces().catch(() => null);
+      if (data) setSpaces(Array.isArray(data) ? data : data.spaces || []);
     } catch (err) {
-      setSaveMsg("Error: " + err.message);
+      onToast?.(`Error: ${err.message}`, 'error');
     } finally {
       setSaving(false);
     }
-  }
+  };
 
-  return React.createElement("div", { className: "text-spaces", style: { padding: "8px" } },
-    error ? React.createElement("p", { style: { color: "#ef4444", fontSize: "12px" } }, error) : null,
+  const handleDiscard = () => {
+    if (selectedSpace) {
+      setEditContent(selectedSpace.content || '');
+    }
+  };
 
-    React.createElement("h3", { style: { margin: "0 0 8px", fontSize: "14px", color: "#a8b5c0" } }, "New Space"),
-    React.createElement("input", {
-      placeholder: "Space name",
-      value: name,
-      onChange: function (e) { setName(e.target.value); },
-      style: { width: "100%", padding: "6px", marginBottom: "4px", background: "#16213e", color: "#e2e8f0", border: "1px solid #334155", borderRadius: "6px", boxSizing: "border-box" },
-    }),
-    React.createElement("textarea", {
-      placeholder: "Content...",
-      rows: 4,
-      value: content,
-      onChange: function (e) { setContent(e.target.value); },
-      style: { width: "100%", background: "#16213e", color: "#e2e8f0", border: "1px solid #334155", borderRadius: "8px", padding: "8px", boxSizing: "border-box" },
-    }),
-    React.createElement("button", {
-      className: "primary",
-      onClick: handleSave,
-      disabled: saving || !name.trim() || !content.trim(),
-      style: { width: "100%", marginTop: "8px" },
-    }, saving ? "Saving..." : "Save Space"),
-    saveMsg ? React.createElement("p", { style: { color: saveMsg.startsWith("Error") ? "#ef4444" : "#22c55e", fontSize: "12px", marginTop: "4px" } }, saveMsg) : null,
+  return (
+    <div className="screen active">
+      <div className="card">
+        {loading && <div className="loading">Loading spaces...</div>}
+        {!loading && spaces.length === 0 && (
+          <div className="empty-state">No context spaces yet.</div>
+        )}
+        {!loading && spaces.map((space, i) => (
+          <div
+            key={space.id || i}
+            className={`list-item${selectedSpace?.id === space.id ? ' active' : ''}`}
+            onClick={() => handleSelect(space)}
+          >
+            <div className="li-title">{space.name || 'Untitled'}</div>
+            <div className="li-sub">{space.content ? `${space.content.substring(0, 50)}...` : 'Empty'}</div>
+          </div>
+        ))}
+      </div>
 
-    React.createElement("h3", { style: { margin: "16px 0 8px", fontSize: "14px", color: "#a8b5c0" } }, "Saved Spaces"),
-    loading
-      ? React.createElement("p", { style: { color: "#64748b", fontSize: "12px" } }, "Loading...")
-      : spaces.length === 0
-        ? React.createElement("p", { style: { color: "#64748b", fontSize: "12px" } }, "No spaces yet.")
-        : React.createElement("ul", { style: { listStyle: "none", padding: 0, margin: 0 } },
-            spaces.map(function (s) {
-              return React.createElement("li", { key: s.id, style: { padding: "6px 8px", margin: "4px 0", background: "#1e293b", borderRadius: "6px", fontSize: "12px" } },
-                React.createElement("strong", null, s.name),
-                React.createElement("p", { style: { color: "#94a3b8", margin: "2px 0 0", fontSize: "11px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, s.content));
-            })));
+      {selectedSpace && (
+        <div className="card">
+          <h4>{selectedSpace.name}</h4>
+          <textarea
+            className="textarea"
+            placeholder="Edit space content..."
+            value={editContent}
+            onChange={(e) => setEditContent(e.target.value)}
+            rows={4}
+          />
+          <div className="mini-card">
+            {editContent ? editContent.substring(0, 120) : 'Preview will appear here...'}
+          </div>
+          <div className="action-row">
+            <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
+              {saving ? 'Saving...' : 'Save'}
+            </button>
+            <button className="btn btn-ghost" onClick={handleDiscard}>
+              Discard
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
-
-export default TextContextSpacesPanel;

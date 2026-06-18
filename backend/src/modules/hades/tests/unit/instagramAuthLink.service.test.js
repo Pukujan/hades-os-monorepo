@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import { describe, test } from "node:test";
 import { createHadesService } from "../../services/hades.service.js";
 
@@ -57,18 +57,16 @@ describe("Instagram auth link generation", () => {
           );
 
           assert.equal(calls.length, 1);
-          assert.equal(calls[0].url, "https://backend.composio.dev/api/v3.1/connected_accounts/link");
+          assert.equal(calls[0].url, "https://backend.composio.dev/api/v3/connected_accounts/link");
           assert.equal(calls[0].options.method, "POST");
           assert.equal(calls[0].options.headers["x-api-key"], "composio_api_key_123");
           assert.equal(calls[0].options.headers["Content-Type"], "application/json");
 
           const requestBody = JSON.parse(calls[0].options.body);
-          assert.deepEqual(requestBody, {
-            auth_config_id: "auth_config_instagram_123",
-            user_id: "user_123",
-            alias: "hades-tenant_123-instagram",
-            callback_url: "https://hades.example/app/socials?provider=instagram",
-          });
+          assert.equal(requestBody.auth_config_id, "auth_config_instagram_123");
+          assert.equal(requestBody.user_id, "user_123");
+          assert.ok(requestBody.alias.startsWith("hades-tenant_123-instagram-"), "Alias should include timestamp suffix from production code");
+          assert.equal(requestBody.callback_url, "https://hades.example/app/socials?provider=instagram");
 
           assert.equal(result.provider, "instagram");
           assert.equal(result.connector, "composio");
