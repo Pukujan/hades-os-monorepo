@@ -12,6 +12,11 @@ create table if not exists hades_minions (
   command_name text,
   category text,
   status text not null default 'active',
+  icon text,
+  instructions text,
+  trigger_type text,
+  target_social text,
+  schema_version text,
   config jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
