@@ -2,6 +2,8 @@
 
 | Date | Slug | Summary | Reference |
 |------|------|---------|-----------|
+| 2026-06-18 | slack-oauth-extension-css-rls | Slack OAuth sign-in + backend social channel + extension card CSS + RLS migration | [→](./2026-06-18-slack-oauth-extension-css-rls.md) |
+| 2026-06-18 | workflow-orchestrator-wiring | Telegram GIF pipeline + minion→workflow CRUD routes + safe migrations | [→](./2026-06-18-workflow-orchestrator-wiring.md) |
 | 2026-06-14 | runtime-compaction-smoke-test | Smoke test utilities: payload gen, markers, log watcher, runtime docs | [→](./2026-06-14-runtime-compaction-smoke-test.md) |
 | 2026-06-14 | stabilize-agents-md-cache | Restructure AGENTS.md cache-stable: numbered sections, Cache Policy near top, Operator Notes below core | [→](./2026-06-14-stabilize-agents-md-cache.md) |
 | 2026-06-14 | context-budget-tooling-fixes | Fix 28k→40k thresholds, opencode model config, archive slug dedup | [→](./2026-06-14-context-budget-tooling-fixes.md) |

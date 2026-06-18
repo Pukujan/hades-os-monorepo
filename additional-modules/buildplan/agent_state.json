@@ -1,31 +1,35 @@
 {
   "phase": "task-complete",
-  "module": "telegram-gif-and-workflow-crud",
-  "task": "Telegram GIF pipeline, minion→workflow CRUD migration, safe migration files, Hermes 500 investigation",
+  "module": "slack-oauth-extension-css-rls",
+  "task": "Slack OAuth social channel, extension install card CSS, RLS migration for slack_connections",
   "state": {
-    "telegramGifPipeline": {
+    "slackOAuthUI": {
       "status": "completed",
-      "summary": "Added sendAnimation to telegramClient.js, send_gif action handler in telegramBotRuntime, createGiphyProvider, gifRoutes with GIF_URL_BASE config toggle. Wired gifProvider into index.js/service.js. Tests: 3 subtests all green."
+      "summary": "Added signInWithSlack() to authClient.js, Slack button with SVG to login page, selector/handler/event listener in LoginPage.jsx, Slack CSS style in login.css."
     },
-    "workflowCrudMigration": {
+    "slackSocialChannel": {
       "status": "completed",
-      "summary": "PATCH /workflows/:id, DELETE /workflows/:id routes for workflow definitions. updateWorkflow/deleteWorkflow/findActiveRuns in workflowService. updateStatus/listByRun in approvalRepository. bootstrap includes workflows when repo is available. Extension BASE_URL fix. WorkflowDetailPanel JSX. Tests: 6 subtests all green."
+      "summary": "Added 'slack' to VALID_TARGET_SOCIALS, SOCIAL_LINKS, formatSocialLabel. Added slack provider branch in verifySocialAccount. Added saveSlackToken and slack in listSocialConnections in hades.service. Added POST /socials/slack/token route. Created slackConnectionRepository with findPublicByUser/findBySlackUserId. Wired slackConnections in index.js."
     },
-    "safeMigrationFiles": {
+    "extensionInstallCSS": {
       "status": "completed",
-      "summary": "Created 006/007/008/009 _safe.sql variants with IF NOT EXISTS / DROP POLICY IF EXISTS guards for idempotent replay."
+      "summary": "Added missing CSS for extension-install-card: card-header, card-body, card-actions, secret-display, key-list, key-row, key-preview, key-actions .small/.small.danger, revoked-label. 17 lines added to hadesPrototype.css."
+    },
+    "migration010": {
+      "status": "completed",
+      "summary": "010_hades_slack_connections.sql: table with user_id, tenant_id, encrypted_token, token_last4, slack_user_id, slack_team_id, status."
+    },
+    "migration011": {
+      "status": "completed",
+      "summary": "011_hades_slack_rls.sql: ENABLE ROW LEVEL SECURITY + SELECT/INSERT/UPDATE/DELETE policies keyed on user_id."
     },
     "hermes500Investigation": {
       "status": "blocked",
-      "summary": "getScheduledReminders is nonexistent method (likely undefined import). Needs Railway CLI for live log confirmation."
-    },
-    "fails": {
-      "status": "completed",
-      "summary": "Fixed gifProvider→giphyProvider var mismatch in index.js. Relaxed timestamp assertion in PATCH workflow test."
+      "summary": "Needs Railway CLI for live log confirmation."
     },
     "testResults": {
       "status": "completed",
-      "summary": "573/576 tests pass (+9 new passing tests). 3 pre-existing failures unchanged. Zero regressions."
+      "summary": "Backend 573/576 pass (3 pre-existing). Frontend 377/377 pass. Zero regressions."
     },
     "completedAt": "2026-06-18"
   }
