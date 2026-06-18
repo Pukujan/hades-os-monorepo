@@ -43,6 +43,10 @@
       "status": "completed",
       "summary": "Added 4 error-case tests to Instagram social routes: DELETE 404, POST connect 500, webhook 400/429. Total 8 tests pass. Retired the 'Instagram DM endpoint untested in CI' risk."
     },
+    "supabaseHermesMigrationsApplied": {
+      "status": "completed",
+      "summary": "Applied 012_hades_hermes_state_index.sql and 013_hades_hermes_task_routes.sql to Supabase production. Tables hades_hermes_state_objects and hades_hermes_task_routes now exist (0 rows). Bridge gap code already deployed to Railway (commit 89cfbe8, build SUCCESS). Railway logs not accessible (no viewer role)."
+    },
     "completedAt": "2026-06-18"
   }
 }

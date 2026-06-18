@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
 import path from "node:path";
 import { createHadesRoutes } from "./routes/hades.routes.js";
+import { createHermesRoutes } from "./routes/hermes.routes.js";
 import { createHadesRepository } from "./repositories/hades.repository.js";
 import { createHermesService } from "./services/hermes.service.js";
 import { createHermesRuntimeService } from "./services/hermesRuntime.service.js";
@@ -261,6 +262,14 @@ export async function register(app, context) {
   });
 
   app.use("/api/hades", router);
+
+  const hermesRouter = createHermesRoutes({
+    config,
+    processManager: hermesProcessManager,
+    stateRepository: hermesStateRepository,
+  });
+
+  app.use("/api/hades/hermes", hermesRouter);
 
   return {
     detail: "→ /api/hades",

@@ -62,3 +62,7 @@
 | GET | `/api/model-condenser/health` | model-condenser | Module health and config summary |
 | POST | `/api/model-condenser/condense` | model-condenser | Regenerate consolidated-models.json |
 | GET | `/api/model-condenser/consolidated` | model-condenser | Read consolidated schema inventory |
+| GET | `/api/hades/hermes/status` | hades | Hermes autonomous runtime status |
+| POST | `/api/hades/hermes/tasks` | hades | Execute an autonomous Hermes task |
+| GET | `/api/hades/hermes/state` | hades | List Hermes workspace state objects |
+| GET | `/api/hades/hermes/skills` | hades | List Hermes skills |

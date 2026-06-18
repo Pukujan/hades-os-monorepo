@@ -57,6 +57,10 @@
 | GET | `/extension/approvals` | List pending approvals for the extension client |
 | POST | `/extension/approvals` | Create an approval request from the extension |
 | POST | `/extension/approvals/:id/decision` | Approve or reject an approval request |
+| GET | `/hermes/status` | Hermes autonomous runtime status |
+| POST | `/hermes/tasks` | Create an autonomous Hermes task |
+| GET | `/hermes/state` | List Hermes workspace state objects |
+| GET | `/hermes/skills` | List Hermes skills |
 
 ## Endpoint details
 
@@ -178,6 +182,78 @@ Execute a workflow, creating a run and orchestrating tool calls through the Herm
       "auditEntries": [{"id": "uuid", "toolName": "string", "status": "string"}]
     }
   }
+}
+```
+
+### GET /hermes/status
+
+Hermes autonomous runtime status check. Returns mode, config, and runtime counters.
+
+**Response:**
+
+```json
+{
+  "mode": "string — HERMES_RUNTIME_MODE env var or 'standalone'",
+  "hermesHome": "string — configured hermes home path",
+  "stateStore": "string — storage mode (memory or supabase)",
+  "objectStore": "string — storage mode (memory or supabase)",
+  "lastRunAt": "string | null — ISO timestamp of last task run",
+  "totalRuns": "number — total task runs since process start"
+}
+```
+
+### POST /hermes/tasks
+
+Execute an autonomous Hermes task.
+
+**Request body:**
+
+```json
+{
+  "message": "string (required) — the task prompt"
+}
+```
+
+**Response:**
+
+```json
+{
+  "taskId": "string — the generated task ID",
+  "routingTokenStatus": "issued",
+  "status": "completed",
+  "reply": "string — Hermes reply text",
+  "assistantText": "string — Hermes assistant reply text"
+}
+```
+
+### GET /hermes/state
+
+List workspace state objects for the authenticated user.
+
+**Response:**
+
+```json
+{
+  "objects": [
+    {
+      "objectKey": "string",
+      "contentHash": "string",
+      "createdAt": "ISO timestamp",
+      "updatedAt": "ISO timestamp"
+    }
+  ]
+}
+```
+
+### GET /hermes/skills
+
+List available Hermes skills.
+
+**Response:**
+
+```json
+{
+  "skills": []
 }
 ```
 
