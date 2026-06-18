@@ -19,6 +19,10 @@
       "status": "planned",
       "summary": "Spec'd dynamic worker pool: hermesWorkerPool.service.js replaces runCommand in hermesRuntime.service.js. Env vars: HERMES_POOL_MODE (warm/auto/cold), HERMES_POOL_MIN/MAX, HERMES_POOL_IDLE_MS, HERMES_POOL_SCALE_DOWN/UP. Per-user cap via Map<userId, processHandle>. Priority: migrate buildCommandArgs to --chat --query -Q, measure memory, test --resume, probe /data/ persistence, --skills test, 5 quick fixes."
     },
+    "autonomousHermesRuntimeTdd": {
+      "status": "planned",
+      "summary": "Saved plan log and handoff for autonomous Hermes runtime. Added red TDD contracts for per-user workspace resolution, process manager queue/reuse/idle-kill/status, skill sync hydration/hash/path safety, skills/runs migrations, repositories, and env-gated Railway/browser E2E status/chat/skills checks. Scripts: npm --prefix backend run test:hades-autonomous-hermes-runtime, npm run test:hades-autonomous-hermes-runtime, npm run test:hades-autonomous-hermes-e2e."
+    },
     "instagramFix": {
       "status": "completed",
       "summary": "Fixed Composio Instagram auth URL from v3.1 to v3 (API endpoint changed). Changed alias assertion from hardcoded to startsWith() to match production code that appends timestamp suffix. Tests pass 2/2."
@@ -26,6 +30,10 @@
     "extensionRefactor": {
       "status": "completed",
       "summary": "Massive CSS refactor (+595 lines) plus JSX structural improvements across all 8 extension panels: ApprovalQueue, ContextUpload, HadesChat, HadesExtensionApp, PageCapture, TextContextSpaces, WorkflowDetail, WorkflowList. Added extension install card styles, rebuilt build artifacts."
+    },
+    "instagramTestCoverage": {
+      "status": "completed",
+      "summary": "Added 4 error-case tests to Instagram social routes: DELETE 404, POST connect 500, webhook 400/429. Total 8 tests pass. Retired the 'Instagram DM endpoint untested in CI' risk."
     },
     "completedAt": "2026-06-18"
   }

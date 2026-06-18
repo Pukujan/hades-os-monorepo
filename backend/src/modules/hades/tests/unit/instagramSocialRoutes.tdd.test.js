@@ -160,4 +160,80 @@ describe("Instagram social connector routes", () => {
     assert.equal(calls[0].method, "handleInstagramWebhook");
     assert.equal(calls[0].body.eventType, "instagram.dm.message_received");
   });
+
+  test("DELETE /api/hades/socials/instagram/connection returns 404 when no connection exists", async () => {
+    const { app } = createApp({
+      deleteInstagramConnection: async () => {
+        const err = new Error("No Instagram connection found");
+        err.status = 404;
+        throw err;
+      },
+    });
+
+    const response = await invokeApp(app, {
+      method: "DELETE",
+      path: "/api/hades/socials/instagram/connection",
+    });
+
+    assert.equal(response.status, 404);
+  });
+
+  test("POST /api/hades/socials/instagram/connect returns 500 when service throws", async () => {
+    const { app } = createApp({
+      createInstagramAuthLink: async () => {
+        throw new Error("Auth link generation failed");
+      },
+    });
+
+    const response = await invokeApp(app, {
+      method: "POST",
+      path: "/api/hades/socials/instagram/connect",
+      body: { connector: "composio", requestedScopes: [] },
+    });
+
+    assert.equal(response.status, 500);
+  });
+
+  test("POST /api/hades/triggers/instagram returns 400 with error JSON when service throws", async () => {
+    const { app } = createApp({
+      handleInstagramWebhook: async () => {
+        const err = new Error("Invalid webhook payload");
+        err.status = 400;
+        throw err;
+      },
+    });
+
+    const response = await invokeApp(app, {
+      method: "POST",
+      path: "/api/hades/triggers/instagram",
+      body: { invalid: true },
+    });
+
+    assert.equal(response.status, 400);
+    const body = JSON.parse(response.body);
+    assert.equal(body.error, "Invalid webhook payload");
+    assert.equal(body.code, "error");
+  });
+
+  test("POST /api/hades/triggers/instagram returns custom status from service error", async () => {
+    const { app } = createApp({
+      handleInstagramWebhook: async () => {
+        const err = new Error("Rate limited");
+        err.status = 429;
+        err.code = "rate_limited";
+        throw err;
+      },
+    });
+
+    const response = await invokeApp(app, {
+      method: "POST",
+      path: "/api/hades/triggers/instagram",
+      body: { connector: "composio", eventType: "instagram.dm.message_received" },
+    });
+
+    assert.equal(response.status, 429);
+    const body = JSON.parse(response.body);
+    assert.equal(body.code, "rate_limited");
+    assert.equal(body.error, "Rate limited");
+  });
 });
