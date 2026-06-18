@@ -8,7 +8,7 @@
   "lastCompactedAt": null,
   "compactionStrategy": "summarize completed work, preserve current phase, target files, failing tests, blockers",
   "sessionStart": "2026-06-18T05:19:30.843+00:00",
-  "sessionEnd": "2026-06-18T04:36:39.348+00:00",
+  "sessionEnd": "2026-06-18T17:42:13.543+00:00",
   "history": [
     {
       "endedAt": "2026-06-12T16:33:56.160+00:00",
@@ -345,6 +345,36 @@
       "peakUsage": 8000,
       "reason": "archive_session",
       "slug": "hermes-railway-probe-docs"
+    },
+    {
+      "endedAt": "2026-06-18T17:16:58.944+00:00",
+      "peakUsage": 12000,
+      "reason": "archive_session",
+      "slug": "autonomous-hermes-runtime-tdd"
+    },
+    {
+      "endedAt": "2026-06-18T17:27:18.102+00:00",
+      "peakUsage": 9000,
+      "reason": "archive_session",
+      "slug": "hermes-upstream-docs-agent-context"
+    },
+    {
+      "endedAt": "2026-06-18T17:33:02.979+00:00",
+      "peakUsage": 8500,
+      "reason": "archive_session",
+      "slug": "autonomous-hermes-r2-study-plan"
+    },
+    {
+      "endedAt": "2026-06-18T17:38:03.071+00:00",
+      "peakUsage": 10000,
+      "reason": "archive_session",
+      "slug": "autonomous-hermes-opencode-handoff-red-tests"
+    },
+    {
+      "endedAt": "2026-06-18T17:42:13.543+00:00",
+      "peakUsage": 0,
+      "reason": "archive_session",
+      "slug": "autonomous-hermes-double-check"
     }
   ]
 }

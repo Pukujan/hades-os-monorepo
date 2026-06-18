@@ -24,6 +24,7 @@
     "test:hades-media-verification": "node --test src/modules/hades/tests/unit/mediaUrlVerifier.tdd.test.js src/modules/hades/tests/unit/discordGifMediaVerification.tdd.test.js src/modules/hades/tests/unit/giphyProvider.test.js",
     "test:hades-instagram-social": "node --test src/modules/hades/tests/unit/instagramSocialRoutes.tdd.test.js",
     "test:hades-inline-gif-media": "node --test src/modules/hades/tests/unit/hermes.service.test.js",
+    "test:hades-autonomous-hermes-runtime": "node --test src/modules/hades/tests/unit/hades.autonomous-hermes-runtime.tdd.test.js src/modules/hades/tests/unit/hades.autonomous-hermes-persistence.tdd.test.js src/modules/hades/tests/unit/hades.autonomous-hermes-bridge-gaps.tdd.test.js",
     "test:evals": "node ../scripts/run-module-evals.mjs"
   },
   "dependencies": {

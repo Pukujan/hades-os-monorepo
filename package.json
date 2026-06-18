@@ -50,6 +50,8 @@
     "test:hades-gif-media-reliability": "npm --prefix backend run test:hades-media-verification && npm --prefix frontend run test:hades-chat-media-ui",
     "test:hades-instagram-social": "npm --prefix backend run test:hades-instagram-social && npm --prefix frontend run test:hades-instagram-social-ui",
     "test:hades-inline-gif-media": "npm --prefix backend run test:hades-inline-gif-media && npm --prefix frontend run test:hades-inline-gif-media-ui",
+    "test:hades-autonomous-hermes-runtime": "npm --prefix backend run test:hades-autonomous-hermes-runtime",
+    "test:hades-autonomous-hermes-e2e": "node --test scripts/hades-autonomous-hermes-e2e.tdd.test.mjs",
     "test:auth-discord-connection-contract": "node --test backend/src/modules/auth/tests/unit/auth.discord.connection.contract.test.js",
     "test:hades-discord-bot-runtime-contract": "node --test backend/src/modules/hades/tests/contracts/hades.discord-bot-runtime.contract.mjs",
     "test:discord-login-bot-contracts": "npm run test:auth-discord-connection-contract && npm run test:hades-discord-bot-runtime-contract",

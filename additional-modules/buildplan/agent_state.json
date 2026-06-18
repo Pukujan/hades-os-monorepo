@@ -1,6 +1,6 @@
 {
-  "phase": "planning",
-  "module": "hermes-worker-pool",
+  "phase": "implementation",
+  "module": "autonomous-hermes-runtime",
   "task": "Build dynamic Hermes worker pool with config-driven warm/auto/cold modes, per-user cap, and pool-managed subprocess lifecycle",
   "state": {
     "hermesRailwayProbe": {
@@ -9,19 +9,23 @@
     },
     "docsHermes": {
       "status": "completed",
-      "summary": "Created docs/hermes/README.md, hermes-discovery.json, hermes-discovery.md, MAINTENANCE.md. All files pass validation test."
+      "summary": "Created docs/hermes/README.md, hermes-discovery.json, hermes-discovery.md, MAINTENANCE.md. Added official upstream Hermes docs cache at docs/hermes/upstream/llms.txt and llms-full.txt, machine-readable docs/hermes/upstream/hermes-docs.agent.json, and docs/hermes/AGENT_CONTEXT.md for future Hades/Hermes coding agents. All docs validation tests pass."
     },
     "hermesDiscoveryDocsTest": {
       "status": "completed",
-      "summary": "Created backend/src/modules/hades/__tests__/hermesDiscoveryDocs.ops.test.js — 20 assertions, auto-discovered by node --test, all pass."
+      "summary": "Created backend/src/modules/hades/__tests__/hermesDiscoveryDocs.ops.test.js. Updated to validate upstream Hermes docs cache and agent JSON index; 23 assertions pass."
     },
     "hermesWorkerPoolPlan": {
       "status": "planned",
       "summary": "Spec'd dynamic worker pool: hermesWorkerPool.service.js replaces runCommand in hermesRuntime.service.js. Env vars: HERMES_POOL_MODE (warm/auto/cold), HERMES_POOL_MIN/MAX, HERMES_POOL_IDLE_MS, HERMES_POOL_SCALE_DOWN/UP. Per-user cap via Map<userId, processHandle>. Priority: migrate buildCommandArgs to --chat --query -Q, measure memory, test --resume, probe /data/ persistence, --skills test, 5 quick fixes."
     },
     "autonomousHermesRuntimeTdd": {
-      "status": "planned",
-      "summary": "Saved plan log and handoff for autonomous Hermes runtime. Added red TDD contracts for per-user workspace resolution, process manager queue/reuse/idle-kill/status, skill sync hydration/hash/path safety, skills/runs migrations, repositories, and env-gated Railway/browser E2E status/chat/skills checks. Scripts: npm --prefix backend run test:hades-autonomous-hermes-runtime, npm run test:hades-autonomous-hermes-runtime, npm run test:hades-autonomous-hermes-e2e."
+      "status": "completed",
+      "summary": "Implemented 7 runtime modules (hermesWorkspace, hermesRoutingToken, hermesCapabilityEnvelope, hermesStateStore, hermesBoundaryActionBroker, hermesProcessManager, hermesStateRepository) and 2 migrations (012_hades_hermes_state_index, 013_hades_hermes_task_routes). All files written to backend/src/modules/hades/runtime/, backend/src/modules/hades/repositories/, and backend/src/modules/hades/migrations/."
+    },
+    "autonomousHermesAudit": {
+      "status": "completed",
+      "summary": "Double-checked autonomous Hermes study, plan, handoff, package scripts, and TDD tests. Fixed stale planning/study wording that still referred to old skill-sync follow-up work. Verified no stale handoff language remains; backend TDD suite is intentionally red with 14 missing-implementation failures, and E2E suite safely skips 4 checks unless HADES_AUTONOMOUS_HERMES_E2E=1."
     },
     "instagramFix": {
       "status": "completed",
