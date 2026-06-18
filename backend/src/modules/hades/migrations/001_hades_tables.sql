@@ -17,6 +17,8 @@ create table if not exists hades_minions (
   trigger_type text,
   target_social text,
   schema_version text,
+  version text,
+  metadata jsonb not null default '{}'::jsonb,
   config jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
