@@ -4,6 +4,8 @@ import { createDocumentRepository } from "../../repositories/documentRepository.
 import { createContextSpaceRepository } from "../../repositories/contextSpaceRepository.js";
 import { createPageCaptureRepository } from "../../repositories/pageCaptureRepository.js";
 import { createApprovalRepository } from "../../repositories/approvalRepository.js";
+import { createExtensionKeyRepository } from "../../workflows/extensionKeyRepository.js";
+import { createHadesService } from "../../services/hades.service.js";
 
 function createFakeSupabaseClient() {
   const rows = [];
@@ -376,4 +378,164 @@ test("POST /api/hades/extension/minions creates minion with extension auth", asy
   assert.equal(res.status, 201);
   const body = JSON.parse(res.body);
   assert.equal(body.minion.name, "Test Minion");
+});
+
+// ─── Extension key verifyKey wildcard scope ─────────────────────
+
+test("verifyKey with scopes [\"*\"] matches workflow:read scope", async () => {
+  const repo = createExtensionKeyRepository({ storage: "memory" });
+  const { plaintextKey } = await repo.createKey({
+    userId: "u1", tenantId: "t1",
+    data: { name: "Wildcard Key", scopes: ["*"] },
+  });
+
+  const auth = await repo.verifyKey({ plaintextKey, requiredScope: "workflow:read" });
+  assert.ok(auth, "verifyKey should return auth context for wildcard scope");
+  assert.equal(auth.userId, "u1");
+
+  const auth2 = await repo.verifyKey({ plaintextKey, requiredScope: "document:upload" });
+  assert.ok(auth2, "verifyKey should match wildcard against any scope");
+
+  const { plaintextKey: narrowKey } = await repo.createKey({
+    userId: "u1", tenantId: "t1",
+    data: { name: "Narrow Key", scopes: ["chat:send"] },
+  });
+  const auth3 = await repo.verifyKey({ plaintextKey: narrowKey, requiredScope: "workflow:read" });
+  assert.equal(auth3, null, "verifyKey should reject scope not in key's scopes");
+});
+
+// ─── listExtensionPageCaptures ──────────────────────────────────
+
+test("listExtensionPageCaptures returns pageCaptures from the repository", async () => {
+  const captures = [];
+  const mockScopedRepos = {
+    extensionPageCaptures: {
+      listByUser: async ({ userId, tenantId }) => {
+        return captures.filter(c => c.user_id === userId && c.tenant_id === tenantId);
+      },
+    },
+  };
+
+  const service = createHadesService({
+    repository: {},
+    scopedRepos: mockScopedRepos,
+    hermes: {},
+    config: {},
+    context: {},
+  });
+
+  const empty = await service.listExtensionPageCaptures({ userId: "u1", tenantId: "t1" });
+  assert.ok(Array.isArray(empty.pageCaptures));
+  assert.equal(empty.pageCaptures.length, 0);
+});
+
+test("listExtensionPageCaptures returns empty array when repo is not configured", async () => {
+  const service = createHadesService({
+    repository: {},
+    scopedRepos: {},
+    hermes: {},
+    config: {},
+    context: {},
+  });
+
+  const result = await service.listExtensionPageCaptures({ userId: "u1", tenantId: "t1" });
+  assert.ok(Array.isArray(result.pageCaptures));
+  assert.equal(result.pageCaptures.length, 0);
+});
+
+// ─── GET /extension/page-capture route ─────────────────────────
+
+test("GET /api/hades/extension/page-capture returns page captures with extension auth", async () => {
+  const app = createTestApp({
+    listExtensionPageCaptures: async (auth) => {
+      assert.equal(auth.userId, "ext-u1");
+      return { pageCaptures: [{ id: "pc1", url: "https://example.com", title: "Example" }] };
+    },
+  });
+  const res = await invokeApp(app, {
+    method: "GET",
+    path: "/api/hades/extension/page-capture",
+    headers: { authorization: "Bearer valid-key" },
+  });
+
+  assert.equal(res.status, 200);
+  const body = JSON.parse(res.body);
+  assert.ok(Array.isArray(body.pageCaptures));
+  assert.equal(body.pageCaptures.length, 1);
+  assert.equal(body.pageCaptures[0].url, "https://example.com");
+});
+
+// ─── saveExtensionApproval (POST /extension/approvals) ─────────
+
+test("saveExtensionApproval creates an approval via the repository", async () => {
+  const mockScopedRepos = {
+    extensionApprovals: {
+      create: async ({ userId, tenantId, actionType, description, payload }) => {
+        assert.equal(userId, "u1");
+        assert.equal(tenantId, "t1");
+        assert.equal(actionType, "document:sign");
+        assert.equal(description, "Sign the document");
+        assert.deepEqual(payload, { docId: "123" });
+        return { id: "ap1", action_type: actionType, status: "pending", payload };
+      },
+    },
+  };
+
+  const service = createHadesService({
+    repository: {},
+    scopedRepos: mockScopedRepos,
+    hermes: {},
+    config: {},
+    context: {},
+  });
+
+  const result = await service.saveExtensionApproval(
+    { action: "document:sign", description: "Sign the document", metadata: { docId: "123" } },
+    { userId: "u1", tenantId: "t1" }
+  );
+
+  assert.ok(result.approval);
+  assert.equal(result.approval.action_type, "document:sign");
+  assert.equal(result.approval.status, "pending");
+});
+
+test("saveExtensionApproval throws 501 when repo is not configured", async () => {
+  const service = createHadesService({
+    repository: {},
+    scopedRepos: {},
+    hermes: {},
+    config: {},
+    context: {},
+  });
+
+  try {
+    await service.saveExtensionApproval({ action: "test" }, { userId: "u1", tenantId: "t1" });
+    assert.fail("should have thrown");
+  } catch (err) {
+    assert.equal(err.status, 501);
+    assert.ok(err.message.includes("not configured"));
+  }
+});
+
+// ─── POST /extension/approvals route ───────────────────────────
+
+test("POST /api/hades/extension/approvals creates approval with extension auth", async () => {
+  const app = createTestApp({
+    saveExtensionApproval: async (body, auth) => {
+      assert.equal(auth.userId, "ext-u1");
+      assert.equal(body.action, "document:submit");
+      return { approval: { id: "ap1", action_type: "document:submit", status: "pending" } };
+    },
+  });
+  const res = await invokeApp(app, {
+    method: "POST",
+    path: "/api/hades/extension/approvals",
+    headers: { authorization: "Bearer valid-key" },
+    body: { action: "document:submit", description: "Submit doc", metadata: { docId: "456" } },
+  });
+
+  assert.equal(res.status, 201);
+  const body = JSON.parse(res.body);
+  assert.ok(body.approval);
+  assert.equal(body.approval.action_type, "document:submit");
 });

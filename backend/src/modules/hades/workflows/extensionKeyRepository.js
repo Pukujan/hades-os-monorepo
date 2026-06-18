@@ -89,7 +89,7 @@ export function createExtensionKeyRepository({ storage = "memory", supabaseClien
     const record = keys.get(recordId);
     if (!record) return null;
     if (record.revoked_at) return null;
-    if (requiredScope && !record.scopes.includes(requiredScope)) return null;
+    if (requiredScope && !record.scopes.includes("*") && !record.scopes.includes(requiredScope)) return null;
     return { id: record.id, scopes: record.scopes, userId: record.user_id, tenantId: record.tenant_id };
   }
 

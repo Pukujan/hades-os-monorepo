@@ -34,6 +34,14 @@
           "limit": { "context": 64000, "output": 16384 }
         }
       }
+    },
+    "opencode": {
+      "id": "opencode",
+      "models": {
+        "big-pickle": {
+          "limit": { "context": 64000, "output": 16384 }
+        }
+      }
     }
   }
 }

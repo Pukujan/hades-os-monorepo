@@ -1032,6 +1032,32 @@ async function saveTelegramToken(body, authContext) {
     return { pageCapture: capture };
   }
 
+  async function listExtensionPageCaptures(authContext) {
+    const userId = resolveUserId(authContext);
+    const tenantId = authContext?.tenantId || userId;
+    if (!scopedRepos?.extensionPageCaptures) {
+      return { pageCaptures: [] };
+    }
+    const captures = await scopedRepos.extensionPageCaptures.listByUser({ userId, tenantId });
+    return { pageCaptures: captures };
+  }
+
+  async function saveExtensionApproval(body, authContext) {
+    const userId = resolveUserId(authContext);
+    const tenantId = authContext?.tenantId || userId;
+    if (!scopedRepos?.extensionApprovals) {
+      throw new AppError("Approval repository not configured", 501);
+    }
+    const approval = await scopedRepos.extensionApprovals.create({
+      userId,
+      tenantId,
+      actionType: body.action || null,
+      description: body.description || null,
+      payload: body.metadata || body.payload || {},
+    });
+    return { approval };
+  }
+
   async function listExtensionApprovals(authContext) {
     const userId = resolveUserId(authContext);
     const tenantId = authContext?.tenantId || userId;
@@ -1100,6 +1126,8 @@ async function saveTelegramToken(body, authContext) {
     saveExtensionContextSpace,
     listExtensionContextSpaces,
     saveExtensionPageCapture,
+    listExtensionPageCaptures,
+    saveExtensionApproval,
     listExtensionApprovals,
     decideExtensionApproval,
   };

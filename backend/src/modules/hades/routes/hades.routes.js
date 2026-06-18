@@ -457,11 +457,29 @@ export function createHadesRoutes({ service, requireHadesAuth, config, scopedRep
   );
 
   router.get(
+    "/extension/page-capture",
+    requireExtensionAuth || requireAuth,
+    asyncRoute(async (req, res) => {
+      const result = await service.listExtensionPageCaptures(req.authContext);
+      res.status(200).json(result);
+    })
+  );
+
+  router.get(
     "/extension/approvals",
     requireExtensionAuth || requireAuth,
     asyncRoute(async (req, res) => {
       const result = await service.listExtensionApprovals(req.authContext);
       res.status(200).json(result);
+    })
+  );
+
+  router.post(
+    "/extension/approvals",
+    requireExtensionAuth || requireAuth,
+    asyncRoute(async (req, res) => {
+      const result = await service.saveExtensionApproval(req.body, req.authContext);
+      res.status(201).json(result);
     })
   );
 
