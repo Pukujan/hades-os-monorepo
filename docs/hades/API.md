@@ -29,6 +29,34 @@
 | GET | `/workflows/:id` | Get a workflow definition by ID |
 | POST | `/workflows/:id/execute` | Execute a workflow, creating a run and orchestrating tool calls |
 | GET | `/workflows/:id/runs` | List runs for a workflow definition |
+| PATCH | `/workflows/:id` | Update a workflow definition |
+| DELETE | `/workflows/:id` | Delete a workflow definition |
+| POST | `/socials/discord/token` | Save a Discord bot token (validates via Discord API) |
+| POST | `/socials/github/token` | Save a GitHub personal access token (validates via GitHub API) |
+| POST | `/socials/slack/token` | Save a Slack bot token (validates via Slack API) |
+| DELETE | `/socials/telegram/token` | Remove a Telegram bot token |
+| POST | `/socials/instagram/connect` | Initiate Instagram OAuth connection flow |
+| POST | `/socials/instagram/connection` | Save or update Instagram connection credentials |
+| DELETE | `/socials/instagram/connection` | Remove an Instagram connection |
+| POST | `/triggers/instagram` | Handle an incoming Instagram trigger |
+| GET | `/extension/download` | Download the browser extension package |
+| POST | `/extension/keys` | Register a new extension API key |
+| GET | `/extension/keys` | List extension API keys for the user |
+| POST | `/extension/keys/:id/rotate` | Rotate an extension API key |
+| POST | `/extension/keys/:id/revoke` | Revoke an extension API key |
+| GET | `/extension/workflows` | List workflow definitions for extension client |
+| POST | `/extension/chat` | Send a chat message from the extension |
+| GET | `/extension/minions` | List minions for the extension client |
+| POST | `/extension/minions` | Create a minion from the extension |
+| POST | `/extension/documents` | Upload a document from the extension |
+| GET | `/extension/documents` | List documents for the extension client |
+| POST | `/extension/context-spaces` | Create a context space from the extension |
+| GET | `/extension/context-spaces` | List context spaces for the extension client |
+| POST | `/extension/page-capture` | Capture a page from the extension |
+| GET | `/extension/page-capture` | List page captures for the extension client |
+| GET | `/extension/approvals` | List pending approvals for the extension client |
+| POST | `/extension/approvals` | Create an approval request from the extension |
+| POST | `/extension/approvals/:id/decision` | Approve or reject an approval request |
 
 ## Endpoint details
 

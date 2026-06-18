@@ -1,35 +1,19 @@
 {
-  "phase": "task-complete",
-  "module": "slack-oauth-extension-css-rls",
-  "task": "Slack OAuth social channel, extension install card CSS, RLS migration for slack_connections",
+  "phase": "info-gathering",
+  "module": "hermes-railway-probe",
+  "task": "Hermes v0.16.0 Railway production probe — map capabilities, measure resources, document discoveries",
   "state": {
-    "slackOAuthUI": {
+    "hermesRailwayProbe": {
       "status": "completed",
-      "summary": "Added signInWithSlack() to authClient.js, Slack button with SVG to login page, selector/handler/event listener in LoginPage.jsx, Slack CSS style in login.css."
+      "summary": "Probed Hermes v0.16.0 on Railway production container. Mapped 50 subcommands, confirmed HERMES_HOME env var, skills persistence, ~140 MB idle RSS, skill format (SKILL.md with YAML frontmatter), workspace structure (SOUL.md, state.db SQLite, tirith scanner, sandboxes). Created docs/hermes/ with dual JSON+MD discovery docs, MAINTENANCE.md, and ops test (20 assertions, auto-discovered)."
     },
-    "slackSocialChannel": {
+    "docsHermes": {
       "status": "completed",
-      "summary": "Added 'slack' to VALID_TARGET_SOCIALS, SOCIAL_LINKS, formatSocialLabel. Added slack provider branch in verifySocialAccount. Added saveSlackToken and slack in listSocialConnections in hades.service. Added POST /socials/slack/token route. Created slackConnectionRepository with findPublicByUser/findBySlackUserId. Wired slackConnections in index.js."
+      "summary": "Created docs/hermes/README.md, hermes-discovery.json, hermes-discovery.md, MAINTENANCE.md. All files pass validation test."
     },
-    "extensionInstallCSS": {
+    "hermesDiscoveryDocsTest": {
       "status": "completed",
-      "summary": "Added missing CSS for extension-install-card: card-header, card-body, card-actions, secret-display, key-list, key-row, key-preview, key-actions .small/.small.danger, revoked-label. 17 lines added to hadesPrototype.css."
-    },
-    "migration010": {
-      "status": "completed",
-      "summary": "010_hades_slack_connections.sql: table with user_id, tenant_id, encrypted_token, token_last4, slack_user_id, slack_team_id, status."
-    },
-    "migration011": {
-      "status": "completed",
-      "summary": "011_hades_slack_rls.sql: ENABLE ROW LEVEL SECURITY + SELECT/INSERT/UPDATE/DELETE policies keyed on user_id."
-    },
-    "hermes500Investigation": {
-      "status": "blocked",
-      "summary": "Needs Railway CLI for live log confirmation."
-    },
-    "testResults": {
-      "status": "completed",
-      "summary": "Backend 573/576 pass (3 pre-existing). Frontend 377/377 pass. Zero regressions."
+      "summary": "Created backend/src/modules/hades/__tests__/hermesDiscoveryDocs.ops.test.js — 20 assertions, auto-discovered by node --test, all pass."
     },
     "completedAt": "2026-06-18"
   }

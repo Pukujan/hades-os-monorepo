@@ -1,0 +1,402 @@
+{
+  "schema_version": "1.0",
+  "last_updated": "2026-06-18T03:45:00Z",
+  "source": "railway-probe-v1",
+  "last_updated": "2026-06-18T04:45:00Z",
+  "hermes": {
+    "version": "v0.16.0",
+    "build_date": "2026.6.5",
+    "binary_path": "/opt/hermes-venv/bin/hermes",
+    "python_version": "3.11.2",
+    "install_size_bytes": 191889408,
+    "install_size_human": "197 MB",
+    "install_path": "/opt/hermes-venv/",
+    "openai_sdk_version": "2.24.0",
+    "hf_model_default": "NousResearch/Hermes-3",
+    "idle_rss_kb": 143344,
+    "idle_rss_human": "~140 MB",
+    "workspace_size_human": "27 MB",
+    "rss_measurement_method": "VmRSS from /proc/PID/status after startup, before LLM call",
+    "rss_measurement_date": "2026-06-18"
+  },
+  "container": {
+    "platform": "Railway",
+    "base_image": "node:22-slim",
+    "python_install": "apt python3 python3-pip python3-venv",
+    "hermes_install": "pip install hermes-agent",
+    "memory_limit_bytes": 8000000000,
+    "memory_limit_human": "7.5 GB",
+    "cpu_count": 48,
+    "project_name": "virtuous-tranquility",
+    "service_name": "hades-os-monorepo",
+    "deployment_id": "31098304-b0db-489e-af33-464c0a226ca0"
+  },
+  "subcommands": {
+    "chat": {
+      "description": "Interactive or single-query chat mode",
+      "flags": {
+        "-q": "--query (single non-interactive query string)",
+        "-Q": "--quiet (suppress TUI output)",
+        "-m": "--model (model override)",
+        "--provider": "API provider override",
+        "-t": "--toolsets (comma-separated toolset names)",
+        "--skills": "comma-separated skill names to load",
+        "--resume": "session ID to resume",
+        "--continue": "continue last session (optionally named)",
+        "--source": "source label (e.g. 'tool' hides from user session lists)",
+        "--worktree": "use worktree mode",
+        "--accept-hooks": "accept hook executions",
+        "--yolo": "bypass safety confirmations",
+        "--pass-session-id": "pass session ID to tool executions",
+        "--ignore-user-config": "skip user config loading",
+        "--ignore-rules": "skip rules loading",
+        "--tui": "force TUI mode",
+        "--cli": "force CLI mode",
+        "--dev": "developer mode"
+      },
+      "notes": "-q flag accepts a single token (Railway SSH parsing limitation). Multi-word queries require stdin piping.",
+      "tested": true,
+      "stdin_works": true
+    },
+    "model": {
+      "description": "Model management",
+      "tested": false
+    },
+    "fallback": {
+      "description": "Fallback provider configuration",
+      "tested": false
+    },
+    "secrets": {
+      "description": "Secrets management",
+      "tested": false
+    },
+    "migrate": {
+      "description": "Migration commands",
+      "tested": false
+    },
+    "gateway": {
+      "description": "API gateway management",
+      "tested": false
+    },
+    "proxy": {
+      "description": "Proxy configuration",
+      "tested": false
+    },
+    "lsp": {
+      "description": "Language server protocol",
+      "tested": false
+    },
+    "setup": {
+      "description": "Setup wizard",
+      "tested": false
+    },
+    "postinstall": {
+      "description": "Post-installation setup",
+      "tested": false
+    },
+    "whatsapp": {
+      "description": "WhatsApp integration",
+      "tested": false
+    },
+    "slack": {
+      "description": "Slack integration",
+      "tested": false
+    },
+    "send": {
+      "description": "Send messages",
+      "tested": false
+    },
+    "login": {
+      "description": "Login to providers",
+      "tested": false
+    },
+    "logout": {
+      "description": "Logout from providers",
+      "tested": false
+    },
+    "auth": {
+      "description": "Authentication management",
+      "tested": false
+    },
+    "status": {
+      "description": "Status display",
+      "tested": false
+    },
+    "cron": {
+      "description": "Cron job management",
+      "tested": false
+    },
+    "webhook": {
+      "description": "Webhook management",
+      "tested": false
+    },
+    "portal": {
+      "description": "Portal management",
+      "tested": false
+    },
+    "kanban": {
+      "description": "Kanban board",
+      "tested": false
+    },
+    "hooks": {
+      "description": "Hook management",
+      "tested": false
+    },
+    "doctor": {
+      "description": "Health diagnostics",
+      "tested": false
+    },
+    "security": {
+      "description": "Security audit",
+      "tested": false
+    },
+    "dump": {
+      "description": "State dump",
+      "tested": false
+    },
+    "debug": {
+      "description": "Debug commands",
+      "tested": false
+    },
+    "backup": {
+      "description": "Backup management",
+      "tested": false
+    },
+    "checkpoints": {
+      "description": "Checkpoint management (session save/restore)",
+      "tested": false
+    },
+    "import": {
+      "description": "Import data",
+      "tested": false
+    },
+    "config": {
+      "description": "Configuration management",
+      "tested": false
+    },
+    "pairing": {
+      "description": "Device pairing",
+      "tested": false
+    },
+    "skills": {
+      "description": "Skill management (list, install, create, delete)",
+      "tested": true,
+      "notes": "`hermes skills list` works. 0 skills installed by default. Can manage skills independently of chat mode."
+    },
+    "bundles": {
+      "description": "Bundle management",
+      "tested": false
+    },
+    "plugins": {
+      "description": "Plugin management",
+      "tested": false
+    },
+    "curator": {
+      "description": "Content curation",
+      "tested": false
+    },
+    "memory": {
+      "description": "Memory management",
+      "tested": false
+    },
+    "tools": {
+      "description": "Tool management",
+      "tested": false
+    },
+    "computer-use": {
+      "description": "Computer use automation",
+      "tested": false
+    },
+    "mcp": {
+      "description": "MCP (Model Context Protocol) management",
+      "tested": false
+    },
+    "sessions": {
+      "description": "Session management (list, resume, delete)",
+      "tested": false
+    },
+    "insights": {
+      "description": "Usage insights",
+      "tested": false
+    },
+    "claw": {
+      "description": "Claw (tool execution) management",
+      "tested": false
+    },
+    "version": {
+      "description": "Version info",
+      "tested": false
+    },
+    "update": {
+      "description": "Self-update",
+      "tested": false
+    },
+    "uninstall": {
+      "description": "Self-uninstall",
+      "tested": false
+    },
+    "acp": {
+      "description": "ACP protocol",
+      "tested": false
+    },
+    "profile": {
+      "description": "Profile management (list, create, set, delete)",
+      "tested": true,
+      "notes": "`hermes profile list` works. Default profile exists but is 'stopped' (no model configured). Profiles configure model, provider, gateway settings."
+    },
+    "completion": {
+      "description": "Shell completion",
+      "tested": false
+    },
+    "dashboard": {
+      "description": "Web dashboard",
+      "tested": false
+    },
+    "desktop": {
+      "description": "Desktop app",
+      "tested": false
+    },
+    "gui": {
+      "description": "GUI mode",
+      "tested": false
+    },
+    "logs": {
+      "description": "Log viewing",
+      "tested": false
+    },
+    "prompt-size": {
+      "description": "Prompt size calculation",
+      "tested": false
+    }
+  },
+  "toolsets": {
+    "count_default": 20,
+    "listed_toolsets": [
+      "browser",
+      "browser-cdp",
+      "clarify",
+      "code_execution",
+      "computer_use",
+      "cronjob",
+      "delegation",
+      "discord"
+    ],
+    "note": "20+ toolsets loaded by default. Full list requires `hermes tools list`.",
+    "tested": false
+  },
+  "home_directory": {
+    "exists": false,
+    "expected_path": "~/.hermes/",
+    "actual_path": "/tmp/hades-hermes",
+    "note": "HERMES_HOME env var overrides the default home. Set to /tmp/hades-hermes by Hades. ~/.hermes/ does not exist. HERMES_HOME fully controls workspace path.",
+    "controlled_by": "hermesRuntime.service.js:239-241",
+    "env_var": "HERMES_HOME"
+  },
+  "cache_directory": {
+    "path": "/tmp/hades-hermes/cache",
+    "env_var": "HERMES_CACHE_DIR",
+    "controlled_by": "hermesRuntime.service.js:242-244"
+  },
+  "binary_path": {
+    "path": "/opt/hermes-venv/bin/hermes",
+    "env_var": "HERMES_BIN_PATH",
+    "priority": "HERMES_BIN_PATH env > system PATH > dev fallback"
+  },
+  "workspace_structure": {
+    "SOUL.md": "Agent identity/persona prompt",
+    "state.db": "SQLite database (sessions, conversations, state)",
+    "state.db-wal": "SQLite WAL (Write-Ahead Log)",
+    "state.db-shm": "SQLite shared memory",
+    "auth.json": "Authentication tokens",
+    ".hermes_history": "Command history",
+    "bin/tirith": "Security scanner (22MB)",
+    "skills/": "Skills directory with .usage.json, .hub/, curator_state",
+    "sessions/": "Saved sessions (currently empty)",
+    "memories/": "Agent memories (currently empty)",
+    "cache/": "Model caches (model_catalog.json, models_dev_cache.json, provider_models_cache.json)",
+    "logs/agent.log": "Agent activity log (30KB)",
+    "logs/errors.log": "Error log",
+    "cron/": "Cron job files",
+    "hooks/": "Hook files",
+    "sandboxes/singularity/": "Tool sandbox",
+    "image_cache/": "Cached images",
+    "audio_cache/": "Cached audio",
+    "pairing/": "Device pairing files"
+  },
+  "profiles": {
+    "count": 1,
+    "default": {
+      "name": "default",
+      "model": null,
+      "gateway": "stopped",
+      "alias": null,
+      "distribution": null
+    },
+    "note": "Profiles store model, provider, gateway settings. Create with `hermes profile create <name> -m <model> --provider <provider>`."
+  },
+  "parent_flags": {
+    "-h": "--help",
+    "--version": "version info",
+    "-z": "PROMPT (quick prompt, single token — experimental, may not work as expected)",
+    "-m": "--model (model override for all subcommands)",
+    "--provider": "API provider override",
+    "-t": "--toolsets",
+    "--resume": "session resume",
+    "--continue": "continue session",
+    "--worktree": "worktree mode",
+    "--accept-hooks": "accept hooks",
+    "--skills": "skill names",
+    "--yolo": "bypass confirmations",
+    "--pass-session-id": "pass session ID",
+    "--ignore-user-config": "skip user config",
+    "--ignore-rules": "skip rules",
+    "--tui": "force TUI",
+    "--cli": "force CLI",
+    "--dev": "dev mode"
+  },
+  "persistence": {
+    "skills_filesystem": "confirmed",
+    "skills_survive_process_exit": true,
+    "skills_survive_container_restart": false,
+    "skills_location": "$HERMES_HOME/skills/{category}/{skill-name}/SKILL.md",
+    "skills_format": "Markdown with YAML frontmatter",
+    "skills_evidence": "Created via timed-out chat session; found alive in subsequent hermes skills list call",
+    "skills_survive_process_exit_date": "2026-06-18",
+    "skills_limit": "Stored under /tmp/ (ephemeral) on Railway. Wiped on container restart/deploy.",
+    "session_resume": "untested",
+    "state_database": "SQLite at $HERMES_HOME/state.db (WAL mode enabled)"
+  },
+  "confirmed_findings": [
+    "HERMES_HOME env var controls Hermes agent workspace path",
+    "HERMES_BIN_PATH env var controls binary path (highest priority)",
+    "HERMES_CACHE_DIR env var controls cache location",
+    "Skills persist across Hermes process exits within same container lifetime",
+    "Skill format is Markdown with YAML frontmatter (SKILL.md)",
+    "Agent identity is stored in SOUL.md (customizable per-user)",
+    "State is stored in SQLite (state.db with WAL mode)",
+    "Hermes chat mode works via stdin piping (receives multi-word messages)",
+    "20+ toolsets loaded by default (browser, code_execution, etc.)",
+    "Profile system exists; profiles get isolated sub-homes under HERMES_HOME/home/",
+    "Idle Hermes process uses ~140 MB RSS (measured via /proc/VmRSS after import + startup, before LLM call)",
+    "Container has 7.5 GB memory / 48 CPU cores / 197 MB Hermes install / 27 MB workspace"
+  ],
+  "open_questions": [
+    "How does Hermes handle concurrent requests to stdin on the same process?",
+    "Does Hermes support a custom IPC protocol over stdin/stdout (JSON lines)?",
+    "Does hermes chat --skills skill1,skill2 load skills correctly?",
+    "Is there a fast/summary response mode (haiku mode)?",
+    "Does --resume SESSION_ID restore full context from state.db?",
+    "Is /data/ on Railway persistent across deploys?",
+    "What is the --oneshot flag status? It works but doesn't appear in --help — is it remapped to -z?",
+    "Does hermes chat -q support multi-word queries if properly quoted (not through Railway SSH)?",
+    "What is the additional memory cost of an active LLM call (vs idle ~140 MB)?",
+    "What is the memory impact of loading 20+ toolsets vs a minimal toolset?"
+  ],
+  "quick_fixes": [
+    "Telegram typing indicator (sendChatAction)",
+    "HERMES_TIMEOUT 120s -> 30s default",
+    "In-process task queue per user",
+    "Rate limiter (sliding window per user)",
+    "SSE streaming to web UI"
+  ]
+}

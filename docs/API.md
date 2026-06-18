@@ -22,6 +22,34 @@
 | GET | `/api/hades/minions` | hades | List all minions for the authenticated user |
 | GET | `/api/hades/minions/:id` | hades | Get a single minion by ID |
 | GET | `/api/hades/minions/:id/logs` | hades | Get execution logs for a minion |
+| PATCH | `/api/hades/workflows/:id` | hades | Update a workflow definition |
+| DELETE | `/api/hades/workflows/:id` | hades | Delete a workflow definition |
+| DELETE | `/api/hades/socials/telegram/token` | hades | Remove a Telegram bot token |
+| DELETE | `/api/hades/socials/instagram/connection` | hades | Remove an Instagram connection |
+| POST | `/api/hades/socials/discord/token` | hades | Save a Discord bot token (validates via Discord API) |
+| POST | `/api/hades/socials/github/token` | hades | Save a GitHub personal access token (validates via GitHub API) |
+| POST | `/api/hades/socials/slack/token` | hades | Save a Slack bot token (validates via Slack API) |
+| POST | `/api/hades/socials/instagram/connect` | hades | Initiate Instagram OAuth connection flow |
+| POST | `/api/hades/socials/instagram/connection` | hades | Save or update Instagram connection credentials |
+| POST | `/api/hades/triggers/instagram` | hades | Handle an incoming Instagram trigger |
+| GET | `/api/hades/extension/download` | hades | Download the browser extension package |
+| POST | `/api/hades/extension/keys` | hades | Register a new extension API key |
+| GET | `/api/hades/extension/keys` | hades | List extension API keys for the user |
+| POST | `/api/hades/extension/keys/:id/rotate` | hades | Rotate an extension API key |
+| POST | `/api/hades/extension/keys/:id/revoke` | hades | Revoke an extension API key |
+| GET | `/api/hades/extension/workflows` | hades | List workflow definitions for extension client |
+| POST | `/api/hades/extension/chat` | hades | Send a chat message from the extension |
+| GET | `/api/hades/extension/minions` | hades | List minions for the extension client |
+| POST | `/api/hades/extension/minions` | hades | Create a minion from the extension |
+| POST | `/api/hades/extension/documents` | hades | Upload a document from the extension |
+| GET | `/api/hades/extension/documents` | hades | List documents for the extension client |
+| POST | `/api/hades/extension/context-spaces` | hades | Create a context space from the extension |
+| GET | `/api/hades/extension/context-spaces` | hades | List context spaces for the extension client |
+| POST | `/api/hades/extension/page-capture` | hades | Capture a page from the extension |
+| GET | `/api/hades/extension/page-capture` | hades | List page captures for the extension client |
+| GET | `/api/hades/extension/approvals` | hades | List pending approvals for the extension client |
+| POST | `/api/hades/extension/approvals` | hades | Create an approval request from the extension |
+| POST | `/api/hades/extension/approvals/:id/decision` | hades | Approve or reject an approval request |
 | GET | `/api/hades/notifications` | hades | List notifications for the authenticated user |
 | PATCH | `/api/hades/minions/:id` | hades | Update a minion's configuration |
 | DELETE | `/api/hades/minions/:id` | hades | Delete a minion |
