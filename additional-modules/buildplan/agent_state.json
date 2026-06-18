@@ -1,7 +1,7 @@
 {
   "phase": "implementation",
-  "module": "autonomous-hermes-runtime",
-  "task": "Build dynamic Hermes worker pool with config-driven warm/auto/cold modes, per-user cap, and pool-managed subprocess lifecycle",
+  "module": "autonomous-hermes-supabase-bridge",
+  "task": "Make autonomous Hermes runtime modules production-shaped: wire Supabase, filesystem, object store, spawn runtime, artifact store into index.js",
   "state": {
     "hermesRailwayProbe": {
       "status": "completed",
@@ -26,6 +26,10 @@
     "autonomousHermesAudit": {
       "status": "completed",
       "summary": "Double-checked autonomous Hermes study, plan, handoff, package scripts, and TDD tests. Fixed stale planning/study wording that still referred to old skill-sync follow-up work. Verified no stale handoff language remains; backend TDD suite is intentionally red with 14 missing-implementation failures, and E2E suite safely skips 4 checks unless HADES_AUTONOMOUS_HERMES_E2E=1."
+    },
+    "autonomousHermesSupabaseBridgeTdd": {
+      "status": "in_progress",
+      "summary": "Gate check passed for module transition to autonomous-hermes-supabase-bridge. 7 bridge gaps remain: (1) hermesStateRepository Supabase mode, (2) routing token persistence, (3) hermesObjectStore, (4) hermesFilesystem, (5) hermesRuntimeSpawn, (6) hermesArtifactStore, (7) wire all factories in index.js."
     },
     "instagramFix": {
       "status": "completed",
