@@ -51,6 +51,15 @@ export async function signInWithApple(supabase, location) {
   return toFriendlyOAuthError(result);
 }
 
+export async function signInWithSlack(supabase, location) {
+  if (!supabase) return clientError();
+  const result = await supabase.auth.signInWithOAuth({
+    provider: "slack_oidc",
+    options: { redirectTo: buildOAuthRedirectTo(location) }
+  });
+  return toFriendlyOAuthError(result);
+}
+
 export async function forgotPassword(supabase, email, options = {}) {
   if (!supabase) return clientError();
   const redirectTo = options.redirectTo || (typeof window !== "undefined" ? `${window.location.origin}/reset-password` : "/reset-password");

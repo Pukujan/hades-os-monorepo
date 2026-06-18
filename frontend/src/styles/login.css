@@ -412,6 +412,7 @@
 .login-root .social.telegram { color:#cfefff; background:color-mix(in srgb, #229ED9 16%, rgba(255,255,255,.05)); }
 .login-root .social.google { color:#f5d7bf; background:rgba(255,255,255,.06); }
 .login-root .social.apple { color:#fff5e6; background:rgba(255,255,255,.06); }
+.login-root .social.slack { color:#d7f0ff; background:color-mix(in srgb, #4A154B 18%, rgba(255,255,255,.05)); }
 
 .login-root .theme-sheet {
   position:fixed;

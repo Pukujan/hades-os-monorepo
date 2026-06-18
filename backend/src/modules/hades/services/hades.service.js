@@ -451,6 +451,11 @@ export function createHadesService({ repository, scopedRepos, hermes, config = {
       if (telegram) socials.push({ provider: "telegram", ...telegram });
     }
 
+    if (scopedRepos?.slackConnections) {
+      const slack = await scopedRepos.slackConnections.findPublicByUser({ userId, tenantId });
+      if (slack) socials.push({ provider: "slack", ...slack });
+    }
+
     if (scopedRepos?.gitHubConnections) {
       const github = await scopedRepos.gitHubConnections.findPublicByUser({ userId, tenantId });
       if (github) socials.push({ provider: "github", ...github });
@@ -569,6 +574,28 @@ async function saveTelegramToken(body, authContext) {
       tenantId,
       token,
       gitHubUsername: null,
+    });
+
+    return { status: "connected", token_last4: last4(token) };
+  }
+
+  async function saveSlackToken(body, authContext) {
+    const userId = authContext?.userId;
+    const tenantId = authContext?.tenantId || userId;
+    const { token } = body || {};
+
+    if (!token) {
+      throw new AppError("Token is required", 400);
+    }
+
+    if (!scopedRepos?.slackConnections) {
+      throw new AppError("Slack connections repository not available", 501);
+    }
+
+    await scopedRepos.slackConnections.saveToken({
+      userId,
+      tenantId,
+      token,
     });
 
     return { status: "connected", token_last4: last4(token) };
@@ -1176,6 +1203,7 @@ async function saveTelegramToken(body, authContext) {
     saveTelegramToken,
     saveDiscordToken,
     saveGitHubToken,
+    saveSlackToken,
     deleteTelegramToken,
     createInstagramAuthLink,
     saveInstagramConnection,

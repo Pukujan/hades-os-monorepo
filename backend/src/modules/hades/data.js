@@ -1,6 +1,6 @@
 export const VALID_CATEGORIES = ["task", "chat", "shopping", "dev", "fun"];
 export const VALID_TRIGGER_TYPES = ["manual", "command", "watcher"];
-export const VALID_TARGET_SOCIALS = ["discord", "telegram", "github", "email", "private"];
+export const VALID_TARGET_SOCIALS = ["discord", "telegram", "slack", "github", "email", "private"];
 
 export const SOCIAL_LINKS = [
   {
@@ -15,6 +15,13 @@ export const SOCIAL_LINKS = [
     provider: "telegram",
     displayName: "Telegram",
     status: "locked",
+    commandName: null
+  },
+  {
+    id: "slack",
+    provider: "slack",
+    displayName: "Slack",
+    status: "not_connected",
     commandName: null
   },
   {
@@ -131,6 +138,8 @@ export function formatSocialLabel(provider) {
       return "Discord";
     case "telegram":
       return "Telegram";
+    case "slack":
+      return "Slack";
     case "github":
       return "GitHub";
     case "email":

@@ -1,6 +1,6 @@
 import React from "react";
 import { useAuth } from "./AuthProvider.jsx";
-import { signInWithEmail, signUpWithEmail, signInWithDiscord, signInWithGoogle, signInWithApple, forgotPassword, needsEmailConfirmation } from "./authClient.js";
+import { signInWithEmail, signUpWithEmail, signInWithDiscord, signInWithGoogle, signInWithApple, signInWithSlack, forgotPassword, needsEmailConfirmation } from "./authClient.js";
 import { extractLoginTemplateParts } from "./loginTemplateParts.js";
 import { showInlineError, showConfirmationMessage, showSuccessMessage } from "./loginHelpers.js";
 import loginTemplate from "./loginTemplate.html?raw";
@@ -101,6 +101,7 @@ export function LoginPage({ view = "signin", onNavigate }) {
     const discordButton = root.querySelector(".social.discord");
     const googleButton = root.querySelector(".social.google");
     const appleButton = root.querySelector(".social.apple");
+    const slackButton = root.querySelector(".social.slack");
 
     const panelWrap = root.querySelector(".panel-wrap");
 
@@ -143,6 +144,15 @@ export function LoginPage({ view = "signin", onNavigate }) {
         return;
       }
       const { error } = await signInWithApple(supabase);
+      if (error) showInlineError(root, panelWrap, error.message);
+    };
+
+    const handleSlackSignIn = async () => {
+      if (!supabase) {
+        showInlineError(root, panelWrap, "Supabase auth is not configured yet.");
+        return;
+      }
+      const { error } = await signInWithSlack(supabase);
       if (error) showInlineError(root, panelWrap, error.message);
     };
 
@@ -270,6 +280,7 @@ export function LoginPage({ view = "signin", onNavigate }) {
     discordButton?.addEventListener("click", handleDiscordSignIn, { signal: controller.signal });
     googleButton?.addEventListener("click", handleGoogleSignIn, { signal: controller.signal });
     appleButton?.addEventListener("click", handleAppleSignIn, { signal: controller.signal });
+    slackButton?.addEventListener("click", handleSlackSignIn, { signal: controller.signal });
     links.forEach((link, i) => link.addEventListener("click", handleLinkClick(i), { signal: controller.signal }));
     root.addEventListener("keydown", onKeydown, { signal: controller.signal });
 

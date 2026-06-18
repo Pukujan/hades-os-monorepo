@@ -18,6 +18,7 @@ import { createConversationRepository } from "./repositories/conversationReposit
 import { createTelegramConnectionRepository } from "./repositories/telegramConnectionRepository.js";
 import { createDiscordConnectionRepository } from "./repositories/discordConnectionRepository.js";
 import { createGitHubConnectionRepository } from "./repositories/gitHubConnectionRepository.js";
+import { createSlackConnectionRepository } from "./repositories/slackConnectionRepository.js";
 import { createInstagramConnectionRepository } from "./repositories/instagramConnectionRepository.js";
 import { createAgentExecutionRepository } from "./repositories/agentExecutionRepository.js";
 import { createMemoryRecordRepository } from "./repositories/memoryRecordRepository.js";
@@ -89,6 +90,7 @@ export async function register(app, context) {
   const telegramConnections = overrides.telegramConnections || createTelegramConnectionRepository({ storage: storageMode, supabaseClient, crypto: tokenCrypto });
   const discordConnections = overrides.discordConnections || createDiscordConnectionRepository({ storage: storageMode, supabaseClient, crypto: tokenCrypto });
   const gitHubConnections = overrides.gitHubConnections || createGitHubConnectionRepository({ storage: storageMode, supabaseClient, crypto: tokenCrypto });
+  const slackConnections = overrides.slackConnections || createSlackConnectionRepository({ storage: storageMode, supabaseClient, crypto: tokenCrypto });
   const instagramConnections = overrides.instagramConnections || createInstagramConnectionRepository({ storage: storageMode, supabaseClient });
   const executions = overrides.executions || createAgentExecutionRepository({ storage: storageMode, supabaseClient });
   const processedUpdates = overrides.processedUpdates || createProcessedUpdateRepository({ storage: storageMode, supabaseClient });
@@ -144,6 +146,7 @@ export async function register(app, context) {
   const verifySocialAccount = overrides.verifySocialAccount || createVerifySocialAccount({
     discordConnections,
     telegramConnections,
+    slackConnections,
   });
 
   const runtimeHermes = overrides.hermesRuntime || hermesRuntime;
@@ -156,6 +159,7 @@ export async function register(app, context) {
     telegramConnections,
     discordConnections,
     gitHubConnections,
+    slackConnections,
     instagramConnections,
     executions,
     processedUpdates,

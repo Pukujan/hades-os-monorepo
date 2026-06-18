@@ -223,6 +223,15 @@ export function createHadesRoutes({ service, requireHadesAuth, config, scopedRep
     })
   );
 
+  router.post(
+    "/socials/slack/token",
+    requireAuth,
+    asyncRoute(async (req, res) => {
+      const result = await service.saveSlackToken(req.body, req.authContext);
+      res.status(200).json(result);
+    })
+  );
+
   router.delete(
     "/socials/telegram/token",
     requireAuth,
