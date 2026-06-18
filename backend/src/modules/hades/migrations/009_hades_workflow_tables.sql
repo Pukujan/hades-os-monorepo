@@ -101,6 +101,8 @@ create policy "hades_workflow_audit_logs user owns rows"
 -- Durable checkpoint snapshots for long-running workflow recovery.
 create table if not exists hades_workflow_run_checkpoints (
   id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  tenant_id uuid not null,
   run_id uuid not null references hades_workflow_runs(id) on delete cascade,
   step_id text not null,
   status text not null,

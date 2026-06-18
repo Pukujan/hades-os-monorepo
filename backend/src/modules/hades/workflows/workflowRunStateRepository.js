@@ -61,10 +61,12 @@ export function createWorkflowRunStateRepository({ storage = "memory", supabaseC
     });
   }
 
-  async function persistCheckpoint(runId, checkpoint) {
+  async function persistCheckpoint(runId, checkpoint, run) {
     if (storage !== "supabase") return;
     await persistTable(supabaseClient, checkpointsTableName, "insert", {
       id: randomUUID(),
+      user_id: run.userId,
+      tenant_id: run.tenantId,
       run_id: runId,
       step_id: checkpoint.stepId,
       status: checkpoint.status,
@@ -123,7 +125,7 @@ export function createWorkflowRunStateRepository({ storage = "memory", supabaseC
 
       run.updated_at = new Date().toISOString();
       await persistRun(run);
-      await persistCheckpoint(runId, checkpoint);
+      await persistCheckpoint(runId, checkpoint, run);
 
       return checkpoint;
     },
