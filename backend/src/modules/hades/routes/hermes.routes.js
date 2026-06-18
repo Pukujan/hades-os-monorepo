@@ -34,7 +34,7 @@ export function createHermesRoutes({
   }
 
   router.get(
-    "/hermes/status",
+    "/status",
     asyncRoute(async (req, res) => {
       res.status(200).json({
         runtimeMode,
@@ -49,7 +49,7 @@ export function createHermesRoutes({
   );
 
   router.post(
-    "/hermes/tasks",
+    "/tasks",
     asyncRoute(async (req, res) => {
       const { message } = req.body;
       const { userId, tenantId } = resolveAuth(req);
@@ -70,7 +70,7 @@ export function createHermesRoutes({
   );
 
   router.get(
-    "/hermes/state",
+    "/state",
     asyncRoute(async (req, res) => {
       const { userId, tenantId } = resolveAuth(req);
       const objects = stateRepository
@@ -87,7 +87,7 @@ export function createHermesRoutes({
   );
 
   router.get(
-    "/hermes/skills",
+    "/skills",
     asyncRoute(async (req, res) => {
       res.status(200).json({ skills: [] });
     })

@@ -14,7 +14,7 @@ const masterApiPath = join(repoRoot, "docs/API.md");
 
 const SKIP_MODULES = new Set(["_reference"]);
 const ROUTE_RE = /router\.(get|post|put|patch|delete)\(\s*["'`]([^"'`]+)["'`]/gi;
-const BASE_PATH_RE = /app\.use\(\s*["'`](\/api\/[^"'`]+)["'`]/;
+const BASE_PATH_RE = /app\.use\(\s*["'`](\/api\/[^"'`]+)["'`]/g;
 
 function readText(path) {
   return readFileSync(path, "utf8");
@@ -42,11 +42,17 @@ function extractRoutesFromFile(filePath) {
   return routes;
 }
 
-function extractBasePath(moduleDir) {
+function extractBasePaths(moduleDir) {
   const indexPath = join(moduleDir, "index.js");
-  if (!existsSync(indexPath)) return null;
-  const match = readText(indexPath).match(BASE_PATH_RE);
-  return match ? match[1] : null;
+  if (!existsSync(indexPath)) return [];
+  const content = readText(indexPath);
+  const paths = [];
+  let match;
+  BASE_PATH_RE.lastIndex = 0;
+  while ((match = BASE_PATH_RE.exec(content)) !== null) {
+    paths.push(match[1]);
+  }
+  return paths;
 }
 
 function normalizePath(path) {
@@ -124,8 +130,8 @@ function main() {
 
   for (const moduleName of collectModules()) {
     const moduleDir = join(modulesDir, moduleName);
-    const basePath = extractBasePath(moduleDir);
-    if (!basePath) {
+    const basePaths = extractBasePaths(moduleDir);
+    if (basePaths.length === 0) {
       errors.push(`${moduleName}: could not read app.use base path from index.js`);
       continue;
     }
@@ -143,19 +149,25 @@ function main() {
     }
 
     for (const { method, path: routePath } of routes) {
-      const fullPath = normalizePath(`${basePath}${routePath}`);
-
       if (!pathDocumentedInModuleDoc(docText, method, routePath)) {
         errors.push(
           `${moduleName}: ${method} ${routePath} not documented in docs/${moduleName}/API.md`
         );
       }
 
-      if (!registryHasRoute(registryRows, method, fullPath)) {
+      const matchedInRegistry = basePaths.some((basePath) =>
+        registryHasRoute(registryRows, method, normalizePath(`${basePath}${routePath}`))
+      );
+
+      if (!matchedInRegistry) {
+        const fullPathsStr = basePaths.map((bp) => normalizePath(`${bp}${routePath}`)).join(", ");
         errors.push(
-          `${moduleName}: ${method} ${fullPath} missing from docs/API.md Endpoint registry`
+          `${moduleName}: ${method} ${fullPathsStr} missing from docs/API.md Endpoint registry`
         );
-      } else {
+      }
+
+      for (const basePath of basePaths) {
+        const fullPath = normalizePath(`${basePath}${routePath}`);
         const row = registryRows.find(
           (r) => r.method === method && normalizePath(r.fullPath) === fullPath
         );
