@@ -1,0 +1,673 @@
+{
+  "meta": {
+    "schemaVersion": "1.0.0",
+    "entryId": "005",
+    "slug": "hermes-railway-probe-docs",
+    "generatedAt": "2026-06-18T04:42:23.102Z",
+    "humanLogPath": "work-log/dev-logs/human/005_2026-06-18_04-41_dev-log_hermes-railway-probe-docs.md",
+    "audience": "agent",
+    "filledBy": "script",
+    "handoffRefs": []
+  },
+  "summary": "Shipped Hermes Railway probe results: confirmed HERMES_HOME env var controls workspace, skills persist across process exits (~140 MB idle RSS), workspace structure fully mapped (27 MB). Created docs/hermes/ with dual JSON+MD discovery docs and MAINTENANCE.md. Wrote hermesDiscoveryDocs.ops.test.js (20 assertions, auto-discovered). Fixed 28 undocumented API endpoints to unblock lint:architecture gate. Pushed to master @ 62d724d.",
+  "apis": {
+    "capturedAt": "2026-06-18T04:41:31.177Z",
+    "sourceDocs": [
+      "docs/API.md"
+    ],
+    "http": {
+      "active": [
+        {
+          "method": "GET",
+          "path": "/api/auth/browser-config",
+          "module": "auth",
+          "description": "Public auth config for frontend (Supabase URL, anon key, app URL)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/hades/readiness",
+          "module": "hades",
+          "description": "Hades service readiness check"
+        },
+        {
+          "method": "GET",
+          "path": "/api/hades/bootstrap",
+          "module": "hades",
+          "description": "Bootstrap data for frontend hydration"
+        },
+        {
+          "method": "POST",
+          "path": "/api/hades/chat",
+          "module": "hades",
+          "description": "Send a chat message to Hermes (legacy, context from body)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/hades/chat/general",
+          "module": "hades",
+          "description": "Send a general chat message to Hermes (non-forge context)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/hades/chat/forge",
+          "module": "hades",
+          "description": "Send a forge chat message to Hermes (minion creation context)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/hades/minions/test",
+          "module": "hades",
+          "description": "Run a test of the current minion draft"
+        },
+        {
+          "method": "POST",
+          "path": "/api/hades/minions",
+          "module": "hades",
+          "description": "Save a new minion"
+        },
+        {
+          "method": "POST",
+          "path": "/api/hades/assignments",
+          "module": "hades",
+          "description": "Assign a minion to a social channel"
+        },
+        {
+          "method": "POST",
+          "path": "/api/hades/triggers",
+          "module": "hades",
+          "description": "Handle an incoming social trigger (Discord, Telegram)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/hades/triggers/telegram/:userId",
+          "module": "hades",
+          "description": "Incoming Telegram webhook (called by Telegram servers, no auth)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/hades/conversations/:id/messages",
+          "module": "hades",
+          "description": "List messages in a conversation"
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/hades/conversations/:id/messages",
+          "module": "hades",
+          "description": "Clear all messages from a conversation"
+        },
+        {
+          "method": "GET",
+          "path": "/api/hades/socials",
+          "module": "hades",
+          "description": "List user's social connections (Discord, Telegram) without tokens"
+        },
+        {
+          "method": "POST",
+          "path": "/api/hades/socials/telegram/token",
+          "module": "hades",
+          "description": "Save a Telegram bot token (validates via getMe)"
+        },
+        {
+          "method": "GET",
+          "path": "/api/hades/minions",
+          "module": "hades",
+          "description": "List all minions for the authenticated user"
+        },
+        {
+          "method": "GET",
+          "path": "/api/hades/minions/:id",
+          "module": "hades",
+          "description": "Get a single minion by ID"
+        },
+        {
+          "method": "GET",
+          "path": "/api/hades/minions/:id/logs",
+          "module": "hades",
+          "description": "Get execution logs for a minion"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/hades/workflows/:id",
+          "module": "hades",
+          "description": "Update a workflow definition"
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/hades/workflows/:id",
+          "module": "hades",
+          "description": "Delete a workflow definition"
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/hades/socials/telegram/token",
+          "module": "hades",
+          "description": "Remove a Telegram bot token"
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/hades/socials/instagram/connection",
+          "module": "hades",
+          "description": "Remove an Instagram connection"
+        },
+        {
+          "method": "POST",
+          "path": "/api/hades/socials/discord/token",
+          "module": "hades",
+          "description": "Save a Discord bot token (validates via Discord API)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/hades/socials/github/token",
+          "module": "hades",
+          "description": "Save a GitHub personal access token (validates via GitHub API)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/hades/socials/slack/token",
+          "module": "hades",
+          "description": "Save a Slack bot token (validates via Slack API)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/hades/socials/instagram/connect",
+          "module": "hades",
+          "description": "Initiate Instagram OAuth connection flow"
+        },
+        {
+          "method": "POST",
+          "path": "/api/hades/socials/instagram/connection",
+          "module": "hades",
+          "description": "Save or update Instagram connection credentials"
+        },
+        {
+          "method": "POST",
+          "path": "/api/hades/triggers/instagram",
+          "module": "hades",
+          "description": "Handle an incoming Instagram trigger"
+        },
+        {
+          "method": "GET",
+          "path": "/api/hades/extension/download",
+          "module": "hades",
+          "description": "Download the browser extension package"
+        },
+        {
+          "method": "POST",
+          "path": "/api/hades/extension/keys",
+          "module": "hades",
+          "description": "Register a new extension API key"
+        },
+        {
+          "method": "GET",
+          "path": "/api/hades/extension/keys",
+          "module": "hades",
+          "description": "List extension API keys for the user"
+        },
+        {
+          "method": "POST",
+          "path": "/api/hades/extension/keys/:id/rotate",
+          "module": "hades",
+          "description": "Rotate an extension API key"
+        },
+        {
+          "method": "POST",
+          "path": "/api/hades/extension/keys/:id/revoke",
+          "module": "hades",
+          "description": "Revoke an extension API key"
+        },
+        {
+          "method": "GET",
+          "path": "/api/hades/extension/workflows",
+          "module": "hades",
+          "description": "List workflow definitions for extension client"
+        },
+        {
+          "method": "POST",
+          "path": "/api/hades/extension/chat",
+          "module": "hades",
+          "description": "Send a chat message from the extension"
+        },
+        {
+          "method": "GET",
+          "path": "/api/hades/extension/minions",
+          "module": "hades",
+          "description": "List minions for the extension client"
+        },
+        {
+          "method": "POST",
+          "path": "/api/hades/extension/minions",
+          "module": "hades",
+          "description": "Create a minion from the extension"
+        },
+        {
+          "method": "POST",
+          "path": "/api/hades/extension/documents",
+          "module": "hades",
+          "description": "Upload a document from the extension"
+        },
+        {
+          "method": "GET",
+          "path": "/api/hades/extension/documents",
+          "module": "hades",
+          "description": "List documents for the extension client"
+        },
+        {
+          "method": "POST",
+          "path": "/api/hades/extension/context-spaces",
+          "module": "hades",
+          "description": "Create a context space from the extension"
+        },
+        {
+          "method": "GET",
+          "path": "/api/hades/extension/context-spaces",
+          "module": "hades",
+          "description": "List context spaces for the extension client"
+        },
+        {
+          "method": "POST",
+          "path": "/api/hades/extension/page-capture",
+          "module": "hades",
+          "description": "Capture a page from the extension"
+        },
+        {
+          "method": "GET",
+          "path": "/api/hades/extension/page-capture",
+          "module": "hades",
+          "description": "List page captures for the extension client"
+        },
+        {
+          "method": "GET",
+          "path": "/api/hades/extension/approvals",
+          "module": "hades",
+          "description": "List pending approvals for the extension client"
+        },
+        {
+          "method": "POST",
+          "path": "/api/hades/extension/approvals",
+          "module": "hades",
+          "description": "Create an approval request from the extension"
+        },
+        {
+          "method": "POST",
+          "path": "/api/hades/extension/approvals/:id/decision",
+          "module": "hades",
+          "description": "Approve or reject an approval request"
+        },
+        {
+          "method": "GET",
+          "path": "/api/hades/notifications",
+          "module": "hades",
+          "description": "List notifications for the authenticated user"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/hades/minions/:id",
+          "module": "hades",
+          "description": "Update a minion's configuration"
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/hades/minions/:id",
+          "module": "hades",
+          "description": "Delete a minion"
+        },
+        {
+          "method": "POST",
+          "path": "/api/hades/workflows",
+          "module": "hades",
+          "description": "Create a workflow definition"
+        },
+        {
+          "method": "GET",
+          "path": "/api/hades/workflows",
+          "module": "hades",
+          "description": "List workflow definitions for the user"
+        },
+        {
+          "method": "GET",
+          "path": "/api/hades/workflows/:id",
+          "module": "hades",
+          "description": "Get a workflow definition by ID"
+        },
+        {
+          "method": "POST",
+          "path": "/api/hades/workflows/:id/execute",
+          "module": "hades",
+          "description": "Execute a workflow, creating a run and orchestrating tool calls"
+        },
+        {
+          "method": "GET",
+          "path": "/api/hades/workflows/:id/runs",
+          "module": "hades",
+          "description": "List runs for a workflow definition"
+        },
+        {
+          "method": "GET",
+          "path": "/api/_reference/health",
+          "module": "_reference",
+          "description": "Example module health check"
+        },
+        {
+          "method": "GET",
+          "path": "/api/model-condenser/health",
+          "module": "model-condenser",
+          "description": "Module health and config summary"
+        },
+        {
+          "method": "POST",
+          "path": "/api/model-condenser/condense",
+          "module": "model-condenser",
+          "description": "Regenerate consolidated-models.json"
+        },
+        {
+          "method": "GET",
+          "path": "/api/model-condenser/consolidated",
+          "module": "model-condenser",
+          "description": "Read consolidated schema inventory"
+        }
+      ],
+      "stub": [],
+      "deprecated": []
+    },
+    "moduleStatus": [],
+    "versioned": {
+      "pipeline": null,
+      "prompts": null,
+      "storage": null,
+      "app": {
+        "packageJson": "0.1.0"
+      }
+    },
+    "deprecated": {
+      "http": [],
+      "cli": [],
+      "prompts": [],
+      "notes": []
+    },
+    "cli": [
+      {
+        "command": "npm run dev-log:pre-push",
+        "purpose": "Paired human + agent dev logs"
+      },
+      {
+        "command": "npm run condense:all",
+        "purpose": "consolidated snapshots → file-exchange/exports/{stamp}_consolidated/"
+      },
+      {
+        "command": "npm run import:file-exchange",
+        "purpose": "Inbound bundle → file-exchange/imports/{stamp}/"
+      },
+      {
+        "command": "npm --prefix backend run condense-models",
+        "purpose": "Regenerate consolidated-models.json"
+      }
+    ]
+  },
+  "git": {
+    "branch": "master",
+    "sha": "62d724def7394adc681af01ae9693c86c7e253cc",
+    "shortSha": "62d724d",
+    "changedFiles": [
+      {
+        "code": "??",
+        "path": "extension/dist/assets/"
+      },
+      {
+        "code": "??",
+        "path": "extension/dist/manifest.json"
+      },
+      {
+        "code": "??",
+        "path": "extension/dist/popup.html"
+      }
+    ],
+    "diffStatAgainstHead": "",
+    "diffCachedStat": "",
+    "recentCommits": [
+      "62d724d docs: hermes railway probe discoveries + fix 28 undocumented API endpoints",
+      "8d7090d docs: session archive slack-oauth-extension-css-rls + agent state + MEMORY.md",
+      "ee033e0 feat: add 011_hades_slack_rls migration (RLS policies for slack connections)",
+      "b5bc2d5 fix: add missing extension install card CSS styles",
+      "e548923 feat: add 010_hades_slack_connections migration table"
+    ]
+  },
+  "tests": {
+    "ran": true,
+    "exitCode": 1,
+    "summary": "exit=1",
+    "passed": [
+      "# Subtest: raw Supabase tokens or cookies are never passed to Hermes",
+      "ok 20 - raw Supabase tokens or cookies are never passed to Hermes",
+      "# Subtest: forge chat passes previous forge messages into the runtime",
+      "ok 44 - forge chat passes previous forge messages into the runtime",
+      "# Subtest: general chat passes prior general messages into the runtime",
+      "ok 46 - general chat passes prior general messages into the runtime",
+      "# Subtest: passes resolved authContext into bootstrap",
+      "ok 4 - passes resolved authContext into bootstrap",
+      "# Subtest: passes scoped context to Hermes",
+      "ok 6 - passes scoped context to Hermes",
+      "# Subtest: passes through clean response unchanged",
+      "ok 130 - passes through clean response unchanged",
+      "# Subtest: searchGif passes rating and limit to the API",
+      "ok 3 - searchGif passes rating and limit to the API",
+      "# Subtest: chat passes only auth-scoped durable memory records into Hermes",
+      "ok 2 - chat passes only auth-scoped durable memory records into Hermes",
+      "# Subtest: valid chat request passes",
+      "ok 194 - valid chat request passes",
+      "# Subtest: valid complete draft passes",
+      "ok 198 - valid complete draft passes",
+      "# Subtest: register() passes configuration through to repository",
+      "ok 2 - register() passes configuration through to repository",
+      "# Subtest: buildResponse passes context through to generateDraft for minions mode",
+      "ok 2 - buildResponse passes context through to generateDraft for minions mode",
+      "# Subtest: Hermes runtime passes timeout option from HERMES_TIMEOUT env var",
+      "ok 227 - Hermes runtime passes timeout option from HERMES_TIMEOUT env var",
+      "# Subtest: is passed through to Hermes CLI subprocess",
+      "ok 1 - is passed through to Hermes CLI subprocess",
+      "# Subtest: handleTelegramUpdate passes hadesCommandParser result to Hermes context",
+      "ok 4 - handleTelegramUpdate passes hadesCommandParser result to Hermes context",
+      "# Subtest: handleTelegramUpdate passes minions from runtime options into hermes context",
+      "ok 12 - handleTelegramUpdate passes minions from runtime options into hermes context",
+      "#     at passThroughAuth (file:///C:/Users/pujan/OneDrive/Desktop/web%20dev/webdev%202.0/hades-os-monorepo/backend/src/modules/hades/routes/hades.routes.js:16:7)",
+      "# pass 593"
+    ],
+    "failed": [
+      "failureType: 'testCodeFailure'",
+      "# Subtest: unauthenticated Discord connection requests fail closed before bot initialization",
+      "ok 15 - unauthenticated Discord connection requests fail closed before bot initialization",
+      "# Subtest: Supabase verification errors fail closed",
+      "ok 19 - Supabase verification errors fail closed",
+      "# [auth] Supabase session verification failed: undefined undefined",
+      "# Unhandled error: Error: Supabase insert failed: connection refused",
+      "# Subtest: fails safely when encryption is unavailable",
+      "ok 5 - fails safely when encryption is unavailable",
+      "failureType: 'subtestsFailed'",
+      "error: '1 subtest failed'",
+      "code: 'ERR_TEST_FAILURE'",
+      "# Subtest: stores status failed and failure_code",
+      "ok 5 - stores status failed and failure_code",
+      "# Subtest: marks token_invalid when test fails",
+      "ok 5 - marks token_invalid when test fails",
+      "# Subtest: fails safely when crypto dependency is missing",
+      "ok 6 - fails safely when crypto dependency is missing",
+      "# Subtest: returns social_send_failed when outbound send fails",
+      "ok 8 - returns social_send_failed when outbound send fails",
+      "# Subtest: fails with 400 when connector is not composio",
+      "ok 1 - fails with 400 when connector is not composio",
+      "# Subtest: fails with 501 when COMPOSIO_API_KEY is not set",
+      "ok 2 - fails with 501 when COMPOSIO_API_KEY is not set",
+      "# Subtest: fails with 501 when COMPOSIO_INSTAGRAM_AUTH_CONFIG_ID is not set",
+      "ok 3 - fails with 501 when COMPOSIO_INSTAGRAM_AUTH_CONFIG_ID is not set",
+      "# Subtest: fails with 502 when Composio returns no redirect_url",
+      "ok 10 - fails with 502 when Composio returns no redirect_url",
+      "# Subtest: fails closed when bot token is empty",
+      "ok 3 - fails closed when bot token is empty",
+      "# Subtest: sendMessage fails closed on API error",
+      "ok 4 - sendMessage fails closed on API error",
+      "# Subtest: Durable memory after Hermes failure",
+      "# Subtest: idempotency key prevents duplicate user messages on retry after failure",
+      "ok 2 - idempotency key prevents duplicate user messages on retry after failure",
+      "# Subtest: multiple sequential failures don't corrupt conversation state",
+      "ok 3 - multiple sequential failures don't corrupt conversation state",
+      "# Subtest: conversation message order is preserved after failed Hermes call",
+      "ok 4 - conversation message order is preserved after failed Hermes call",
+      "ok 134 - Durable memory after Hermes failure",
+      "# Subtest: working vs failing URLs differ by /m/ segment presence",
+      "ok 1 - working vs failing URLs differ by /m/ segment presence",
+      "# Subtest: working vs failing URLs may differ by subdomain (media vs media1)",
+      "ok 2 - working vs failing URLs may differ by subdomain (media vs media1)",
+      "# Subtest: searchGif fails gracefully when the API returns an error",
+      "ok 4 - searchGif fails gracefully when the API returns an error",
+      "# Subtest: searchGif fails when API key is missing",
+      "ok 5 - searchGif fails when API key is missing",
+      "# Subtest: empty message fails",
+      "ok 195 - empty message fails",
+      "# Subtest: missing idempotencyKey fails on write routes",
+      "ok 196 - missing idempotencyKey fails on write routes",
+      "# Subtest: unknown enum values fail",
+      "ok 197 - unknown enum values fail",
+      "# Subtest: Hermes runtime invalid enum output fails fast",
+      "ok 215 - Hermes runtime invalid enum output fails fast",
+      "# Subtest: Hermes runtime failure bubbles instead of falling back",
+      "ok 217 - Hermes runtime failure bubbles instead of falling back",
+      "# Subtest: fails clearly when Composio is not configured instead of returning a placeholder URL",
+      "ok 2 - fails clearly when Composio is not configured instead of returning a placeholder URL",
+      "ok 4 - fails closed when bot token is empty",
+      "# Subtest: fails after all retries exhausted",
+      "ok 3 - fails after all retries exhausted",
+      "# fail 3"
+    ],
+    "commands": [
+      "npm test"
+    ]
+  },
+  "repositoryTree": {
+    "capturedAt": "2026-06-18T04:42:23.102Z",
+    "excludeDirs": [
+      "node_modules",
+      ".git",
+      "dist",
+      "build",
+      ".DS_Store"
+    ],
+    "excludePrefixes": [
+      "data"
+    ],
+    "treeIgnoreFlag": "tree -I \"node_modules|.git|dist|build\"",
+    "stats": {
+      "fileCount": 1025,
+      "directoryCount": 301,
+      "pathCount": 1025,
+      "byExtension": {
+        ".js": 385,
+        ".md": 293,
+        ".json": 123,
+        ".mjs": 89,
+        ".py": 35,
+        ".jsx": 30,
+        "(no extension)": 22,
+        ".sql": 19,
+        ".html": 7,
+        ".css": 5,
+        ".pyc": 4,
+        ".template": 3,
+        ".jsonl": 2,
+        ".example": 2,
+        ".toml": 1,
+        ".yml": 1,
+        ".tag": 1,
+        ".sha256": 1,
+        ".ini": 1,
+        ".sample": 1
+      }
+    },
+    "treeText": "C:\\Users\\pujan\\OneDrive\\Desktop\\web dev\\webdev 2.0\\hades-os-monorepo/\n├── .gitignore\n├── AGENTS.md\n├── LICENSE\n├── MEMORY.md\n├── NOTICE\n├── opencode.json\n├── package-lock.json\n├── package.json\n├── railway.toml\n├── README.md\n├── vercel.json\n├── .github/\n│   └── workflows/\n│       └── ci.yml\n├── .opencode/\n│   ├── .gitignore\n│   ├── package-lock.json\n│   ├── package.json\n│   └── plans/\n│       ├── 2026-06-13-multi-user-auth-isolation.md\n│       ├── 2026-06-13-social-provider-integration.md\n│       └── 2026-06-13-unit-test-pack.md\n├── .pytest_cache/\n│   ├── .gitignore\n│   ├── CACHEDIR.TAG\n│   ├── README.md\n│   └── v/\n│       └── cache/\n│           ├── lastfailed\n│           └── nodeids\n├── additional-modules/\n│   ├── buildplan/\n│   │   ├── agent_state.json\n│   │   ├── agent_state.sha256\n│   │   └── context_budget.json\n│   ├── context-engineering/\n│   │   ├── opencode.json\n│   │   ├── bin/\n│   │   │   └── context-eng.js\n│   │   ├── lib/\n│   │   │   └── init.js\n│   │   └── templates/\n│   │       ├── AGENTS.md.template\n│   │       ├── MEMORY.md.template\n│   │       ├── opencode.json.template\n│   │       └── scripts/\n│   │           ├── check_gate.py\n│   │           ├── measure_context.py\n│   │           └── render_memory.py\n│   ├── docs/\n│   │   ├── API.md\n│   │   ├── CHANGELOG.md\n│   │   ├── DEPLOY.md\n│   │   ├── DEVLOG_V2.md\n│   │   ├── PUBLISHING.md\n│   │   ├── README.md\n│   │   ├── STARTER_PACK.md\n│   │   ├── architecture/\n│   │   │   ├── API_DOCUMENTATION_CONTRACT.md\n│   │   │   ├── ARCHITECTURE_GUARDRAILS.md\n│   │   │   ├── CONTRACTS_OVERVIEW.md\n│   │   │   ├── EVAL_AND_CI.md\n│   │   │   ├── MODULE_INTERNAL_CONTRACT.md\n│   │   │   ├── REPO_ARTIFACT_LAYOUT.md\n│   │   │   ├── contracts/\n│   │   │   │   ├── apiDocumentationRegistry.contract.md\n│   │   │   │   ├── architecturePushDevLog.contract.md\n│   │   │   │   ├── asyncJobQueue.contract.md\n│   │   │   │   ├── changelog.jsonl\n│   │   │   │   ├── consolidatedExports.contract.md\n│   │   │   │   ├── documentPersistence.contract.md\n│   │   │   │   ├── fileExchange.contract.md\n│   │   │   │   ├── manifest.json\n│   │   │   │   ├── moduleAgentStateMachine.contract.md\n│   │   │   │   ├── monorepoDeploy.contract.md\n│   │   │   │   ├── pipelineAgentMiniModules.contract.md\n│   │   │   │   ├── planningPhase.contract.md\n│   │   │   │   └── prePushDevLog.contract.md\n│   │   │   └── templates/\n│   │   │       ├── async-job-queue/\n│   │   │       │   ├── createQueueConnection.template.js\n│   │   │       │   ├── enqueue.template.js\n│   │   │       │   ├── inMemoryQueue.adapter.template.js\n│   │   │       │   ├── parse-document.worker.template.js\n│   │   │       │   ├── README.md\n│   │   │       │   └── run-agent-action.worker.template.js\n│   │   │       ├── document-persistence/\n│   │   │       │   ├── README.md\n│   │   │       │   ├── adapters/\n│   │   │       │   │   ├── file-storage.adapter.template.js\n│   │   │       │   │   └── parser.adapter.template.js\n│   │   │       │   ├── migrations/\n│   │   │       │   │   └── 001_document_persistence.sql\n│   │   │       │   ├── repositories/\n│   │   │       │   │   └── document.repository.template.js\n│   │   │       │   ├── routes/\n│   │   │       │   │   └── upload.routes.template.js\n│   │   │       │   └── services/\n│   │   │       │       └── document-ingest.service.template.js\n│   │   │       └── module-agent-state-machine/\n│   │   │           ├── README.md\n│   │   │           ├── agents/\n│   │   │           │   ├── example-agent.machine.template.js\n│   │   │           │   └── manifest.template.json\n│   │   │           ├── events/\n│   │   │           │   └── agent-triggers.template.js\n│   │   │           ├── migrations/\n│   │   │           │   └── 001_agent_state_machine.sql\n│   │   │           ├── repositories/\n│   │   │           │   └── agent-run.repository.template.js\n│   │   │           ├── routes/\n│   │   │           │   └── agent.routes.template.js\n│   │   │           └── services/\n│   │   │               ├── agent-actions.template.js\n│   │   │               └── agent-runner.service.template.js\n│   │   └── model-condenser/\n│   │       └── API.md\n│   ├── file-exchange/\n│   │   ├── README.md\n│   │   ├── exports/\n│   │   │   ├── .gitkeep\n│   │   │   ├── EXPORT_MANIFEST.json\n│   │   │   └── README.md\n│   │   └── imports/\n│   │       └── .gitkeep\n│   ├── phase_builder/\n│   │   ├── __init__.py\n│   │   ├── phase_01/\n│   │   │   ├── __init__.py\n│   │   │   └── state.py\n│   │   ├── phase_02/\n│   │   │   ├── __init__.py\n│   │   │   └── budget.py\n│   │   └── phase_03/\n│   │       ├── __init__.py\n│   │       └── gates.py\n│   ├── phase-builder/\n│   │   ├── pytest.ini\n│   │   ├── phase_builder/\n│   │   │   ├── __init__.py\n│   │   │   ├── phase_01/\n│   │   │   │   ├── __init__.py\n│   │   │   │   └── state.py\n│   │   │   ├── phase_02/\n│   │   │   │   ├── __init__.py\n│   │   │   │   └── budget.py\n│   │   │   └── phase_03/\n│   │   │       ├── __init__.py\n│   │   │       └── gates.py\n│   │   └── tests/\n│   │       ├── __init__.py\n│   │       ├── phase_01/\n│   │       │   ├── __init__.py\n│   │       │   └── test_state.py\n│   │       ├── phase_02/\n│   │       │   ├── __init__.py\n│   │       │   └── test_budget.py\n│   │       └── phase_03/\n│   │           ├── __init__.py\n│   │           └── test_gates.py\n│   ├── scripts/\n│   │   ├── check_agents_contract.py\n│   │   ├── check_gate.py\n│   │   ├── check_prompt_cache_shape.py\n│   │   ├── gen_compaction_payload.py\n│   │   ├── measure_context.py\n│   │   ├── measure_opencode_cache_run.md\n│   │   ├── render_memory.py\n│   │   ├── RUNTIME_COMPACTION_SMOKE_TEST.md\n│   │   ├── watch_opencode_compaction_logs.py\n│   │   ├── __pycache__/\n│   │   │   ├── check_gate.cpython-312.pyc\n│   │   │   └── measure_context.cpython-312.pyc\n│   │   └── tests/\n│   │       ├── test_auto_compaction.py\n│   │       ├── test_check_gate.py\n│   │       ├── test_compaction_payload_generator.py\n│   │       ├── test_measure_context.py\n│   │       └── __pycache__/\n│   │           ├── test_auto_compaction.cpython-312-pytest-9.1.0.pyc\n│   │           └── test_check_gate.cpython-312-pytest-9.1.0.pyc\n│   └── work-log/\n│       ├── INDEX.md\n│       ├── README.md\n│       ├── dev-logs/\n│       │   ├── README.md\n│       │   ├── agent/\n│       │   │   └── 006_2026-06-14_dev-log-agent_supabase-persist-fix.json\n│       │   ├── human/\n│       │   │   └── 006_2026-06-14_dev-log_supabase-persist-fix.md\n│       │   ├── schemas/\n│       │   │   └── dev-log-agent.v1.schema.json\n│       │   └── templates/\n│       │       └── dev-log-human.template.md\n│       ├── handoffs/\n│       │   ├── 010_2026-06-12_12-30_handoff_hermes-discord-gif-minion-runtime.md\n│       │   ├── 011_2026-06-14_handoff_minions-ui-validation-chat-markup-cleanup.md\n│       │   ├── 012_2026-06-14_handoff_app-login-mvp-production-routing-uuid-persistence.md\n│       │   ├── 013_2026-06-17_00-10_handoff_hades-conversational-minion-flow.md\n│       │   ├── 014_2026-06-17_02-20_handoff_social-command-routing-and-minion-v2-cleanup.md\n│       │   └── README.md\n│       ├── planning/\n│       │   └── .gitkeep\n│       ├── sessions/\n│       │   ├── 2026-06-06-audit-and-memory-setup.md\n│       │   ├── 2026-06-06-fsm-template-audit.md\n│       │   ├── 2026-06-06-generic-rename-and-enforcement-test.md\n│       │   ├── 2026-06-12-hermes-discord-gif-minion-runtime-plan-docs.md\n│       │   ├── 2026-06-12-hermes-discord-gif-runtime-handoff.md\n│       │   ├── 2026-06-13-clean-legacy-css.md\n│       │   ├── 2026-06-13-handoff-multi-user-auth.md\n│       │   ├── 2026-06-13-handoff-wire-auth-isolation.md\n│       │   ├── 2026-06-13-handoff-wire-supabase-post-auth.md\n│       │   ├── 2026-06-13-multi-user-auth-tdd.md\n│       │   ├── 2026-06-13-push-gates.md\n│       │   ├── 2026-06-13-visual-parity-fixes-2.md\n│       │   ├── 2026-06-13-visual-parity-prototype.md\n│       │   ├── 2026-06-13-wire-auth-isolation.md\n│       │   ├── 2026-06-13-wiring-tests-multi-user-auth.md\n│       │   ├── 2026-06-14-chat-cards-pending-voice.md\n│       │   ├── 2026-06-14-context-budget-tooling-fixes.md\n│       │   ├── 2026-06-14-deploy-readiness-audit-issues.md\n│       │   ├── 2026-06-14-devlog-fill-deploy-readiness.md\n│       │   ├── 2026-06-14-fix-frontend-api-auth-wiring.md\n│       │   ├── 2026-06-14-minions-ui-port.md\n│       │   ├── 2026-06-14-minions-ui-validation-chat-markup-cleanup.md\n│       │   ├── 2026-06-14-persistence-output-contract-deployment-audit.md\n│       │   ├── 2026-06-14-railway-hermes-runtime-fix-greened-tests.md\n│       │   ├── 2026-06-14-railway-hermes-runtime-fix.md\n│       │   ├── 2026-06-14-railway-root-env-example.md\n│       │   ├── 2026-06-14-runtime-compaction-smoke-test.md\n│       │   ├── 2026-06-14-stabilize-agents-md-cache.md\n│       │   ├── 2026-06-14-telegram-crypto-frontend-auth-supabase-ops.md\n│       │   ├── 2026-06-14-telegram-setup-card-frontend.md\n│       │   ├── 2026-06-14-telegram-socials-layout-fix.md\n│       │   ├── 2026-06-14-vite-env-var-injection-fix.md\n│       │   ├── 2026-06-14-wire-supabase-chat-scoped-repos.md\n│       │   ├── 2026-06-15-fix-agent-execution-persist.md\n│       │   ├── 2026-06-15-hermes-smoke-fix-and-final-verify.md\n│       │   ├── 2026-06-15-phase-1-portability-implementation.md\n│       │   ├── 2026-06-15-phase-10-adr-lifecycle.md\n│       │   ├── 2026-06-15-phase-2-contracts.md\n│       │   ├── 2026-06-15-phase-3-metadata-catalog.md\n│       │   ├── 2026-06-15-phase-4-module-manifests.md\n│       │   ├── 2026-06-15-phase-5-generated-indexes.md\n│       │   ├── 2026-06-15-phase-6-enforcement.md\n│       │   ├── 2026-06-15-phase-7-implementation.md\n│       │   ├── 2026-06-15-phase-8-architecture-fitness.md\n│       │   ├── 2026-06-15-phase-9-route-api-docs.md\n│       │   ├── 2026-06-15-portable-hostability-red-tests.md\n│       │   ├── 2026-06-15-repo-architecture-contract-phase0-phase1.md\n│       │   ├── 2026-06-15-script-phase-metadata.md\n│       │   ├── 2026-06-15-task-branch-metadata.md\n│       │   ├── 2026-06-15-task-script-handoff-metadata.md\n│       │   ├── 2026-06-16-alert-to-inline-conversion.md\n│       │   ├── 2026-06-16-auth-signup-fixes.md\n│       │   ├── 2026-06-16-discord-github-cards-tdd.md\n│       │   ├── 2026-06-16-telegram-privacy-contract-tests.md\n│       │   ├── 2026-06-17-hades-conversational-minion-flow-slice.md\n│       │   ├── 2026-06-17-hades-telegram-fixes.md\n│       │   ├── 2026-06-17-minion-injection.md\n│       │   ├── 2026-06-17-minion-repository-cache-review-fix.md\n│       │   ├── 2026-06-17-social-command-routing-and-forge-v2-implementation.md\n│       │   ├── 2026-06-17-social-command-routing-red-tests-handoff.md\n│       │   ├── 2026-06-17-telegram-token-delete-route.md\n│       │   ├── 2026-06-18-hermes-railway-probe-docs.md\n│       │   ├── 2026-06-18-slack-oauth-extension-css-rls.md\n│       │   ├── 2026-06-18-workflow-orchestrator-wiring.md\n│       │   ├── INDEX.md\n│       │   └── README.md\n│       └── study-docs/\n│           ├── 2026-06-06-context-engineering-for-llm-agents.md\n│           └── README.md\n├── agents/\n│   ├── hooks.json\n│   ├── commands/\n│   │   ├── architecture-push-log.md\n│   │   ├── planning-audit-log.md\n│   │   ├── pre-push-dev-log.md\n│   │   └── push.md\n│   └── hooks/\n│       └── before-agent-push.mjs\n├── backend/\n│   ├── .dockerignore\n│   ├── .env\n│   ├── .env.example\n│   ├── .gitignore\n│   ├── Dockerfile\n│   ├── package-lock.json\n│   ├── package.json\n│   ├── db/\n│   │   └── migrations/\n│   │       └── .gitkeep\n│   ├── scripts/\n│   │   ├── boundary-lint.test.mjs\n│   │   ├── check-module-boundaries.mjs\n│   │   ├── check-module-layers.mjs\n│   │   ├── check-parent-mini-modules.mjs\n│   │   └── contract-discovery.test.mjs\n│   └── src/\n│       ├── core/\n│       │   ├── app.js\n│       │   ├── module-loader.js\n│       │   ├── server.js\n│       │   ├── startup-log.js\n│       │   └── __tests__/\n│       │       └── serverStartup.test.js\n│       ├── modules/\n│       │   ├── .gitkeep\n│       │   ├── _reference/\n│       │   │   ├── index.js\n│       │   │   ├── module.json\n│       │   │   ├── README.md\n│       │   │   ├── adapters/\n│       │   │   │   └── README.md\n│       │   │   ├── config/\n│       │   │   │   └── index.js\n│       │   │   ├── domain/\n│       │   │   │   └── README.md\n│       │   │   ├── events/\n│       │   │   │   └── index.js\n│       │   │   ├── prompts/\n│       │   │   │   ├── manifest.json\n│       │   │   │   └── templates/\n│       │   │   │       └── example.prompt.js\n│       │   │   ├── repositories/\n│       │   │   │   └── .gitkeep\n│       │   │   ├── routes/\n│       │   │   │   ├── health.routes.js\n│       │   │   │   └── index.js\n│       │   │   ├── schemas/\n│       │   │   │   └── health.schema.js\n│       │   │   ├── services/\n│       │   │   │   └── health.service.js\n│       │   │   ├── tests/\n│       │   │   │   ├── integration/\n│       │   │   │   │   └── health.routes.test.js\n│       │   │   │   └── unit/\n│       │   │   │       └── health.service.test.js\n│       │   │   └── utils/\n│       │   │       └── index.js\n│       │   ├── auth/\n│       │   │   ├── index.js\n│       │   │   ├── module.json\n│       │   │   ├── middleware/\n│       │   │   │   └── attachAuthContext.js\n│       │   │   ├── routes/\n│       │   │   │   └── auth.routes.js\n│       │   │   ├── services/\n│       │   │   │   ├── authMiddleware.js\n│       │   │   │   ├── createDiscordBotConnectionFromRequest.js\n│       │   │   │   ├── createHermesJobFromRequest.js\n│       │   │   │   └── verifySupabaseSession.js\n│       │   │   └── tests/\n│       │   │       ├── integration/\n│       │   │       │   └── authChain.integration.test.js\n│       │   │       └── unit/\n│       │   │           ├── attachAuthContext.test.js\n│       │   │           ├── auth.discord.connection.contract.test.js\n│       │   │           ├── auth.hermes.context.test.js\n│       │   │           ├── authMiddleware.test.js\n│       │   │           ├── browserConfig.routes.test.js\n│       │   │           ├── browserConfig.secureKeys.test.js\n│       │   │           └── verifySupabaseSession.test.js\n│       │   ├── hades/\n│       │   │   ├── data.js\n│       │   │   ├── hadesAppContext.js\n│       │   │   ├── index.js\n│       │   │   ├── module.json\n│       │   │   ├── parser.js\n│       │   │   ├── validators.js\n│       │   │   ├── __tests__/\n│       │   │   │   ├── chatConversationType.integration.test.js\n│       │   │   │   ├── chatOutputContract.unit.test.js\n│       │   │   │   ├── chatPersistence.test.js\n│       │   │   │   ├── forgeChatMemory.integration.test.js\n│       │   │   │   ├── generalChatNavigation.integration.test.js\n│       │   │   │   ├── hadesIndex.runtimeWiring.test.js\n│       │   │   │   ├── hadesRepository.wiring.test.js\n│       │   │   │   ├── hadesRoutes.auth.wiring.test.js\n│       │   │   │   ├── hermesDiscoveryDocs.ops.test.js\n│       │   │   │   ├── liveAssignmentScope.integration.test.js\n│       │   │   │   ├── liveChatHermesScope.integration.test.js\n│       │   │   │   ├── liveDiscordTokenScope.integration.test.js\n│       │   │   │   ├── liveGitHubTokenScope.integration.test.js\n│       │   │   │   ├── liveTelegramE2E.test.js\n│       │   │   │   ├── liveTelegramTokenCrypto.integration.test.js\n│       │   │   │   ├── liveTelegramTokenScope.integration.test.js\n│       │   │   │   ├── liveTriggerIsolation.integration.test.js\n│       │   │   │   ├── liveTwoUserIsolation.integration.test.js\n│       │   │   │   ├── supabaseEnv.ops.test.js\n│       │   │   │   ├── supabaseSchema.ops.test.js\n│       │   │   │   └── workflowRuntimeWiring.integration.test.js\n│       │   │   ├── config/\n│       │   │   │   └── index.js\n│       │   │   ├── migrations/\n│       │   │   │   ├── 001_hades_tables.sql\n│       │   │   │   ├── 002_conversation_type.sql\n│       │   │   │   ├── 003_processed_telegram_updates.sql\n│       │   │   │   ├── 004_telegram_conversation_modes.sql\n│       │   │   │   ├── 005_hades_extension_keys.sql\n│       │   │   │   ├── 006_hades_instagram_connections_safe.sql\n│       │   │   │   ├── 006_hades_instagram_connections.sql\n│       │   │   │   ├── 007_hades_extension_runtime_safe.sql\n│       │   │   │   ├── 007_hades_extension_runtime.sql\n│       │   │   │   ├── 008_hades_minions_icon_safe.sql\n│       │   │   │   ├── 008_hades_minions_icon.sql\n│       │   │   │   ├── 009_hades_workflow_tables_safe.sql\n│       │   │   │   ├── 009_hades_workflow_tables.sql\n│       │   │   │   ├── 010_hades_slack_connections.sql\n│       │   │   │   └── 011_hades_slack_rls.sql\n│       │   │   ├── plans/\n│       │   │   ├── prompts/\n│       │   │   │   ├── forgeChatPrompt.js\n│       │   │   │   ├── generalChatPrompt.js\n│       │   │   │   └── __tests__/\n│       │   │   │       ├── forgeChatPrompt.test.js\n│       │   │   │       └── generalChatPrompt.test.js\n│       │   │   ├── repositories/\n│       │   │   │   ├── _supabase.js\n│       │   │   │   ├── agentExecutionRepository.js\n│       │   │   │   ├── approvalRepository.js\n│       │   │   │   ├── assignmentRepository.js\n│       │   │   │   ├── contextSpaceRepository.js\n│       │   │   │   ├── conversationRepository.js\n│       │   │   │   ├── discordConnectionRepository.js\n│       │   │   │   ├── documentRepository.js\n│       │   │   │   ├── gitHubConnectionRepository.js\n│       │   │   │   ├── hades.repository.js\n│       │   │   │   ├── instagramConnectionRepository.js\n│       │   │   │   ├── memoryRecordRepository.js\n│       │   │   │   ├── minionLogsRepository.js\n│       │   │   │   ├── minionRepository.js\n│       │   │   │   ├── notificationsRepository.js\n│       │   │   │   ├── pageCaptureRepository.js\n│       │   │   │   ├── processedUpdateRepository.js\n│       │   │   │   ├── slackConnectionRepository.js\n│       │   │   │   ├── telegramConnectionRepository.js\n│       │   │   │   ├── telegramConversationModeRepository.js\n│       │   │   │   └── tests/\n│       │   │   │       └── unit/\n│       │   │   │           ├── agentExecutionRepository.test.js\n│       │   │   │           ├── assignmentRepository.scope.test.js\n│       │   │   │           ├── conversationRepository.scope.test.js\n│       │   │   │           ├── conversationSeparation.test.js\n│       │   │   │           ├── conversationType.test.js\n│       │   │   │           ├── discordConnectionRepository.test.js\n│       │   │   │           ├── minionLogsRepository.test.js\n│       │   │   │           ├── minionRepository.scope.test.js\n│       │   │   │           ├── minionRepository.supabaseCache.test.js\n│       │   │   │           ├── notificationsRepository.test.js\n│       │   │   │           └── telegramConnectionRepository.test.js\n│       │   │   ├── routes/\n│       │   │   │   └── hades.routes.js\n│       │   │   ├── runtime/\n│       │   │   │   ├── hermesContextBuilder.js\n│       │   │   │   ├── hermesOutputValidator.js\n│       │   │   │   ├── minionAssignmentRuntime.js\n│       │   │   │   ├── verifySocialAccount.js\n│       │   │   │   └── tests/\n│       │   │   │       └── unit/\n│       │   │   │           ├── hermesContextBuilder.test.js\n│       │   │   │           ├── hermesOutputValidator.test.js\n│       │   │   │           ├── minionAssignmentRuntime.auth.test.js\n│       │   │   │           └── verifySocialAccount.test.js\n│       │   │   ├── security/\n│       │   │   │   ├── tokenCrypto.js\n│       │   │   │   └── __tests__/\n│       │   │   │       └── tokenCrypto.test.js\n│       │   │   ├── services/\n│       │   │   │   ├── botTokenProvider.js\n│       │   │   │   ├── chatActions.js\n│       │   │   │   ├── chatCards.js\n│       │   │   │   ├── chatModeGuard.js\n│       │   │   │   ├── cors.js\n│       │   │   │   ├── discordBotRuntime.service.js\n│       │   │   │   ├── discordClient.js\n│       │   │   │   ├── discordHermesCommandFlow.service.js\n│       │   │   │   ├── giphyProvider.service.js\n│       │   │   │   ├── hades.service.js\n│       │   │   │   ├── hadesCommandParser.js\n│       │   │   │   ├── hermes.service.js\n│       │   │   │   ├── hermesRuntime.service.js\n│       │   │   │   ├── mediaUrlVerifier.js\n│       │   │   │   ├── minionAssignmentRuntime.service.js\n│       │   │   │   ├── openRouterClient.js\n│       │   │   │   ├── socialCommandRouting.js\n│       │   │   │   ├── telegramBotRuntime.service.js\n│       │   │   │   └── telegramClient.js\n│       │   │   ├── souls/\n│       │   │   │   ├── hades.soul.md\n│       │   │   │   └── loadSoul.js\n│       │   │   ├── studies/\n│       │   │   │   └── autonomous-hermes-cloud-study.md\n│       │   │   ├── tests/\n│       │   │   │   ├── contracts/\n│       │   │   │   │   ├── hades.discord-bot-runtime.contract.mjs\n│       │   │   │   │   ├── hades.discord-gif.contract.mjs\n│       │   │   │   │   ├── hades.minion-assignment-runtime.contract.mjs\n│       │   │   │   │   └── hades.telegram-bot-runtime.contract.mjs\n│       │   │   │   ├── e2e/\n│       │   │   │   │   └── instagramComposio.e2e.test.js\n│       │   │   │   ├── integration/\n│       │   │   │   │   ├── hades.bootstrap.routes.test.js\n│       │   │   │   │   ├── hades.readiness.routes.test.js\n│       │   │   │   │   ├── hades.routes.test.js\n│       │   │   │   │   ├── hermesDockerSmoke.test.js\n│       │   │   │   │   └── instagramConnect.integration.test.js\n│       │   │   │   └── unit/\n│       │   │   │       ├── botTokenProvider.test.js\n│       │   │   │       ├── chatActions.test.js\n│       │   │   │       ├── chatCards.test.js\n│       │   │   │       ├── chatClearing.test.js\n│       │   │   │       ├── chatModeGuard.test.js\n│       │   │   │       ├── cors.test.js\n│       │   │   │       ├── discordClient.test.js\n│       │   │   │       ├── discordGifMediaVerification.tdd.test.js\n│       │   │   │       ├── durableMemoryAfterFailure.tdd.test.js\n│       │   │   │       ├── extensionRuntime.tdd.test.js\n│       │   │   │       ├── generalChat.prompt.actions.test.js\n│       │   │   │       ├── generalChat.prompt.context.test.js\n│       │   │   │       ├── generalChat.prompt.structuredResults.test.js\n│       │   │   │       ├── gifUrlPattern.tdd.test.js\n│       │   │   │       ├── giphyProvider.test.js\n│       │   │   │       ├── hades.bootstrap.repository.test.js\n│       │   │   │       ├── hades.bootstrap.service.test.js\n│       │   │   │       ├── hades.config.test.js\n│       │   │   │       ├── hades.extension-auth.tdd.test.js\n│       │   │   │       ├── hades.extension-install.tdd.test.js\n│       │   │   │       ├── hades.extension-key-persistence.tdd.test.js\n│       │   │   │       ├── hades.memory-isolation.tdd.test.js\n│       │   │   │       ├── hades.module.wiring.test.js\n│       │   │   │       ├── hades.repository.test.js\n│       │   │   │       ├── hades.routes.auth.test.js\n│       │   │   │       ├── hades.schema.test.js\n│       │   │   │       ├── hades.service.minionScope.test.js\n│       │   │   │       ├── hades.supabase.readback.test.js\n│       │   │   │       ├── hades.supabase.repository.test.js\n│       │   │   │       ├── hades.supabase.wiring.test.js\n│       │   │   │       ├── hades.workflow-build-phases.tdd.test.js\n│       │   │   │       ├── hades.workflow-durable-run-state.tdd.test.js\n│       │   │   │       ├── hades.workflow-orchestrator.tdd.test.js\n│       │   │   │       ├── hadesCommandParser.test.js\n│       │   │   │       ├── hadesSoul.test.js\n│       │   │   │       ├── hermes.service.test.js\n│       │   │   │       ├── hermesContext.test.js\n│       │   │   │       ├── hermesRuntime.binaryResolution.test.js\n│       │   │   │       ├── hermesRuntime.service.test.js\n│       │   │   │       ├── hermesRuntime.writableState.test.js\n│       │   │   │       ├── hermesRuntimeContext.test.js\n│       │   │   │       ├── instagramAuthLink.service.test.js\n│       │   │   │       ├── instagramConnectionRepository.tdd.test.js\n│       │   │   │       ├── instagramSocialRoutes.tdd.test.js\n│       │   │   │       ├── mediaUrlVerifier.tdd.test.js\n│       │   │   │       ├── minion.routes.test.js\n│       │   │   │       ├── multiUserIsolation.regression.test.js\n│       │   │   │       ├── nonHermesFallback.test.js\n│       │   │   │       ├── openRouterClient.test.js\n│       │   │   │       ├── productionUserScoping.test.js\n│       │   │   │       ├── socialCommandRouting.test.js\n│       │   │   │       ├── telegramBotRuntime.test.js\n│       │   │   │       ├── telegramClient.test.js\n│       │   │   │       ├── telegramConnectionRepository.test.js\n│       │   │   │       ├── telegramConversationModeRepository.test.js\n│       │   │   │       ├── telegramGifPipeline.tdd.test.js\n│       │   │   │       ├── telegramSocialRoutes.test.js\n│       │   │   │       ├── telegramWebhookDedup.test.js\n│       │   │   │       ├── toolSummary.prompt.test.js\n│       │   │   │       ├── triggersRoute.test.js\n│       │   │   │       ├── withRetry.test.js\n│       │   │   │       ├── workflowCrudRoutes.tdd.test.js\n│       │   │   │       └── workflowExecution.tdd.test.js\n│       │   │   ├── testUtils/\n│       │   │   │   ├── createHadesTestRuntime.js\n│       │   │   │   └── seedHadesTestData.js\n│       │   │   ├── utils/\n│       │   │   │   └── withRetry.js\n│       │   │   └── workflows/\n│       │   │       ├── browserExtensionContract.js\n│       │   │       ├── durableWorkflowOrchestrator.js\n│       │   │       ├── extensionKeyRepository.js\n│       │   │       ├── externalAdapterRegistry.js\n│       │   │       ├── jobApplicationPlanner.js\n│       │   │       ├── memoryDocumentTools.js\n│       │   │       ├── toolRegistry.js\n│       │   │       ├── workflowAuditRepository.js\n│       │   │       ├── workflowDefinition.contract.js\n│       │   │       ├── workflowOrchestrator.js\n│       │   │       ├── workflowRecoveryService.js\n│       │   │       ├── workflowRepository.js\n│       │   │       └── workflowRunStateRepository.js\n│       │   └── model-condenser/\n│       │       ├── index.js\n│       │       ├── module.json\n│       │       ├── README.md\n│       │       ├── config/\n│       │       │   └── index.js\n│       │       ├── events/\n│       │       │   └── index.js\n│       │       ├── routes/\n│       │       │   ├── health.routes.js\n│       │       │   ├── index.js\n│       │       │   └── modelCondenser.routes.js\n│       │       ├── services/\n│       │       │   ├── health.service.js\n│       │       │   ├── modelCondenser.facade.js\n│       │       │   └── modelCondenser.service.js\n│       │       ├── tests/\n│       │       │   ├── integration/\n│       │       │   │   └── modelCondenser.routes.test.js\n│       │       │   └── unit/\n│       │       │       └── modelCondenser.service.test.js\n│       │       └── utils/\n│       │           └── index.js\n│       ├── shared/\n│       │   ├── agent-runtime/\n│       │   │   ├── createAgentRuntime.js\n│       │   │   ├── createAgentRuntime.test.js\n│       │   │   └── createAgentRuntime.types.js\n│       │   ├── ai/\n│       │   │   └── prompt-registry.js\n│       │   ├── config/\n│       │   │   ├── resolveArtifactPaths.js\n│       │   │   ├── resolveArtifactPaths.test.js\n│       │   │   └── resolveArtifactPaths.types.js\n│       │   ├── contracts/\n│       │   │   ├── architecturePushDevLog.contract.js\n│       │   │   ├── asyncJobQueue.contract.js\n│       │   │   ├── consolidatedExports.contract.js\n│       │   │   ├── documentPersistence.contract.js\n│       │   │   ├── moduleAgentStateMachine.contract.js\n│       │   │   ├── monorepoDeploy.contract.js\n│       │   │   ├── planningPhase.contract.js\n│       │   │   └── prePushDevLog.contract.js\n│       │   ├── db/\n│       │   │   ├── openDatabase.js\n│       │   │   ├── postgres.js\n│       │   │   ├── requirePostgres.js\n│       │   │   └── sqlite.js\n│       │   ├── domain/\n│       │   │   └── case-filing/\n│       │   │       └── core-models.js\n│       │   ├── events/\n│       │   │   └── index.js\n│       │   ├── http/\n│       │   │   ├── cors.js\n│       │   │   └── errors.js\n│       │   ├── queue/\n│       │   │   ├── createQueueConnection.js\n│       │   │   ├── enqueue.js\n│       │   │   ├── inMemoryQueue.adapter.js\n│       │   │   └── registerWorkers.js\n│       │   ├── storage/\n│       │   │   ├── resolveDocumentStoragePaths.js\n│       │   │   ├── resolveDocumentStoragePaths.test.js\n│       │   │   └── resolveDocumentStoragePaths.types.js\n│       │   ├── testing/\n│       │   │   ├── create-test-app.js\n│       │   │   └── invoke-app.js\n│       │   └── utils/\n│       │       ├── consolidatedExport.js\n│       │       ├── consolidatedExport.test.js\n│       │       ├── fileExchangeCleanup.js\n│       │       ├── fileExchangeCleanup.test.js\n│       │       ├── formatExchangeTimestamp.js\n│       │       ├── formatExchangeTimestamp.test.js\n│       │       ├── pdf-binary.js\n│       │       ├── traceId.js\n│       │       └── zipDirectory.js\n│       └── testUtils/\n│           └── createTestSupabaseAuth.js\n├── consolidated-files/\n│   └── consolidated-models.json\n├── docs/\n│   ├── API.md\n│   ├── CHANGELOG.md\n│   ├── DEPLOY.md\n│   ├── DEVLOG_V2.md\n│   ├── hades-ui-qa-issue-draft.md\n│   ├── INDEX.md\n│   ├── legacy-registry.json\n│   ├── PUBLISHING.md\n│   ├── README.md\n│   ├── STARTER_PACK.md\n│   ├── architecture/\n│   │   ├── API_DOCUMENTATION_CONTRACT.md\n│   │   ├── ARCHITECTURE_GUARDRAILS.md\n│   │   ├── CONTRACTS_OVERVIEW.md\n│   │   ├── EVAL_AND_CI.md\n│   │   ├── MODULE_INTERNAL_CONTRACT.md\n│   │   ├── REPO_ARTIFACT_LAYOUT.md\n│   │   ├── adr/\n│   │   │   ├── 0001-contract-document-format.md\n│   │   │   ├── 0002-metadata-catalog-structure.md\n│   │   │   ├── 0003-module-manifest-convention.md\n│   │   │   ├── 0004-generated-index-strategy.md\n│   │   │   ├── 0005-architecture-enforcement-lints.md\n│   │   │   ├── 0006-doc-canonicalization.md\n│   │   │   ├── 0007-architecture-fitness-tests.md\n│   │   │   ├── 0008-api-documentation-standards.md\n│   │   │   ├── INDEX.md\n│   │   │   └── README.md\n│   │   ├── contracts/\n│   │   │   ├── adrLifecycle.contract.md\n│   │   │   ├── apiDocumentationRegistry.contract.md\n│   │   │   ├── architectureFitness.contract.md\n│   │   │   ├── architecturePushDevLog.contract.md\n│   │   │   ├── asyncJobQueue.contract.md\n│   │   │   ├── changelog.jsonl\n│   │   │   ├── consolidatedExports.contract.md\n│   │   │   ├── docCanonicalSource.contract.md\n│   │   │   ├── documentPersistence.contract.md\n│   │   │   ├── fileExchange.contract.md\n│   │   │   ├── manifest.json\n│   │   │   ├── moduleAgentStateMachine.contract.md\n│   │   │   ├── moduleMetadata.contract.md\n│   │   │   ├── modulePublicApi.contract.md\n│   │   │   ├── monorepoDeploy.contract.md\n│   │   │   ├── pipelineAgentMiniModules.contract.md\n│   │   │   ├── planningPhase.contract.md\n│   │   │   ├── prePushDevLog.contract.md\n│   │   │   ├── repoCatalog.contract.md\n│   │   │   ├── routeManifest.contract.md\n│   │   │   └── taskArtifactLayout.contract.md\n│   │   └── templates/\n│   │       ├── async-job-queue/\n│   │       │   ├── createQueueConnection.template.js\n│   │       │   ├── enqueue.template.js\n│   │       │   ├── inMemoryQueue.adapter.template.js\n│   │       │   ├── parse-document.worker.template.js\n│   │       │   ├── README.md\n│   │       │   └── run-agent-action.worker.template.js\n│   │       ├── document-persistence/\n│   │       │   ├── README.md\n│   │       │   ├── adapters/\n│   │       │   │   ├── file-storage.adapter.template.js\n│   │       │   │   └── parser.adapter.template.js\n│   │       │   ├── migrations/\n│   │       │   │   └── 001_document_persistence.sql\n│   │       │   ├── repositories/\n│   │       │   │   └── document.repository.template.js\n│   │       │   ├── routes/\n│   │       │   │   └── upload.routes.template.js\n│   │       │   └── services/\n│   │       │       └── document-ingest.service.template.js\n│   │       └── module-agent-state-machine/\n│   │           ├── README.md\n│   │           ├── agents/\n│   │           │   ├── example-agent.machine.template.js\n│   │           │   └── manifest.template.json\n│   │           ├── events/\n│   │           │   └── agent-triggers.template.js\n│   │           ├── migrations/\n│   │           │   └── 001_agent_state_machine.sql\n│   │           ├── repositories/\n│   │           │   └── agent-run.repository.template.js\n│   │           ├── routes/\n│   │           │   └── agent.routes.template.js\n│   │           └── services/\n│   │               ├── agent-actions.template.js\n│   │               └── agent-runner.service.template.js\n│   ├── auth/\n│   │   └── API.md\n│   ├── hades/\n│   │   └── API.md\n│   ├── hades-mvp-handoff/\n│   │   └── hades-mvp-codex-handoff/\n│   │       ├── manifest.json\n│   │       ├── README.md\n│   │       ├── docs/\n│   │       │   ├── bot-creator-chat-pattern.md\n│   │       │   ├── data-model.md\n│   │       │   ├── mvp-scope.md\n│   │       │   ├── route-map.md\n│   │       │   └── ux-direction.md\n│   │       ├── implementation/\n│   │       │   ├── codex-implementation-handoff.md\n│   │       │   ├── component-breakdown.md\n│   │       │   ├── suggested-react-structure.md\n│   │       │   └── test-checklist.md\n│   │       └── prototype/\n│   │           └── hades-mvp-interactive.html\n│   ├── hermes/\n│   │   ├── hermes-discovery.json\n│   │   ├── hermes-discovery.md\n│   │   ├── MAINTENANCE.md\n│   │   └── README.md\n│   ├── model-condenser/\n│   │   └── API.md\n│   ├── modules/\n│   │   ├── INDEX.md\n│   │   └── hades/\n│   │       └── routes.json\n│   └── tasks/\n│       ├── INDEX.md\n│       └── repo-architecture-contract/\n│           ├── ACCEPTANCE.md\n│           ├── FINAL_ACCEPTANCE.md\n│           ├── PROJECT_PLAN.md\n│           └── README.md\n├── extension/\n│   ├── package-lock.json\n│   ├── package.json\n│   ├── popup.html\n│   ├── vite.config.mjs\n│   ├── public/\n│   │   └── manifest.json\n│   ├── src/\n│   │   ├── hades-extension.css\n│   │   ├── popup.jsx\n│   │   ├── api/\n│   │   │   └── hadesExtensionClient.js\n│   │   └── surfaces/\n│   │       ├── ApprovalQueuePanel.jsx\n│   │       ├── ContextUploadPanel.jsx\n│   │       ├── HadesChatPanel.jsx\n│   │       ├── HadesExtensionApp.jsx\n│   │       ├── PageCapturePanel.jsx\n│   │       ├── TextContextSpacesPanel.jsx\n│   │       ├── WorkflowDetailPanel.jsx\n│   │       └── WorkflowListPanel.jsx\n│   └── tests/\n│       └── extension-e2e.test.mjs\n├── file-exchange/\n│   ├── README.md\n│   ├── exports/\n│   │   ├── .gitkeep\n│   │   ├── consolidated-models.json\n│   │   ├── EXPORT_MANIFEST.json\n│   │   ├── README.md\n│   │   ├── 2026-06-17_21-13-03Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-17_21-13-04Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-17_21-31-32Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-17_21-56-23Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-17_21-56-24Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-17_21-57-50Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-17_22-00-43Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-17_22-02-17Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-17_22-02-18Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-17_22-06-31Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-17_22-06-32Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-17_22-09-35Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-17_23-07-36Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-18_01-59-40Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-18_02-23-30Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-18_02-24-55Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   ├── 2026-06-18_02-37-15Z_consolidated/\n│   │   │   ├── consolidated-models.json\n│   │   │   └── manifest.json\n│   │   └── 2026-06-18_02-46-34Z_consolidated/\n│   │       ├── consolidated-models.json\n│   │       └── manifest.json\n│   └── imports/\n│       ├── .gitkeep\n│       ├── hades_extension_only_react_prototype.html\n│       ├── hades_minion_preview_v5.html\n│       └── hades_os_post_login_ux_v4.html\n├── frontend/\n│   ├── .env.example\n│   ├── index.html\n│   ├── package-lock.json\n│   ├── package.json\n│   ├── vercel.json\n│   ├── vite.config.js\n│   ├── src/\n│   │   ├── main.jsx\n│   │   ├── api/\n│   │   │   ├── apiUrl.js\n│   │   │   └── apiUrl.test.js\n│   │   ├── archive/\n│   │   │   └── hades/\n│   │   │       ├── HomeScreen.jsx\n│   │   │       ├── ScreenHeader.jsx\n│   │   │       └── supabaseBrowserConfig.js\n│   │   ├── auth/\n│   │   │   ├── authClient.js\n│   │   │   ├── authClient.test.js\n│   │   │   ├── AuthProvider.jsx\n│   │   │   ├── authRedirects.js\n│   │   │   ├── authRedirects.test.js\n│   │   │   ├── loginHelpers.js\n│   │   │   ├── loginHelpers.test.js\n│   │   │   ├── LoginPage.jsx\n│   │   │   ├── LoginPage.test.js\n│   │   │   ├── loginTemplate.html\n│   │   │   ├── loginTemplateParts.js\n│   │   │   ├── loginTemplateParts.test.js\n│   │   │   ├── supabaseClient.js\n│   │   │   └── supabaseClient.test.js\n│   │   ├── core/\n│   │   │   ├── App.jsx\n│   │   │   └── moduleRegistry.jsx\n│   │   ├── modules/\n│   │   │   ├── _reference/\n│   │   │   │   ├── index.jsx\n│   │   │   │   ├── module.json\n│   │   │   │   ├── README.md\n│   │   │   │   ├── components/\n│   │   │   │   │   └── ModuleHealthCard.jsx\n│   │   │   │   ├── hooks/\n│   │   │   │   │   └── use-module-health.js\n│   │   │   │   ├── pages/\n│   │   │   │   │   └── _referencePage.jsx\n│   │   │   │   ├── prompts/\n│   │   │   │   │   └── README.md\n│   │   │   │   ├── schemas/\n│   │   │   │   │   └── health.schema.js\n│   │   │   │   ├── services/\n│   │   │   │   │   └── health-api.js\n│   │   │   │   ├── tests/\n│   │   │   │   │   └── unit/\n│   │   │   │   │       └── health.schema.test.js\n│   │   │   │   └── utils/\n│   │   │   │       └── index.js\n│   │   │   └── hades/\n│   │   │       ├── index.jsx\n│   │   │       ├── module.json\n│   │   │       ├── components/\n│   │   │       │   ├── ChatBubble.js\n│   │   │       │   ├── DiscordSetupCard.jsx\n│   │   │       │   ├── GitHubSetupCard.jsx\n│   │   │       │   ├── InstagramSetupCard.jsx\n│   │   │       │   └── TelegramSetupCard.jsx\n│   │   │       ├── extension/\n│   │   │       │   ├── components/\n│   │   │       │   │   └── ExtensionInstallCard.jsx\n│   │   │       │   ├── services/\n│   │   │       │   │   └── extensionInstallApi.js\n│   │   │       │   └── utils/\n│   │   │       │       └── extensionInstallViewModel.js\n│   │   │       ├── pages/\n│   │   │       │   ├── HadesPrototypeApp.jsx\n│   │   │       │   ├── MinionDetailScreen.jsx\n│   │   │       │   ├── MinionListScreen.jsx\n│   │   │       │   ├── MinionLogsScreen.jsx\n│   │   │       │   └── MinionSlots.jsx\n│   │   │       ├── services/\n│   │   │       │   ├── discordSetup.js\n│   │   │       │   ├── githubSetup.js\n│   │   │       │   ├── hadesApi.js\n│   │   │       │   └── telegramSetup.js\n│   │   │       ├── tests/\n│   │   │       │   └── unit/\n│   │   │       │       ├── AppShell.auth.test.js\n│   │   │       │       ├── catmemeApi.test.js\n│   │   │       │       ├── chatActions.test.js\n│   │   │       │       ├── ChatBubble.test.js\n│   │   │       │       ├── chatPendingCopy.test.js\n│   │   │       │       ├── discordSetup.test.js\n│   │   │       │       ├── DiscordSetupCard.layout.test.js\n│   │   │       │       ├── DiscordSetupCard.test.js\n│   │   │       │       ├── extensionInstallModule.tdd.test.js\n│   │   │       │       ├── frontendAuth.integration.test.js\n│   │   │       │       ├── githubSetup.test.js\n│   │   │       │       ├── GitHubSetupCard.layout.test.js\n│   │   │       │       ├── GitHubSetupCard.test.js\n│   │   │       │       ├── hadesApi.discord.test.js\n│   │   │       │       ├── hadesApi.github.test.js\n│   │   │       │       ├── hadesApi.telegram.test.js\n│   │   │       │       ├── hadesApi.test.js\n│   │   │       │       ├── hadesChatContext.test.js\n│   │   │       │       ├── hadesData.test.js\n│   │   │       │       ├── hadesHostedApi.test.js\n│   │   │       │       ├── hadesHydration.test.js\n│   │   │       │       ├── hadesRoutes.test.js\n│   │   │       │       ├── hadesUxLayout.test.js\n│   │   │       │       ├── hadesViewModel.logic.test.js\n│   │   │       │       ├── hadesViewModel.test.js\n│   │   │       │       ├── inlineGifResponseMapping.tdd.test.js\n│   │   │       │       ├── instagramSocial.tdd.test.js\n│   │   │       │       ├── minionApi.test.js\n│   │   │       │       ├── minionData.test.js\n│   │   │       │       ├── MinionDetailScreen.edit.test.js\n│   │   │       │       ├── MinionDetailScreen.test.js\n│   │   │       │       ├── minionFlow.test.js\n│   │   │       │       ├── MinionListScreen.pagination.test.js\n│   │   │       │       ├── notificationApi.test.js\n│   │   │       │       ├── parser.test.js\n│   │   │       │       ├── sendChat.test.js\n│   │   │       │       ├── socialConnectionPersistence.tdd.test.js\n│   │   │       │       ├── SocialsPage.telegram.test.js\n│   │   │       │       ├── SocialsPage.test.js\n│   │   │       │       ├── SocialsScreen.integration.test.js\n│   │   │       │       ├── TelegramSetupCard.layout.test.js\n│   │   │       │       ├── TelegramSetupCard.test.js\n│   │   │       │       ├── workflowBuildPhases.tdd.test.js\n│   │   │       │       └── workflowExplanation.tdd.test.js\n│   │   │       └── utils/\n│   │   │           ├── chatActions.js\n│   │   │           ├── chatPendingCopy.js\n│   │   │           ├── extensionWorkflowConsole.js\n│   │   │           ├── hadesData.js\n│   │   │           ├── hadesViewModel.js\n│   │   │           ├── minionFlow.js\n│   │   │           ├── minionPreviewData.js\n│   │   │           ├── parser.js\n│   │   │           ├── workflowContextLibrary.js\n│   │   │           ├── workflowCrudContracts.js\n│   │   │           ├── workflowDetailViewModel.js\n│   │   │           ├── workflowExplanation.js\n│   │   │           └── workflowExplanationRenderer.js\n│   │   ├── shared/\n│   │   │   ├── api/\n│   │   │   │   ├── client.js\n│   │   │   │   └── client.test.js\n│   │   │   └── utils/\n│   │   │       └── asyncState.js\n│   │   └── styles/\n│   │       ├── globals.css\n│   │       ├── hadesPrototype.css\n│   │       ├── login.css\n│   │       └── tokens.css\n│   ├── test-hooks/\n│   │   ├── jsx-loader.mjs\n│   │   └── register.mjs\n│   └── tests/\n│       └── loader.mjs\n├── metadata/\n│   ├── adrs.json\n│   ├── apis.json\n│   ├── architecture-fitness.json\n│   ├── catalog.json\n│   ├── contracts.json\n│   ├── dependency-graph.json\n│   ├── modules.json\n│   ├── repo.json\n│   └── tasks.json\n├── scripts/\n│   ├── check-api-docs.mjs\n│   ├── condense-all.mjs\n│   ├── condense-file-structure.mjs\n│   ├── condense-models.mjs\n│   ├── condense-prompts.mjs\n│   ├── consolidated-output.mjs\n│   ├── export-architecture-starter.mjs\n│   ├── export-consolidated-models.mjs\n│   ├── hades-extension-design-handoff.contract.test.mjs\n│   ├── hades-extension-package.tdd.test.mjs\n│   ├── hades-extension-real-build.tdd.test.mjs\n│   ├── hermes-config-sync.mjs\n│   ├── hermes-config-sync.test.mjs\n│   ├── import-to-file-exchange.mjs\n│   ├── lint-contracts.mjs\n│   ├── lint-deploy.mjs\n│   ├── lint-deploy.test.mjs\n│   ├── lint-repo-artifacts.mjs\n│   ├── lint-task-artifacts.mjs\n│   ├── new-module.mjs\n│   ├── package-hades-extension.mjs\n│   ├── plan-finalize.mjs\n│   ├── plan-gate.mjs\n│   ├── README.md\n│   ├── resolve-import-stamp.mjs\n│   ├── run-hades-extension-install-tests.mjs\n│   ├── run-hades-workflow-build-phase-tests.mjs\n│   ├── run-hades-workflow-orchestrator-tests.mjs\n│   ├── run-module-evals.mjs\n│   ├── script-registry.json\n│   ├── smoke-hades-runtime.mjs\n│   ├── smoke-hades-runtime.test.mjs\n│   ├── smoke-hermes-chat.mjs\n│   ├── smoke-hermes-chat.test.mjs\n│   ├── smoke-hermes-context-limit.mjs\n│   ├── smoke-hermes-context-limit.test.mjs\n│   ├── smoke-hermes-runtime.mjs\n│   ├── smoke-hermes-runtime.test.mjs\n│   ├── sync-cli-template.mjs\n│   ├── verify-dev-log.mjs\n│   ├── write-pre-push-dev-log.mjs\n│   ├── core/\n│   │   ├── generate-repo-indexes.mjs\n│   │   ├── lint-adr-lifecycle.mjs\n│   │   ├── lint-architecture-fitness.mjs\n│   │   ├── lint-doc-canonical-source.mjs\n│   │   ├── lint-module-metadata.mjs\n│   │   ├── lint-repo-catalog.mjs\n│   │   └── lint-task-artifacts.mjs\n│   ├── git-hooks/\n│   │   └── pre-push.sample\n│   ├── lib/\n│   │   ├── api-inventory.mjs\n│   │   ├── arch-push-human-format.mjs\n│   │   ├── collect-starter-export-changes.mjs\n│   │   ├── dev-log-human-format.mjs\n│   │   ├── extract-import-specifiers.mjs\n│   │   ├── git-snapshot.mjs\n│   │   ├── module-scaffold.mjs\n│   │   ├── parent-mini-modules.config.mjs\n│   │   ├── parse-cli-arg.mjs\n│   │   ├── plan-artifacts.constants.mjs\n│   │   ├── plan-artifacts.mjs\n│   │   ├── repo-tree.mjs\n│   │   ├── resolve-module-import.mjs\n│   │   └── run-tests.mjs\n│   └── tasks/\n│       ├── INDEX.md\n│       ├── README.md\n│       ├── hermes-core-module-split/\n│       │   ├── metadata.json\n│       │   └── phases/\n│       │       └── phase-1-portability/\n│       │           ├── metadata.json\n│       │           └── portable-hostability.test.mjs\n│       └── repo-architecture-contract/\n│           ├── metadata.json\n│           └── phases/\n│               ├── phase-1-red-tests/\n│               │   ├── lint-repo-architecture-red.mjs\n│               │   ├── metadata.json\n│               │   └── repo-architecture-contract.test.mjs\n│               ├── phase-10-adr-lifecycle/\n│               │   ├── adr-lifecycle.test.mjs\n│               │   └── metadata.json\n│               ├── phase-11-final-acceptance/\n│               │   ├── final-acceptance.test.mjs\n│               │   └── metadata.json\n│               ├── phase-2-contracts/\n│               │   ├── contract-docs.test.mjs\n│               │   ├── metadata.json\n│               │   └── phase-0-1-regression.test.mjs\n│               ├── phase-3-metadata-catalog/\n│               │   ├── metadata-catalog.test.mjs\n│               │   └── metadata.json\n│               ├── phase-4-module-manifests/\n│               │   ├── metadata.json\n│               │   └── module-manifests.test.mjs\n│               ├── phase-5-generated-indexes/\n│               │   ├── generated-indexes.test.mjs\n│               │   └── metadata.json\n│               ├── phase-6-enforcement/\n│               │   ├── enforcement-lints.test.mjs\n│               │   └── metadata.json\n│               ├── phase-7-doc-canonicalization/\n│               │   ├── doc-canonicalization.test.mjs\n│               │   └── metadata.json\n│               ├── phase-8-architecture-fitness/\n│               │   ├── architecture-fitness.test.mjs\n│               │   └── metadata.json\n│               └── phase-9-route-api-docs/\n│                   ├── metadata.json\n│                   └── route-api-docs.test.mjs\n├── tmp_ext_test/\n└── work-log/\n    ├── INDEX.md\n    ├── README.md\n    ├── dev-logs/\n    │   ├── README.md\n    │   ├── agent/\n    │   │   ├── .gitkeep\n    │   │   └── 005_2026-06-14_18-47_dev-log-agent_deploy-readiness-audit.json\n    │   ├── human/\n    │   │   ├── .gitkeep\n    │   │   └── 005_2026-06-14_18-47_dev-log_deploy-readiness-audit.md\n    │   ├── schemas/\n    │   │   └── dev-log-agent.v1.schema.json\n    │   └── templates/\n    │       └── dev-log-human.template.md\n    ├── handoffs/\n    │   ├── 001_2026-06-10_01-10_handoff_hosted-hermes-private-ai.md\n    │   ├── 002_2026-06-10_01-17_handoff_backend-hostable-mvp.md\n    │   ├── 003_2026-06-10_02-05_handoff_hosting-railway-vercel-tdd.md\n    │   ├── 004_2026-06-10_23-12_handoff_hosted-runtime-readiness-tdd.md\n    │   ├── 005_2026-06-12_hermes-runtime-wrapper-tdd.md\n    │   ├── 006_2026-06-12_15-30_handoff_discord-auth-bot-bridge.md\n    │   ├── 007_2026-06-13_handoff_post-login-ux-v4-visual-alignment.md\n    │   ├── 008_2026-06-17_16-37_handoff_hermes-memory-isolation-tdd.md\n    │   ├── 009_2026-06-17_16-51_handoff_hermes-workflow-orchestrator.md\n    │   ├── 010_2026-06-17_handoff_hades-extension-install-and-design.md\n    │   ├── 011_2026-06-17_handoff_real-browser-extension-build-download.md\n    │   ├── 012_2026-06-17_handoff_durable-workflow-run-state-recovery.md\n    │   ├── 013_2026-06-17_handoff_gif-media-verification-chat-rendering.md\n    │   ├── 014_2026-06-17_handoff_extension-api-production-routing.md\n    │   ├── 015_2026-06-17_handoff_instagram-social-connector.md\n    │   ├── 016_2026-06-17_handoff_inline-tenor-gif-rendering.md\n    │   ├── 016_2026-06-17_handoff_instagram-connect-link-real-url.md\n    │   ├── README.md\n    │   └── hermes-core-module-split/\n    │       ├── handoff.md\n    │       └── metadata.json\n    ├── planning/\n    │   ├── .gitkeep\n    │   ├── Hades-os-futureplans.md\n    │   ├── 004_2026-06-10_23-12_hosted-runtime-readiness-tdd/\n    │   │   ├── audit-log.md\n    │   │   ├── manifest.json\n    │   │   └── plan-log.md\n    │   ├── 005_2026-06-11_hermes-runtime-wrapper-tdd/\n    │   │   ├── audit-log.md\n    │   │   ├── plan-log.md\n    │   │   └── test-plan.md\n    │   ├── 006_2026-06-12_hermes-discord-gif-minion-runtime/\n    │   │   ├── audit-log.md\n    │   │   ├── design-log.md\n    │   │   ├── handoff.md\n    │   │   ├── manifest.json\n    │   │   ├── plan-log.md\n    │   │   └── README.md\n    │   ├── 007_2026-06-12_discord-auth-bot-bridge/\n    │   │   ├── audit-log.md\n    │   │   ├── handoff.md\n    │   │   ├── manifest.json\n    │   │   ├── plan-log.md\n    │   │   └── README.md\n    │   ├── 008_2026-06-13_post-login-ux-v4-visual-alignment/\n    │   │   ├── audit-log.md\n    │   │   ├── handoff.md\n    │   │   ├── manifest.json\n    │   │   ├── plan-log.md\n    │   │   ├── README.md\n    │   │   └── test-plan.md\n    │   ├── 009_2026-06-17_16-37_hermes-memory-isolation-tdd/\n    │   │   ├── manifest.json\n    │   │   └── plan-log.md\n    │   └── 010_2026-06-17_16-51_hermes-workflow-orchestrator/\n    │       ├── build-phase-contracts.md\n    │       ├── manifest.json\n    │       └── plan-log.md\n    ├── sessions/\n    │   ├── INDEX.md\n    │   └── README.md\n    ├── study-docs/\n    │   ├── 001_2026-06-10_00-52_study-log_raw-keyboard-app-presses.md\n    │   ├── 002_2026-06-11_hermes-runtime-layer-study-log.md\n    │   ├── 003_2026-06-17_16-37_study-log_hermes-memory-isolation.md\n    │   ├── 004_2026-06-17_16-51_study-log_hermes-workflow-orchestrator.md\n    │   └── README.md\n    └── tasks/\n        ├── INDEX.md\n        ├── README.md\n        ├── hermes-core-module-split/\n        │   ├── metadata.json\n        │   ├── handoffs/\n        │   │   ├── handoff.md\n        │   │   └── metadata.json\n        │   └── phases/\n        │       └── phase-1-portability/\n        │           └── metadata.json\n        └── repo-architecture-contract/\n            ├── metadata.json\n            └── phases/\n                ├── phase-1-red-tests/\n                │   ├── audit-log.md\n                │   ├── metadata.json\n                │   ├── plan.md\n                │   └── test-plan.md\n                ├── phase-10-adr-lifecycle/\n                │   ├── audit-log.md\n                │   ├── metadata.json\n                │   ├── plan.md\n                │   └── test-plan.md\n                ├── phase-11-final-acceptance/\n                │   ├── audit-log.md\n                │   ├── metadata.json\n                │   ├── plan.md\n                │   └── test-plan.md\n                ├── phase-2-contracts/\n                │   ├── audit-log.md\n                │   ├── metadata.json\n                │   ├── plan.md\n                │   └── test-plan.md\n                ├── phase-3-metadata-catalog/\n                │   ├── audit-log.md\n                │   ├── metadata.json\n                │   ├── plan.md\n                │   └── test-plan.md\n                ├── phase-4-module-manifests/\n                │   ├── audit-log.md\n                │   ├── metadata.json\n                │   ├── plan.md\n                │   └── test-plan.md\n                ├── phase-5-generated-indexes/\n                │   ├── audit-log.md\n                │   ├── metadata.json\n                │   ├── plan.md\n                │   └── test-plan.md\n                ├── phase-6-enforcement/\n                │   ├── audit-log.md\n                │   ├── metadata.json\n                │   ├── plan.md\n                │   └── test-plan.md\n                ├── phase-7-doc-canonicalization/\n                │   ├── audit-log.md\n                │   ├── metadata.json\n                │   ├── plan.md\n                │   └── test-plan.md\n                ├── phase-8-architecture-fitness/\n                │   ├── audit-log.md\n                │   ├── metadata.json\n                │   ├── plan.md\n                │   └── test-plan.md\n                └── phase-9-route-api-docs/\n                    ├── metadata.json\n                    ├── plan.md\n                    └── test-plan.md",
+    "flatPathCount": 1025
+  },
+  "changes": {
+    "byArea": {
+      "extension": [
+        "extension/dist/assets/",
+        "extension/dist/manifest.json",
+        "extension/dist/popup.html"
+      ]
+    },
+    "added": [
+      "extension/dist/assets/",
+      "extension/dist/manifest.json",
+      "extension/dist/popup.html"
+    ],
+    "modified": [],
+    "deleted": [],
+    "narrative": [
+      "Created docs/hermes/ with discovery JSON + MD + MAINTENANCE.md",
+      "Added hermesDiscoveryDocs.ops.test.js (20 assertions) to verify doc completeness",
+      "Added dev-log enforcement tests to lint-deploy.test.mjs",
+      "Fixed 28 undocumented API endpoints in docs/API.md and docs/hades/API.md",
+      "Updated agent_state.json and MEMORY.md for hermes-railway-probe-docs phase"
+    ]
+  },
+  "decisions": [
+    {
+      "id": "D1",
+      "decision": "Store Hermes discovery docs in dual JSON+MD format",
+      "rationale": "Agents need machine-readable structured JSON for automated consumption; humans need narrative Markdown for comprehension. JSON is the source of truth, MD mirrors it with context.",
+      "alternativesRejected": [
+        "Single Markdown file only — not parseable by agents without regex",
+        "Single JSON file only — unreadable for humans doing code review"
+      ],
+      "tradeoff": "Dual files must be kept in sync; the ops test enforces this."
+    },
+    {
+      "id": "D2",
+      "decision": "Enforce dev-log existence before push via lint-deploy test suite",
+      "rationale": "Previously the dev-log:pre-push script existed but there was no automated CI test verifying dev-logs are actually created and filled before each push. Adding assertions to lint-deploy.test.mjs makes it a hard gate.",
+      "alternativesRejected": [
+        "Git pre-push hook — would require npm run dev-log:install-hook per clone",
+        "Manual process — would be skipped under time pressure"
+      ],
+      "tradeoff": "Tests run in CI, so dev-log enforcement is async (post-push in CI, not pre-push locally)."
+    }
+  ],
+  "iterations": [
+    {
+      "attempt": 1,
+      "action": "Railway SSH probe: measure Hermes idle RSS",
+      "outcome": "pass — measured ~140 MB via /proc/VmRSS",
+      "blockedBy": ""
+    },
+    {
+      "attempt": 1,
+      "action": "Railway SSH probe: verify skills persistence across process exits",
+      "outcome": "pass — skill created in timed-out session found alive in subsequent skills list",
+      "blockedBy": ""
+    },
+    {
+      "attempt": 3,
+      "action": "Run dev-log:pre-push script with --slug arg",
+      "outcome": "pass — npm run wrapper mangled args; direct node call worked",
+      "blockedBy": "PowerShell npm run -- parsing quirk"
+    }
+  ],
+  "tradeoffs": [
+    "Dual JSON+MD format requires sync effort but serves both agents and humans",
+    "Dev-log enforcement via test suite is async (CI) not synchronous (pre-push hook)"
+  ],
+  "improvements": [
+    "Dev-log FILL fields should be auto-populated by the pre-push script using git diff stats",
+    "Railway SSH quoting issues could be solved with a helper script on the container"
+  ],
+  "regressions": [
+    "None — all 28 API doc additions only add coverage, no behavioral changes"
+  ],
+  "risks": [
+    "Hermes workspace is under /tmp/ — lost on Railway deploy. Persistence requires /data/ volume or Supabase sync.",
+    "Dev-log test enforces logs exist but FILL content might be stale if not manually updated"
+  ],
+  "followUps": [
+    "Probe Hermes idle RSS during active LLM call (vs idle 140 MB)",
+    "Test HERMES_HOME with per-user path isolation on Railway",
+    "Build persistent /data/ volume or Supabase skill sync for Railway deploy survival",
+    "Update docs/hermes/ discovery files with any new findings from future probes"
+  ]
+}

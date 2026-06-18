@@ -197,3 +197,97 @@ test("backend .gitignore blocks local secrets and artifacts", () => {
     assert.ok(gitignore.includes(pattern), `backend/.gitignore must block ${pattern}`);
   }
 });
+
+// ===================================================================
+// Group 8 — Pre-push dev log enforcement
+// ===================================================================
+
+const agentDir = join(repoRoot, "work-log/dev-logs/agent");
+const humanDir = join(repoRoot, "work-log/dev-logs/human");
+
+function getLatestAgentLog() {
+  const files = readdirSync(agentDir).filter(f => f.endsWith(".json") && f !== ".gitkeep").sort();
+  const latest = files[files.length - 1];
+  if (!latest) return null;
+  const path = join(agentDir, latest);
+  const doc = JSON.parse(readFileSync(path, "utf8"));
+  return { path, filename: latest, doc };
+}
+
+function getHumanPathForAgent(agentFilename) {
+  return join(humanDir, agentFilename.replace("_dev-log-agent_", "_dev-log_").replace(/\.json$/, ".md"));
+}
+
+test("dev-log agent JSON exists for current HEAD commit", () => {
+  const headSha = execSync("git rev-parse HEAD", { cwd: repoRoot, encoding: "utf8" }).trim();
+  const log = getLatestAgentLog();
+  assert.ok(log, "at least one agent dev-log must exist in work-log/dev-logs/agent/");
+  assert.equal(log.doc.git?.sha, headSha, `latest agent dev-log must match HEAD sha (${headSha})`);
+});
+
+test("dev-log pair: human MD exists alongside agent JSON", () => {
+  const log = getLatestAgentLog();
+  assert.ok(log, "agent dev-log must exist");
+  const humanPath = getHumanPathForAgent(log.filename);
+  assert.ok(existsSync(humanPath), `human dev-log must exist at ${humanPath}`);
+  const humanContent = readFileSync(humanPath, "utf8");
+  assert.ok(humanContent.length > 100, "human dev-log must have substantial content");
+});
+
+test("dev-log agent JSON has all required top-level keys", () => {
+  const log = getLatestAgentLog();
+  assert.ok(log, "agent dev-log must exist");
+  const required = ["meta", "summary", "apis", "git", "tests", "repositoryTree", "changes", "decisions", "iterations", "risks", "followUps"];
+  for (const key of required) {
+    assert.ok(key in log.doc, `agent dev-log must have key "${key}"`);
+  }
+});
+
+test("dev-log agent JSON summary is filled (not default placeholder)", () => {
+  const log = getLatestAgentLog();
+  assert.ok(log, "agent dev-log must exist");
+  assert.ok(log.doc.summary, "summary must be non-empty");
+  assert.ok(!log.doc.summary.includes("FILL"), "summary must not contain placeholder text 'FILL'");
+  assert.ok(log.doc.summary.length > 20, "summary must be substantive (>20 chars)");
+});
+
+test("dev-log agent JSON has at least one documented decision that is filled", () => {
+  const log = getLatestAgentLog();
+  assert.ok(log, "agent dev-log must exist");
+  assert.ok(Array.isArray(log.doc.decisions), "decisions must be an array");
+  assert.ok(log.doc.decisions.length >= 1, "at least one decision must exist");
+  for (const d of log.doc.decisions) {
+    assert.ok(d.decision && !d.decision.includes("FILL"), `decision "${d.id}" must be filled`);
+    assert.ok(d.rationale && !d.rationale.includes("FILL"), `decision "${d.id}" must have filled rationale`);
+  }
+});
+
+test("dev-log agent JSON git section has changedFiles", () => {
+  const log = getLatestAgentLog();
+  assert.ok(log, "agent dev-log must exist");
+  assert.ok(Array.isArray(log.doc.git?.changedFiles), "git.changedFiles must be an array");
+  assert.ok(log.doc.git.changedFiles.length > 0, "git.changedFiles must list changed files");
+});
+
+test("dev-log agent JSON tests section confirms tests ran", () => {
+  const log = getLatestAgentLog();
+  assert.ok(log, "agent dev-log must exist");
+  assert.ok(log.doc.tests?.ran === true, "tests.ran must be true");
+});
+
+test("dev-log agent JSON repositoryTree has treeText", () => {
+  const log = getLatestAgentLog();
+  assert.ok(log, "agent dev-log must exist");
+  assert.ok(log.doc.repositoryTree?.treeText?.length > 100, "repositoryTree.treeText must be present and substantial");
+});
+
+test("dev-log human MD has required section headers", () => {
+  const log = getLatestAgentLog();
+  assert.ok(log, "agent dev-log must exist");
+  const humanPath = getHumanPathForAgent(log.filename);
+  const content = readFileSync(humanPath, "utf8");
+  const sections = ["## Table of contents", "Part I", "Part II"];
+  for (const s of sections) {
+    assert.ok(content.includes(s), `human dev-log must include "${s}"`);
+  }
+});
