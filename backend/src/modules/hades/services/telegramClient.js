@@ -64,5 +64,20 @@ export async function createTelegramClient({ botToken, api } = {}) {
     return result.result || result;
   }
 
-  return { sendMessage, setWebhook, getUpdates, getMe };
+  async function sendAnimation({ chatId, animation, caption, parseMode, replyToMessageId } = {}) {
+    const body = { chat_id: chatId, animation };
+    if (caption) body.caption = caption;
+    if (parseMode) body.parse_mode = parseMode;
+    if (replyToMessageId != null) body.reply_to_message_id = replyToMessageId;
+
+    const result = await httpClient.post("sendAnimation", body);
+    if (!result.ok) {
+      throw new Error(
+        `Telegram API error: ${result.error_code} ${result.description}`
+      );
+    }
+    return { providerMessageId: result.result?.message_id };
+  }
+
+  return { sendMessage, sendAnimation, setWebhook, getUpdates, getMe };
 }

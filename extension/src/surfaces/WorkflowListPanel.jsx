@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { listWorkflows, listMinions, saveMinion } from "../api/hadesExtensionClient.js";
+import { WorkflowDetailPanel } from "./WorkflowDetailPanel.jsx";
 
 export function WorkflowListPanel() {
   const [workflows, setWorkflows] = useState([]);
@@ -10,6 +11,7 @@ export function WorkflowListPanel() {
   const [newMinionGoal, setNewMinionGoal] = useState("");
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
+  const [selectedWorkflowId, setSelectedWorkflowId] = useState(null);
 
   useEffect(function () {
     Promise.all([
@@ -47,6 +49,13 @@ export function WorkflowListPanel() {
       React.createElement("p", null, "Loading..."));
   }
 
+  if (selectedWorkflowId) {
+    return React.createElement(WorkflowDetailPanel, {
+      workflowId: selectedWorkflowId,
+      onBack: function () { setSelectedWorkflowId(null); },
+    });
+  }
+
   return React.createElement("div", { className: "workflow-list", style: { padding: "8px" } },
     error ? React.createElement("p", { style: { color: "#ef4444", fontSize: "12px" } }, error) : null,
 
@@ -55,7 +64,8 @@ export function WorkflowListPanel() {
       ? React.createElement("p", { style: { color: "#64748b", fontSize: "12px" } }, "No workflows yet.")
       : React.createElement("ul", { style: { listStyle: "none", padding: 0, margin: 0 } },
           workflows.map(function (wf) {
-            return React.createElement("li", { key: wf.id, style: { padding: "6px 8px", margin: "4px 0", background: "#1e293b", borderRadius: "6px", fontSize: "13px" } },
+            return React.createElement("li", { key: wf.id, style: { padding: "6px 8px", margin: "4px 0", background: "#1e293b", borderRadius: "6px", fontSize: "13px", cursor: "pointer" },
+              onClick: function () { setSelectedWorkflowId(wf.id); } },
               React.createElement("strong", null, wf.name),
               wf.goal ? React.createElement("span", { style: { color: "#94a3b8", marginLeft: "6px" } }, "\u2014 " + wf.goal) : null);
           })),

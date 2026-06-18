@@ -537,5 +537,23 @@ export function createHadesRoutes({ service, requireHadesAuth, config, scopedRep
     })
   );
 
+  router.patch(
+    "/workflows/:id",
+    requireAuth,
+    asyncRoute(async (req, res) => {
+      const result = await service.updateWorkflow(req.params.id, req.body, req.authContext);
+      res.status(200).json(result);
+    })
+  );
+
+  router.delete(
+    "/workflows/:id",
+    requireAuth,
+    asyncRoute(async (req, res) => {
+      const result = await service.deleteWorkflow(req.params.id, req.authContext);
+      res.status(200).json(result);
+    })
+  );
+
   return router;
 }

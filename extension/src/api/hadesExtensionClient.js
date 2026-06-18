@@ -30,7 +30,7 @@ export async function setApiKey(key) {
   });
 }
 
-const BASE_URL = "https://api.hades-os.app";
+const BASE_URL = (typeof __VITE_API_BASE_URL__ !== "undefined" ? __VITE_API_BASE_URL__ : (typeof process !== "undefined" && process.env?.VITE_API_BASE_URL ? process.env.VITE_API_BASE_URL : "https://hades-os-monorepo-production.up.railway.app"));
 
 export async function apiRequest(path, options = {}) {
   const apiKey = await getApiKey();

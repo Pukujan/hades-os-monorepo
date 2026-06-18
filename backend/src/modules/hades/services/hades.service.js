@@ -53,7 +53,7 @@ function createMessage(role, content, extra = {}) {
   return message;
 }
 
-export function createHadesService({ repository, scopedRepos, hermes, config = {}, minionAssignmentRuntime, context, telegramClientFactory, minionLogsRepo, notificationsRepo, hermesRuntime, telegramWebhookBaseUrl } = {}) {
+export function createHadesService({ repository, scopedRepos, hermes, config = {}, minionAssignmentRuntime, context, telegramClientFactory, minionLogsRepo, notificationsRepo, hermesRuntime, telegramWebhookBaseUrl, gifProvider } = {}) {
   function resolveUserId(authContext) {
     if (authContext?.userId) return authContext.userId;
     if (process.env.NODE_ENV !== "production") {
@@ -85,11 +85,15 @@ export function createHadesService({ repository, scopedRepos, hermes, config = {
       const scopedConversations = scopedRepos.conversations
         ? await scopedRepos.conversations.listConversations({ userId: actualUserId, tenantId })
         : [];
+      const scopedWorkflows = scopedRepos.workflowDefinitions
+        ? await scopedRepos.workflowDefinitions.listDefinitions({ userId: actualUserId, tenantId })
+        : [];
 
       return {
         minions: scopedMinions,
         assignments: scopedAssignments,
         conversations: scopedConversations,
+        workflows: scopedWorkflows,
         authContext: { userId: actualUserId, tenantId },
       };
     }
@@ -645,6 +649,7 @@ async function saveTelegramToken(body, authContext) {
         ? { saveAgentExecution: ({ execution }) => scopedRepos.executions.create({ userId, tenantId, data: execution }) }
         : null,
       minions: telegramMinions,
+      gifProvider,
     });
 
     return runtime.handleTelegramUpdate({ update });
@@ -946,6 +951,27 @@ async function saveTelegramToken(body, authContext) {
     return { workflows };
   }
 
+  async function updateWorkflow(workflowId, body, authContext) {
+    const userId = resolveUserId(authContext);
+    const tenantId = authContext?.tenantId || userId;
+    if (!scopedRepos?.workflowDefinitions) {
+      throw new AppError("Workflow repository is not configured", 501);
+    }
+    const result = await scopedRepos.workflowDefinitions.updateDefinition({ id: workflowId, userId, tenantId, patch: body });
+    if (!result) throw new AppError("Workflow not found", 404);
+    return result;
+  }
+
+  async function deleteWorkflow(workflowId, authContext) {
+    const userId = resolveUserId(authContext);
+    const tenantId = authContext?.tenantId || userId;
+    if (!scopedRepos?.workflowDefinitions) {
+      throw new AppError("Workflow repository is not configured", 501);
+    }
+    await scopedRepos.workflowDefinitions.delete({ id: workflowId, userId, tenantId });
+    return { ok: true };
+  }
+
   async function listExtensionWorkflows(authContext) {
     return listWorkflows(authContext);
   }
@@ -1170,6 +1196,8 @@ async function saveTelegramToken(body, authContext) {
     downloadExtensionBundle,
     createWorkflow,
     listWorkflows,
+    updateWorkflow,
+    deleteWorkflow,
     listExtensionWorkflows,
     extensionChat,
     listExtensionMinions,

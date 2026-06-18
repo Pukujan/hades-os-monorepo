@@ -201,6 +201,7 @@ export async function register(app, context) {
     telegramClientFactory: overrides.telegramClientFactory || null,
     hermesRuntime,
     telegramWebhookBaseUrl,
+    gifProvider: giphyProvider,
   });
 
   const router = createHadesRoutes({

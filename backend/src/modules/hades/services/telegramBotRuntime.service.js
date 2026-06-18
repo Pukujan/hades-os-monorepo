@@ -9,6 +9,7 @@ export function createTelegramBotRuntime({
   repository,
   conversationModeRepo,
   minions,
+  gifProvider,
 } = {}) {
   if (!telegramClient || !resolveTelegramIdentity || !hermesRuntime) {
     throw new Error("telegramBotRuntime: telegramClient, resolveTelegramIdentity, and hermesRuntime are required");
@@ -122,14 +123,34 @@ export function createTelegramBotRuntime({
         assistantText = `Hermes processing failed: ${hermesError.message}`;
       }
 
-      const replyText = buildTelegramReply({ assistantText, outboundActions });
+      let sendResult = null;
+      const gifAction = outboundActions.find((a) => a.type === "send_gif");
 
-      const sendResult = await telegramClient.sendMessage({
-        chatId,
-        text: replyText,
-        parseMode: "Markdown",
-        replyToMessageId: messageId,
-      });
+      if (gifAction && gifProvider) {
+        const gifQuery = gifAction.query || gifAction.searchQuery || assistantText;
+        const gif = await gifProvider.searchGif({ query: gifQuery, limit: 1 }).catch(() => null);
+
+        if (gif?.url) {
+          sendResult = await telegramClient.sendAnimation({
+            chatId,
+            animation: gif.url,
+            caption: assistantText || "",
+            parseMode: "Markdown",
+            replyToMessageId: messageId,
+          });
+        }
+      }
+
+      if (!sendResult) {
+        const replyText = buildTelegramReply({ assistantText, outboundActions });
+
+        sendResult = await telegramClient.sendMessage({
+          chatId,
+          text: replyText,
+          parseMode: "Markdown",
+          replyToMessageId: messageId,
+        });
+      }
 
       if (repository?.saveAgentExecution) {
         await repository.saveAgentExecution({
@@ -140,7 +161,7 @@ export function createTelegramBotRuntime({
             chatId,
             input: text,
             parsedCommand: parsed,
-            response: replyText,
+            response: assistantText,
             providerMessageId: sendResult?.providerMessageId,
             timestamp: new Date().toISOString(),
           },
