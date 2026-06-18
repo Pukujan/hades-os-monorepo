@@ -17,6 +17,7 @@ import { createConversationRepository } from "./repositories/conversationReposit
 import { createTelegramConnectionRepository } from "./repositories/telegramConnectionRepository.js";
 import { createDiscordConnectionRepository } from "./repositories/discordConnectionRepository.js";
 import { createGitHubConnectionRepository } from "./repositories/gitHubConnectionRepository.js";
+import { createInstagramConnectionRepository } from "./repositories/instagramConnectionRepository.js";
 import { createAgentExecutionRepository } from "./repositories/agentExecutionRepository.js";
 import { createMemoryRecordRepository } from "./repositories/memoryRecordRepository.js";
 import { createExtensionKeyRepository } from "./workflows/extensionKeyRepository.js";
@@ -25,6 +26,10 @@ import { createProcessedUpdateRepository } from "./repositories/processedUpdateR
 import { createTelegramConversationModeRepository } from "./repositories/telegramConversationModeRepository.js";
 import { createVerifySocialAccount } from "./runtime/verifySocialAccount.js";
 import { createTokenCrypto } from "./security/tokenCrypto.js";
+import { createDocumentRepository } from "./repositories/documentRepository.js";
+import { createContextSpaceRepository } from "./repositories/contextSpaceRepository.js";
+import { createPageCaptureRepository } from "./repositories/pageCaptureRepository.js";
+import { createApprovalRepository } from "./repositories/approvalRepository.js";
 
 function createSupabaseClient() {
   const url = process.env.SUPABASE_URL;
@@ -73,12 +78,17 @@ export async function register(app, context) {
   const telegramConnections = overrides.telegramConnections || createTelegramConnectionRepository({ storage: storageMode, supabaseClient, crypto: tokenCrypto });
   const discordConnections = overrides.discordConnections || createDiscordConnectionRepository({ storage: storageMode, supabaseClient, crypto: tokenCrypto });
   const gitHubConnections = overrides.gitHubConnections || createGitHubConnectionRepository({ storage: storageMode, supabaseClient, crypto: tokenCrypto });
+  const instagramConnections = overrides.instagramConnections || createInstagramConnectionRepository({ storage: storageMode, supabaseClient });
   const executions = overrides.executions || createAgentExecutionRepository({ storage: storageMode, supabaseClient });
   const processedUpdates = overrides.processedUpdates || createProcessedUpdateRepository({ storage: storageMode, supabaseClient });
   const conversationModes = overrides.conversationModes || createTelegramConversationModeRepository({ storage: storageMode, supabaseClient });
   const memoryRecords = overrides.memoryRecords || createMemoryRecordRepository({ storage: storageMode, supabaseClient });
   const extensionKeys = overrides.extensionKeys || createExtensionKeyRepository({ storage: storageMode, supabaseClient });
   const workflowDefinitions = overrides.workflowDefinitions || createWorkflowRepository({ storage: storageMode, supabaseClient });
+  const extensionDocuments = overrides.extensionDocuments || createDocumentRepository({ storage: storageMode, supabaseClient });
+  const extensionContextSpaces = overrides.extensionContextSpaces || createContextSpaceRepository({ storage: storageMode, supabaseClient });
+  const extensionPageCaptures = overrides.extensionPageCaptures || createPageCaptureRepository({ storage: storageMode, supabaseClient });
+  const extensionApprovals = overrides.extensionApprovals || createApprovalRepository({ storage: storageMode, supabaseClient });
 
   const verifySocialAccount = overrides.verifySocialAccount || createVerifySocialAccount({
     discordConnections,
@@ -95,12 +105,17 @@ export async function register(app, context) {
     telegramConnections,
     discordConnections,
     gitHubConnections,
+    instagramConnections,
     executions,
     processedUpdates,
     conversationModes,
     memoryRecords,
     extensionKeys,
     workflowDefinitions,
+    extensionDocuments,
+    extensionContextSpaces,
+    extensionPageCaptures,
+    extensionApprovals,
     verifySocialAccount,
   };
 

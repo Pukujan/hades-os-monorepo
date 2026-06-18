@@ -21,6 +21,7 @@ const files = [
   { src: "src/surfaces/TextContextSpacesPanel.jsx", name: "src/surfaces/TextContextSpacesPanel.jsx" },
   { src: "src/surfaces/PageCapturePanel.jsx", name: "src/surfaces/PageCapturePanel.jsx" },
   { src: "src/surfaces/ApprovalQueuePanel.jsx", name: "src/surfaces/ApprovalQueuePanel.jsx" },
+  { src: "src/api/hadesExtensionClient.js", name: "src/api/hadesExtensionClient.js" },
 ];
 
 function crc32(buf) {

@@ -6,7 +6,7 @@ import { validateAssignmentRequest, validateChatRequest, validateSaveRequest, va
 import { createTelegramClient } from "./telegramClient.js";
 import { createTelegramBotRuntime } from "./telegramBotRuntime.service.js";
 
-const COMPOSIO_CONNECT_LINK_URL = "https://backend.composio.dev/api/v3.1/connected_accounts/link";
+const COMPOSIO_CONNECT_LINK_URL = "https://backend.composio.dev/api/v3/connected_accounts/link";
 
 function resolvePublicAppOrigin() {
   const explicitAppUrl = (process.env.APP_URL || "").trim().replace(/\/+$/, "");
@@ -737,7 +737,7 @@ async function saveTelegramToken(body, authContext) {
       body: JSON.stringify({
         auth_config_id: authConfigId,
         user_id: userId,
-        alias: `hades-${tenantId}-instagram`,
+        alias: `hades-${tenantId}-instagram-${Date.now()}`,
         callback_url: callbackUrl,
       }),
     });
@@ -946,6 +946,118 @@ async function saveTelegramToken(body, authContext) {
     return { workflows };
   }
 
+  async function listExtensionWorkflows(authContext) {
+    return listWorkflows(authContext);
+  }
+
+  async function extensionChat(body, authContext) {
+    return chat(body, authContext);
+  }
+
+  async function listExtensionMinions(authContext) {
+    return listMinions(authContext);
+  }
+
+  async function saveExtensionMinion(body, authContext) {
+    return saveMinion(body, authContext);
+  }
+
+  async function uploadExtensionDocument(body, authContext) {
+    const userId = resolveUserId(authContext);
+    const tenantId = authContext?.tenantId || userId;
+    if (!scopedRepos?.extensionDocuments) {
+      throw new AppError("Document repository not configured", 501);
+    }
+    const doc = await scopedRepos.extensionDocuments.create({
+      userId,
+      tenantId,
+      name: body.name || null,
+      contentType: body.contentType || null,
+      size: body.size || 0,
+      storageKey: body.storageKey || null,
+      textContent: body.textContent || null,
+    });
+    return { document: doc };
+  }
+
+  async function listExtensionDocuments(authContext) {
+    const userId = resolveUserId(authContext);
+    const tenantId = authContext?.tenantId || userId;
+    if (!scopedRepos?.extensionDocuments) {
+      return { documents: [] };
+    }
+    const documents = await scopedRepos.extensionDocuments.listByUser({ userId, tenantId });
+    return { documents };
+  }
+
+  async function saveExtensionContextSpace(body, authContext) {
+    const userId = resolveUserId(authContext);
+    const tenantId = authContext?.tenantId || userId;
+    if (!scopedRepos?.extensionContextSpaces) {
+      throw new AppError("Context space repository not configured", 501);
+    }
+    const space = await scopedRepos.extensionContextSpaces.createOrUpdate({
+      userId,
+      tenantId,
+      name: body.name,
+      content: body.content,
+    });
+    return { contextSpace: space };
+  }
+
+  async function listExtensionContextSpaces(authContext) {
+    const userId = resolveUserId(authContext);
+    const tenantId = authContext?.tenantId || userId;
+    if (!scopedRepos?.extensionContextSpaces) {
+      return { contextSpaces: [] };
+    }
+    const spaces = await scopedRepos.extensionContextSpaces.listByUser({ userId, tenantId });
+    return { contextSpaces: spaces };
+  }
+
+  async function saveExtensionPageCapture(body, authContext) {
+    const userId = resolveUserId(authContext);
+    const tenantId = authContext?.tenantId || userId;
+    if (!scopedRepos?.extensionPageCaptures) {
+      throw new AppError("Page capture repository not configured", 501);
+    }
+    const capture = await scopedRepos.extensionPageCaptures.create({
+      userId,
+      tenantId,
+      url: body.url,
+      title: body.title,
+      selectedText: body.selectedText,
+      fullText: body.fullText,
+    });
+    return { pageCapture: capture };
+  }
+
+  async function listExtensionApprovals(authContext) {
+    const userId = resolveUserId(authContext);
+    const tenantId = authContext?.tenantId || userId;
+    if (!scopedRepos?.extensionApprovals) {
+      return { approvals: [] };
+    }
+    const approvals = await scopedRepos.extensionApprovals.listPending({ userId, tenantId });
+    return { approvals };
+  }
+
+  async function decideExtensionApproval(id, body, authContext) {
+    const userId = resolveUserId(authContext);
+    const tenantId = authContext?.tenantId || userId;
+    if (!scopedRepos?.extensionApprovals) {
+      throw new AppError("Approval repository not configured", 501);
+    }
+    const result = await scopedRepos.extensionApprovals.decide({
+      id,
+      userId,
+      tenantId,
+      status: body.status || "approved",
+    });
+    if (!result) throw new AppError("Approval not found", 404);
+    return { approval: result };
+  }
+
   return {
     readiness,
     bootstrap,
@@ -979,5 +1091,16 @@ async function saveTelegramToken(body, authContext) {
     downloadExtensionBundle,
     createWorkflow,
     listWorkflows,
+    listExtensionWorkflows,
+    extensionChat,
+    listExtensionMinions,
+    saveExtensionMinion,
+    uploadExtensionDocument,
+    listExtensionDocuments,
+    saveExtensionContextSpace,
+    listExtensionContextSpaces,
+    saveExtensionPageCapture,
+    listExtensionApprovals,
+    decideExtensionApproval,
   };
 }

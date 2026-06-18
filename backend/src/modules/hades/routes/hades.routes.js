@@ -385,6 +385,96 @@ export function createHadesRoutes({ service, requireHadesAuth, config, scopedRep
   );
 
   router.post(
+    "/extension/chat",
+    requireExtensionAuth || requireAuth,
+    asyncRoute(async (req, res) => {
+      const result = await service.extensionChat(req.body, req.authContext);
+      res.status(200).json(result);
+    })
+  );
+
+  router.get(
+    "/extension/minions",
+    requireExtensionAuth || requireAuth,
+    asyncRoute(async (req, res) => {
+      const result = await service.listExtensionMinions(req.authContext);
+      res.status(200).json(result);
+    })
+  );
+
+  router.post(
+    "/extension/minions",
+    requireExtensionAuth || requireAuth,
+    asyncRoute(async (req, res) => {
+      const result = await service.saveExtensionMinion(req.body, req.authContext);
+      res.status(201).json(result);
+    })
+  );
+
+  router.post(
+    "/extension/documents",
+    requireExtensionAuth || requireAuth,
+    asyncRoute(async (req, res) => {
+      const result = await service.uploadExtensionDocument(req.body, req.authContext);
+      res.status(201).json(result);
+    })
+  );
+
+  router.get(
+    "/extension/documents",
+    requireExtensionAuth || requireAuth,
+    asyncRoute(async (req, res) => {
+      const result = await service.listExtensionDocuments(req.authContext);
+      res.status(200).json(result);
+    })
+  );
+
+  router.post(
+    "/extension/context-spaces",
+    requireExtensionAuth || requireAuth,
+    asyncRoute(async (req, res) => {
+      const result = await service.saveExtensionContextSpace(req.body, req.authContext);
+      res.status(201).json(result);
+    })
+  );
+
+  router.get(
+    "/extension/context-spaces",
+    requireExtensionAuth || requireAuth,
+    asyncRoute(async (req, res) => {
+      const result = await service.listExtensionContextSpaces(req.authContext);
+      res.status(200).json(result);
+    })
+  );
+
+  router.post(
+    "/extension/page-capture",
+    requireExtensionAuth || requireAuth,
+    asyncRoute(async (req, res) => {
+      const result = await service.saveExtensionPageCapture(req.body, req.authContext);
+      res.status(201).json(result);
+    })
+  );
+
+  router.get(
+    "/extension/approvals",
+    requireExtensionAuth || requireAuth,
+    asyncRoute(async (req, res) => {
+      const result = await service.listExtensionApprovals(req.authContext);
+      res.status(200).json(result);
+    })
+  );
+
+  router.post(
+    "/extension/approvals/:id/decision",
+    requireExtensionAuth || requireAuth,
+    asyncRoute(async (req, res) => {
+      const result = await service.decideExtensionApproval(req.params.id, req.body, req.authContext);
+      res.status(200).json(result);
+    })
+  );
+
+  router.post(
     "/workflows",
     requireAuth,
     asyncRoute(async (req, res) => {

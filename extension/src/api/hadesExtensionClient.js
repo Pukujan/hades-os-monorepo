@@ -46,7 +46,8 @@ export async function apiRequest(path, options = {}) {
   });
 
   if (!response.ok) {
-    throw new Error(`API error: ${response.status}`);
+    const errorBody = await response.text().catch(() => "");
+    throw new Error(`API error: ${response.status}${errorBody ? ` - ${errorBody}` : ""}`);
   }
 
   return response.json();
@@ -75,7 +76,58 @@ export function listApprovals() {
 }
 
 export function approveAction(approvalId) {
-  return apiRequest(`/api/hades/extension/approvals/${approvalId}/approve`, {
+  return apiRequest(`/api/hades/extension/approvals/${approvalId}/decision`, {
     method: "POST",
+    body: JSON.stringify({ status: "approved" }),
+  });
+}
+
+export function rejectAction(approvalId) {
+  return apiRequest(`/api/hades/extension/approvals/${approvalId}/decision`, {
+    method: "POST",
+    body: JSON.stringify({ status: "rejected" }),
+  });
+}
+
+export function sendChatMessage(message) {
+  return apiRequest("/api/hades/extension/chat", {
+    method: "POST",
+    body: JSON.stringify({ message }),
+  });
+}
+
+export function listMinions() {
+  return apiRequest("/api/hades/extension/minions");
+}
+
+export function saveMinion(minionData) {
+  return apiRequest("/api/hades/extension/minions", {
+    method: "POST",
+    body: JSON.stringify(minionData),
+  });
+}
+
+export function saveTextContext(name, content) {
+  return apiRequest("/api/hades/extension/context-spaces", {
+    method: "POST",
+    body: JSON.stringify({ name, content }),
+  });
+}
+
+export function listContextSpaces() {
+  return apiRequest("/api/hades/extension/context-spaces");
+}
+
+export function capturePage(pageData) {
+  return apiRequest("/api/hades/extension/page-capture", {
+    method: "POST",
+    body: JSON.stringify(pageData),
+  });
+}
+
+export function saveDocumentFromText({ name, textContent }) {
+  return apiRequest("/api/hades/extension/documents", {
+    method: "POST",
+    body: JSON.stringify({ name, textContent, contentType: "text/plain", size: textContent.length }),
   });
 }
