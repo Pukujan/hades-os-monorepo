@@ -498,6 +498,23 @@ button{color:inherit;cursor:pointer}
 /* ─── Compact & misc ─── */
 .compact:empty{display:none}
 
+/* ─── Extension install card ─── */
+.extension-install-card .card-header h3{margin:0;font-size:12px;font-family:var(--font-title);color:var(--gold);text-transform:uppercase}
+.extension-install-card .card-body{display:grid;gap:12px}
+.extension-install-card .card-body>p{margin:0;color:var(--muted);font-size:17px;line-height:1.2}
+.extension-install-card .card-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+.extension-install-card .secret-display{display:flex;align-items:center;gap:8px;flex-wrap:wrap;border:1px solid var(--line2);border-radius:14px;padding:10px;background:rgba(0,0,0,.25)}
+.extension-install-card .secret-display code{font-family:"Courier New",monospace;font-size:13px;color:var(--gold);word-break:break-all;flex:1;min-width:0}
+.extension-install-card .secret-display .secondary{flex:none}
+.extension-install-card .key-list{display:grid;gap:8px}
+.extension-install-card .key-row{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--line);border-radius:14px;padding:8px 10px;background:rgba(255,255,255,.04);font-size:16px}
+.extension-install-card .key-row[data-revoked="true"]{opacity:.5;border-color:rgba(255,255,255,.06)}
+.extension-install-card .key-preview{color:var(--text);font-family:"Courier New",monospace;font-size:14px;min-width:0;word-break:break-all}
+.extension-install-card .key-actions{display:flex;gap:6px;flex:none}
+.extension-install-card .key-actions .small{border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--gold);border-radius:999px;padding:6px 12px;font-size:14px;white-space:nowrap}
+.extension-install-card .key-actions .small.danger{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 40%,transparent);background:rgba(251,113,133,.08)}
+.extension-install-card .revoked-label{font-size:15px;color:var(--muted2);font-style:italic;flex:none}
+
 /* ─── 2×2 slot grid (home) ─── */
 .grid4{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
 .grid4 .slot{min-height:104px;border:1px solid var(--line);border-radius:20px;padding:12px;background:linear-gradient(180deg,var(--card),rgba(0,0,0,.2));display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:6px;cursor:pointer}
