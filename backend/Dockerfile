@@ -4,6 +4,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends python3 python3
 RUN python3 -m venv /opt/hermes-venv && \
   /opt/hermes-venv/bin/pip install --no-cache-dir hermes-agent
 ENV HERMES_BIN_PATH=/opt/hermes-venv/bin/hermes
+ENV HERMES_PUBLIC_BASE_URL=https://hades-os-monorepo-production.up.railway.app/api/hades/hermes
 
 FROM base AS runner
 WORKDIR /app

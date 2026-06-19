@@ -5,6 +5,7 @@ import { createCorsMiddleware } from "../shared/http/cors.js";
 
 export async function createApp({ overrides = {} } = {}) {
   const app = express();
+  app.set("trust proxy", 1);
   app.use(createCorsMiddleware(process.env.CORS_ORIGIN));
   app.use(express.json({ limit: "10mb" }));
 
