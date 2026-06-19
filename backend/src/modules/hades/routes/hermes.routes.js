@@ -217,6 +217,22 @@ export function createHermesSessionRoutes({
       const platform = process.env.HADES_PLATFORM || "local";
       const railwayVolumeMountPath = process.env.RAILWAY_VOLUME_MOUNT_PATH || "";
 
+      // Auto-restore profile state from latest snapshot on startup
+      if (profileStatePersistence && !fs.existsSync(path.join(hermesHome, "state.db"))) {
+        try {
+          const restoreResult = await profileStatePersistence.restoreProfile({
+            tenantId: profile.tenantId,
+            userId: profile.userId,
+            profileName: profile.profileName,
+          });
+          if (restoreResult.restored > 0) {
+            console.log(`[proof/profile] restored ${restoreResult.restored} entries from snapshot for ${profileName}`);
+          }
+        } catch (err) {
+          console.warn(`[proof/profile] restore failed for ${profileName}: ${err.message}`);
+        }
+      }
+
       let state = { hasStateDb: false, hasSessionsDir: false, hasMemoriesDir: false, hasEnvFile: false, envReturned: false };
       if (fs.existsSync(hermesHome)) {
         state.hasStateDb = fs.existsSync(path.join(hermesHome, "state.db"));
@@ -271,6 +287,36 @@ export function createHermesSessionRoutes({
       });
 
       res.json(snapshot);
+    })
+  );
+
+  router.post(
+    "/proof/restore",
+    requireProofAuth,
+    asyncRoute(async (req, res) => {
+      const { profileName } = req.body || {};
+      if (!profileName) {
+        return res.status(400).json({ error: "profileName required in body" });
+      }
+
+      if (!profileStatePersistence) {
+        return res.status(503).json({ error: "profileStatePersistence not configured" });
+      }
+
+      const profile = profileRegistry
+        ? await profileRegistry.findProfile({ profileName })
+        : null;
+      if (!profile) {
+        return res.status(404).json({ error: `profile not found: ${profileName}` });
+      }
+
+      const result = await profileStatePersistence.restoreProfile({
+        tenantId: profile.tenantId,
+        userId: profile.userId,
+        profileName: profile.profileName,
+      });
+
+      res.json(result);
     })
   );
 

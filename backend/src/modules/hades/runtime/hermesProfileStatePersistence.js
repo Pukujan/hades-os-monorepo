@@ -65,7 +65,7 @@ export function createHermesProfileStatePersistence({ platform, profilesRoot = "
     }
 
     const snapshotId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    const objectKey = `profiles/${tenantId}/users/${userId}/${profileName}/snapshots/${snapshotId}.json`;
+    const objectKey = `profiles/${tenantId}/users/${userId}/${profileName}/snapshot.json`;
 
     const snapshot = {
       objectKey,
@@ -99,10 +99,12 @@ export function createHermesProfileStatePersistence({ platform, profilesRoot = "
 
   async function restoreProfile({ tenantId, userId, profileName, objectKey } = {}) {
     const profileHome = resolveProfileHome({ tenantId, userId, profileName });
+    const latestKey = `profiles/${tenantId}/users/${userId}/${profileName}/snapshot.json`;
+    const key = objectKey || latestKey;
     let snapshot;
 
-    if (objectStore && objectKey) {
-      snapshot = await objectStore.getJson({ key: objectKey });
+    if (objectStore) {
+      snapshot = await objectStore.getJson({ key });
     }
 
     const entries = (snapshot?.entries || []).filter(

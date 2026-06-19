@@ -1,24 +1,17 @@
 export const HADES_APP_ROUTES = [
   {
     id: "home",
-    label: "Home",
+    label: "HADES CHAT",
     path: "/app/minions",
-    description: "Main Hades dashboard with minions overview.",
-    keywords: ["home", "dashboard", "minions", "overview", "start", "main"],
+    description: "Main Hades chat for minion creation and management.",
+    keywords: ["home", "dashboard", "chat", "hades", "minions", "main"],
   },
   {
     id: "forge",
-    label: "Forge",
+    label: "MINIONS",
     path: "/forge",
-    description: "Create, refine, test, and save minions.",
-    keywords: ["forge", "create minion", "make minion", "build agent", "edit minion", "craft minion"],
-  },
-  {
-    id: "minions",
-    label: "Minions",
-    path: "/app/minions",
     description: "View saved minions and active minion slots.",
-    keywords: ["minions", "agents", "workers", "slots", "saved minions", "active minions"],
+    keywords: ["forge", "minions", "agents", "workers", "slots", "saved minions"],
   },
   {
     id: "socials",

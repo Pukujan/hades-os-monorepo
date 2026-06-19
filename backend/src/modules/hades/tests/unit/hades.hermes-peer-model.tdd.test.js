@@ -462,6 +462,7 @@ describe("Hermes per-user profile state persistence", () => {
       },
     });
 
+    // Snapshot uses fixed latest key
     const snapshot = await persistence.snapshotProfile({
       tenantId: "tenant_a",
       userId: "user_a",
@@ -469,7 +470,7 @@ describe("Hermes per-user profile state persistence", () => {
       reason: "pre-restart",
     });
 
-    assert.match(snapshot.objectKey, /^profiles\/tenant_a\/users\/user_a\/tenant_a_user_a\/snapshots\//);
+    assert.equal(snapshot.objectKey, "profiles/tenant_a/users/user_a/tenant_a_user_a/snapshot.json");
     assert.equal(snapshot.visibility, "private");
     assert.equal(Object.hasOwn(snapshot, "signedUrl"), false);
     assert.equal(Object.hasOwn(snapshot, "publicUrl"), false);
@@ -480,11 +481,11 @@ describe("Hermes per-user profile state persistence", () => {
     assert.equal(JSON.stringify(stored).includes("profile-static-secret"), false);
     assert.equal(JSON.stringify(stored).includes("raw-token"), false);
 
+    // Restore without explicit objectKey reads latest snapshot
     await persistence.restoreProfile({
       tenantId: "tenant_a",
       userId: "user_a",
       profileName: "tenant_a_user_a",
-      objectKey: snapshot.objectKey,
     });
 
     const restore = stored.find((entry) => entry.restoredRoot);
@@ -492,6 +493,176 @@ describe("Hermes per-user profile state persistence", () => {
     assert.ok(restore.entries.some((entry) => entry.relativePath === "state.db"));
     assert.ok(restore.entries.some((entry) => entry.relativePath.startsWith("sessions/")));
     assert.equal(JSON.stringify(restore).includes(".env"), false);
+  });
+
+  test("snapshot overwrites previous snapshot data (no accumulation)", async () => {
+    const { createHermesProfileStatePersistence } = await loadProfileStatePersistence();
+    const storedKeys = [];
+    const files = () => new Map([
+      ["state.db", "sqlite-state-v1"],
+      ["memories/user.md", "memory-v1"],
+    ]);
+    const persistence = createHermesProfileStatePersistence({
+      platform: "railway",
+      profilesRoot: "/data/hermes/profiles",
+      railwayVolumeMountPath: "/data",
+      filesystem: {
+        readTree: async ({ root }) =>
+          Array.from(files().entries()).map(([relativePath, content]) => ({
+            root, relativePath, content,
+          })),
+      },
+      objectStore: {
+        putJson: async ({ key, value }) => { storedKeys.push(key); return { key, etag: "etag" }; },
+        getJson: async ({ key }) => null,
+      },
+    });
+
+    await persistence.snapshotProfile({ tenantId: "t", userId: "u", profileName: "p" });
+    await persistence.snapshotProfile({ tenantId: "t", userId: "u", profileName: "p" });
+
+    // Only one key stored — second overwrites the first
+    assert.equal(storedKeys.length, 2);
+    assert.equal(storedKeys[0], storedKeys[1]);
+    assert.equal(storedKeys[0], "profiles/t/users/u/p/snapshot.json");
+  });
+
+  test("restore without objectKey reads latest snapshot", async () => {
+    const { createHermesProfileStatePersistence } = await loadProfileStatePersistence();
+    const snapshotData = {};
+    const writtenFiles = [];
+    const files = new Map([
+      ["state.db", "sqlite-data"],
+      ["memories/memory.md", "persistent memory"],
+    ]);
+    const persistence = createHermesProfileStatePersistence({
+      platform: "railway",
+      profilesRoot: "/data/hermes/profiles",
+      railwayVolumeMountPath: "/data",
+      filesystem: {
+        readTree: async ({ root }) =>
+          Array.from(files.entries()).map(([relativePath, content]) => ({
+            root, relativePath, content,
+          })),
+        writeTree: async ({ root, entries }) => { writtenFiles.push({ root, entries }); },
+      },
+      objectStore: {
+        putJson: async ({ key, value }) => { snapshotData[key] = value; return { key, etag: "etag" }; },
+        getJson: async ({ key }) => snapshotData[key] || null,
+      },
+    });
+
+    // Snapshot once
+    await persistence.snapshotProfile({ tenantId: "t", userId: "u", profileName: "p", reason: "test" });
+
+    // Restore without objectKey
+    const result = await persistence.restoreProfile({ tenantId: "t", userId: "u", profileName: "p" });
+
+    assert.equal(result.restored, 2);
+    assert.equal(writtenFiles.length, 1);
+    assert.equal(writtenFiles[0].root, "/data/hermes/profiles/p");
+    assert.ok(writtenFiles[0].entries.some((e) => e.relativePath === "state.db"));
+    assert.ok(writtenFiles[0].entries.some((e) => e.relativePath === "memories/memory.md"));
+  });
+
+  test("snapshot+restore roundtrip survives process restart (end-to-end)", async () => {
+    const { createHermesProfileStatePersistence } = await loadProfileStatePersistence();
+    const snapshotData = {};
+
+    // Phase 1: agent works and snapshots
+    const filesBefore = new Map([
+      ["state.db", "session-data"],
+      ["memories/note.md", "user said something important"],
+      ["sessions/last.json", '{"id":"conv-1"}'],
+      [".env", "SECRET=should-not-survive"],
+    ]);
+    const persistence1 = createHermesProfileStatePersistence({
+      platform: "railway",
+      profilesRoot: "/data/hermes/profiles",
+      railwayVolumeMountPath: "/data",
+      filesystem: {
+        readTree: async ({ root }) =>
+          Array.from(filesBefore.entries()).map(([relativePath, content]) => ({
+            root, relativePath, content,
+          })),
+      },
+      objectStore: {
+        putJson: async ({ key, value }) => { snapshotData[key] = value; return { key, etag: "etag" }; },
+        getJson: async ({ key }) => snapshotData[key] || null,
+      },
+    });
+
+    const snapshot = await persistence1.snapshotProfile({
+      tenantId: "t", userId: "u", profileName: "p", reason: "shutdown",
+    });
+    assert.ok(snapshot.secretStripped);
+
+    // Phase 2: process restarts, new persistence instance restores
+    const restoredFiles = [];
+    const persistence2 = createHermesProfileStatePersistence({
+      platform: "railway",
+      profilesRoot: "/data/hermes/profiles",
+      railwayVolumeMountPath: "/data",
+      filesystem: {
+        writeTree: async ({ root, entries }) => { restoredFiles.push({ root, entries }); },
+      },
+      objectStore: {
+        getJson: async ({ key }) => snapshotData[key] || null,
+        putJson: async () => { throw new Error("should not write during restore"); },
+      },
+    });
+
+    const result = await persistence2.restoreProfile({ tenantId: "t", userId: "u", profileName: "p" });
+    assert.equal(result.restored, 3, "state.db + memories/ + sessions/ restored");
+    assert.equal(restoredFiles.length, 1);
+    const restoredEntries = restoredFiles[0].entries.map((e) => e.relativePath);
+    assert.ok(restoredEntries.includes("state.db"));
+    assert.ok(restoredEntries.includes("memories/note.md"));
+    assert.ok(restoredEntries.includes("sessions/last.json"));
+    assert.ok(!restoredEntries.some((p) => p.includes(".env")), "secrets not restored");
+
+    // Memory content is intact
+    const memoryEntry = restoredFiles[0].entries.find((e) => e.relativePath === "memories/note.md");
+    assert.equal(memoryEntry.content, "user said something important");
+  });
+
+  test("restore with no snapshot returns zero restored", async () => {
+    const { createHermesProfileStatePersistence } = await loadProfileStatePersistence();
+    const persistence = createHermesProfileStatePersistence({
+      platform: "railway",
+      profilesRoot: "/data/hermes/profiles",
+      railwayVolumeMountPath: "/data",
+      objectStore: {
+        getJson: async ({ key }) => null,
+        putJson: async () => { throw new Error("should not write"); },
+      },
+    });
+
+    const result = await persistence.restoreProfile({ tenantId: "t", userId: "u", profileName: "p" });
+    assert.equal(result.restored, 0);
+  });
+
+  test("snapshot key includes userId for isolation between users", async () => {
+    const { createHermesProfileStatePersistence } = await loadProfileStatePersistence();
+    const keys = [];
+    const persistence = createHermesProfileStatePersistence({
+      platform: "railway",
+      profilesRoot: "/data/hermes/profiles",
+      railwayVolumeMountPath: "/data",
+      filesystem: { readTree: async () => [] },
+      objectStore: {
+        putJson: async ({ key, value }) => { keys.push(key); return { key, etag: "etag" }; },
+        getJson: async () => null,
+      },
+    });
+
+    await persistence.snapshotProfile({ tenantId: "tenant_x", userId: "alice", profileName: "alice_pro" });
+    await persistence.snapshotProfile({ tenantId: "tenant_x", userId: "bob", profileName: "bob_pro" });
+
+    assert.equal(keys.length, 2);
+    assert.match(keys[0], /users\/alice\//);
+    assert.match(keys[1], /users\/bob\//);
+    assert.notEqual(keys[0], keys[1]);
   });
 });
 

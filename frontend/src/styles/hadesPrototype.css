@@ -202,7 +202,19 @@ button{color:inherit;cursor:pointer}
 .bubble{max-width:88%;border:1px solid var(--line);border-radius:18px;padding:9px;background:rgba(255,255,255,.045)}
 .bubble.user{justify-self:end;background:color-mix(in srgb,var(--accent) 16%,rgba(255,255,255,.04))}
 .bubble.hades{justify-self:start}
-.bubble p{margin:0;font-size:17px;line-height:1.05}
+.bubble p{margin:4px 0;font-size:17px;line-height:1.35}
+.bubble pre{background:rgba(0,0,0,.3);border:1px solid var(--line2);border-radius:10px;padding:8px;overflow-x:auto;margin:6px 0}
+.bubble pre code{background:none;padding:0;font-size:13px;color:var(--gold);word-break:break-all;white-space:pre-wrap}
+.bubble code{background:rgba(255,255,255,.08);padding:1px 5px;border-radius:5px;font-size:14px;color:var(--gold);font-family:"Courier New",monospace}
+.bubble ul,.bubble ol{margin:4px 0;padding-left:22px;line-height:1.35}
+.bubble li{margin:2px 0}
+.bubble hr{border:none;border-top:1px solid var(--line2);margin:8px 0}
+.bubble a{color:var(--gold);text-decoration:underline}
+.bubble .chat-media{max-width:100%;border-radius:12px;margin:6px 0;cursor:pointer;display:block}
+.bubble .chat-video{max-width:100%;border-radius:12px;margin:6px 0;display:block}
+.bubble .chat-audio{width:100%;margin:6px 0}
+.bubble .chat-download{display:inline-block;padding:6px 12px;border:1px solid var(--gold);border-radius:8px;margin:4px 0;font-size:14px}
+.bubble .media-unavailable{color:var(--muted);font-size:14px;font-style:italic;margin:4px 0}
 .stamp{display:block;margin-top:5px;color:var(--muted2);font-size:14px;line-height:1.05}
 .loading{display:flex;align-items:center;gap:5px;color:var(--muted);font-size:16px}
 .spark{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:pulse .72s infinite alternate}

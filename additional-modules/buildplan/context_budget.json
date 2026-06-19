@@ -1,14 +1,14 @@
 {
   "hardLimit": 64000,
-  "currentUsage": 12000,
-  "remaining": 52000,
+  "currentUsage": 42000,
+  "remaining": 22000,
   "warningAt": 51200,
   "compactAt": 57600,
   "stopAt": 62400,
   "lastCompactedAt": null,
   "compactionStrategy": "summarize completed work, preserve current phase, target files, failing tests, blockers",
-  "sessionStart": "2026-06-19T18:00:50.488+00:00",
-  "sessionEnd": "2026-06-19T18:52:59.297+00:00",
+  "sessionStart": "2026-06-19T21:32:53.075+00:00",
+  "sessionEnd": "2026-06-19T22:15:04.309+00:00",
   "history": [
     {
       "endedAt": "2026-06-12T16:33:56.160+00:00",
@@ -483,6 +483,12 @@
       "peakUsage": 12000,
       "reason": "archive_session",
       "slug": "lvhme-dns-migration"
+    },
+    {
+      "endedAt": "2026-06-19T22:15:04.309+00:00",
+      "peakUsage": 42000,
+      "reason": "archive_session",
+      "slug": "fix-hades-tests"
     }
   ]
 }

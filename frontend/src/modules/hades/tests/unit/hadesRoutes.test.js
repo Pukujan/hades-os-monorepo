@@ -5,7 +5,7 @@ test("HADES_APP_ROUTES contains all expected routes", async () => {
   const { HADES_APP_ROUTES } = await import("../../index.jsx");
 
   assert.ok(Array.isArray(HADES_APP_ROUTES));
-  assert.ok(HADES_APP_ROUTES.length >= 6);
+  assert.ok(HADES_APP_ROUTES.length >= 5);
 
   const ids = HADES_APP_ROUTES.map((r) => r.id);
   assert.ok(ids.includes("home"));

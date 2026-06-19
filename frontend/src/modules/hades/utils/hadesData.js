@@ -20,8 +20,8 @@ export const THEME_CHOICES = [
 ];
 
 export const MOBILE_NAV = [
-  { id: "minions", label: "Minions", icon: "minions", to: "/app/minions" },
-  { id: "forge", label: "Forge", icon: "hammer", to: "/forge" },
+  { id: "minions", label: "HADES CHAT", icon: "minions", to: "/app/minions" },
+  { id: "forge", label: "MINIONS", icon: "hammer", to: "/forge" },
   { id: "socials", label: "Socials", icon: "socials", to: "/app/socials" },
   { id: "settings", label: "Settings", icon: "settings", to: "/app/settings" }
 ];

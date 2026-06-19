@@ -20,12 +20,12 @@ test("uses forge-specific copy when conversationType is forge", () => {
 });
 
 test("uses default Hades copy otherwise", () => {
-  assert.equal(getPendingCopy("hello"), "Hades is thinking.");
-  assert.equal(getPendingCopy("what is a minion"), "Hades is thinking.");
+  assert.equal(getPendingCopy("hello"), "Hermes is thinking.");
+  assert.equal(getPendingCopy("what is a minion"), "Hermes is thinking.");
 });
 
 test("getFallbackPendingCopy returns mode-aware fallback", () => {
   assert.equal(getFallbackPendingCopy("forge"), "Heating the forge.");
-  assert.equal(getFallbackPendingCopy("general"), "Hades is thinking.");
-  assert.equal(getFallbackPendingCopy(), "Hades is thinking.");
+  assert.equal(getFallbackPendingCopy("general"), "Hermes is thinking.");
+  assert.equal(getFallbackPendingCopy(), "Hermes is thinking.");
 });

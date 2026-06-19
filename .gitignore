@@ -19,5 +19,10 @@ forge-response.json
 .env copy
 .env*
 
+# OCI CLI install artifacts
+install-oci-cli.ps1
+install.ps1
+oci --version/
+
 # Docker proof env
 backend/.env.docker

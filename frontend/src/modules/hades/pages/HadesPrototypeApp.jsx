@@ -39,12 +39,8 @@ import {
   buildNotificationViewModel,
   normalizeMessage
 } from "../utils/hadesViewModel.js";
-import {
-  buildForgeDraftFromMinion,
-  getForgeDraftActionLabel,
-  getForgeTriggerLabel,
-  normalizeSavedMinion
-} from "../utils/minionFlow.js";
+import { normalizeSavedMinion, paginateMinions } from "../utils/minionFlow.js";
+import { getEmojiForMinion } from "../utils/minionPreviewData.js";
 import { MinionSlots } from "./MinionSlots.jsx";
 import { MinionListScreen } from "./MinionListScreen.jsx";
 import { MinionDetailScreen } from "./MinionDetailScreen.jsx";
@@ -58,7 +54,6 @@ import {
   getHadesBootstrap,
   mapBootstrapToHadesState,
   postHadesAssignment,
-  sendForgeChat,
   sendGeneralChat,
   postHadesMinion,
   updateMinion,
@@ -220,14 +215,12 @@ function getScreenTitle(screen) {
 function HadesProvider({ children }) {
   const [theme, setThemeState] = usePersistentState("hades.theme", "ember");
   const [messages, setMessages] = usePersistentState("hades.chatMessages", createInitialMessages());
-  const [forgeMessages, setForgeMessages] = usePersistentState("hades.forgeMessages", createInitialMessages());
   const [draft, setDraft] = usePersistentState("hades.draft", createEmptyDraft());
   const [minions, setMinions] = usePersistentState("hades.minions", []);
   const [inbox, setInbox] = usePersistentState("hades.inboxAlerts", createInitialInbox());
   const [assignments, setAssignments] = usePersistentState("hades.assignments", []);
   const [levelState, setLevelState] = usePersistentState("hades.levelState", null);
   const [conversationId, setConversationId] = usePersistentState("hades.conversationId", null);
-  const [forgeConversationId, setForgeConversationId] = usePersistentState("hades.forgeConversationId", null);
   const [toast, setToast] = React.useState(null);
   const maxSlots = 4;
   const [composerText, setComposerText] = React.useState("");
@@ -571,15 +564,9 @@ function HadesProvider({ children }) {
     }
   }
 
-  async function sendMessage(messageText, context = "forge") {
+  async function sendMessage(messageText, context = "general") {
     const text = messageText.trim();
     if (!text) return;
-
-    const isForge = context === "forge";
-    const currentConvId = isForge ? forgeConversationId : conversationId;
-    const setConvId = isForge ? setForgeConversationId : setConversationId;
-    const setMsgs = isForge ? setForgeMessages : setMessages;
-    const chatEndpoint = isForge ? sendForgeChat : sendGeneralChat;
 
     const userMessageId = createId("msg");
     const userMessage = {
@@ -589,15 +576,14 @@ function HadesProvider({ children }) {
       status: "queued"
     };
 
-    setMsgs((current) => [...current, userMessage]);
+    setMessages((current) => [...current, userMessage]);
     setComposerText("");
-    const conversationType = isForge ? "forge" : "general";
-    setPendingCopy(getPendingCopy(text, conversationType));
+    setPendingCopy(getPendingCopy(text, context));
     setSending(true);
 
     try {
-      const response = await chatEndpoint({
-        conversationId: currentConvId || undefined,
+      const response = await sendGeneralChat({
+        conversationId: conversationId || undefined,
         clientMessageId: userMessageId,
         idempotencyKey: userMessageId,
         message: text,
@@ -605,14 +591,14 @@ function HadesProvider({ children }) {
       }, accessToken);
 
       if (response?.conversationId) {
-        setConvId(response.conversationId);
+        setConversationId(response.conversationId);
       }
 
       if (response?.pendingCopy) {
         setPendingCopy(response.pendingCopy);
       }
 
-      setMsgs((current) =>
+      setMessages((current) =>
         current.map((entry) => (entry.id === userMessageId ? { ...entry, status: "completed" } : entry)).concat(normalizeMessage({
           id: response.assistantMessage?.id || createId("msg"),
           role: "assistant",
@@ -629,13 +615,10 @@ function HadesProvider({ children }) {
           mediaVerificationReason: response.assistantMessage?.mediaVerificationReason ?? undefined,
         }))
       );
-      if (isForge && response.draft) {
-        updateDraft(response.draft);
-      }
     } catch (error) {
       console.error("[Hades chat] Hermes request failed; using local fallback.", {
-        context: conversationType,
-        conversationId: currentConvId || null,
+        context: context,
+        conversationId: conversationId || null,
         clientMessageId: userMessageId,
         status: error?.status || null,
         code: error?.code || null,
@@ -645,11 +628,8 @@ function HadesProvider({ children }) {
         error,
       });
       const parsed = buildLocalDraftFallback(text, draft);
-      if (isForge) {
-        updateDraft(parsed.draft);
-      }
       const assistantReply = buildAssistantReply(parsed);
-      setMsgs((current) =>
+      setMessages((current) =>
         current.map((entry) => (entry.id === userMessageId ? { ...entry, status: "completed" } : entry)).concat(normalizeMessage({
           id: createId("msg"),
           role: "assistant",
@@ -663,17 +643,13 @@ function HadesProvider({ children }) {
     setSending(false);
   }
 
-  async function clearMessages(context = "general") {
-    const isForge = context === "forge";
-    const currentConvId = isForge ? forgeConversationId : conversationId;
-    const setMsgs = isForge ? setForgeMessages : setMessages;
-
-    if (currentConvId) {
+  async function clearMessages() {
+    if (conversationId) {
       try {
-        await deleteHadesMessages(currentConvId, accessToken);
+        await deleteHadesMessages(conversationId, accessToken);
       } catch { /* best effort */ }
     }
-    setMsgs([]);
+    setMessages([]);
   }
 
   async function runDraftTest() {
@@ -939,7 +915,6 @@ function HadesProvider({ children }) {
         toast,
         showToast,
         messages,
-        forgeMessages,
         sending,
         composerText,
         setComposerText,
@@ -995,6 +970,13 @@ function HadesProvider({ children }) {
     </HadesContext.Provider>
   );
 }
+
+const NAV_ICONS = {
+  minions: "♟",
+  forge: "⚒",
+  socials: "◎",
+  settings: "☰"
+};
 
 function AppShell() {
   const location = useLocation();
@@ -1070,22 +1052,16 @@ function AppShell() {
 
           <nav className="bottom">
             <div className="nav">
-              <button className={`nav-btn ${screen === "minions" ? "active" : ""}`} onClick={() => navigate("/app/minions")}>
-                <span className="nav-icon">♟</span>
-                <span className="nav-label">MINIONS</span>
-              </button>
-              <button className={`nav-btn ${screen === "forge" ? "active" : ""}`} onClick={() => navigate("/forge")}>
-                <span className="nav-icon">⚒</span>
-                <span className="nav-label">FORGE</span>
-              </button>
-              <button className={`nav-btn ${screen === "socials" ? "active" : ""}`} onClick={() => navigate("/app/socials")}>
-                <span className="nav-icon">◎</span>
-                <span className="nav-label">SOCIALS</span>
-              </button>
-              <button className={`nav-btn ${screen === "settings" ? "active" : ""}`} onClick={() => navigate("/app/settings")}>
-                <span className="nav-icon">☰</span>
-                <span className="nav-label">SETTINGS</span>
-              </button>
+              {MOBILE_NAV.map((item) => (
+                <button
+                  key={item.id}
+                  className={`nav-btn ${screen === item.id ? "active" : ""}`}
+                  onClick={() => navigate(item.to)}
+                >
+                  <span className="nav-icon">{NAV_ICONS[item.id]}</span>
+                  <span className="nav-label">{item.label}</span>
+                </button>
+              ))}
             </div>
           </nav>
 
@@ -1553,11 +1529,11 @@ function MinionsScreen() {
   const activeCount = minions.filter((m) => m.slotIndex != null).length;
 
   const suggestionButtons = [
-    { label: "What is this place?", action: () => sendMessage("What is this place?", "minions") },
+    { label: "What can you do?", action: () => sendMessage("What can you do? Tell me about your capabilities.", "minions") },
+    { label: "Summarize this repo", action: () => sendMessage("Check my current directory and summarize this repo in a few bullets.", "minions") },
+    { label: "Help me debug", action: () => sendMessage("What's my current setup? Help me debug any issues.", "minions") },
     { label: "Open Forge", action: () => navigate("/forge") },
-    { label: "Connect Telegram", action: () => navigate("/app/socials") },
-    { label: "Show Socials", action: () => navigate("/app/socials") },
-    { label: "Open Settings", action: () => navigate("/app/settings") },
+    { label: "Settings", action: () => navigate("/app/settings") },
   ];
 
   function handleSend() {
@@ -1566,38 +1542,14 @@ function MinionsScreen() {
 
   return (
     <>
-      <ScreenHead title="Minions" subtitle="Speak to Hades, then inspect your minions and slots." />
+      <ScreenHead title="Chat" subtitle="Conversational AI powered by Hermes Agent" />
       <div className="scroll minions-scroll">
-        {false && (
-        <>
-        <div className="card row">
-          <div>
-            <h2 className="title">Your lesser court</h2>
-            <p className="hades-copy">Four slots. Use them wisely. Or waste them on cats, apparently.</p>
-          </div>
-          <span className="chip">4 slots</span>
-        </div>
-
-        <div className="section-head"><h2>Minion Slots</h2><span className="tiny">{activeCount} / 4 active</span></div>
-        <MinionSlots minions={minions} />
-        </>
-        )}
-
-        <div className="card">
-          <div className="row">
-            <div>
-              <h2 className="title" style={{ fontSize: 19 }}>Hades is listening</h2>
-              <p className="hades-copy">Speak, ask, or choose a door. The machinery dislikes idleness.</p>
-            </div>
-            <button className="pill-btn" type="button" onClick={() => navigate("/app/minions/list")}>Minion List</button>
-          </div>
-        </div>
 
         <section className={chatClass} id="hadesChatCard">
-          <p className="kicker">Speak to Hades
-            {messages.length > 0 ? <button className="tiny" type="button" style={{ float: "right" }} onClick={() => clearMessages("general")}>Clear</button> : null}
+          <p className="kicker">Hermes Chat
+            {messages.length > 0 ? <button className="tiny" type="button" style={{ float: "right" }} onClick={() => clearMessages()}>Clear</button> : null}
           </p>
-          {messages.length === 0 ? <h3 className="bigline chat-intro">Hades is listening. Speak, ask, or choose a door.</h3> : null}
+          {messages.length === 0 ? <h3 className="bigline chat-intro">Chat with Hermes. Ask anything — code, debug, research, automate.</h3> : null}
           {messages.length === 0 ? (
             <div className="suggest">
               {suggestionButtons.map((btn) => (
@@ -1625,7 +1577,7 @@ function MinionsScreen() {
             <textarea
               className="input"
               value={composerText}
-              placeholder="Speak thy mind..."
+              placeholder="Ask Hermes anything..."
               onChange={(event) => setComposerText(event.target.value)}
               onKeyDown={(event) => {
                 if (event.key === "Enter" && !event.shiftKey) {
@@ -1811,142 +1763,59 @@ function SettingsScreen() {
 }
 
 function ForgeScreen() {
-  const location = useLocation();
-  const {
-    forgeMessages: messages,
-    draft,
-    sending,
-    pendingCopy,
-    composerText,
-    setComposerText,
-    sendMessage,
-    clearMessages,
-    runDraftTest,
-    saveDraft,
-    minions,
-    openMinionDetail,
-    updateDraft,
-    forgeEditMinionId,
-    setForgeEditMinionId,
-  } = useHades();
-  const visibleSummons = minions.filter((minion) => minion.status === "active").slice(0, 4);
-  const editMinionId = new URLSearchParams(location.search).get("edit");
-  const isEditing = Boolean(editMinionId || forgeEditMinionId);
-  const saveLabel = getForgeDraftActionLabel({ isEditing });
+  const navigate = useNavigate();
+  const { minions } = useHades();
+  const [search, setSearch] = React.useState("");
+  const [page, setPage] = React.useState(0);
+
+  const filtered = minions.filter((m) =>
+    (m.name + " " + (m.description || "")).toLowerCase().includes(search.toLowerCase())
+  );
+  const { visibleMinions, hasPrevious, hasNext, totalPages, page: currentPage } = paginateMinions(filtered, page, 10);
 
   React.useEffect(() => {
-    if (!editMinionId) return;
-    if (forgeEditMinionId === editMinionId && draft?.name) return;
-    const match = minions.find((minion) => minion.id === editMinionId);
-    if (!match) return;
-    setForgeEditMinionId(editMinionId);
-    updateDraft(buildForgeDraftFromMinion(match));
-  }, [draft?.name, editMinionId, forgeEditMinionId, minions, setForgeEditMinionId, updateDraft]);
-
-  const templateChips = [
-    { id: "sendcat", label: "SEND CAT", text: "Create a command called !sendcat that sends cat memes in Discord." },
-    { id: "tracker", label: "PRICE TRACK", text: "Make a minion that checks product prices every 5 hours." },
-    { id: "summarize", label: "SUMMARIZE", text: "Make a minion that summarizes chats into a clean note." },
-    { id: "timezone", label: "TIMEZONE", text: "Create a minion that converts timezones on command." },
-    { id: "advice", label: "ADVICE", text: "Make a minion that gives random advice or affirmations." },
-    { id: "episode", label: "TRACK EPISODE", text: "Make a minion that tracks new episodes of a show." }
-  ];
+    setPage(0);
+  }, [search]);
 
   return (
     <>
-      <ScreenHead title="Forge" subtitle={isEditing ? "Refine a saved helper from plain English." : "Create a helper from plain English."} />
+      <ScreenHead title="Minions" subtitle="The whole cabinet of obedient nonsense." />
       <div className="scroll">
-        <section className="card chat-card expanded">
-          <p className="kicker">{isEditing ? "Edit your minion" : "Forge your minion"}
-            {messages.length > 0 ? <button className="tiny" type="button" style={{ float: "right" }} onClick={() => clearMessages("forge")}>Clear</button> : null}
-          </p>
-          <div className="chips">
-          {templateChips.map((chip) => (
-            <button key={chip.id} type="button" className="chip" onClick={() => sendMessage(chip.text)}>
-              {chip.label}
-            </button>
-          ))}
+        <section className="card">
+          <div className="list-top">
+            <div>
+              <h2 className="title">Minion List</h2>
+              <p className="hades-copy">All your summoned helpers in one place.</p>
+            </div>
           </div>
-          <div className="chat-log" id="forgeChat">
-            {messages.map((message) => (
-              <React.Fragment key={message.id}>
-                <ChatBubble message={message} sendMessage={sendMessage} ProductCard={ProductCard} ComparisonCard={ComparisonCard} />
-                {message.suggestions?.length ? (
-                  <div className="suggest">
-                    {message.suggestions.map((s, i) => {
-                      const label = typeof s === "string" ? s : s.label;
-                      return <button key={label || i} type="button" onClick={() => sendMessage(s)}>{label}</button>;
-                    })}
-                  </div>
-                ) : null}
-              </React.Fragment>
-            ))}
-            {sending ? <LoadingDots pendingCopy={pendingCopy} /> : null}
+          <input
+            className="search"
+            placeholder="Search the lesser things..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <div className="row" style={{ marginBottom: 12 }}>
+            <span className="tiny">Page {currentPage + 1} of {totalPages}</span>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button className="pill-btn" type="button" onClick={() => setPage((current) => Math.max(0, current - 1))} disabled={!hasPrevious}>
+                Previous
+              </button>
+              <button className="pill-btn" type="button" onClick={() => setPage((current) => current + 1)} disabled={!hasNext}>
+                Next
+              </button>
+            </div>
           </div>
-          <div className="input-row">
-            <textarea
-              className="input"
-              id="forgeChatInput"
-              rows={1}
-              value={composerText}
-              placeholder="Summon a minion to..."
-              onChange={(event) => setComposerText(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" && !event.shiftKey) {
-                  event.preventDefault();
-                  sendMessage(composerText);
-                }
-              }}
-            />
-            <button className="primary" type="button" onClick={() => sendMessage(composerText)}>
-              Forge
-            </button>
-          </div>
-        </section>
-
-        <section className="card config">
-          <p className="kicker">{isEditing ? "Editing draft" : "Live draft"}</p>
-          <div className="config">
-            <div className="config-row"><span>Template</span><b>{draft.name || "Not selected"}</b></div>
-            <div className="config-row"><span>Trigger</span><b>{getForgeTriggerLabel(draft)}</b></div>
-            <div className="config-row"><span>Channel</span><b>{formatSocialLabel(draft.targetSocial || "private")}</b></div>
-            <div className="config-row"><span>Approval</span><b>{draft.safetyMode === "ask_first" ? "Required" : "Optional"}</b></div>
-          </div>
-          <div className="draft-actions" style={{ marginTop: 16 }}>
-            <button className="btn secondary" type="button" onClick={runDraftTest}>
-              Test draft
-            </button>
-            <button className="btn secondary" type="button" onClick={saveDraft}>
-              {saveLabel}
-            </button>
-          </div>
-        </section>
-
-        <div className="section-row">
-          <h3>Your Past Summons</h3>
-          <button className="tiny" type="button" onClick={runDraftTest}>History</button>
-        </div>
-        <section className="past-pane">
-          <div className="contained-list">
-            {visibleSummons.map((minion) => (
-              <article key={minion.id} className="summon-card">
-                <div className="avatar">
-                  {minion.avatar || <AppIcon name={minion.icon} />}
-                </div>
-                <div>
-                  <h4 className="name">{minion.name}</h4>
-                  <p className="task">{minion.commandName || "!hades <follow-up>"}</p>
-                  <div className="meta-mini">
-                    <span className="meta-pill">{toTitleCase(minion.triggerType || "manual")}</span>
-                    <span className="meta-pill">{formatSocialLabel(minion.targetSocial)}</span>
-                  </div>
-                </div>
-                <button className="detail-btn" type="button" onClick={() => openMinionDetail(minion.id)}>
-                  Detail
-                </button>
-              </article>
+          <div className="grid4">
+            {visibleMinions.map((m) => (
+              <button key={m.id} type="button" className="minion-tile" onClick={() => navigate(`/app/minions/${m.id}`)}>
+                <span className="owner">User</span>
+                <div className="emoji">{getEmojiForMinion(m)}</div>
+                <strong>{m.name}</strong>
+                <small>{m.slotIndex != null ? "Active" : "Inactive"} · {m.type === "auto" ? "auto" : "manual"}</small>
+              </button>
             ))}
           </div>
+          {!filtered.length ? <p className="task" style={{ margin: "12px 0 0" }}>No minions match your search.</p> : null}
         </section>
       </div>
     </>
