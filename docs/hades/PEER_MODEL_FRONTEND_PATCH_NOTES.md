@@ -232,13 +232,57 @@ Social tokens (Telegram, Discord, etc.) are stored in DB via Hades social routes
 
 Current architecture keeps them separate: Hades social layer handles inbound messages, Hermes profiles handle outbound conversations. Decide which direction.
 
+### Gap E: Container Restart (Deploy)
+
+Railway Hobby tier has **no sleep** — container runs 24/7. The only restart is during a deploy (~30s build + swap). On restart:
+- **Volume data survives** — profile homes (`state.db`, `sessions/`, `memories/`, `state-index/`) on Railway persistent volume
+- **In-memory `profileRegistry` is wiped** — the Map of profiles is gone. Profiles must be re-discovered from the volume
+- **Hermes API server subprocesses are dead** — need to be re-launched on container start
+- **Temp port allocations from before restart are stale** — `allocatePort` grabbed random ports that may be taken
+
+Fix: A profile lifecycle manager that on container start:
+1. Scans the profiles directory on the volume
+2. Re-discovers existing profiles and re-registers them in `profileRegistry`
+3. Re-launches Hermes API servers on their allocated ports (or re-allocate)
+4. On first request, if the profile's Hermes API server isn't running, launch it lazily
+
+Note: If the user switches to Free tier later, Railway **does** sleep after ~5 min idle and cold-starts on next request. The lifecycle manager should handle that too (lazy-launch on first request after sleep).
+
+### Gap F: Snapshot Storage — Needs R2/S3
+
+Current `objectStore` is in "memory" mode (no Supabase/R2 configured). Snapshots (`POST /proof/snapshot`) are stored in-memory and wiped on restart.
+
+Fix:
+1. Add Cloudflare R2 (S3-compatible) as the object store backend
+2. Switch `HERMES_STORAGE_MODE` from `memory` to `r2` or `s3`
+3. Add auto-snapshot schedule: snapshot after each chat completion, or via cron every N minutes
+4. Restore profile state from latest snapshot on container wake (Railway cold start)
+
+The `hermesObjectStore.js` already has `putJson`/`getJson` — it just needs an S3/R2 adapter replacing the current in-memory store.
+
+### Gap G: Hermes API Server Profile Lifecycle Manager
+
+No module exists to keep Hermes API servers running per profile. Currently the provisioner creates files but never launches `hermes gateway`.
+
+Need: `hermesProfileLifecycleManager.js` with:
+- `launchProfile(profileName)` — spawns `hermes -p {name} gateway` with `API_SERVER_KEY` in env
+- `stopProfile(profileName)` — kills the child process
+- `restartProfile(profileName)` — stop + launch
+- `isRunning(profileName)` — check if PID is alive
+- Internal `Map<profileName, { pid, port, startedAt }>`
+- Auto-restart on crash
+- On container restart (Railway wake): scan volume profiles dir, re-launch all found profiles
+- Integration: `ensureProfile()` in session broker calls `launchProfile()` after provisioning
+
 ---
 
 ## Part 6: Sequence to Ship
 
 ```
-Priority 1 — Make chat work end-to-end:
-  [Backend] Gap A: Launch Hermes API server per profile
+Priority 1 — Make chat work on Railway (restart + lifecycle):
+  [Backend] Gap G: Profile lifecycle manager — launch Hermes API server per profile
+  [Backend] Gap G: On container start, scan volume profiles dir, re-register + re-launch
+  [Backend] Gap E: First-request lazy-launch if API server not running
   [Backend] Gap B: Fix edge auth to validate routing tokens properly
   [Frontend] Gap 1: Swap chat API calls to session → edge URL flow
   → Chat works end-to-end through persistent profile API server
@@ -247,9 +291,12 @@ Priority 2 — Profile management:
   [Backend] Gap C: Add profile management routes (soul, config, env, sessions)
   [Frontend] Gap 2 + 3: Profile settings page with SOUL editor, model picker, API keys
 
-Priority 3 — Polish:
-  [Backend] Gap D: Social token sync decision
+Priority 3 — Production hardening:
+  [Backend] Gap F: Add R2/S3 object store, switch storage mode from memory
+  [Backend] Gap F: Auto-snapshot schedule (cron or post-chat)
+  [Backend] Gap E: Restore profile state from latest snapshot on restart
+  [Backend] Gap D: Social token sync decision (profile .env vs Hades token pool)
   [Frontend] Remove old /chat/general flow, harden error handling
-  [Backend] Delete proof hooks (they're for Docker proof only)
+  [Backend] Delete proof hooks (Docker proof only)
   [Docs] Update API.md with new routes
 ```

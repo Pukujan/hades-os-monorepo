@@ -85,6 +85,10 @@
       "status": "completed",
       "summary": "Created docs/hades/PEER_MODEL_FRONTEND_PATCH_NOTES.md with full agent-readable patch notes covering: what exists, auth model, frontend gaps (3), backend gaps remaining (4), and priority-ordered ship sequence for frontend integration."
     },
+    "railwayDeploy": {
+      "status": "pending",
+      "summary": "Pushed 239 files to master (1b3be75). Railway project virtuous-tranquility has old deploy at 5fe8e4f. Need to trigger new deploy from current commit. Dev log written to work-log/dev-logs/human/007_2026-06-19_dev-log_peer-model-railway-deploy.md."
+    },
     "completedAt": "2026-06-19"
   }
 }
