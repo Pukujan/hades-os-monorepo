@@ -278,11 +278,13 @@ export function createHermesSessionRoutes({
     "/proof/restart",
     requireProofAuth,
     asyncRoute(async (req, res) => {
-      res.json({ status: "restarting" });
-
-      setImmediate(() => {
-        process.exit(0);
-      });
+      const platform = process.env.HADES_PLATFORM;
+      if (platform && platform !== "local") {
+        res.json({ status: "restarting" });
+        setImmediate(() => process.exit(1));
+      } else {
+        res.json({ status: "restart_skipped", reason: "no supervisor" });
+      }
     })
   );
 
