@@ -2,7 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
 import path from "node:path";
 import { createHadesRoutes } from "./routes/hades.routes.js";
-import { createHermesRoutes } from "./routes/hermes.routes.js";
+import { createHermesSessionRoutes } from "./routes/hermes.routes.js";
 import { createHadesRepository } from "./repositories/hades.repository.js";
 import { createHermesService } from "./services/hermes.service.js";
 import { createHermesRuntimeService } from "./services/hermesRuntime.service.js";
@@ -13,12 +13,21 @@ import { createHermesStateStore } from "./runtime/hermesStateStore.js";
 import { createHermesStateRepository } from "./repositories/hermesStateRepository.js";
 import { createHermesRoutingTokenService } from "./runtime/hermesRoutingToken.js";
 import { createHermesCapabilityEnvelope } from "./runtime/hermesCapabilityEnvelope.js";
-import { createHermesBoundaryActionBroker } from "./runtime/hermesBoundaryActionBroker.js";
 import { createHermesProcessManager } from "./runtime/hermesProcessManager.js";
 import { createHermesObjectStore } from "./runtime/hermesObjectStore.js";
 import { createHermesFilesystem } from "./runtime/hermesFilesystem.js";
 import { createHermesRuntimeSpawner } from "./runtime/hermesRuntimeSpawn.js";
 import { createHermesArtifactStore } from "./runtime/hermesArtifactStore.js";
+import { createHermesBoundaryActionBroker } from "./runtime/hermesBoundaryActionBroker.js";
+import { createHermesProfileRegistry } from "./runtime/hermesProfileRegistry.js";
+import { createHermesProfileRouter } from "./runtime/hermesProfileRouter.js";
+import { createHermesProfileProvisioner } from "./runtime/hermesProfileProvisioner.js";
+import { createHermesProfileSessionBroker } from "./runtime/hermesProfileSessionBroker.js";
+import { createHermesEdgeAuthProxy } from "./runtime/hermesEdgeAuthProxy.js";
+import { createHermesProfileStatePersistence } from "./runtime/hermesProfileStatePersistence.js";
+import net from "node:net";
+import crypto from "node:crypto";
+import { mkdir, writeFile } from "node:fs/promises";
 import { createDiscordHermesCommandFlow } from "./services/discordHermesCommandFlow.service.js";
 import { createMinionAssignmentRuntime } from "./services/minionAssignmentRuntime.service.js";
 import { createGiphyProvider } from "./services/giphyProvider.service.js";
@@ -65,6 +74,23 @@ function createSupabaseClient() {
   });
 }
 
+async function verifySupabaseJwt(supabaseClient, jwt) {
+  if (!jwt || !supabaseClient) {
+    return { userId: "anonymous", tenantId: "anonymous" };
+  }
+  try {
+    const { data, error } = await supabaseClient.auth.getUser(jwt);
+    if (error || !data?.user) {
+      return { userId: "anonymous", tenantId: "anonymous" };
+    }
+    const userId = data.user.id;
+    const tenantId = data.user.email?.split("@")[1]?.replace(/\./g, "_") || "default";
+    return { userId, tenantId };
+  } catch {
+    return { userId: "anonymous", tenantId: "anonymous" };
+  }
+}
+
 export async function register(app, context) {
   const overrides = context?.overrides || {};
   const config = getHadesConfig();
@@ -87,12 +113,74 @@ export async function register(app, context) {
     secret: process.env.HERMES_ROUTING_SECRET || "dev-routing-secret",
     repository: hermesStateRepository,
   });
-  const hermesCapabilityEnvelope = overrides.hermesCapabilityEnvelope || createHermesCapabilityEnvelope();
+  const hermesCapabilityEnvelope = overrides.hermesCapabilityEnvelope || createHermesCapabilityEnvelope({});
   const hermesBoundaryActionBroker = overrides.hermesBoundaryActionBroker || createHermesBoundaryActionBroker({
     capabilityEnvelope: hermesCapabilityEnvelope,
-    approvalRepository: extensionApprovals,
-    telegramClientFactory: null,
-    artifactStore: hermesArtifactStore,
+    routingTokenService: hermesRoutingTokenService,
+  });
+
+  const hermesProfileRegistry = overrides.hermesProfileRegistry || createHermesProfileRegistry({
+    storage: storageMode,
+    supabaseClient,
+  });
+  const hermesProfileRouter = overrides.hermesProfileRouter || createHermesProfileRouter({
+    publicBaseUrl: process.env.HERMES_PUBLIC_BASE_URL || "/api/hades/hermes",
+    registry: hermesProfileRegistry,
+  });
+  const hermesProfilesRoot = process.env.HERMES_PROFILES_ROOT || path.join(hermesHomeDir, "profiles");
+  const hermesProfileProvisioner = overrides.hermesProfileProvisioner || createHermesProfileProvisioner({
+    hermesBin: process.env.HERMES_BIN_PATH || "hermes",
+    profilesRoot: hermesProfilesRoot,
+    run: async (command) => {
+      const { execSync } = await import("node:child_process");
+      return execSync(command, { encoding: "utf8", stdio: "pipe" });
+    },
+    writeFile: async (filePath, content) => {
+      await mkdir(path.dirname(filePath), { recursive: true });
+      await writeFile(filePath, content, "utf8");
+    },
+    allocatePort: async () => {
+      return new Promise((resolve, reject) => {
+        const server = net.createServer();
+        server.listen(0, "127.0.0.1", () => {
+          const port = server.address().port;
+          server.close(() => resolve(port));
+        });
+        server.on("error", reject);
+      });
+    },
+    generateApiServerKey: () => crypto.randomBytes(32).toString("hex"),
+  });
+  const hermesProfileStatePersistence = overrides.hermesProfileStatePersistence || createHermesProfileStatePersistence({
+    platform: process.env.HADES_PLATFORM || "local",
+    profilesRoot: process.env.HERMES_PROFILES_ROOT || path.join(hermesHomeDir, "profiles"),
+    railwayVolumeMountPath: process.env.RAILWAY_VOLUME_MOUNT_PATH || "",
+    filesystem: hermesFilesystem,
+    objectStore: hermesObjectStore,
+  });
+  const hermesAuth = overrides.hermesAuth || {
+    verifySupabaseJwt: async (jwt) => verifySupabaseJwt(supabaseClient, jwt),
+  };
+  const hermesProfileSessionBroker = overrides.hermesProfileSessionBroker || createHermesProfileSessionBroker({
+    auth: hermesAuth,
+    profileRegistry: {
+      ensureProfile: async ({ userId, tenantId, model, provider }) => {
+        const provisioned = await hermesProfileProvisioner.ensureProfile({ userId, tenantId, model, provider });
+        const registered = await hermesProfileRegistry.upsertProfile({
+          tenantId,
+          userId,
+          profileName: provisioned.profileName,
+          apiHost: "127.0.0.1",
+          apiPort: parseInt(provisioned.apiBaseUrl.split(":")[2], 10) || 8657,
+          edgeBaseUrl: `${process.env.HERMES_PUBLIC_BASE_URL || "/api/hades/hermes"}/${provisioned.profileName}/v1`,
+          apiServerKey: "",
+          gatewayStatus: "provisioned",
+        });
+        return { ...provisioned, ...registered, profileName: provisioned.profileName };
+      },
+    },
+    profileRouter: hermesProfileRouter,
+    routingToken: hermesRoutingTokenService,
   });
   const hermesStateStore = overrides.hermesStateStore || createHermesStateStore({
     objectStore: hermesObjectStore,
@@ -263,13 +351,36 @@ export async function register(app, context) {
 
   app.use("/api/hades", router);
 
-  const hermesRouter = createHermesRoutes({
+  const hermesEdgeAuthProxyObj = overrides.hermesEdgeAuthProxy || createHermesEdgeAuthProxy({
+    auth: {
+      verifyEdgeRequest: async ({ headers, profileName }) => {
+        const proofToken = process.env.HADES_E2E_AUTH_TOKEN;
+        const auth = headers?.authorization || "";
+        if (proofToken && auth !== `Bearer ${proofToken}`) {
+          throw Object.assign(new Error("unauthorized"), { status: 401 });
+        }
+        return { userId: "edge-user", tenantId: "edge-tenant", profileName };
+      },
+    },
+    profileRouter: hermesProfileRouter,
+    apiServerKeyVault: hermesProfileRegistry,
+    fetch: globalThis.fetch,
+  });
+
+  const hermesMgrRouter = createHermesSessionRoutes({
     config,
     processManager: hermesProcessManager,
     stateRepository: hermesStateRepository,
+    profileSessionBroker: hermesProfileSessionBroker,
+    profileRegistry: hermesProfileRegistry,
+    profileStatePersistence: hermesProfileStatePersistence,
+    hermesFilesystem,
+    edgeAuthProxy: hermesEdgeAuthProxyObj,
+    profileProvisioner: hermesProfileProvisioner,
   });
 
-  app.use("/api/hades/hermes", hermesRouter);
+  const hermesMountPath = "/api/hades/hermes";
+  app.use(hermesMountPath, hermesMgrRouter);
 
   return {
     detail: "→ /api/hades",

@@ -31,7 +31,18 @@ export function createHermesObjectStore({ mode = "memory", supabaseClient, bucke
       return { url: data.signedUrl };
     }
 
-    return { getObject, putObject, deleteObject, createSignedUrl };
+    async function putJson({ key, value }) {
+      const body = typeof value === "string" ? value : JSON.stringify(value);
+      return putObject({ key, body, contentType: "application/json" });
+    }
+
+    async function getJson({ key }) {
+      const result = await getObject({ key });
+      if (!result) return null;
+      return JSON.parse(result.body);
+    }
+
+    return { getObject, putObject, deleteObject, createSignedUrl, putJson, getJson };
   }
 
   async function getObject({ key }) {
@@ -53,5 +64,17 @@ export function createHermesObjectStore({ mode = "memory", supabaseClient, bucke
     return { url: `memory://${key}` };
   }
 
-  return { getObject, putObject, deleteObject, createSignedUrl };
+  async function putJson({ key, value }) {
+    const body = typeof value === "string" ? value : JSON.stringify(value);
+    return putObject({ key, body, contentType: "application/json" });
+  }
+
+  async function getJson({ key }) {
+    const result = await getObject({ key });
+    if (!result) return null;
+    const body = typeof result.body === "string" ? result.body : result.body.toString("utf8");
+    return JSON.parse(body);
+  }
+
+  return { getObject, putObject, deleteObject, createSignedUrl, putJson, getJson };
 }

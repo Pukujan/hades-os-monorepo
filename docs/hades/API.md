@@ -61,7 +61,10 @@
 | POST | `/hermes/tasks` | Create an autonomous Hermes task |
 | GET | `/hermes/state` | List Hermes workspace state objects |
 | GET | `/hermes/skills` | List Hermes skills |
-
+| POST | `/sessions` | Create a Hermes profile session, returns edge route |
+| GET | `/proof/profile` | Admin-only: get detailed profile proof (state, paths, secrets check) |
+| POST | `/proof/snapshot` | Admin-only: trigger profile state snapshot and return metadata |
+| POST | `/proof/restart` | Admin-only: trigger service restart (Docker proof) |
 ## Endpoint details
 
 ### POST /chat/general
@@ -181,7 +184,104 @@ Execute a workflow, creating a run and orchestrating tool calls through the Herm
       "approvalRequests": [{"id": "uuid", "action_type": "string"}],
       "auditEntries": [{"id": "uuid", "toolName": "string", "status": "string"}]
     }
+  ]
+}
+```
+
+### GET /proof/profile
+
+Admin-only proof hook. Requires `Authorization: Bearer <HADES_E2E_AUTH_TOKEN>`.
+
+**Query params:**
+
+```
+profileName: string (required) — profile to inspect
+```
+
+**Response:**
+
+```json
+{
+  "profileName": "tenant_a_user_a",
+  "hermesApiBaseUrl": "http://localhost:3001/api/hades/hermes/tenant_a_user_a/v1",
+  "authMode": "edge_injected",
+  "platform": "local",
+  "profilesRoot": "/data/hermes/profiles",
+  "railwayVolumeMountPath": "",
+  "hermesHome": "/data/hermes/profiles/tenant_a_user_a",
+  "apiHost": "127.0.0.1",
+  "apiPort": 8657,
+  "apiServerKeyHash": "sha256:...",
+  "directBrowserReachable": false,
+  "rawProfilePortPublic": false,
+  "state": {
+    "hasStateDb": true,
+    "hasSessionsDir": true,
+    "hasMemoriesDir": true,
+    "hasEnvFile": true,
+    "envReturned": false
   }
+}
+```
+
+### POST /proof/snapshot
+
+Admin-only proof hook. Requires `Authorization: Bearer <HADES_E2E_AUTH_TOKEN>`.
+
+**Request body:**
+
+```json
+{
+  "profileName": "tenant_a_user_a",
+  "reason": "final-proof"
+}
+```
+
+**Response:**
+
+```json
+{
+  "objectKey": "profiles/tenant_a/users/user_a/tenant_a_user_a/snapshots/snapshot-id.json",
+  "visibility": "private",
+  "secretStripped": true,
+  "includes": ["memories/", "sessions/", "state.db"]
+}
+```
+
+### POST /proof/restart
+
+Admin-only proof hook. Requires `Authorization: Bearer <HADES_E2E_AUTH_TOKEN>`.
+
+Triggers graceful service restart via `process.exit(0)`. Docker Compose `restart: unless-stopped` policy will restart the container.
+
+**Response:**
+
+```json
+{
+  "status": "restarting"
+}
+```
+
+### POST /sessions
+
+Create a new Hermes profile session. Returns a scoped edge route for the Hermes profile API server.
+
+**Request headers:**
+
+```
+Authorization: Bearer <supabase-jwt> (optional)
+x-user-id: string (optional, used when auth context unavailable)
+x-tenant-id: string (optional, used when auth context unavailable)
+```
+
+**Response:**
+
+```json
+{
+  "profileName": "string — tenantId_userId composite",
+  "hermesApiBaseUrl": "string — edge route path for profile Hermes API",
+  "authMode": "edge_injected",
+  "routingToken": null
 }
 ```
 

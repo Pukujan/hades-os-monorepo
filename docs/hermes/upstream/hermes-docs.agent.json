@@ -1,0 +1,577 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-06-18T17:25:52.983Z",
+  "source": {
+    "name": "Hermes Agent official docs",
+    "llms_txt": "https://hermes-agent.nousresearch.com/docs/llms.txt",
+    "llms_full_txt": "https://hermes-agent.nousresearch.com/docs/llms-full.txt",
+    "github": "https://github.com/NousResearch/hermes-agent",
+    "local_index": "docs/hermes/upstream/llms.txt",
+    "local_full": "docs/hermes/upstream/llms-full.txt",
+    "index_bytes": 17409,
+    "full_bytes": 2912406
+  },
+  "hades_integration_notes": {
+    "recommended_model": "Per-user HERMES_HOME/profile as the primary isolation boundary; Hades verifies routing, auth, approvals, and artifact publication.",
+    "do_not_manually_model_every_tool": "Grant capability envelopes and intercept boundary-crossing actions instead of writing one Hades adapter for every Hermes skill.",
+    "routing": "Use Hades-issued taskId plus signed/encrypted routing token; do not trust Hermes-authored userId as authority.",
+    "telegram_gif_implication": "Hermes can use messaging gateways, but Hades-owned Telegram delivery still needs either a direct scoped Hermes gateway or a structured/proposed action that Hades executes with the correct user connection."
+  },
+  "priority_topics": [
+    "Messaging Platforms",
+    "Tools",
+    "Skills System",
+    "Memory",
+    "Context Files",
+    "Security",
+    "MCP",
+    "Plugins",
+    "Cron Jobs",
+    "Code Execution",
+    "Image Generation",
+    "Text-to-Speech",
+    "Architecture"
+  ],
+  "sections": [
+    {
+      "title": "Getting Started",
+      "entries": [
+        {
+          "title": "Installation",
+          "url": "https://hermes-agent.nousresearch.com/docs/getting-started/installation",
+          "description": "Install Hermes Agent on Linux, macOS, WSL2, native Windows, or Android via Termux"
+        },
+        {
+          "title": "Quickstart",
+          "url": "https://hermes-agent.nousresearch.com/docs/getting-started/quickstart",
+          "description": "Your first conversation with Hermes Agent — from install to chatting in under 5 minutes"
+        },
+        {
+          "title": "Learning Path",
+          "url": "https://hermes-agent.nousresearch.com/docs/getting-started/learning-path",
+          "description": "Choose your learning path through the Hermes Agent documentation based on your experience level and goals."
+        },
+        {
+          "title": "Updating",
+          "url": "https://hermes-agent.nousresearch.com/docs/getting-started/updating",
+          "description": "How to update Hermes Agent to the latest version or uninstall it"
+        },
+        {
+          "title": "Termux (Android)",
+          "url": "https://hermes-agent.nousresearch.com/docs/getting-started/termux",
+          "description": "Run Hermes Agent directly on an Android phone with Termux"
+        },
+        {
+          "title": "Nix Setup",
+          "url": "https://hermes-agent.nousresearch.com/docs/getting-started/nix-setup",
+          "description": "Install and deploy Hermes Agent with Nix — from quick `nix run` to fully declarative NixOS module with container mode"
+        }
+      ]
+    },
+    {
+      "title": "Using Hermes",
+      "entries": [
+        {
+          "title": "CLI",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/cli",
+          "description": "Master the Hermes Agent terminal interface — commands, keybindings, personalities, and more"
+        },
+        {
+          "title": "TUI (Ink terminal UI)",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/tui",
+          "description": "Launch the modern terminal UI for Hermes — mouse-friendly, rich overlays, and non-blocking input."
+        },
+        {
+          "title": "Configuration",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/configuration",
+          "description": "Configure Hermes Agent — config.yaml, providers, models, API keys, and more"
+        },
+        {
+          "title": "Configuring Models",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/configuring-models",
+          "description": ""
+        },
+        {
+          "title": "Sessions",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/sessions",
+          "description": "Session persistence, resume, search, management, and per-platform session tracking"
+        },
+        {
+          "title": "Profiles",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/profiles",
+          "description": ""
+        },
+        {
+          "title": "Git Worktrees",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/git-worktrees",
+          "description": "Run multiple Hermes agents safely on the same repository using git worktrees and isolated checkouts"
+        },
+        {
+          "title": "Docker Backend",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/docker",
+          "description": "Running Hermes Agent in Docker and using Docker as a terminal backend"
+        },
+        {
+          "title": "Security",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/security",
+          "description": "Security model, dangerous command approval, user authorization, container isolation, and production deployment best practices"
+        },
+        {
+          "title": "Checkpoints & Rollback",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/checkpoints-and-rollback",
+          "description": "Filesystem safety nets for destructive operations using shadow git repos and automatic snapshots"
+        }
+      ]
+    },
+    {
+      "title": "Core Features",
+      "entries": [
+        {
+          "title": "Features Overview",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/features/overview",
+          "description": ""
+        },
+        {
+          "title": "Tools",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/features/tools",
+          "description": "Overview of Hermes Agent's tools — what's available, how toolsets work, and terminal backends"
+        },
+        {
+          "title": "Skills System",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/features/skills",
+          "description": "On-demand knowledge documents — progressive disclosure, agent-managed skills, and the Skills Hub"
+        },
+        {
+          "title": "Curator",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/features/curator",
+          "description": "Background maintenance for agent-created skills — usage tracking, staleness, archival, and LLM-driven review"
+        },
+        {
+          "title": "Memory",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/features/memory",
+          "description": "How Hermes Agent remembers across sessions — MEMORY.md, USER.md, and session search"
+        },
+        {
+          "title": "Memory Providers",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/features/memory-providers",
+          "description": "External memory provider plugins — Honcho, OpenViking, Mem0, Hindsight, Holographic, RetainDB, ByteRover, Supermemory"
+        },
+        {
+          "title": "Context Files",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/features/context-files",
+          "description": "Project context files — .hermes.md, AGENTS.md, CLAUDE.md, global SOUL.md, and .cursorrules — automatically injected into every conversation"
+        },
+        {
+          "title": "Context References",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/features/context-references",
+          "description": "Inline @-syntax for attaching files, folders, git diffs, and URLs directly into your messages"
+        },
+        {
+          "title": "Personality & SOUL.md",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/features/personality",
+          "description": "Customize Hermes Agent's personality with a global SOUL.md, built-in personalities, and custom persona definitions"
+        },
+        {
+          "title": "Plugins",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/features/plugins",
+          "description": "Extend Hermes with custom tools, hooks, and integrations via the plugin system"
+        },
+        {
+          "title": "Built-in Plugins",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/features/built-in-plugins",
+          "description": "Plugins shipped with Hermes Agent that run automatically via lifecycle hooks — disk-cleanup and friends"
+        }
+      ]
+    },
+    {
+      "title": "Automation",
+      "entries": [
+        {
+          "title": "Cron Jobs",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/features/cron",
+          "description": "Schedule automated tasks with natural language, manage them with one cron tool, and attach one or more skills"
+        },
+        {
+          "title": "Delegation",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/features/delegation",
+          "description": "Spawn isolated child agents for parallel workstreams with delegate_task"
+        },
+        {
+          "title": "Kanban Multi-Agent",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/features/kanban",
+          "description": "Durable SQLite-backed task board for coordinating multiple Hermes profiles"
+        },
+        {
+          "title": "Kanban Tutorial",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/features/kanban-tutorial",
+          "description": ""
+        },
+        {
+          "title": "Persistent Goals",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/features/goals",
+          "description": "Set a standing goal and let Hermes keep working across turns until it's done. Our take on the Ralph loop."
+        },
+        {
+          "title": "Code Execution",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/features/code-execution",
+          "description": "Programmatic Python execution with RPC tool access — collapse multi-step workflows into a single turn"
+        },
+        {
+          "title": "Hooks",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/features/hooks",
+          "description": "Run custom code at key lifecycle points — log activity, send alerts, post to webhooks"
+        },
+        {
+          "title": "Batch Processing",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/features/batch-processing",
+          "description": "Generate agent trajectories at scale — parallel processing, checkpointing, and toolset distributions"
+        }
+      ]
+    },
+    {
+      "title": "Media & Web",
+      "entries": [
+        {
+          "title": "Voice Mode",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/features/voice-mode",
+          "description": "Real-time voice conversations with Hermes Agent — CLI, Telegram, Discord (DMs, text channels, and voice channels)"
+        },
+        {
+          "title": "Browser",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/features/browser",
+          "description": ""
+        },
+        {
+          "title": "Vision",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/features/vision",
+          "description": ""
+        },
+        {
+          "title": "Image Generation",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/features/image-generation",
+          "description": ""
+        },
+        {
+          "title": "Text-to-Speech",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/features/tts",
+          "description": "Text-to-speech and voice message transcription across all platforms"
+        }
+      ]
+    },
+    {
+      "title": "Messaging Platforms",
+      "entries": [
+        {
+          "title": "Overview",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/messaging/index",
+          "description": "Chat with Hermes from Telegram, Discord, Slack, WhatsApp, Signal, SMS, Email, Home Assistant, Mattermost, Matrix, DingTalk, Yuanbao, Microsoft Teams, LINE, Webhooks, or any OpenAI-compatible frontend via the API server — architecture and setup overview"
+        },
+        {
+          "title": "Telegram",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram",
+          "description": "Set up Hermes Agent as a Telegram bot"
+        },
+        {
+          "title": "Discord",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/messaging/discord",
+          "description": "Set up Hermes Agent as a Discord bot"
+        },
+        {
+          "title": "Slack",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/messaging/slack",
+          "description": "Set up Hermes Agent as a Slack bot using Socket Mode"
+        },
+        {
+          "title": "WhatsApp",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/messaging/whatsapp",
+          "description": "Set up Hermes Agent as a WhatsApp bot via the built-in Baileys bridge"
+        },
+        {
+          "title": "Signal",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/messaging/signal",
+          "description": "Set up Hermes Agent as a Signal messenger bot via signal-cli daemon"
+        },
+        {
+          "title": "Email",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/messaging/email",
+          "description": "Set up Hermes Agent as an email assistant via IMAP/SMTP"
+        },
+        {
+          "title": "SMS",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/messaging/sms",
+          "description": "Set up Hermes Agent as an SMS chatbot via Twilio"
+        },
+        {
+          "title": "Matrix",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/messaging/matrix",
+          "description": "Set up Hermes Agent as a Matrix bot"
+        },
+        {
+          "title": "Mattermost",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/messaging/mattermost",
+          "description": "Set up Hermes Agent as a Mattermost bot"
+        },
+        {
+          "title": "Home Assistant",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/messaging/homeassistant",
+          "description": ""
+        },
+        {
+          "title": "Webhooks",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/messaging/webhooks",
+          "description": "Receive events from GitHub, GitLab, and other services to trigger Hermes agent runs"
+        }
+      ]
+    },
+    {
+      "title": "Integrations",
+      "entries": [
+        {
+          "title": "Integrations Overview",
+          "url": "https://hermes-agent.nousresearch.com/docs/integrations/index",
+          "description": ""
+        },
+        {
+          "title": "Providers",
+          "url": "https://hermes-agent.nousresearch.com/docs/integrations/providers",
+          "description": ""
+        },
+        {
+          "title": "MCP (Model Context Protocol)",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp",
+          "description": "Connect Hermes Agent to external tool servers via MCP — and control exactly which MCP tools Hermes loads"
+        },
+        {
+          "title": "ACP (Agent Context Protocol)",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/features/acp",
+          "description": "Use Hermes Agent inside ACP-compatible editors such as VS Code, Zed, and JetBrains"
+        },
+        {
+          "title": "API Server",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server",
+          "description": "Expose hermes-agent as an OpenAI-compatible API for any frontend"
+        },
+        {
+          "title": "Honcho Memory",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/features/honcho",
+          "description": "AI-native persistent memory via Honcho — dialectic reasoning, multi-agent user modeling, and deep personalization"
+        },
+        {
+          "title": "Provider Routing",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/features/provider-routing",
+          "description": ""
+        },
+        {
+          "title": "Fallback Providers",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/features/fallback-providers",
+          "description": ""
+        },
+        {
+          "title": "Credential Pools",
+          "url": "https://hermes-agent.nousresearch.com/docs/user-guide/features/credential-pools",
+          "description": ""
+        }
+      ]
+    },
+    {
+      "title": "Guides & Tutorials",
+      "entries": [
+        {
+          "title": "Tips & Best Practices",
+          "url": "https://hermes-agent.nousresearch.com/docs/guides/tips",
+          "description": "Practical advice to get the most out of Hermes Agent — prompt tips, CLI shortcuts, context files, memory, cost optimization, and security"
+        },
+        {
+          "title": "Local LLMs on Mac",
+          "url": "https://hermes-agent.nousresearch.com/docs/guides/local-llm-on-mac",
+          "description": "Set up a local OpenAI-compatible LLM server on macOS with llama.cpp or MLX, including model selection, memory optimization, and real benchmarks on Apple Silicon"
+        },
+        {
+          "title": "Daily Briefing Bot",
+          "url": "https://hermes-agent.nousresearch.com/docs/guides/daily-briefing-bot",
+          "description": "Build an automated daily briefing bot that researches topics, summarizes findings, and delivers them to Telegram or Discord every morning"
+        },
+        {
+          "title": "Team Telegram Assistant",
+          "url": "https://hermes-agent.nousresearch.com/docs/guides/team-telegram-assistant",
+          "description": "Step-by-step guide to setting up a Telegram bot that your whole team can use for code help, research, system admin, and more"
+        },
+        {
+          "title": "Use Hermes as a Python Library",
+          "url": "https://hermes-agent.nousresearch.com/docs/guides/python-library",
+          "description": "Embed AIAgent in your own Python scripts, web apps, or automation pipelines — no CLI required"
+        },
+        {
+          "title": "Use MCP with Hermes",
+          "url": "https://hermes-agent.nousresearch.com/docs/guides/use-mcp-with-hermes",
+          "description": "A practical guide to connecting MCP servers to Hermes Agent, filtering their tools, and using them safely in real workflows"
+        },
+        {
+          "title": "Use Voice Mode with Hermes",
+          "url": "https://hermes-agent.nousresearch.com/docs/guides/use-voice-mode-with-hermes",
+          "description": "A practical guide to setting up and using Hermes voice mode across CLI, Telegram, Discord, and Discord voice channels"
+        },
+        {
+          "title": "Use SOUL.md with Hermes",
+          "url": "https://hermes-agent.nousresearch.com/docs/guides/use-soul-with-hermes",
+          "description": "How to use SOUL.md to shape Hermes Agent's default voice, what belongs there, and how it differs from AGENTS.md and /personality"
+        },
+        {
+          "title": "Build a Hermes Plugin",
+          "url": "https://hermes-agent.nousresearch.com/docs/guides/build-a-hermes-plugin",
+          "description": "Step-by-step guide to building a complete Hermes plugin with tools, hooks, data files, and skills"
+        },
+        {
+          "title": "Automate with Cron",
+          "url": "https://hermes-agent.nousresearch.com/docs/guides/automate-with-cron",
+          "description": "Real-world automation patterns using Hermes cron — monitoring, reports, pipelines, and multi-skill workflows"
+        },
+        {
+          "title": "Work with Skills",
+          "url": "https://hermes-agent.nousresearch.com/docs/guides/work-with-skills",
+          "description": "Find, install, use, and create skills — on-demand knowledge that teaches Hermes new workflows"
+        },
+        {
+          "title": "Delegation Patterns",
+          "url": "https://hermes-agent.nousresearch.com/docs/guides/delegation-patterns",
+          "description": "When and how to use subagent delegation — patterns for parallel research, code review, and multi-file work"
+        },
+        {
+          "title": "GitHub PR Review Agent",
+          "url": "https://hermes-agent.nousresearch.com/docs/guides/github-pr-review-agent",
+          "description": "Build an automated AI code reviewer that monitors your repos, reviews pull requests, and delivers feedback — hands-free"
+        }
+      ]
+    },
+    {
+      "title": "Developer Guide",
+      "entries": [
+        {
+          "title": "Contributing",
+          "url": "https://hermes-agent.nousresearch.com/docs/developer-guide/contributing",
+          "description": "How to contribute to Hermes Agent — dev setup, code style, PR process"
+        },
+        {
+          "title": "Architecture",
+          "url": "https://hermes-agent.nousresearch.com/docs/developer-guide/architecture",
+          "description": "Hermes Agent internals — major subsystems, execution paths, data flow, and where to read next"
+        },
+        {
+          "title": "Agent Loop",
+          "url": "https://hermes-agent.nousresearch.com/docs/developer-guide/agent-loop",
+          "description": "Detailed walkthrough of AIAgent execution, API modes, tools, callbacks, and fallback behavior"
+        },
+        {
+          "title": "Prompt Assembly",
+          "url": "https://hermes-agent.nousresearch.com/docs/developer-guide/prompt-assembly",
+          "description": "How Hermes builds the system prompt, preserves cache stability, and injects ephemeral layers"
+        },
+        {
+          "title": "Context Compression & Caching",
+          "url": "https://hermes-agent.nousresearch.com/docs/developer-guide/context-compression-and-caching",
+          "description": ""
+        },
+        {
+          "title": "Gateway Internals",
+          "url": "https://hermes-agent.nousresearch.com/docs/developer-guide/gateway-internals",
+          "description": "How the messaging gateway boots, authorizes users, routes sessions, and delivers messages"
+        },
+        {
+          "title": "Session Storage",
+          "url": "https://hermes-agent.nousresearch.com/docs/developer-guide/session-storage",
+          "description": ""
+        },
+        {
+          "title": "Provider Runtime",
+          "url": "https://hermes-agent.nousresearch.com/docs/developer-guide/provider-runtime",
+          "description": "How Hermes resolves providers, credentials, API modes, and auxiliary models at runtime"
+        },
+        {
+          "title": "Adding Tools",
+          "url": "https://hermes-agent.nousresearch.com/docs/developer-guide/adding-tools",
+          "description": "How to add a new tool to Hermes Agent — schemas, handlers, registration, and toolsets"
+        },
+        {
+          "title": "Adding Providers",
+          "url": "https://hermes-agent.nousresearch.com/docs/developer-guide/adding-providers",
+          "description": "How to add a new inference provider to Hermes Agent — auth, runtime resolution, CLI flows, adapters, tests, and docs"
+        },
+        {
+          "title": "Adding Platform Adapters",
+          "url": "https://hermes-agent.nousresearch.com/docs/developer-guide/adding-platform-adapters",
+          "description": ""
+        },
+        {
+          "title": "Creating Skills",
+          "url": "https://hermes-agent.nousresearch.com/docs/developer-guide/creating-skills",
+          "description": "How to create skills for Hermes Agent — SKILL.md format, guidelines, and publishing"
+        },
+        {
+          "title": "Extending the CLI",
+          "url": "https://hermes-agent.nousresearch.com/docs/developer-guide/extending-the-cli",
+          "description": "Build wrapper CLIs that extend the Hermes TUI with custom widgets, keybindings, and layout changes"
+        }
+      ]
+    },
+    {
+      "title": "Reference",
+      "entries": [
+        {
+          "title": "CLI Commands",
+          "url": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+          "description": "Authoritative reference for Hermes terminal commands and command families"
+        },
+        {
+          "title": "Slash Commands",
+          "url": "https://hermes-agent.nousresearch.com/docs/reference/slash-commands",
+          "description": "Complete reference for interactive CLI and messaging slash commands"
+        },
+        {
+          "title": "Profile Commands",
+          "url": "https://hermes-agent.nousresearch.com/docs/reference/profile-commands",
+          "description": ""
+        },
+        {
+          "title": "Environment Variables",
+          "url": "https://hermes-agent.nousresearch.com/docs/reference/environment-variables",
+          "description": "Complete reference of all environment variables used by Hermes Agent"
+        },
+        {
+          "title": "Tools Reference",
+          "url": "https://hermes-agent.nousresearch.com/docs/reference/tools-reference",
+          "description": "Authoritative reference for Hermes built-in tools, grouped by toolset"
+        },
+        {
+          "title": "Toolsets Reference",
+          "url": "https://hermes-agent.nousresearch.com/docs/reference/toolsets-reference",
+          "description": "Reference for Hermes core, composite, platform, and dynamic toolsets"
+        },
+        {
+          "title": "MCP Config Reference",
+          "url": "https://hermes-agent.nousresearch.com/docs/reference/mcp-config-reference",
+          "description": "Reference for Hermes Agent MCP configuration keys, filtering semantics, and utility-tool policy"
+        },
+        {
+          "title": "Model Catalog",
+          "url": "https://hermes-agent.nousresearch.com/docs/reference/model-catalog",
+          "description": ""
+        },
+        {
+          "title": "Bundled Skills Catalog",
+          "url": "https://hermes-agent.nousresearch.com/docs/reference/skills-catalog",
+          "description": "Table of all ~90 skills bundled with Hermes"
+        },
+        {
+          "title": "Optional Skills Catalog",
+          "url": "https://hermes-agent.nousresearch.com/docs/reference/optional-skills-catalog",
+          "description": "Table of ~60 additional installable skills"
+        },
+        {
+          "title": "FAQ & Troubleshooting",
+          "url": "https://hermes-agent.nousresearch.com/docs/reference/faq",
+          "description": "Frequently asked questions and solutions to common issues with Hermes Agent"
+        }
+      ]
+    }
+  ]
+}

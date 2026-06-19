@@ -1,0 +1,38 @@
+services:
+  hades:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - "3001:3001"
+    volumes:
+      - hermes-data:/data
+      - ./backend/.env.docker:/app/.env:ro
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - HOST=0.0.0.0
+      - ALLOW_SQLITE=true
+      - QUEUE_DISABLED=true
+      - HERMES_REQUIRED=true
+      - HERMES_BIN_PATH=/opt/hermes-venv/bin/hermes
+      - HERMES_HOME=/data/hermes-home
+      - HERMES_PROFILES_ROOT=/data/hermes/profiles
+      - HERMES_PUBLIC_BASE_URL=http://lvh.me:3001/api/hades/hermes
+      - HERMES_ROUTING_SECRET=dev-routing-secret-for-docker-proof
+      - HADES_PLATFORM=local
+      - HADES_E2E_AUTH_TOKEN=proof-token-change-me
+      - CORS_ORIGIN=http://localhost:5173
+      - ENCRYPTION_KEY=0000000000000000000000000000000000000000000000000000000000000000
+      - OPENROUTER_API_KEY=
+      - OPENROUTER_MODEL=deepseek/deepseek-v4-flash
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/api/health', r => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  hermes-data:

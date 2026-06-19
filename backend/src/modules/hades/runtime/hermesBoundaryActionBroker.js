@@ -6,7 +6,7 @@ const ACTION_CAPABILITY_MAP = {
   "public.publish": "public.publish",
 };
 
-export function createHermesBoundaryActionBroker({ routing, capabilityEnvelope, telegramClientFactory, artifactStore, approvalRepository }) {
+export function createHermesBoundaryActionBroker({ routing, capabilityEnvelope, telegramClientFactory, artifactStore, approvalRepository, pendingBoundaryActionQueue, stateStore } = {}) {
   function mapActionToCapability(type) {
     return ACTION_CAPABILITY_MAP[type] || type;
   }
@@ -15,14 +15,29 @@ export function createHermesBoundaryActionBroker({ routing, capabilityEnvelope, 
     const verified = await routing.verifyResponse({ taskId, routingToken, processId, userId: undefined, tenantId: undefined });
     const executed = [];
     const paused = [];
+    const queuedBoundary = [];
 
     for (const action of actions) {
       const capability = mapActionToCapability(action.type);
 
       if (!capabilityEnvelope.can(capability) && capabilityEnvelope.requiresApproval(capability)) {
         if (approvalRepository) {
-          const approval = await approvalRepository.create({ taskId, action });
-          paused.push(approval);
+          try {
+            const approval = await approvalRepository.create({ taskId, action });
+            paused.push(approval);
+          } catch (err) {
+            if (pendingBoundaryActionQueue && stateStore) {
+              const queued = await pendingBoundaryActionQueue.enqueue({ taskId, action, error: err.message });
+              await stateStore.snapshotPendingBoundaryAction({ taskId, action, queueId: queued.id });
+              queuedBoundary.push({ id: queued.id, action });
+              continue;
+            }
+            throw err;
+          }
+        } else if (pendingBoundaryActionQueue && stateStore) {
+          const queued = await pendingBoundaryActionQueue.enqueue({ taskId, action });
+          await stateStore.snapshotPendingBoundaryAction({ taskId, action, queueId: queued.id });
+          queuedBoundary.push({ id: queued.id, action });
         }
         continue;
       }
@@ -41,6 +56,10 @@ export function createHermesBoundaryActionBroker({ routing, capabilityEnvelope, 
         });
         executed.push({ type: action.type, providerMessageId: result.providerMessageId });
       }
+    }
+
+    if (queuedBoundary.length > 0) {
+      return { status: "queued_for_retry", executed, paused, queuedBoundary };
     }
 
     if (paused.length > 0) {

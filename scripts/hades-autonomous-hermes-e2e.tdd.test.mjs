@@ -2,9 +2,12 @@ import { test, describe } from "node:test";
 import assert from "node:assert/strict";
 
 const enabled = process.env.HADES_AUTONOMOUS_HERMES_E2E === "1";
-const baseUrl = process.env.HADES_E2E_BASE_URL;
+const hadesBaseUrl = process.env.HADES_E2E_BASE_URL;
 const authToken = process.env.HADES_E2E_AUTH_TOKEN;
 const telegramE2EEnabled = process.env.HADES_AUTONOMOUS_HERMES_TELEGRAM_E2E === "1";
+const restartE2EEnabled = process.env.HADES_AUTONOMOUS_HERMES_RESTART_E2E === "1";
+const restartHookUrl = process.env.HADES_E2E_RESTART_HOOK_URL;
+const restartWaitMs = Number(process.env.HADES_E2E_RESTART_WAIT_MS || 30000);
 
 function assertNoSecrets(value) {
   const serialized = JSON.stringify(value);
@@ -12,16 +15,18 @@ function assertNoSecrets(value) {
   assert.equal(serialized.includes("OPENROUTER_API_KEY"), false);
   assert.equal(serialized.includes("TELEGRAM_BOT_TOKEN"), false);
   assert.equal(serialized.includes("DISCORD_BOT_TOKEN"), false);
+  assert.equal(serialized.includes("API_SERVER_KEY"), false);
   assert.equal(serialized.includes("sk-"), false);
   assert.equal(serialized.includes("raw-token"), false);
 }
 
 function requireE2E(t) {
   if (!enabled) {
-    t.skip("Set HADES_AUTONOMOUS_HERMES_E2E=1 to run Railway/browser autonomous Hermes E2E checks.");
+    t.skip("Set HADES_AUTONOMOUS_HERMES_E2E=1 to run peer-model Hermes E2E checks.");
     return false;
   }
-  assert.ok(baseUrl, "HADES_E2E_BASE_URL is required for autonomous Hermes E2E");
+  assert.ok(hadesBaseUrl, "HADES_E2E_BASE_URL is required for peer-model Hermes E2E");
+  assert.ok(authToken, "HADES_E2E_AUTH_TOKEN is required for peer-model Hermes E2E");
   return true;
 }
 
@@ -34,12 +39,26 @@ function requireTelegramE2E(t) {
   return true;
 }
 
-async function request(path, options = {}) {
+function requireRestartE2E(t) {
+  if (!requireE2E(t)) return false;
+  if (!restartE2EEnabled) {
+    t.skip("Set HADES_AUTONOMOUS_HERMES_RESTART_E2E=1 to run restart durability E2E.");
+    return false;
+  }
+  assert.ok(restartHookUrl, "HADES_E2E_RESTART_HOOK_URL is required for restart durability E2E");
+  return true;
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function jsonRequest(baseUrl, path, options = {}) {
   const headers = {
     accept: "application/json",
+    ...(options.body ? { "content-type": "application/json" } : {}),
     ...(options.headers || {}),
   };
-  if (authToken) headers.authorization = `Bearer ${authToken}`;
 
   const response = await fetch(new URL(path, baseUrl), {
     ...options,
@@ -50,125 +69,164 @@ async function request(path, options = {}) {
   return { response, body, text };
 }
 
-describe("Autonomous Hermes Railway/browser E2E TDD contract", () => {
-  test("runtime status endpoint reports mode, isolation, and redacted process state", async (t) => {
-    if (!requireE2E(t)) return;
+async function hadesRequest(path, options = {}) {
+  return jsonRequest(hadesBaseUrl, path, {
+    ...options,
+    headers: {
+      authorization: `Bearer ${authToken}`,
+      ...(options.headers || {}),
+    },
+  });
+}
 
-    const { response, body, text } = await request("/api/hades/hermes/status");
-
-    assert.equal(response.ok, true, text);
-    assert.match(body.runtimeMode, /oneshot|warm|daemon/);
-    assert.equal(typeof body.workspaceRoot, "string");
-    assert.ok(["supabase", "r2", "memory", "disabled"].includes(body.stateStore));
-    assert.ok(["supabase", "r2", "memory", "disabled"].includes(body.objectStore || body.stateStore));
-    assertNoSecrets(body);
+async function startPeerSession() {
+  const session = await hadesRequest("/api/hades/hermes/sessions", {
+    method: "POST",
+    body: JSON.stringify({
+      clientSessionId: `e2e-session-${Date.now()}`,
+      requestedSurface: "api_server",
+    }),
   });
 
-  test("full pipeline creates a task, persists route metadata, and updates runtime status", async (t) => {
+  assert.equal(session.response.ok, true, session.text);
+  assert.equal(typeof session.body.profileName, "string");
+  assert.equal(typeof session.body.hermesApiBaseUrl, "string");
+  assert.equal(session.body.authMode, "edge_injected");
+  assert.equal(Object.hasOwn(session.body, "apiServerKey"), false);
+  assert.equal(Object.hasOwn(session.body, "hermesApiHeaders"), false);
+  assertNoSecrets(session.body);
+  return session.body;
+}
+
+async function hermesRequest(session, path, options = {}) {
+  return jsonRequest(session.hermesApiBaseUrl, path, {
+    ...options,
+    headers: {
+      authorization: `Bearer ${authToken}`,
+      ...(options.headers || {}),
+    },
+  });
+}
+
+describe("Hades/Hermes peer-model E2E TDD contract", () => {
+  test("Hades session bootstrap returns profile-scoped edge route without Hermes static auth", async (t) => {
     if (!requireE2E(t)) return;
 
-    const payload = {
-      clientMessageId: `e2e-full-${Date.now()}`,
-      idempotencyKey: `e2e-full-${Date.now()}`,
-      message: "Reply with JSON-safe text: autonomous Hermes Supabase bridge e2e ok",
-    };
+    const session = await startPeerSession();
 
-    const task = await request("/api/hades/hermes/tasks", {
+    assert.match(session.profileName, /tenant|user|profile/i);
+    assert.doesNotMatch(session.hermesApiBaseUrl, /\/api\/hades\/hermes\/tasks/);
+    assert.doesNotMatch(session.hermesApiBaseUrl, /127\.0\.0\.1|localhost/);
+    assert.ok(session.routingToken || session.capabilityToken);
+  });
+
+  test("normal chat calls the returned edge route, not the Hades task proxy or raw profile port", async (t) => {
+    if (!requireE2E(t)) return;
+
+    const session = await startPeerSession();
+    const result = await hermesRequest(session, "/v1/chat/completions", {
       method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    assert.equal(task.response.ok, true, task.text);
-    assert.ok(task.body.taskId);
-    assert.ok(task.body.routingTokenStatus === "issued" || task.body.routingTokenStatus === "verified");
-    assert.ok(task.body.reply || task.body.assistantText || task.body.status);
-    assertNoSecrets(task.body);
-
-    const status = await request("/api/hades/hermes/status");
-    assert.equal(status.response.ok, true, status.text);
-    assert.ok(status.body.lastRunAt || status.body.activeRuntimes || status.body.totalRuns >= 1);
-    assertNoSecrets(status.body);
-  });
-
-  test("state endpoint proves Supabase bridge metadata is scoped and redacted", async (t) => {
-    if (!requireE2E(t)) return;
-
-    const { response, body, text } = await request("/api/hades/hermes/state");
-
-    assert.equal(response.ok, true, text);
-    assert.ok(Array.isArray(body.objects));
-    assertNoSecrets(body);
-    for (const object of body.objects) {
-      assert.ok(object.objectKey || object.object_key);
-      assert.ok(object.contentHash || object.content_hash || object.etag);
-      assert.equal(Object.hasOwn(object, "body"), false);
-      assert.equal(Object.hasOwn(object, "rawBody"), false);
-    }
-  });
-
-  test("skills endpoint is scoped, redacted, and backed by hydrated state metadata", async (t) => {
-    if (!requireE2E(t)) return;
-
-    const { response, body, text } = await request("/api/hades/hermes/skills");
-
-    assert.equal(response.ok, true, text);
-    assert.ok(Array.isArray(body.skills));
-    assertNoSecrets(body);
-    for (const skill of body.skills) {
-      assert.ok(skill.name);
-      assert.ok(skill.contentHash || skill.content_hash);
-      assert.equal(Object.hasOwn(skill, "rawSecret"), false);
-      assert.equal(Object.hasOwn(skill, "content"), false);
-    }
-  });
-
-  test("artifact-backed Telegram media proposal returns scoped artifact pointers and signed URL status", async (t) => {
-    if (!requireE2E(t)) return;
-
-    const payload = {
-      clientMessageId: `e2e-media-${Date.now()}`,
-      idempotencyKey: `e2e-media-${Date.now()}`,
-      message: "Create or find a safe cat GIF and propose sending it to this Telegram chat.",
-    };
-
-    const result = await request("/api/hades/hermes/tasks", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        model: session.model || session.profileName,
+        messages: [{ role: "user", content: "Reply with: peer model e2e ok" }],
+        stream: false,
+      }),
     });
 
     assert.equal(result.response.ok, true, result.text);
-    assert.ok(result.body.taskId);
-    assert.ok(result.body.routingTokenStatus === "issued" || result.body.routingTokenStatus === "verified");
-    assert.ok(Array.isArray(result.body.artifacts) || Array.isArray(result.body.proposedActions));
     assertNoSecrets(result.body);
-
-    const serialized = JSON.stringify(result.body);
-    assert.match(serialized, /artifact|objectKey|object_key|signedUrlStatus|proposedActions/i);
+    assert.ok(result.body.choices || result.body.output || result.body.response);
   });
 
-  test("real Telegram delivery is opt-in and verifies Hades-owned boundary send", async (t) => {
+  test("Hades no longer exposes the client-facing Hermes task proxy", async (t) => {
+    if (!requireE2E(t)) return;
+
+    const proxy = await hadesRequest("/api/hades/hermes/tasks", {
+      method: "POST",
+      body: JSON.stringify({ message: "this old proxy path should be gone" }),
+    });
+
+    assert.ok([404, 405, 410].includes(proxy.response.status), proxy.text);
+    assertNoSecrets(proxy.body || {});
+  });
+
+  test("Hades state-index endpoint accepts Hermes audit metadata without raw task output", async (t) => {
+    if (!requireE2E(t)) return;
+
+    const session = await startPeerSession();
+    const result = await hadesRequest("/api/hades/hermes/state-index", {
+      method: "POST",
+      body: JSON.stringify({
+        profileName: session.profileName,
+        eventType: "e2e_peer_session_started",
+        objectKey: `profiles/${session.profileName}/sessions/e2e.json`,
+        contentHash: "e2e-red-test-placeholder",
+      }),
+    });
+
+    assert.equal(result.response.ok, true, result.text);
+    assertNoSecrets(result.body);
+    assert.equal(Object.hasOwn(result.body || {}, "rawOutput"), false);
+    assert.equal(Object.hasOwn(result.body || {}, "body"), false);
+  });
+
+  test("same user keeps profile route and state-index metadata across service restart", async (t) => {
+    if (!requireRestartE2E(t)) return;
+
+    const marker = `restart-state-${Date.now()}`;
+    const before = await startPeerSession();
+    const write = await hadesRequest("/api/hades/hermes/state-index", {
+      method: "POST",
+      body: JSON.stringify({
+        profileName: before.profileName,
+        eventType: "e2e_restart_marker",
+        objectKey: `profiles/${before.profileName}/sessions/${marker}.json`,
+        contentHash: marker,
+      }),
+    });
+
+    assert.equal(write.response.ok, true, write.text);
+    assertNoSecrets(write.body);
+
+    const restart = await fetch(restartHookUrl, {
+      method: "POST",
+      headers: { authorization: `Bearer ${authToken}` },
+    });
+    assert.equal(restart.ok, true, await restart.text());
+    await sleep(restartWaitMs);
+
+    const after = await startPeerSession();
+    assert.equal(after.profileName, before.profileName);
+    assert.equal(after.hermesApiBaseUrl, before.hermesApiBaseUrl);
+
+    const state = await hadesRequest(
+      `/api/hades/hermes/state-index?profileName=${encodeURIComponent(after.profileName)}&contentHash=${encodeURIComponent(marker)}`
+    );
+
+    assert.equal(state.response.ok, true, state.text);
+    assertNoSecrets(state.body);
+    assert.equal(JSON.stringify(state.body).includes(marker), true);
+    assert.equal(JSON.stringify(state.body).includes("API_SERVER_KEY"), false);
+  });
+
+  test("real Telegram delivery stays opt-in and goes through the chosen boundary path", async (t) => {
     if (!requireTelegramE2E(t)) return;
 
-    const payload = {
-      clientMessageId: `e2e-telegram-${Date.now()}`,
-      idempotencyKey: `e2e-telegram-${Date.now()}`,
-      message: "Create or find a safe tiny cat GIF and send it through the verified Telegram test chat.",
-      boundaryAction: {
-        provider: "telegram",
-        type: "send_animation",
-      },
-    };
-
-    const result = await request("/api/hades/hermes/tasks", {
+    const session = await startPeerSession();
+    const result = await hadesRequest("/api/hades/hermes/boundary-actions", {
       method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        profileName: session.profileName,
+        routingToken: session.routingToken || session.capabilityToken,
+        action: {
+          provider: "telegram",
+          type: "send_animation",
+          text: "peer model Telegram GIF E2E",
+        },
+      }),
     });
 
     assert.equal(result.response.ok, true, result.text);
-    assert.ok(result.body.taskId);
     assert.ok(result.body.boundaryActionStatus === "executed" || result.body.deliveryStatus === "sent");
     assert.ok(result.body.providerMessageId || result.body.telegramMessageId || result.body.deliveredAt);
     assertNoSecrets(result.body);

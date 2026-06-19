@@ -130,6 +130,10 @@ opencode 2>&1 | python3 additional-modules/scripts/watch_opencode_compaction_log
   behavior (context dropping, markers present, old outputs disappearing).
 - Config readiness (verified by `--check`) does not guarantee runtime compaction will fire —
   only that the prerequisites are correctly configured.
+- **`measure_context.py --status` is a manual bookkeeping tool**, not a runtime monitor.
+  It reports `0 / 64,000` regardless of actual context usage because it only
+  records tokens explicitly passed via `--tokens`. It cannot detect whether
+  auto-compaction fired. See `OPCODE_CONFIG_NOTES.md` for details.
 
 ---
 
@@ -139,7 +143,7 @@ opencode 2>&1 | python3 additional-modules/scripts/watch_opencode_compaction_log
 2. Payload generates with all 3 markers.
 3. OpenCode reads the file and reports all 3 markers found.
 4. Terminal shows `compaction` or `compact` event.
-5. `measure_context.py --status` shows context below 60,000 after (if compaction pruned old outputs).
+5. ~~`measure_context.py --status` shows context below 60,000 after (if compaction pruned old outputs).~~ **Broken:** `measure_context.py` is a manual bookkeeping tool, not a runtime monitor — it always reports 0. Do not use for this.
 6. Old tool outputs from before the smoke test are no longer visible in the session.
 
 ---

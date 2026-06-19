@@ -62,7 +62,8 @@
 | GET | `/api/model-condenser/health` | model-condenser | Module health and config summary |
 | POST | `/api/model-condenser/condense` | model-condenser | Regenerate consolidated-models.json |
 | GET | `/api/model-condenser/consolidated` | model-condenser | Read consolidated schema inventory |
-| GET | `/api/hades/hermes/status` | hades | Hermes autonomous runtime status |
-| POST | `/api/hades/hermes/tasks` | hades | Execute an autonomous Hermes task |
-| GET | `/api/hades/hermes/state` | hades | List Hermes workspace state objects |
-| GET | `/api/hades/hermes/skills` | hades | List Hermes skills |
+| POST | `/api/hades/sessions` | hades | Create a Hermes profile session, returns edge route |
+| GET | `/api/hades/proof/profile` | hades | Admin-only: get detailed profile proof (state, paths, secrets check) |
+| POST | `/api/hades/proof/snapshot` | hades | Admin-only: trigger profile state snapshot and return metadata |
+| POST | `/api/hades/proof/restart` | hades | Admin-only: trigger service restart (Docker proof) |
+| GET | `/api/hades/state` | hades | List Hermes workspace state objects |

@@ -1,7 +1,8 @@
 {
   "phase": "done",
-  "module": "autonomous-hermes-supabase-bridge",
-  "task": "Bridge gaps implemented and verified: all 9 production adapter modules wired in index.js, 9/9 TDD tests passing, architecture lint clean",
+  "module": "hades-hermes-peer-model",
+  "branch": "master",
+  "task": "Peer-model runtime implemented + wired: 6 new modules (profileRegistry, profileRouter, profileProvisioner, profileStatePersistence, profileSessionBroker, edgeAuthProxy), session broker wired into POST /sessions route, hermesRoutes + index.js refactored, 13/13 TDD + 23/23 autonomous + 10/10 wiring + lint:architecture clean",
   "state": {
     "hermesRailwayProbe": {
       "status": "completed",
@@ -10,6 +11,14 @@
     "docsHermes": {
       "status": "completed",
       "summary": "Created docs/hermes/README.md, hermes-discovery.json, hermes-discovery.md, MAINTENANCE.md. Added official upstream Hermes docs cache at docs/hermes/upstream/llms.txt and llms-full.txt, machine-readable docs/hermes/upstream/hermes-docs.agent.json, and docs/hermes/AGENT_CONTEXT.md for future Hades/Hermes coding agents. All docs validation tests pass."
+    },
+    "hermesDocsFirstRule": {
+      "status": "active",
+      "summary": "Standing rule from user: before any Hermes/Hades-Hermes architecture, security, gateway, profile, runtime, container, auth, or implementation strategy, read the local official Hermes docs cache first. Minimum reads: docs/hermes/AGENT_CONTEXT.md, docs/hermes/upstream/hermes-docs.agent.json, and relevant sections from docs/hermes/upstream/llms-full.txt (Profiles, Security, Gateway Internals, Architecture, Environment Variables, messaging docs). Do not rely on generic agent threat models when Hermes docs define an existing primitive."
+    },
+    "hermesNativeIsolationCorrection": {
+      "status": "active",
+      "summary": "Corrected Hermes-native architecture stance: multi-user isolation should use Hermes Profiles as the first-class primitive. A profile is a separate HERMES_HOME with config.yaml, .env, SOUL.md, memories, sessions, skills, cron jobs, gateway state, and state DB. Profiles are not sandboxes; production security requires Docker/Modal/Daytona/Singularity-style container backends with Hermes' documented hardening. Stock Hermes gateway expects per-profile bot tokens in each profile .env and blocks duplicate bot token use across profiles; Hades-owned Telegram broker is a deliberate product departure, not stock Hermes behavior. Hermes already includes env filtering for execute_code/MCP subprocesses, session isolation, cron path hardening, SSRF protections, context-file prompt-injection scanning, and credential redaction. Future Hades/Hermes plans must configure these primitives per tenant instead of reinventing them."
     },
     "hermesDiscoveryDocsTest": {
       "status": "completed",
@@ -47,6 +56,35 @@
       "status": "completed",
       "summary": "Applied 012_hades_hermes_state_index.sql and 013_hades_hermes_task_routes.sql to Supabase production. Tables hades_hermes_state_objects and hades_hermes_task_routes now exist (0 rows). Bridge gap code already deployed to Railway (commit 89cfbe8, build SUCCESS). Railway logs not accessible (no viewer role)."
     },
-    "completedAt": "2026-06-18"
+    "hadesHermesPeerModel": {
+      "status": "completed",
+      "summary": "Implemented peer-model edge-routing architecture. Fixed 2 bugs in hades module (createHermesCapabilityEnvelope called with no args; extensionApprovals TDZ). Rewrote hermesRoutingToken.js for stateless self-contained HMAC-signed tokens. Updated hermesBoundaryActionBroker.js with Hades-down queue fallback. Created 6 new modules: hermesProfileRegistry.js, hermesProfileRouter.js, hermesProfileProvisioner.js, hermesProfileStatePersistence.js, hermesProfileSessionBroker.js, hermesEdgeAuthProxy.js. Refactored hermes.routes.js (removed old proxy routes, added POST /sessions + GET /state). Refactored index.js (route factory renamed, mount path changed to variable). All 13/13 peer-model TDD, 23/23 autonomous hermes runtime, 10/10 wiring tests, architecture lint: all clean. Added API docs for new routes."
+    },
+    "postImplementationAudit": {
+      "status": "completed",
+      "summary": "Ran full post-implementation audit per handoffs #019/#020 and plan #012. Found and fixed 2 bugs: (1) hermesProfileProvisioner wrote combined config file instead of separate .env + config.yaml — Hermes would not parse it. (2) index.js wired session broker with provisioner as profileRegistry, so registry map was never populated — edge proxy internalTargetForProfile would fail. Both fixed. All 13/13 peer-model TDD + 23/23 autonomous runtime + 10/10 wiring + lint:architecture clean. No secrets leaked in any runtime or test file. 4 pre-existing failures in unrelated tests (contract-discovery URL type, live two-user isolation, chat idempotency, extension zip manifest) — none regressed."
+    },
+    "hadesHermesPeerDockerRailwayProof": {
+      "status": "handoff_ready",
+      "summary": "Created final OpenCode proof packet for local Docker/Railway validation before production: work-log/handoffs/021_2026-06-19_handoff_opencode_final_peer_docker_railway_proof.md and scripts/hades-hermes-peer-docker-proof.e2e.test.mjs. The env-gated proof suite skips by default and becomes red when HADES_HERMES_PEER_PROOF_E2E=1 until proof hooks and Docker/Railway wiring exist. It verifies edge-injected auth, no API_SERVER_KEY/browser secret leakage, private loopback/internal profile API targets, persistent per-user Hermes profile state on volume/Railway mount, private secret-stripped state snapshots, and restart persistence for profile route + state index metadata. Root package script added: npm run test:hades-hermes-peer-docker-proof."
+    },
+    "compactionDocFix": {
+      "status": "completed",
+      "summary": "Documented measure_context.py limitations (manual bookkeeping tool, not runtime monitor; stale sessionEnd bug) in OPCODE_CONFIG_NOTES.md and RUNTIME_COMPACTION_SMOKE_TEST.md. Ran compaction smoke test: 150k payload generated with all 3 markers, read successfully. Config confirmed correct."
+    },
+    "dockerProofHooks": {
+      "status": "completed",
+      "summary": "All 5/5 Docker/Railway proof E2E tests passing. Implemented: proof hooks (GET /proof/profile, POST /proof/snapshot, POST /proof/restart, POST /proof/create), provisioner placeholder state files (state.db, sessions/, memories/), hermesFilesystem readTree/writeTree, hermesObjectStore putJson/getJson, persistent /state-index route. Tests: 13/13 peer-model + 23/23 autonomous runtime + 10/10 wiring + 16/16 contracts + lint:architecture all pass. Proof tests: 5/5 pass with env-enabled.",
+      "hermesDocsFirstRule": "Standing rule: always consult local Hermes docs cache (docs/hermes-agent/*.md) before making Hermes-related architecture, security, gateway, profile, or container changes."
+    },
+    "lvhMeDnsMigration": {
+      "status": "completed",
+      "summary": "Replaced hades.docker.internal with lvh.me in docker-compose.yaml and .env.docker. Removed Windows hosts file entry. lvh.me resolves to 127.0.0.1 via public DNS — no hosts file modification needed. All 5/5 proof tests pass without hosts modification. AGENTS.md updated with Hermes-docs-first rule."
+    },
+    "frontendPatchNotes": {
+      "status": "completed",
+      "summary": "Created docs/hades/PEER_MODEL_FRONTEND_PATCH_NOTES.md with full agent-readable patch notes covering: what exists, auth model, frontend gaps (3), backend gaps remaining (4), and priority-ordered ship sequence for frontend integration."
+    },
+    "completedAt": "2026-06-19"
   }
 }

@@ -6,6 +6,11 @@
     "reserved": 4000,
     "tail_turns": 2
   },
+  "agent": {
+    "compaction": {
+      "model": "opencode-go/deepseek-v4-flash"
+    }
+  },
   "mcp": {
     "supabase": {
       "type": "remote",

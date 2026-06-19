@@ -1,14 +1,14 @@
 {
   "hardLimit": 64000,
-  "currentUsage": 4200,
-  "remaining": 59800,
+  "currentUsage": 12000,
+  "remaining": 52000,
   "warningAt": 51200,
   "compactAt": 57600,
   "stopAt": 62400,
   "lastCompactedAt": null,
   "compactionStrategy": "summarize completed work, preserve current phase, target files, failing tests, blockers",
-  "sessionStart": "2026-06-18T05:19:30.843+00:00",
-  "sessionEnd": "2026-06-18T18:41:08.429+00:00",
+  "sessionStart": "2026-06-19T18:00:50.488+00:00",
+  "sessionEnd": "2026-06-19T18:52:59.297+00:00",
   "history": [
     {
       "endedAt": "2026-06-12T16:33:56.160+00:00",
@@ -405,6 +405,84 @@
       "peakUsage": 4200,
       "reason": "archive_session",
       "slug": "session-012-013-migrations-applied"
+    },
+    {
+      "endedAt": "2026-06-19T16:14:08.515+00:00",
+      "peakUsage": 0,
+      "reason": "archive_session",
+      "slug": "hades-hermes-peer-model-review"
+    },
+    {
+      "endedAt": "2026-06-19T16:22:16.928+00:00",
+      "peakUsage": 0,
+      "reason": "archive_session",
+      "slug": "hermes-docs-first-rule"
+    },
+    {
+      "endedAt": "2026-06-19T16:23:50.776+00:00",
+      "peakUsage": 0,
+      "reason": "archive_session",
+      "slug": "hermes-native-isolation-correction"
+    },
+    {
+      "endedAt": "2026-06-19T16:30:32.539+00:00",
+      "peakUsage": 0,
+      "reason": "archive_session",
+      "slug": "hermes-peer-auth-routing-correction"
+    },
+    {
+      "endedAt": "2026-06-19T16:41:15.151+00:00",
+      "peakUsage": 0,
+      "reason": "archive_session",
+      "slug": "hades-hermes-peer-edge-routing-plan"
+    },
+    {
+      "endedAt": "2026-06-19T16:46:23.355+00:00",
+      "peakUsage": 0,
+      "reason": "archive_session",
+      "slug": "opencode-peer-edge-handoff-red-tests"
+    },
+    {
+      "endedAt": "2026-06-19T16:53:01.287+00:00",
+      "peakUsage": 0,
+      "reason": "archive_session",
+      "slug": "peer-edge-double-check"
+    },
+    {
+      "endedAt": "2026-06-19T17:02:22.759+00:00",
+      "peakUsage": 0,
+      "reason": "archive_session",
+      "slug": "peer-edge-state-persistence"
+    },
+    {
+      "endedAt": "2026-06-19T17:33:28.760+00:00",
+      "peakUsage": 3400,
+      "reason": "archive_session",
+      "slug": "hades-hermes-peer-model-audit"
+    },
+    {
+      "endedAt": "2026-06-19T17:44:59.225+00:00",
+      "peakUsage": 0,
+      "reason": "archive_session",
+      "slug": "final-peer-docker-railway-proof"
+    },
+    {
+      "endedAt": "2026-06-19T18:08:10.231+00:00",
+      "peakUsage": 0,
+      "reason": "archive_session",
+      "slug": "final-peer-docker-railway-proof"
+    },
+    {
+      "endedAt": "2026-06-19T18:16:56.565+00:00",
+      "peakUsage": 0,
+      "reason": "archive_session",
+      "slug": "docker-proof-hooks-wiring"
+    },
+    {
+      "endedAt": "2026-06-19T18:52:59.297+00:00",
+      "peakUsage": 12000,
+      "reason": "archive_session",
+      "slug": "lvhme-dns-migration"
     }
   ]
 }

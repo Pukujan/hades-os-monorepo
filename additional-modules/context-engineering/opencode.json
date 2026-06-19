@@ -6,6 +6,11 @@
     "reserved": 4000,
     "tail_turns": 2
   },
+  "agent": {
+    "compaction": {
+      "model": "opencode-go/deepseek-v4-flash"
+    }
+  },
   "mcp": {
     "supabase": {
       "type": "remote",
@@ -31,6 +36,14 @@
           "limit": { "context": 64000, "output": 16384 }
         },
         "deepseek-v4-flash": {
+          "limit": { "context": 64000, "output": 16384 }
+        }
+      }
+    },
+    "opencode": {
+      "id": "opencode",
+      "models": {
+        "big-pickle": {
           "limit": { "context": 64000, "output": 16384 }
         }
       }

@@ -136,3 +136,11 @@ python3 additional-modules/scripts/gen_compaction_payload.py --tokens 70000 --ou
 ```
 
 Then follow: `additional-modules/scripts/RUNTIME_COMPACTION_SMOKE_TEST.md`
+
+---
+
+# 11. Hermes Docs First
+
+**Rule:** Before making any Hermes-related change (architecture, security, gateway, profile, or container changes), read the local Hermes docs cache at `docs/hermes-agent/` first. The docs contain authoritative information about profile API server ports, loopback binding, profile creation, and gateway configuration.
+
+**Location:** `docs/hermes-agent/` — 171 pages split from upstream `llms-full.txt`. Pages are organized by topic directory (e.g., `user-guide/profiles.md`, `features/gateway.md`).

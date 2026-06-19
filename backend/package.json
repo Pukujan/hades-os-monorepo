@@ -25,6 +25,7 @@
     "test:hades-instagram-social": "node --test src/modules/hades/tests/unit/instagramSocialRoutes.tdd.test.js",
     "test:hades-inline-gif-media": "node --test src/modules/hades/tests/unit/hermes.service.test.js",
     "test:hades-autonomous-hermes-runtime": "node --test src/modules/hades/tests/unit/hades.autonomous-hermes-runtime.tdd.test.js src/modules/hades/tests/unit/hades.autonomous-hermes-persistence.tdd.test.js src/modules/hades/tests/unit/hades.autonomous-hermes-bridge-gaps.tdd.test.js",
+    "test:hades-hermes-peer-model": "node --test src/modules/hades/tests/unit/hades.hermes-peer-model.tdd.test.js",
     "test:evals": "node ../scripts/run-module-evals.mjs"
   },
   "dependencies": {
