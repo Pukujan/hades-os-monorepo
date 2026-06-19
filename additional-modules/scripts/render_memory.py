@@ -211,7 +211,7 @@ def main() -> int:
             os.makedirs(out_dir, exist_ok=True)
         with open(resolved, "w", encoding="utf-8") as f:
             f.write(md)
-        print(f"Written: {args.out} (→ {resolved})")
+        print(f"Written: {args.out} (-> {resolved})")
 
     return 0
 

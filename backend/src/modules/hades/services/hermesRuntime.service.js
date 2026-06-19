@@ -6,6 +6,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { createHermesWorkerPool } from "./hermesWorkerPool.service.js";
 import { createEmptyDraft, VALID_CATEGORIES, VALID_TARGET_SOCIALS, VALID_TRIGGER_TYPES } from "../data.js";
 import { buildGeneralChatPrompt } from "../prompts/generalChatPrompt.js";
 import { buildForgeChatPrompt } from "../prompts/forgeChatPrompt.js";
@@ -208,6 +209,8 @@ export function createHermesRuntimeService({
   backendEnvPath = DEFAULT_BACKEND_ENV_PATH,
   runCommand = execHermesCommand
 } = {}) {
+  const pool = createHermesWorkerPool({ runCommand });
+
   async function generateDraft({
     userId = "local-user",
     conversationId,
@@ -243,10 +246,11 @@ export function createHermesRuntimeService({
       subprocessEnv.HERMES_CACHE_DIR = "/tmp/hades-hermes/cache";
     }
     try {
-      const output = await runCommand(hermesBin, buildCommandArgs(prompt, { provider, model }), {
+      const output = await pool.execute(hermesBin, buildCommandArgs(prompt, { provider, model }), {
         encoding: "utf8",
         env: subprocessEnv,
         timeout: hermesTimeout,
+        userId,
       });
 
       return parseRuntimeOutput(output, context);
