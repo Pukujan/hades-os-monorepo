@@ -1,7 +1,12 @@
 export function createHermesProfileRouter({ publicBaseUrl = "", registry } = {}) {
+  const railDomain = process.env.RAILWAY_PUBLIC_DOMAIN || "";
+  const effectivePublicUrl = publicBaseUrl.startsWith("/") && railDomain
+    ? `https://${railDomain}${publicBaseUrl}`
+    : publicBaseUrl;
+
   async function publicRouteForProfile({ profileName }) {
     return {
-      hermesApiBaseUrl: `${publicBaseUrl.replace(/\/+$/, "")}/${profileName}/v1`,
+      hermesApiBaseUrl: `${effectivePublicUrl.replace(/\/+$/, "")}/${profileName}/v1`,
       authMode: "edge_injected",
     };
   }

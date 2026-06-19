@@ -209,7 +209,8 @@ export function createHermesSessionRoutes({
         return res.status(404).json({ error: `profile not found: ${profileName}` });
       }
 
-      const profilesRoot = process.env.HERMES_PROFILES_ROOT || "";
+      const hermesHomeDir = process.env.HERMES_HOME || path.join(process.cwd(), ".hermes-home");
+      const profilesRoot = process.env.HERMES_PROFILES_ROOT || path.join(hermesHomeDir, "profiles");
       const hermesHome = profile.hermesHome || path.join(profilesRoot, profileName);
       const platform = process.env.HADES_PLATFORM || "local";
       const railwayVolumeMountPath = process.env.RAILWAY_VOLUME_MOUNT_PATH || "";

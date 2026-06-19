@@ -82,7 +82,11 @@ export function createHermesProfileStatePersistence({ platform, profilesRoot = "
     };
 
     if (objectStore) {
-      await objectStore.putJson({ key: objectKey, value: snapshot });
+      try {
+        await objectStore.putJson({ key: objectKey, value: snapshot });
+      } catch (err) {
+        console.warn(`[hermesProfileStatePersistence] snapshot storage failed: ${err.message}`);
+      }
     }
 
     return {
