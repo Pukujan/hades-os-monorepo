@@ -39,7 +39,8 @@ export function createHermesSessionRoutes({
         const supabaseJwt = authHeader.startsWith("Bearer ")
           ? authHeader.slice(7)
           : null;
-        const session = await profileSessionBroker.startSession({ supabaseJwt });
+        const origin = `${req.protocol}://${req.get("host")}`;
+        const session = await profileSessionBroker.startSession({ supabaseJwt, origin });
         return res.status(200).json(session);
       }
 

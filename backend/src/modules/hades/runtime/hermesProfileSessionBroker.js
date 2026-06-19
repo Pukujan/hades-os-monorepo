@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 
 export function createHermesProfileSessionBroker({ auth, profileRegistry, profileRouter, routingToken } = {}) {
-  async function startSession({ supabaseJwt } = {}) {
+  async function startSession({ supabaseJwt, origin } = {}) {
     const identity = await auth.verifySupabaseJwt(supabaseJwt);
     const profile = await profileRegistry.ensureProfile({
       userId: identity.userId,
@@ -10,6 +10,7 @@ export function createHermesProfileSessionBroker({ auth, profileRegistry, profil
 
     const route = await profileRouter.publicRouteForProfile({
       profileName: profile.profileName,
+      origin,
     });
 
     const sessionId = randomUUID();
