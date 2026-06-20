@@ -16,7 +16,7 @@ function hashKey(key) {
 }
 
 export function createHermesProfileProvisioner({ hermesBin = "hermes", profilesRoot = "", run, writeFile, mkdir, allocatePort, generateApiServerKey, serverEnv = {} } = {}) {
-  async function ensureProfile({ userId, tenantId, model, provider } = {}) {
+  async function ensureProfile({ userId, tenantId, model = serverEnv.HERMES_DEFAULT_MODEL, provider = serverEnv.HERMES_DEFAULT_PROVIDER } = {}) {
     const profileName = sanitizeProfileName(tenantId, userId);
     const apiServerKey = generateApiServerKey ? generateApiServerKey() : `dev-key-${profileName}-${Date.now()}`;
     const apiPort = allocatePort ? await allocatePort() : 8657;

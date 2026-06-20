@@ -134,7 +134,11 @@ export async function register(app, context) {
   const hermesProfileProvisioner = overrides.hermesProfileProvisioner || createHermesProfileProvisioner({
     hermesBin: process.env.HERMES_BIN_PATH || "hermes",
     profilesRoot: hermesProfilesRoot,
-    serverEnv: { GROQ_API_KEY: process.env.GROQ_API_KEY },
+    serverEnv: {
+      GROQ_API_KEY: process.env.GROQ_API_KEY,
+      HERMES_DEFAULT_MODEL: process.env.HERMES_DEFAULT_MODEL,
+      HERMES_DEFAULT_PROVIDER: process.env.HERMES_DEFAULT_PROVIDER,
+    },
     run: async (command) => {
       const { execSync } = await import("node:child_process");
       return execSync(command, {

@@ -130,9 +130,13 @@
                     "status": "completed",
                     "summary": "Wired HermesMediaComposer into MinionsScreen replacing inline textarea. Added isUploading state to HadesProvider context (true during uploadPendingAttachments, false in finally). Filtered extension keys display to only show active (non-revoked) keys. Added composer CSS (attach, record, textarea, send, chips, transcript). Fixed 405 by appending /responses to Hermes API URL. Route all Hermes API calls through shared apiUrl helper for Vercel/Railway support. Build passes, all 32 chat media tests + 8 extension tests + 7 routing tests pass."
                 },
-                "hadesHermesSessionsVercel405Handoff": {
-                    "status": "handoff_ready",
-                    "summary": "Created work-log/handoffs/023_2026-06-20_handoff_opencode_fix_hermes_sessions_vercel_405.md after production browser showed POST /api/hades/hermes/sessions returning 405 from Vercel. Diagnosis: frontend/src/modules/hades/services/hermesMediaClient.js hardcodes same-origin /api/hades/hermes and bypasses shared apiUrl()/VITE_API_BASE_URL, so Hermes session/media calls hit Vercel instead of Railway. Added frontend/src/modules/hades/tests/unit/hermesMediaClient.routing.test.js plus npm run test:hades-hermes-routing-ui. Red result: 7 tests, 1 pass, 6 fail; failures prove start/session, upload, transcribe, speak, and relative /v1 responses URLs do not use Railway base URL and source lacks apiUrl. Handoff instructs OpenCode to normalize all Hermes media client URLs through apiUrl(), verify Vercel VITE_API_BASE_URL and Railway CORS/HERMES_PUBLIC_BASE_URL, and not restore legacy chat fallback."
-                }
+                 "hadesHermesSessionsVercel405Handoff": {
+                     "status": "handoff_ready",
+                     "summary": "Created work-log/handoffs/023_2026-06-20_handoff_opencode_fix_hermes_sessions_vercel_405.md after production browser showed POST /api/hades/hermes/sessions returning 405 from Vercel. Diagnosis: frontend/src/modules/hades/services/hermesMediaClient.js hardcodes same-origin /api/hades/hermes and bypasses shared apiUrl()/VITE_API_BASE_URL, so Hermes session/media calls hit Vercel instead of Railway. Added frontend/src/modules/hades/tests/unit/hermesMediaClient.routing.test.js plus npm run test:hades-hermes-routing-ui. Red result: 7 tests, 1 pass, 6 fail; failures prove start/session, upload, transcribe, speak, and relative /v1 responses URLs do not use Railway base URL and source lacks apiUrl. Handoff instructs OpenCode to normalize all Hermes media client URLs through apiUrl(), verify Vercel VITE_API_BASE_URL and Railway CORS/HERMES_PUBLIC_BASE_URL, and not restore legacy chat fallback."
+                 },
+                 "hadesHermesSessionB1B2Fixes": {
+                     "status": "completed",
+                     "summary": "Fixed 4 bugs found via full request-flow audit: (B1) ensureProfile was non-idempotent — regenerated API key + port on every session boot, breaking 2nd+ sessions with 401/503. Fixed by caching profiles in composite closure, checking registry first. (B2) Edge proxy Headers instanceof Map check wrong — real fetch() returns Headers object, not Map; switched to .entries() check. (B7) Removed dead fetch param passed to gateway manager. (B8) Fixed healthTimeoutMs default mismatch (15000 index vs 30000 gateway) by removing default override. Branch: master, commit 732d45a."
+                 }
             }
 }
