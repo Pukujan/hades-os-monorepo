@@ -1,7 +1,7 @@
-const HADES_API_BASE = "/api/hades/hermes";
+import { apiUrl, getApiBaseUrl } from "../../../shared/api/client.js";
 
 export async function startHermesSession(accessToken) {
-  const res = await fetch(`${HADES_API_BASE}/sessions`, {
+  const res = await fetch(apiUrl("/api/hades/hermes/sessions"), {
     method: "POST",
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -16,12 +16,13 @@ export async function startHermesSession(accessToken) {
 }
 
 export async function sendHermesResponse({ hermesApiBaseUrl, input, conversation, previousResponseId }, accessToken) {
+  const base = hermesApiBaseUrl.startsWith("/") ? `${getApiBaseUrl()}${hermesApiBaseUrl}` : hermesApiBaseUrl;
+  const url = base.endsWith("/v1") ? `${base}/responses` : base;
   const body = {
     input: typeof input === "string" ? input : input,
     ...(previousResponseId ? { previous_response_id: previousResponseId } : {}),
     ...(conversation ? { conversation } : {}),
   };
-  const url = hermesApiBaseUrl.endsWith("/v1") ? `${hermesApiBaseUrl}/responses` : hermesApiBaseUrl;
   const res = await fetch(url, {
     method: "POST",
     headers: {
@@ -40,7 +41,7 @@ export async function sendHermesResponse({ hermesApiBaseUrl, input, conversation
 export async function uploadHermesMedia({ profileName, file }, accessToken) {
   const form = new FormData();
   form.append("file", file);
-  const res = await fetch(`${HADES_API_BASE}/${profileName}/media`, {
+  const res = await fetch(apiUrl(`/api/hades/hermes/${profileName}/media`), {
     method: "POST",
     headers: { Authorization: `Bearer ${accessToken}` },
     body: form,
@@ -63,7 +64,7 @@ export async function transcribeHermesAudio({ audioBlob, filename = "recording.w
     reader.onerror = reject;
     reader.readAsDataURL(audioBlob);
   });
-  const res = await fetch(`${HADES_API_BASE}/transcribe`, {
+  const res = await fetch(apiUrl("/api/hades/hermes/transcribe"), {
     method: "POST",
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -79,7 +80,7 @@ export async function transcribeHermesAudio({ audioBlob, filename = "recording.w
 }
 
 export async function synthesizeHermesSpeech({ text, voice = "en-US-JennyNeural" }, accessToken) {
-  const res = await fetch(`${HADES_API_BASE}/speak`, {
+  const res = await fetch(apiUrl("/api/hades/hermes/speak"), {
     method: "POST",
     headers: {
       Authorization: `Bearer ${accessToken}`,
