@@ -2,7 +2,8 @@ FROM node:22-slim AS base
 RUN apt-get update && apt-get install -y --no-install-recommends python3 python3-pip python3-venv && \
   rm -rf /var/lib/apt/lists/*
 RUN python3 -m venv /opt/hermes-venv && \
-  /opt/hermes-venv/bin/pip install --no-cache-dir hermes-agent
+  /opt/hermes-venv/bin/pip install --no-cache-dir hermes-agent edge-tts && \
+  ln -sf /opt/hermes-venv/bin/edge-tts /usr/local/bin/edge-tts
 ENV HERMES_BIN_PATH=/opt/hermes-venv/bin/hermes
 ENV HERMES_PUBLIC_BASE_URL=https://hades-os-monorepo-production.up.railway.app/api/hades/hermes
 
