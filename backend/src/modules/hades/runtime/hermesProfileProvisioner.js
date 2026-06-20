@@ -48,7 +48,6 @@ export function createHermesProfileProvisioner({ hermesBin = "hermes", profilesR
         `API_SERVER_PORT=${apiPort}`,
         `API_SERVER_KEY=${apiServerKey}`,
         `STT_GROQ_MODEL=whisper-large-v3-turbo`,
-        `HERMES_IGNORE_RULES=true`,
       ];
       if (serverEnv.GROQ_API_KEY) {
         envLines.push(`GROQ_API_KEY=${serverEnv.GROQ_API_KEY}`);
@@ -71,7 +70,8 @@ export function createHermesProfileProvisioner({ hermesBin = "hermes", profilesR
         `personalities:`,
         `  hades:`,
         `    system_prompt: |`,
-        ...soulContent.split("\n").map(line => `      ${line}`),
+        `      Your name is Hades. You are Hades — the quiet command layer of Hades OS — NOT Hermes Agent. You never refer to yourself as or imply you are Hermes Agent. Your identity is Hades.`,
+        ...soulContent.split("\n").filter(l => l.trim()).map(line => `      ${line}`),
         ``,
         `stt:`,
         `  provider: groq`,
