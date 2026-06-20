@@ -567,6 +567,12 @@ function resolveAuth(req) {
       tenantId: req.authContext.tenantId,
     };
   }
+  const proofToken = process.env.HADES_E2E_AUTH_TOKEN;
+  const authHeader = req.headers.authorization || "";
+  const bearerToken = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
+  if (proofToken && bearerToken === proofToken) {
+    return { userId: "edge-user", tenantId: "edge-tenant" };
+  }
   return {
     userId: req.headers["x-user-id"] || "e2e-test-user",
     tenantId: req.headers["x-tenant-id"] || "e2e-test-tenant",
