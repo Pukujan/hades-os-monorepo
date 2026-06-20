@@ -13,6 +13,8 @@ const FIXTURE_DIR = path.join(ROOT, "file-exchange", "hermes-media-fixtures");
 function headers(extra = {}) {
   return {
     ...(AUTH_TOKEN ? { Authorization: `Bearer ${AUTH_TOKEN}` } : {}),
+    "x-user-id": "anonymous",
+    "x-tenant-id": "anonymous",
     ...extra,
   };
 }
