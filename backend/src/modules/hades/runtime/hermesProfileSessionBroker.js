@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-export function createHermesProfileSessionBroker({ auth, profileRegistry, profileRouter, routingToken, profileGatewayManager } = {}) {
+export function createHermesProfileSessionBroker({ auth, profileRegistry, profileRouter, routingToken, profileGatewayManager, logger = console } = {}) {
   async function startSession({ supabaseJwt, origin } = {}) {
     const identity = await auth.verifySupabaseJwt(supabaseJwt);
     const profile = await profileRegistry.ensureProfile({
@@ -22,7 +22,10 @@ export function createHermesProfileSessionBroker({ auth, profileRegistry, profil
           writable: false,
         });
       }
-      const gateway = await profileGatewayManager.ensureGateway(gatewayRequest);
+      const gateway = await profileGatewayManager.ensureGateway(gatewayRequest).catch((err) => {
+        logger?.warn?.("[Hades Hermes] gateway health check failed, continuing with uncertain status", { profileName: profile.profileName, error: err.message });
+        return { gatewayStatus: "running_uncertain" };
+      });
       gatewayStatus = gateway.gatewayStatus || gatewayStatus;
     }
 

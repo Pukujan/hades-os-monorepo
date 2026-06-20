@@ -1,3 +1,6 @@
+import http from "node:http";
+import https from "node:https";
+
 function parsePositiveInteger(value, fallback) {
   const parsed = Number.parseInt(String(value || ""), 10);
   return Number.isInteger(parsed) && parsed >= 0 ? parsed : fallback;
@@ -18,28 +21,37 @@ function validateProfileName(profileName) {
   }
 }
 
+function httpGet(url) {
+  return new Promise((resolve) => {
+    const parsed = new URL(url);
+    const mod = parsed.protocol === "https:" ? https : http;
+    const req = mod.get(url, { timeout: 3000 }, (res) => {
+      let data = "";
+      res.on("data", (chunk) => { data += chunk; });
+      res.on("end", () => resolve({ ok: res.statusCode >= 200 && res.statusCode < 300, status: res.statusCode, body: data }));
+    });
+    req.on("error", () => resolve(null));
+    req.on("timeout", () => { req.destroy(); resolve(null); });
+  });
+}
+
 export function createHermesProfileGatewayProcessManager({
   hermesBin = "hermes",
   hermesHome = "",
   env = process.env,
-  fetch: fetch_ = globalThis.fetch?.bind(globalThis),
   spawn,
-  healthTimeoutMs = 15000,
-  healthPollMs = 250,
+  healthTimeoutMs = 30000,
+  healthPollMs = 500,
   logger = console,
 } = {}) {
   const active = new Map();
-  const timeoutMs = parsePositiveInteger(healthTimeoutMs, 15000);
-  const pollMs = parsePositiveInteger(healthPollMs, 250);
+  const timeoutMs = parsePositiveInteger(healthTimeoutMs, 30000);
+  const pollMs = parsePositiveInteger(healthPollMs, 500);
 
   async function isHealthy(apiBaseUrl, apiServerKey) {
-    if (typeof fetch_ !== "function") return false;
     try {
-      const response = await fetch_(`${normalizeBaseUrl(apiBaseUrl)}/health`, {
-        method: "GET",
-        headers: apiServerKey ? { authorization: `Bearer ${apiServerKey}` } : {},
-      });
-      return Boolean(response?.ok);
+      const result = await httpGet(`${normalizeBaseUrl(apiBaseUrl)}/health`);
+      return result?.ok === true;
     } catch {
       return false;
     }
@@ -48,7 +60,8 @@ export function createHermesProfileGatewayProcessManager({
   async function waitForHealth(apiBaseUrl, apiServerKey) {
     const deadline = Date.now() + timeoutMs;
     do {
-      if (await isHealthy(apiBaseUrl, apiServerKey)) return true;
+      const healthy = await isHealthy(apiBaseUrl, apiServerKey);
+      if (healthy) return true;
       await wait(pollMs);
     } while (Date.now() <= deadline);
     return false;

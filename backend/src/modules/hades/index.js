@@ -137,7 +137,11 @@ export async function register(app, context) {
     serverEnv: { GROQ_API_KEY: process.env.GROQ_API_KEY },
     run: async (command) => {
       const { execSync } = await import("node:child_process");
-      return execSync(command, { encoding: "utf8", stdio: "pipe" });
+      return execSync(command, {
+        encoding: "utf8",
+        stdio: "pipe",
+        env: { ...process.env, ...(hermesHomeDir ? { HERMES_HOME: hermesHomeDir } : {}) },
+      });
     },
     writeFile: async (filePath, content) => {
       await mkdir(path.dirname(filePath), { recursive: true });
