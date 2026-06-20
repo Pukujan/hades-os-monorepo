@@ -48,6 +48,7 @@ export function createHermesProfileProvisioner({ hermesBin = "hermes", profilesR
         `API_SERVER_PORT=${apiPort}`,
         `API_SERVER_KEY=${apiServerKey}`,
         `STT_GROQ_MODEL=whisper-large-v3-turbo`,
+        `HERMES_IGNORE_RULES=true`,
       ];
       if (serverEnv.GROQ_API_KEY) {
         envLines.push(`GROQ_API_KEY=${serverEnv.GROQ_API_KEY}`);
