@@ -381,10 +381,17 @@ export async function register(app, context) {
       verifyEdgeRequest: async ({ headers, profileName }) => {
         const proofToken = process.env.HADES_E2E_AUTH_TOKEN;
         const auth = headers?.authorization || "";
-        if (proofToken && auth !== `Bearer ${proofToken}`) {
-          throw Object.assign(new Error("unauthorized"), { status: 401 });
+        if (proofToken && auth === `Bearer ${proofToken}`) {
+          return { userId: "edge-user", tenantId: "edge-tenant", profileName };
         }
-        return { userId: "edge-user", tenantId: "edge-tenant", profileName };
+        const jwt = auth.startsWith("Bearer ") ? auth.slice(7) : null;
+        const identity = await verifySupabaseJwt(supabaseClient, jwt);
+        if (!identity.userId || identity.userId === "anonymous") {
+          const xUserId = headers["x-user-id"] || "anonymous";
+          const xTenantId = headers["x-tenant-id"] || "anonymous";
+          return { userId: xUserId, tenantId: xTenantId, profileName };
+        }
+        return { userId: identity.userId, tenantId: identity.tenantId, profileName };
       },
     },
     profileRouter: hermesProfileRouter,
