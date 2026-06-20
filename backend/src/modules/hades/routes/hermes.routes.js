@@ -47,19 +47,20 @@ export function createHermesSessionRoutes({
         const origin = `${proto}://${req.hostname}`;
         const session = await profileSessionBroker.startSession({ supabaseJwt, origin });
 
-        if (profileStatePersistence && profileRegistry) {
-          profileRegistry.findProfile({ profileName: session.profileName })
-            .then(profile => {
-              if (profile) {
-                profileStatePersistence.snapshotProfile({
-                  tenantId: profile.tenantId,
-                  userId: profile.userId,
-                  profileName: session.profileName,
-                  reason: "session_start",
-                }).catch(err => console.warn("[snapshot] session boot:", err.message));
-              }
-            })
-            .catch(() => {});
+        if (profileStatePersistence && profileRegistry && session.profileName) {
+          try {
+            const profile = await profileRegistry.findProfile({ profileName: session.profileName });
+            if (profile) {
+              await profileStatePersistence.snapshotProfile({
+                tenantId: profile.tenantId,
+                userId: profile.userId,
+                profileName: session.profileName,
+                reason: "session_start",
+              });
+            }
+          } catch (err) {
+            console.warn("[snapshot] session boot:", err.message);
+          }
         }
 
         return res.status(200).json(session);
