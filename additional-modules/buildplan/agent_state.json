@@ -122,9 +122,13 @@
                                                "status":  "completed",
                                                "summary":  "Removed silent legacy chat fallback from frontend Hermes chat path: HadesPrototypeApp no longer imports/calls sendGeneralChat or local draft fallback on Hermes errors; UI returns explicit Hermes-unavailable/error message. Added no-fallback contract to scripts/hades-hermes-media-contract.tdd.test.mjs. Added createHermesProfileGatewayProcessManager with bearer-capable health check + spawn of `hermes -p <profileName> gateway`, wired into createHermesProfileSessionBroker and index.js so session bootstrap verifies/starts the profile gateway before returning hermesApiBaseUrl. Provisioner now exposes raw API_SERVER_KEY only as a non-enumerable server-side property so registry/vault can inject it while JSON responses stay secret-free. Edge auth proxy now fails closed with 503 instead of fake 200 edge_ready when upstream Hermes is down. Added unit tests for no-spawn when healthy, spawn+health wait, broker gateway readiness, non-serialized API key access, and edge proxy fail-closed behavior."
                                            },
-                 "hadesHermesMediaPlanE2eRun": {
-                                               "status":  "completed",
-                                               "summary":  "Ran full E2E proof against Railway production. Fixed 3 issues: (1) GROQ_API_KEY was missing on Railway -- set via railway variables set; (2) edge-tts CLI not installed in Docker image -- added pip install edge-tts + symlink; (3) E2E test auth mismatch -- added x-user-id/x-tenant-id anonymous headers so upload resolveAuth matches session profile. All 1/1 E2E tests pass (session, image send, STT, TTS, PDF upload, media download, video upload). Added stderr capture to gateway manager for diagnostics. Fixed gateway transient failure on first deploy (Hermes binary was installed correctly, health check passed after redeploy). Added API docs for POST /:profileName/media and GET /:profileName/media/:attachmentId. Added sample-video.webm fixture for proper browser video playback testing (185 B WebM container)."
-                                           }
-                 }
+                "hadesHermesMediaPlanE2eRun": {
+                                                "status":  "completed",
+                                                "summary":  "Ran full E2E proof against Railway production. Fixed 3 issues: (1) GROQ_API_KEY was missing on Railway -- set via railway variables set; (2) edge-tts CLI not installed in Docker image -- added pip install edge-tts + symlink; (3) E2E test auth mismatch -- added x-user-id/x-tenant-id anonymous headers so upload resolveAuth matches session profile. All 1/1 E2E tests pass (session, image send, STT, TTS, PDF upload, media download, video upload). Added stderr capture to gateway manager for diagnostics. Fixed gateway transient failure on first deploy (Hermes binary was installed correctly, health check passed after redeploy). Added API docs for POST /:profileName/media and GET /:profileName/media/:attachmentId. Added sample-video.webm fixture for proper browser video playback testing (185 B WebM container)."
+                                            },
+                "wireHermesMediaComposer": {
+                    "status": "completed",
+                    "summary": "Wired HermesMediaComposer into MinionsScreen replacing inline textarea. Added isUploading state to HadesProvider context (true during uploadPendingAttachments, false in finally). Filtered extension keys display to only show active (non-revoked) keys. Build passes, all 32 chat media tests + 8 extension tests pass."
+                }
+            }
 }

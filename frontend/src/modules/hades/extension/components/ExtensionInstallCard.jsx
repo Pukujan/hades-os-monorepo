@@ -76,7 +76,7 @@ export function ExtensionInstallCard({ providerId, accessToken } = {}) {
             React.createElement("button", { className: "secondary", onClick: handleCopySecret }, "Copy API key"))
         : null,
       React.createElement("div", { className: "key-list" },
-        keys.map(function (k) {
+        keys.filter(function (k) { return !k.revokedAt; }).map(function (k) {
           return React.createElement("div", { key: k.id, className: "key-row", "data-revoked": !!k.revokedAt },
             React.createElement("span", { className: "key-preview" }, k.secretPreview || k.name),
             !k.revokedAt

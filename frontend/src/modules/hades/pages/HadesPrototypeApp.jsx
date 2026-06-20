@@ -47,6 +47,7 @@ import { MinionDetailScreen } from "./MinionDetailScreen.jsx";
 import { MinionLogsScreen } from "./MinionLogsScreen.jsx";
 
 import { ChatBubble } from "../components/ChatBubble.js";
+import { HermesMediaComposer } from "../components/HermesMediaComposer.jsx";
 import { buildTestOutput, missingDraftFields } from "../utils/parser.js";
 import {
   deleteHadesMessages,
@@ -237,6 +238,7 @@ function HadesProvider({ children }) {
   const [attachments, setAttachments] = React.useState([]);
   const [isRecording, setIsRecording] = React.useState(false);
   const [transcript, setTranscript] = React.useState("");
+  const [isUploading, setIsUploading] = React.useState(false);
   const [selectedMinionId, setSelectedMinionId] = usePersistentState("hades.selectedMinionId", "");
   const [selectedSocialId, setSelectedSocialId] = usePersistentState("hades.selectedSocialId", "discord");
   const [assignmentCommand, setAssignmentCommand] = usePersistentState("hades.assignmentCommand", "");
@@ -606,7 +608,13 @@ function HadesProvider({ children }) {
 
     const userMessageId = createId("msg");
 
-    const uploaded = await uploadPendingAttachments();
+    setIsUploading(true);
+    let uploaded = [];
+    try {
+      uploaded = await uploadPendingAttachments();
+    } finally {
+      setIsUploading(false);
+    }
     const allAttachments = attachments.filter((a) => a.kind === "image" || a.status === "uploaded");
     const currentAttachments = allAttachments.map((a) => ({
       kind: a.kind,
@@ -1035,6 +1043,8 @@ function HadesProvider({ children }) {
         setIsRecording,
         transcript,
         setTranscript,
+        isUploading,
+        setIsUploading,
         playAssistantSpeech,
         telegramConnection,
         discordConnection,
@@ -1606,7 +1616,7 @@ function MinionLogsScreenWrapped() {
 
 function MinionsScreen() {
   const navigate = useNavigate();
-  const { minions, messages, sending, pendingCopy, composerText, setComposerText, sendMessage, clearMessages } = useHades();
+  const { minions, messages, sending, pendingCopy, composerText, setComposerText, sendMessage, clearMessages, attachments, setAttachments, isRecording, setIsRecording, transcript, setTranscript, isUploading } = useHades();
   const chatClass = "card chat-card expanded";
   const activeCount = minions.filter((m) => m.slotIndex != null).length;
 
@@ -1656,21 +1666,18 @@ function MinionsScreen() {
             {sending ? <LoadingDots pendingCopy={pendingCopy} /> : null}
           </div>
           <div className="input-row">
-            <textarea
-              className="input"
-              value={composerText}
-              placeholder="Ask Hermes anything..."
-              onChange={(event) => setComposerText(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" && !event.shiftKey) {
-                  event.preventDefault();
-                  handleSend();
-                }
-              }}
+            <HermesMediaComposer
+              composerText={composerText}
+              setComposerText={setComposerText}
+              attachments={attachments}
+              setAttachments={setAttachments}
+              isRecording={isRecording}
+              setIsRecording={setIsRecording}
+              transcript={transcript}
+              setTranscript={setTranscript}
+              isUploading={isUploading}
+              onSend={handleSend}
             />
-            <button className="primary" type="button" onClick={handleSend}>
-              Send
-            </button>
           </div>
         </section>
       </div>
