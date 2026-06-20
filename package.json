@@ -57,6 +57,8 @@
     "test:hades-hermes-media-red": "node --test scripts/hades-hermes-media-contract.tdd.test.mjs",
     "test:hades-hermes-media-e2e": "node --test scripts/hades-hermes-media-e2e.tdd.test.mjs",
     "test:hades-hermes-routing-ui": "npm --prefix frontend run test:hades-hermes-routing-ui",
+    "test:fastapi-migration-red": "node --test scripts/hades-fastapi-modular-contract.red.test.mjs",
+    "test:fastapi-migration-e2e": "node --test scripts/hades-fastapi-migration-e2e.tdd.test.mjs",
     "generate:hades-media-fixtures": "node scripts/generate-hermes-media-fixtures.mjs",
     "test:auth-discord-connection-contract": "node --test backend/src/modules/auth/tests/unit/auth.discord.connection.contract.test.js",
     "test:hades-discord-bot-runtime-contract": "node --test backend/src/modules/hades/tests/contracts/hades.discord-bot-runtime.contract.mjs",

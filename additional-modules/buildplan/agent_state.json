@@ -165,6 +165,10 @@
                      "daytonaModalFastApiMigrationStudy": {
                          "status": "completed",
                          "summary": "Created docs/hades/DAYTONA_MODAL_FASTAPI_MIGRATION_STUDY.md and work-log/planning/014_2026-06-20_daytona-modal-fastapi-migration-plan.md after reading local Hermes profile/API-server/Docker/session docs and checking official current FastAPI, Daytona, Modal, and Railway docs/pricing. Recommendation: FastAPI as Hades control plane, Daytona for persistent workspaces/dev runtime, Modal for bursty media/OCR/STT/video jobs, and durable Hermes profile storage with exactly one active owner process per profile. Docs-only planning; no implementation code."
+                     },
+                     "fastApiModularContractMigrationPacket": {
+                         "status": "handoff_ready",
+                         "summary": "Created FastAPI modular-contract migration packet for OpenCode. Added scripts/hades-fastapi-modular-contract.red.test.mjs (static red suite against HADES_FASTAPI_REPO), scripts/hades-fastapi-migration-e2e.tdd.test.mjs (env-gated running API proof), package scripts test:fastapi-migration-red and test:fastapi-migration-e2e, plan log 015, and handoff 024. Plan maps Express modular contracts to FastAPI APIRouter/Depends/Pydantic/ModuleManifest/OpenAPI contracts and preserves Hades/Hermes auth/profile/media invariants. Red suite currently fails 9/9 because ../hades-os-fastapi does not exist; E2E skips 5/5 without HADES_FASTAPI_BASE_URL."
                      }
                 }
 }
