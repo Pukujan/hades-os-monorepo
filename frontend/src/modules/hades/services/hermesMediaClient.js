@@ -21,7 +21,8 @@ export async function sendHermesResponse({ hermesApiBaseUrl, input, conversation
     ...(previousResponseId ? { previous_response_id: previousResponseId } : {}),
     ...(conversation ? { conversation } : {}),
   };
-  const res = await fetch(hermesApiBaseUrl, {
+  const url = hermesApiBaseUrl.endsWith("/v1") ? `${hermesApiBaseUrl}/responses` : hermesApiBaseUrl;
+  const res = await fetch(url, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${accessToken}`,

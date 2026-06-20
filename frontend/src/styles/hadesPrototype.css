@@ -167,6 +167,28 @@ button{color:inherit;cursor:pointer}
 .kicker{margin:0;color:var(--muted);font-size:18px;line-height:1.1}
 .bigline{margin:0;font-size:26px;line-height:.95}
 .input-row{display:flex;gap:8px;margin-top:auto;flex:none}
+.hermes-composer{display:flex;flex-direction:column;gap:6px;width:100%;min-width:0}
+.hermes-composer-attachments{display:flex;flex-wrap:wrap;gap:4px}
+.hermes-attachment-chip{display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:12px;padding:2px 8px;font-size:11px;line-height:1.4;color:var(--muted);max-width:100%}
+.hermes-attachment-chip-icon{flex:none;font-size:14px}
+.hermes-attachment-chip-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:120px}
+.hermes-attachment-chip-size{flex:none;color:var(--muted2);font-size:10px}
+.hermes-attachment-chip-remove{flex:none;border:0;background:0 0;color:var(--danger);font-size:14px;cursor:pointer;padding:0;line-height:1;opacity:.7}
+.hermes-attachment-chip-remove:hover{opacity:1}
+.hermes-transcript-preview{font-size:12px;color:var(--muted2);font-style:italic;padding:0 4px;line-height:1.3}
+.hermes-transcript-label{color:var(--muted)}
+.hermes-composer-row{display:flex;gap:6px;align-items:center;min-width:0}
+.hermes-composer-btn{flex:none;display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--muted);font-size:16px;cursor:pointer;padding:0;transition:all .15s;line-height:1}
+.hermes-composer-btn:hover{background:rgba(255,255,255,.1);border-color:var(--line2);color:var(--text)}
+.hermes-composer-btn:disabled{opacity:.35;cursor:not-allowed}
+.hermes-composer-btn-recording{border-color:var(--danger);color:var(--danger);animation:hermes-pulse 1s ease-in-out infinite;background:rgba(251,113,133,.1)}
+@keyframes hermes-pulse{0%,100%{box-shadow:0 0 0 0 rgba(251,113,133,.4)}50%{box-shadow:0 0 0 6px rgba(251,113,133,0)}}
+.hermes-composer-textarea{flex:1;min-height:36px;height:36px;border-radius:16px;border:1px solid var(--line);background:rgba(0,0,0,.22);color:var(--text);padding:6px 12px;outline:0;font-size:15px;font-family:var(--font-body);resize:none;min-width:0;line-height:1.4}
+.hermes-composer-textarea::placeholder{color:var(--muted2)}
+.hermes-composer-textarea:focus{border-color:var(--line2);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 12%,transparent)}
+.hermes-composer-send{flex:none;border:0;border-radius:14px;padding:0 14px;min-height:36px;height:36px;background:linear-gradient(135deg,var(--gold),var(--accent2) 58%,var(--accent));color:#1a0c05;font-size:9px;white-space:nowrap;text-transform:uppercase;cursor:pointer;font-weight:700;transition:opacity .15s;line-height:1}
+.hermes-composer-send:disabled{opacity:.35;cursor:not-allowed}
+.hermes-composer-send:hover:not(:disabled){opacity:.85}
 .input{width:100%;min-height:44px;border-radius:16px;border:1px solid var(--line);background:rgba(0,0,0,.22);color:var(--text);padding:0 12px;outline:0;font-size:17px;min-width:0}
 .input::placeholder{color:var(--muted2)}
 .input:focus{border-color:var(--line2);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 12%,transparent)}

@@ -51,7 +51,7 @@ export function createHermesSessionRoutes({
       const { userId, tenantId } = resolveAuth(req);
       res.status(200).json({
         profileName: `${tenantId}_${userId}`,
-        hermesApiBaseUrl: `/hermes/${tenantId}_${userId}/v1`,
+        hermesApiBaseUrl: `/api/hades/hermes/${tenantId}_${userId}/v1`,
         authMode: "edge_injected",
         routingToken: null,
       });
