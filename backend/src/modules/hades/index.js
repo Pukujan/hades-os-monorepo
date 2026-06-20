@@ -195,6 +195,11 @@ export async function register(app, context) {
           if (existing) {
             const apiServerKey = await hermesProfileRegistry.getApiServerKey({ profileName: existing.profileName });
             if (apiServerKey) {
+              await hermesProfileProvisioner.ensureProfile({
+                userId, tenantId, model, provider,
+                apiServerKey,
+                apiPort: existing.apiPort,
+              });
               const profile = {
                 ...existing,
                 apiBaseUrl: `http://${existing.apiHost}:${existing.apiPort}`,
