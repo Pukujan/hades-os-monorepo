@@ -95,6 +95,14 @@ export async function deleteInstagramConnection(accessToken) {
   return apiDelete("/api/hades/socials/instagram/connection", null, { accessToken });
 }
 
+export async function deleteTelegramToken(accessToken) {
+  return apiDelete("/api/hades/socials/telegram/token", null, { accessToken });
+}
+
+export async function deleteDiscordToken(accessToken) {
+  return apiDelete("/api/hades/socials/discord/token", null, { accessToken });
+}
+
 export async function getMinion(minionId, accessToken) {
   return apiGet(`/api/hades/minions/${minionId}`, { accessToken });
 }

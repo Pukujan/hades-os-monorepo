@@ -2,7 +2,7 @@ import React from "react";
 
 const DISCORD_DEV_PORTAL = "https://discord.com/developers/applications";
 
-export function DiscordSetupCard({ connection, onSaveToken }) {
+export function DiscordSetupCard({ connection, onSaveToken, onDeleteToken }) {
   const [token, setToken] = React.useState("");
   const [testing, setTesting] = React.useState(false);
   const [error, setError] = React.useState(null);
@@ -54,6 +54,14 @@ export function DiscordSetupCard({ connection, onSaveToken }) {
             onClick={handleOpenDevPortal}
           >
             Configure server setup
+          </button>
+          <button
+            type="button"
+            className="secondary danger"
+            data-testid="discord-disconnect-btn"
+            onClick={onDeleteToken}
+          >
+            Disconnect
           </button>
         </div>
       </article>

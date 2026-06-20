@@ -3,7 +3,7 @@ import { buildBotFatherCommand, buildBotFatherPrivacyInstructions, formatTokenDi
 
 const BOTFATHER_URL = "https://t.me/BotFather";
 
-export function TelegramSetupCard({ connection, currentUser, onSaveToken }) {
+export function TelegramSetupCard({ connection, currentUser, onSaveToken, onDeleteToken }) {
   const [token, setToken] = React.useState("");
   const [testing, setTesting] = React.useState(false);
   const [error, setError] = React.useState(null);
@@ -74,6 +74,14 @@ export function TelegramSetupCard({ connection, currentUser, onSaveToken }) {
             onClick={handleCopyPrivacyInstructions}
           >
             Configure group chat access
+          </button>
+          <button
+            type="button"
+            className="secondary danger"
+            data-testid="telegram-disconnect-btn"
+            onClick={onDeleteToken}
+          >
+            Disconnect
           </button>
           <p className="instructions" data-testid="telegram-privacy-instructions" style={{ whiteSpace: "pre-wrap", fontSize: "0.85em", marginTop: "8px" }}>
             {instructions}

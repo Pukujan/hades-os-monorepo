@@ -241,6 +241,15 @@ export function createHadesRoutes({ service, requireHadesAuth, config, scopedRep
     })
   );
 
+  router.delete(
+    "/socials/discord/token",
+    requireAuth,
+    asyncRoute(async (req, res) => {
+      const result = await service.deleteDiscordToken(req.authContext);
+      res.status(200).json(result);
+    })
+  );
+
   router.post(
     "/socials/instagram/connect",
     requireAuth,

@@ -26,7 +26,7 @@ import {
   formatSocialLabel,
   getSocialIcon
 } from "../utils/hadesData.js";
-import { saveTelegramToken, saveDiscordToken, saveGitHubToken, getSocialConnections, createInstagramAuthLink, saveInstagramConnection, deleteInstagramConnection } from "../services/hadesApi.js";
+import { saveTelegramToken, saveDiscordToken, saveGitHubToken, getSocialConnections, createInstagramAuthLink, saveInstagramConnection, deleteInstagramConnection, deleteTelegramToken, deleteDiscordToken } from "../services/hadesApi.js";
 import { getPendingCopy } from "../utils/chatPendingCopy.js";
 import { TelegramSetupCard } from "../components/TelegramSetupCard.jsx";
 import { DiscordSetupCard } from "../components/DiscordSetupCard.jsx";
@@ -461,6 +461,16 @@ function HadesProvider({ children }) {
       tokenLast4: connection?.tokenLast4 || connection?.token_last4 || null,
     });
     return result;
+  }, [accessToken]);
+
+  const handleDeleteTelegramToken = React.useCallback(async () => {
+    await deleteTelegramToken(accessToken);
+    setTelegramConnection({ status: "disconnected" });
+  }, [accessToken]);
+
+  const handleDeleteDiscordToken = React.useCallback(async () => {
+    await deleteDiscordToken(accessToken);
+    setDiscordConnection({ status: "disconnected" });
   }, [accessToken]);
 
   const handleSaveGithubToken = React.useCallback(async ({ token }) => {
@@ -1055,7 +1065,9 @@ function HadesProvider({ children }) {
         handleSaveGithubToken,
         handleCreateInstagramAuthLink,
         handleSaveInstagramConnection,
-        handleDeleteInstagramConnection
+        handleDeleteInstagramConnection,
+        handleDeleteTelegramToken,
+        handleDeleteDiscordToken
       }}
     >
       {children}
@@ -1721,6 +1733,8 @@ function SocialsScreen() {
     handleCreateInstagramAuthLink,
     handleSaveInstagramConnection,
     handleDeleteInstagramConnection,
+    handleDeleteTelegramToken,
+    handleDeleteDiscordToken,
   } = useHades();
 
   React.useEffect(() => {
@@ -1756,6 +1770,7 @@ function SocialsScreen() {
                 connection={telegramConnection}
                 currentUser={currentUser}
                 onSaveToken={handleSaveTelegramToken}
+                onDeleteToken={handleDeleteTelegramToken}
               />
             );
           }
@@ -1765,6 +1780,7 @@ function SocialsScreen() {
                 key={social.id}
                 connection={discordConnection}
                 onSaveToken={handleSaveDiscordToken}
+                onDeleteToken={handleDeleteDiscordToken}
               />
             );
           }

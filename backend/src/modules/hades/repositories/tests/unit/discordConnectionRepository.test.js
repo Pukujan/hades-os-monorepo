@@ -50,6 +50,11 @@ describe("discordConnectionRepository", () => {
       channelId: "channel_a",
       status: "connected",
     });
+    await repo.saveToken({
+      userId: "user_a",
+      tenantId: "tenant_a",
+      token: "token_a_secret",
+    });
 
     await repo.createOrUpdate({
       userId: "user_b",

@@ -618,6 +618,23 @@ async function saveTelegramToken(body, authContext) {
     return { deleted: true };
   }
 
+  async function deleteDiscordToken(authContext) {
+    const userId = authContext?.userId;
+    const tenantId = authContext?.tenantId || userId;
+
+    if (!scopedRepos?.discordConnections) {
+      throw new AppError("Discord connections repository not available", 501);
+    }
+
+    const connection = await scopedRepos.discordConnections.findByUserId({ userId, tenantId });
+    if (!connection) {
+      throw new AppError("No Discord connection found", 404);
+    }
+
+    await scopedRepos.discordConnections.delete({ id: connection.id });
+    return { deleted: true };
+  }
+
   const dedupStore = scopedRepos?.processedUpdates || null;
   const processedUpdates = new Set();
 
@@ -1205,6 +1222,7 @@ async function saveTelegramToken(body, authContext) {
     saveGitHubToken,
     saveSlackToken,
     deleteTelegramToken,
+    deleteDiscordToken,
     createInstagramAuthLink,
     saveInstagramConnection,
     deleteInstagramConnection,

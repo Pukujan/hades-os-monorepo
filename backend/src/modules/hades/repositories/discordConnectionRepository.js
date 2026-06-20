@@ -82,7 +82,7 @@ export function createDiscordConnectionRepository({ storage = "memory", supabase
   async function findPublicByUser({ userId, tenantId }) {
     await hydrate();
     for (const record of connections.values()) {
-      if (record.user_id === userId && record.tenant_id === tenantId) {
+      if (record.user_id === userId && record.tenant_id === tenantId && record.encrypted_bot_token) {
         const { encrypted_bot_token, bot_token, ...rest } = record;
         return rest;
       }
