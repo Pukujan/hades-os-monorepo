@@ -59,24 +59,34 @@ export function createHermesProfileGatewayProcessManager({
       throw new Error("Hermes profile gateway spawn function is not configured.");
     }
 
+    const stderrChunks = [];
     const child = await spawn(hermesBin, ["-p", profileName, "gateway"], {
       detached: true,
-      stdio: "ignore",
+      stdio: ["ignore", "ignore", "pipe"],
       env: {
         ...env,
         ...(hermesHome ? { HERMES_HOME: hermesHome } : {}),
       },
     });
 
+    if (child?.stderr) {
+      child.stderr.on("data", (chunk) => {
+        stderrChunks.push(chunk);
+      });
+    }
     if (child && typeof child.unref === "function") {
       child.unref();
     }
     if (child && typeof child.on === "function") {
-      child.on("exit", () => {
-        if (active.get(profileName) === child) active.delete(profileName);
+      child.on("exit", (code) => {
+        if (code !== 0 && stderrChunks.length > 0) {
+          logger?.warn?.("[Hades Hermes] gateway exited with code " + code, { profileName, stderr: Buffer.concat(stderrChunks).toString("utf8") });
+        }
+        const entry = active.get(profileName);
+        if (entry && entry.child === child) active.delete(profileName);
       });
     }
-    active.set(profileName, child);
+    active.set(profileName, { child, stderrChunks });
     return child;
   }
 
@@ -97,6 +107,12 @@ export function createHermesProfileGatewayProcessManager({
 
     if (await waitForHealth(apiBaseUrl, apiServerKey)) {
       return { profileName, apiBaseUrl, gatewayStatus: "running", spawned: true };
+    }
+
+    const entry = active.get(profileName);
+    const stderr = entry?.stderrChunks?.length ? Buffer.concat(entry.stderrChunks).toString("utf8") : "";
+    if (stderr) {
+      logger?.error?.("[Hades Hermes] gateway stderr for " + profileName, { profileName, apiBaseUrl, stderr });
     }
 
     throw new Error(`Hermes profile gateway did not become healthy for ${profileName}.`);
