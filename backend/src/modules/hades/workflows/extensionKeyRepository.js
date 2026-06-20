@@ -34,6 +34,14 @@ export function createExtensionKeyRepository({ storage = "memory", supabaseClien
 
   async function createKey({ userId, tenantId, data }) {
     await hydrate();
+    for (const [id, existing] of keys) {
+      if (existing.user_id === userId && existing.tenant_id === tenantId && !existing.revoked_at) {
+        existing.revoked_at = new Date().toISOString();
+        existing.updated_at = new Date().toISOString();
+        keys.set(id, existing);
+        await persist(existing, "upsert");
+      }
+    }
     const plaintextKey = generateKey();
     const keyHash = hashKey(plaintextKey);
     const record = {

@@ -23,10 +23,12 @@ import { createHermesProfileRegistry } from "./runtime/hermesProfileRegistry.js"
 import { createHermesProfileRouter } from "./runtime/hermesProfileRouter.js";
 import { createHermesProfileProvisioner } from "./runtime/hermesProfileProvisioner.js";
 import { createHermesProfileSessionBroker } from "./runtime/hermesProfileSessionBroker.js";
+import { createHermesProfileGatewayProcessManager } from "./runtime/hermesProfileGatewayProcessManager.js";
 import { createHermesEdgeAuthProxy } from "./runtime/hermesEdgeAuthProxy.js";
 import { createHermesProfileStatePersistence } from "./runtime/hermesProfileStatePersistence.js";
 import net from "node:net";
 import crypto from "node:crypto";
+import { spawn } from "node:child_process";
 import { mkdir, writeFile } from "node:fs/promises";
 import { createDiscordHermesCommandFlow } from "./services/discordHermesCommandFlow.service.js";
 import { createMinionAssignmentRuntime } from "./services/minionAssignmentRuntime.service.js";
@@ -64,6 +66,7 @@ import { createMemoryDocumentTools } from "./workflows/memoryDocumentTools.js";
 import { createJobApplicationPlanner } from "./workflows/jobApplicationPlanner.js";
 import { createExternalAdapterRegistry } from "./workflows/externalAdapterRegistry.js";
 import { createBrowserExtensionContract } from "./workflows/browserExtensionContract.js";
+import { createVoiceService } from "./services/voice.service.js";
 
 function createSupabaseClient() {
   const url = process.env.SUPABASE_URL;
@@ -131,6 +134,7 @@ export async function register(app, context) {
   const hermesProfileProvisioner = overrides.hermesProfileProvisioner || createHermesProfileProvisioner({
     hermesBin: process.env.HERMES_BIN_PATH || "hermes",
     profilesRoot: hermesProfilesRoot,
+    serverEnv: { GROQ_API_KEY: process.env.GROQ_API_KEY },
     run: async (command) => {
       const { execSync } = await import("node:child_process");
       return execSync(command, { encoding: "utf8", stdio: "pipe" });
@@ -161,6 +165,15 @@ export async function register(app, context) {
   const hermesAuth = overrides.hermesAuth || {
     verifySupabaseJwt: async (jwt) => verifySupabaseJwt(supabaseClient, jwt),
   };
+  const hermesProfileGatewayProcessManager = overrides.hermesProfileGatewayProcessManager || createHermesProfileGatewayProcessManager({
+    hermesBin: process.env.HERMES_BIN_PATH || "hermes",
+    hermesHome: hermesHomeDir,
+    env: process.env,
+    fetch: globalThis.fetch?.bind(globalThis),
+    spawn,
+    healthTimeoutMs: process.env.HERMES_PROFILE_GATEWAY_HEALTH_TIMEOUT_MS || 15000,
+    healthPollMs: process.env.HERMES_PROFILE_GATEWAY_HEALTH_POLL_MS || 250,
+  });
   const hermesProfileSessionBroker = overrides.hermesProfileSessionBroker || createHermesProfileSessionBroker({
     auth: hermesAuth,
     profileRegistry: {
@@ -173,14 +186,22 @@ export async function register(app, context) {
           apiHost: "127.0.0.1",
           apiPort: parseInt(provisioned.apiBaseUrl.split(":")[2], 10) || 8657,
           edgeBaseUrl: `${process.env.HERMES_PUBLIC_BASE_URL || "/api/hades/hermes"}/${provisioned.profileName}/v1`,
-          apiServerKey: "",
+          apiServerKey: provisioned.apiServerKey,
           gatewayStatus: "provisioned",
         });
-        return { ...provisioned, ...registered, profileName: provisioned.profileName };
+        const profile = { ...provisioned, ...registered, profileName: provisioned.profileName };
+        Object.defineProperty(profile, "apiServerKey", {
+          value: provisioned.apiServerKey,
+          enumerable: false,
+          configurable: false,
+          writable: false,
+        });
+        return profile;
       },
     },
     profileRouter: hermesProfileRouter,
     routingToken: hermesRoutingTokenService,
+    profileGatewayManager: hermesProfileGatewayProcessManager,
   });
   const hermesStateStore = overrides.hermesStateStore || createHermesStateStore({
     objectStore: hermesObjectStore,
@@ -367,6 +388,8 @@ export async function register(app, context) {
     fetch: globalThis.fetch,
   });
 
+  const voiceService = createVoiceService();
+
   const hermesMgrRouter = createHermesSessionRoutes({
     config,
     processManager: hermesProcessManager,
@@ -377,6 +400,7 @@ export async function register(app, context) {
     hermesFilesystem,
     edgeAuthProxy: hermesEdgeAuthProxyObj,
     profileProvisioner: hermesProfileProvisioner,
+    voiceService,
   });
 
   const hermesMountPath = "/api/hades/hermes";

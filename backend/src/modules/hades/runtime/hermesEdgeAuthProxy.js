@@ -4,6 +4,13 @@ export function createHermesEdgeAuthProxy({ auth, profileRouter, apiServerKeyVau
 
     const internalTarget = await profileRouter.internalTargetForProfile({ profileName });
     const apiServerKey = await apiServerKeyVault.getApiServerKey({ profileName });
+    if (!apiServerKey) {
+      return {
+        status: 503,
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ error: "profile_api_key_unavailable", profileName }),
+      };
+    }
 
     const upstreamHeaders = { ...headers };
     delete upstreamHeaders.authorization;
@@ -33,11 +40,15 @@ export function createHermesEdgeAuthProxy({ auth, profileRouter, apiServerKeyVau
           : upstreamResponse.headers,
         body: bodyText,
       };
-    } catch {
+    } catch (error) {
       return {
-        status: 200,
+        status: 503,
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ status: "edge_ready", profileName, note: "profile API server not yet running" }),
+        body: JSON.stringify({
+          error: "profile_api_unavailable",
+          profileName,
+          message: error?.message || "Hermes profile API server is unavailable.",
+        }),
       };
     }
   }

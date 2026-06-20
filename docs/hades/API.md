@@ -65,6 +65,8 @@
 | GET | `/proof/profile` | Admin-only: get detailed profile proof (state, paths, secrets check) |
 | POST | `/proof/snapshot` | Admin-only: trigger profile state snapshot and return metadata |
 | POST | `/proof/restart` | Admin-only: trigger service restart (Docker proof) |
+| POST | `/speak` | Text-to-speech: synthesize speech from text via edge-tts |
+| POST | `/transcribe` | Speech-to-text: transcribe audio via Groq Whisper API |
 ## Endpoint details
 
 ### POST /chat/general
@@ -261,6 +263,59 @@ Triggers graceful service restart via `process.exit(0)`. Docker Compose `restart
   "status": "restarting"
 }
 ```
+
+### POST /speak
+
+Text-to-speech endpoint. Synthesizes speech from text using edge-tts CLI.
+
+**Request body:**
+
+```json
+{
+  "text": "string (required) — the text to synthesize",
+  "voice": "string (optional) — edge-tts voice name, defaults to en-US-JennyNeural"
+}
+```
+
+**Response:**
+
+Returns `audio/mpeg` binary stream on success.
+
+**Status codes:**
+
+| Code | Description |
+|------|-------------|
+| 200 | Audio file (audio/mpeg) |
+| 400 | Missing `text` field |
+| 503 | Voice service not configured |
+
+### POST /transcribe
+
+Speech-to-text endpoint. Transcribes audio using Groq Whisper API.
+
+**Request body:**
+
+```json
+{
+  "audio": "string (required) — base64-encoded audio data"
+}
+```
+
+**Response:**
+
+```json
+{
+  "text": "string — transcribed text"
+}
+```
+
+**Status codes:**
+
+| Code | Description |
+|------|-------------|
+| 200 | Transcription result |
+| 400 | Missing `audio` field |
+| 503 | Voice service not configured |
 
 ### POST /sessions
 

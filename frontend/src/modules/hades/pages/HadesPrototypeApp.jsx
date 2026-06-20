@@ -47,18 +47,24 @@ import { MinionDetailScreen } from "./MinionDetailScreen.jsx";
 import { MinionLogsScreen } from "./MinionLogsScreen.jsx";
 
 import { ChatBubble } from "../components/ChatBubble.js";
-import { buildAssistantReply, buildTestOutput, missingDraftFields } from "../utils/parser.js";
+import { buildTestOutput, missingDraftFields } from "../utils/parser.js";
 import {
-  buildLocalDraftFallback,
   deleteHadesMessages,
   getHadesBootstrap,
   mapBootstrapToHadesState,
   postHadesAssignment,
-  sendGeneralChat,
   postHadesMinion,
   updateMinion,
   postHadesMinionTest
 } from "../services/hadesApi.js";
+import {
+  startHermesSession,
+  sendHermesResponse,
+  uploadHermesMedia,
+  transcribeHermesAudio,
+  synthesizeHermesSpeech,
+  buildHermesInputFromComposer,
+} from "../services/hermesMediaClient.js";
 
 const HadesContext = React.createContext(null);
 
@@ -224,6 +230,13 @@ function HadesProvider({ children }) {
   const [toast, setToast] = React.useState(null);
   const maxSlots = 4;
   const [composerText, setComposerText] = React.useState("");
+  const [hermesSession, setHermesSession] = React.useState(null);
+  const [hermesApiBaseUrl, setHermesApiBaseUrl] = React.useState("");
+  const [profileName, setProfileName] = React.useState("");
+  const [previousResponseId, setPreviousResponseId] = React.useState(null);
+  const [attachments, setAttachments] = React.useState([]);
+  const [isRecording, setIsRecording] = React.useState(false);
+  const [transcript, setTranscript] = React.useState("");
   const [selectedMinionId, setSelectedMinionId] = usePersistentState("hades.selectedMinionId", "");
   const [selectedSocialId, setSelectedSocialId] = usePersistentState("hades.selectedSocialId", "discord");
   const [assignmentCommand, setAssignmentCommand] = usePersistentState("hades.assignmentCommand", "");
@@ -318,6 +331,14 @@ function HadesProvider({ children }) {
       .catch(() => {
         hydratedRef.current = true;
       });
+
+    startHermesSession(accessToken)
+      .then((session) => {
+        setHermesSession(session);
+        if (session.hermesApiBaseUrl) setHermesApiBaseUrl(session.hermesApiBaseUrl);
+        if (session.profileName) setProfileName(session.profileName);
+      })
+      .catch(() => {});
   }, [accessToken]);
 
   React.useEffect(() => {
@@ -564,31 +585,68 @@ function HadesProvider({ children }) {
     }
   }
 
+  async function uploadPendingAttachments() {
+    const pending = attachments.filter((a) => a.status === "pending" && a.file && a.kind !== "image");
+    const uploaded = [];
+    for (const att of pending) {
+      try {
+        const result = await uploadHermesMedia({ profileName, file: att.file }, accessToken);
+        uploaded.push({ ...att, ...result.attachment, status: "uploaded" });
+        setAttachments((prev) => prev.map((a) => (a.id === att.id ? { ...a, status: "uploaded" } : a)));
+      } catch {
+        setAttachments((prev) => prev.map((a) => (a.id === att.id ? { ...a, status: "error" } : a)));
+      }
+    }
+    return uploaded;
+  }
+
   async function sendMessage(messageText, context = "general") {
     const text = messageText.trim();
-    if (!text) return;
+    if (!text && attachments.length === 0) return;
 
     const userMessageId = createId("msg");
+
+    const uploaded = await uploadPendingAttachments();
+    const allAttachments = attachments.filter((a) => a.kind === "image" || a.status === "uploaded");
+    const currentAttachments = allAttachments.map((a) => ({
+      kind: a.kind,
+      name: a.name,
+      url: a.url,
+      dataUrl: a.kind === "image" ? a.dataUrl : undefined,
+      promptPart: a.promptPart,
+      contentType: a.contentType,
+      size: a.size,
+    }));
+
     const userMessage = {
       id: userMessageId,
       role: "user",
       content: text,
+      attachments: currentAttachments,
       status: "queued"
     };
 
     setMessages((current) => [...current, userMessage]);
     setComposerText("");
+    setAttachments([]);
+    setTranscript("");
     setPendingCopy(getPendingCopy(text, context));
     setSending(true);
 
     try {
-      const response = await sendGeneralChat({
-        conversationId: conversationId || undefined,
-        clientMessageId: userMessageId,
-        idempotencyKey: userMessageId,
-        message: text,
-        currentDraft: draft,
+      let response;
+      if (!hermesApiBaseUrl) {
+        throw new Error("Hermes profile API server is not available yet.");
+      }
+
+      const input = await buildHermesInputFromComposer({ text, attachments: currentAttachments });
+      response = await sendHermesResponse({
+        hermesApiBaseUrl,
+        input,
+        conversation: null,
+        previousResponseId,
       }, accessToken);
+      if (response.id) setPreviousResponseId(response.id);
 
       if (response?.conversationId) {
         setConversationId(response.conversationId);
@@ -600,9 +658,9 @@ function HadesProvider({ children }) {
 
       setMessages((current) =>
         current.map((entry) => (entry.id === userMessageId ? { ...entry, status: "completed" } : entry)).concat(normalizeMessage({
-          id: response.assistantMessage?.id || createId("msg"),
+          id: response.assistantMessage?.id || response.id || createId("msg"),
           role: "assistant",
-          content: response.assistantMessage?.content || "Draft updated.",
+          content: response.assistantMessage?.content || response.output_text || response.output?.[0]?.content?.[0]?.text || "Draft updated.",
           status: response.assistantMessage?.status || "completed",
           suggestions: response.assistantMessage?.suggestions || [],
           actions: response.actions || response.assistantMessage?.actions || [],
@@ -616,7 +674,7 @@ function HadesProvider({ children }) {
         }))
       );
     } catch (error) {
-      console.error("[Hades chat] Hermes request failed; using local fallback.", {
+      console.error("[Hades chat] Hermes request failed.", {
         context: context,
         conversationId: conversationId || null,
         clientMessageId: userMessageId,
@@ -627,20 +685,33 @@ function HadesProvider({ children }) {
         responseBody: error?.responseBody || null,
         error,
       });
-      const parsed = buildLocalDraftFallback(text, draft);
-      const assistantReply = buildAssistantReply(parsed);
       setMessages((current) =>
-        current.map((entry) => (entry.id === userMessageId ? { ...entry, status: "completed" } : entry)).concat(normalizeMessage({
+        current.map((entry) => (entry.id === userMessageId ? { ...entry, status: "error" } : entry)).concat(normalizeMessage({
           id: createId("msg"),
           role: "assistant",
-          content: assistantReply.content,
-          status: assistantReply.status,
-          suggestions: assistantReply.suggestions
+          content: error?.message
+            ? `Hermes is not available yet: ${error.message}`
+            : "Hermes is not available yet. Start the profile API server and try again.",
+          status: "error",
+          suggestions: ["Try again after Hermes is online"]
         }))
       );
-      showToast(error?.message ? `Using local fallback: ${error.message}` : "Using local fallback.");
+      showToast("Hermes is unavailable. Start the profile API server and try again.");
     }
     setSending(false);
+  }
+
+  async function playAssistantSpeech(text) {
+    if (!text) return;
+    try {
+      const blob = await synthesizeHermesSpeech({ text }, accessToken);
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      audio.onended = () => URL.revokeObjectURL(url);
+      audio.play();
+    } catch {
+      showToast("Speech synthesis unavailable.");
+    }
   }
 
   async function clearMessages() {
@@ -954,6 +1025,17 @@ function HadesProvider({ children }) {
         activateMinion,
         deactivateMinion,
         maxSlots,
+        hermesSession,
+        hermesApiBaseUrl,
+        profileName,
+        previousResponseId,
+        attachments,
+        setAttachments,
+        isRecording,
+        setIsRecording,
+        transcript,
+        setTranscript,
+        playAssistantSpeech,
         telegramConnection,
         discordConnection,
         githubConnection,

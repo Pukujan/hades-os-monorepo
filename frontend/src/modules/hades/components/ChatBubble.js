@@ -54,6 +54,7 @@ export function ChatBubble({ message, showStamp = true, sendMessage, ProductCard
   const mediaType = message.mediaType || "";
   const mediaAlt = message.mediaAlt || "Media";
   const mediaStatus = message.mediaVerificationStatus;
+  const attachments = message.attachments || [];
 
   function renderMedia() {
     if (!mediaUrl) return null;
@@ -80,11 +81,46 @@ export function ChatBubble({ message, showStamp = true, sendMessage, ProductCard
     return React.createElement("a", { key: "download", href: mediaUrl, target: "_blank", rel: "noopener noreferrer", className: "chat-download" }, "Download file");
   }
 
+  function renderAttachments() {
+    if (!attachments.length) return null;
+    return React.createElement("div", { className: "chat-attachment-list", key: "attachments" },
+      attachments.map((att, i) => {
+        const key = `att-${i}`;
+        if (att.kind === "image" && att.url) {
+          return React.createElement("img", {
+            key, src: att.url, alt: att.name || "Image",
+            className: "chat-media",
+            onClick: () => window.open(att.url, "_blank", "noopener,noreferrer"),
+          });
+        }
+        if (att.kind === "video" && att.url) {
+          return React.createElement("video", { key, src: att.url, controls: true, className: "chat-video", alt: att.name });
+        }
+        if (att.kind === "audio" && att.url) {
+          return React.createElement("audio", { key, src: att.url, controls: true, className: "chat-audio" });
+        }
+        return React.createElement("div", { key, className: "chat-attachment-card" },
+          React.createElement("span", { className: "chat-attachment-card-icon" },
+            att.kind === "document" ? "📄" : att.kind === "video" ? "🎬" : att.kind === "audio" ? "🎵" : "📎"
+          ),
+          React.createElement("span", { className: "chat-attachment-card-name" }, att.name || "file"),
+          React.createElement("span", { className: "chat-attachment-card-size" },
+            att.size ? `${(att.size / 1024).toFixed(1)} KB` : ""
+          ),
+          att.url
+            ? React.createElement("a", { href: att.url, target: "_blank", rel: "noopener noreferrer", className: "chat-download", download: true }, "Download file")
+            : null,
+        );
+      })
+    );
+  }
+
   return React.createElement("div", { className },
     React.createElement("span", { dangerouslySetInnerHTML: { __html: renderMarkdown(message.content) } }),
     showStamp ? React.createElement("span", { className: "stamp", key: "stamp" }, message.createdAt || "Just now") : null,
     message.status === "queued" ? React.createElement("small", { key: "pending" }, "Pending sync") : null,
     renderMedia(),
+    renderAttachments(),
     message.cards?.length > 0 ? React.createElement("div", { className: "hades-message-cards", key: "cards" },
       message.cards.map((card, i) => {
         if (card.type === "product_result" && ProductCard) return React.createElement(ProductCard, { key: `card-${i}`, card });

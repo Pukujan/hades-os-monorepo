@@ -274,6 +274,8 @@ describe("Hermes profile API session routing and auth translation", () => {
     assert.doesNotMatch(writtenConfig, /SUPABASE_JWT_SECRET/);
     assert.equal(JSON.stringify(profile).includes("profile-static-secret"), false);
     assert.ok(profile.apiServerKeyHash);
+    assert.equal(profile.apiServerKey, "profile-static-secret");
+    assert.equal(Object.keys(profile).includes("apiServerKey"), false);
   });
 
   test("profile provisioner sanitizes tenant/user identifiers before CLI and filesystem use", async () => {
@@ -394,6 +396,39 @@ describe("Hermes profile API session routing and auth translation", () => {
     assert.equal(forwarded[0].init.headers.accept, "text/event-stream");
     assert.equal(forwarded[0].init.headers["x-hermes-session-id"], "transcript-alpha");
     assert.equal(forwarded[0].init.headers["x-hermes-session-key"], "agent:main:webui:dm:user-42");
+    assert.equal(JSON.stringify(response).includes("profile-static-secret"), false);
+  });
+
+  test("edge auth proxy fails closed when profile API server is unavailable", async () => {
+    const { createHermesEdgeAuthProxy } = await loadEdgeAuthProxy();
+    const proxy = createHermesEdgeAuthProxy({
+      auth: {
+        verifyEdgeRequest: async () => ({ userId: "user_a", tenantId: "tenant_a" }),
+      },
+      profileRouter: {
+        internalTargetForProfile: async () => ({
+          profileName: "tenant_a_user_a",
+          baseUrl: "http://127.0.0.1:8657",
+        }),
+      },
+      apiServerKeyVault: {
+        getApiServerKey: async () => "profile-static-secret",
+      },
+      fetch: async () => {
+        throw new Error("ECONNREFUSED");
+      },
+    });
+
+    const response = await proxy.forward({
+      profileName: "tenant_a_user_a",
+      path: "/v1/responses",
+      method: "POST",
+      headers: { authorization: "Bearer supabase-user-jwt" },
+      body: '{"input":"hello"}',
+    });
+
+    assert.equal(response.status, 503);
+    assert.equal(JSON.stringify(response).includes("edge_ready"), false);
     assert.equal(JSON.stringify(response).includes("profile-static-secret"), false);
   });
 });

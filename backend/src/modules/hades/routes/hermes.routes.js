@@ -1,7 +1,9 @@
 import { Router } from "express";
 import fs from "node:fs";
 import path from "node:path";
+import crypto from "node:crypto";
 import { mkdir, writeFile, readFile } from "node:fs/promises";
+import multer from "multer";
 
 function asyncRoute(handler) {
   return (req, res, next) => {
@@ -28,6 +30,7 @@ export function createHermesSessionRoutes({
   hermesFilesystem,
   edgeAuthProxy,
   profileProvisioner,
+  voiceService,
 } = {}) {
   const router = Router();
 
@@ -136,7 +139,7 @@ export function createHermesSessionRoutes({
           apiHost: "127.0.0.1",
           apiPort: parseInt(provisioned.apiBaseUrl.split(":")[2], 10) || 8657,
           edgeBaseUrl: `${process.env.HERMES_PUBLIC_BASE_URL || "/api/hades/hermes"}/${provisioned.profileName}/v1`,
-          apiServerKey: "",
+          apiServerKey: provisioned.apiServerKey,
           gatewayStatus: "provisioned",
         });
         registered = upserted;
@@ -331,6 +334,226 @@ export function createHermesSessionRoutes({
       } else {
         res.json({ status: "restart_skipped", reason: "no supervisor" });
       }
+    })
+  );
+
+  // --- Voice (TTS / STT) ---
+
+  router.post(
+    "/speak",
+    asyncRoute(async (req, res) => {
+      if (!voiceService) {
+        return res.status(503).json({ error: "voiceService not configured" });
+      }
+      const { text, voice } = req.body || {};
+      if (!text) {
+        return res.status(400).json({ error: "text is required" });
+      }
+      const audioBuffer = await voiceService.synthesizeSpeech({ text, voice });
+      res.set("Content-Type", "audio/mpeg");
+      res.send(audioBuffer);
+    })
+  );
+
+  router.post(
+    "/transcribe",
+    asyncRoute(async (req, res) => {
+      if (!voiceService) {
+        return res.status(503).json({ error: "voiceService not configured" });
+      }
+      const { audio, filename } = req.body || {};
+      if (!audio) {
+        return res.status(400).json({ error: "audio is required" });
+      }
+      const audioBuffer = Buffer.from(audio, "base64");
+      const transcript = await voiceService.transcribeAudio(filename || "recording.wav", audioBuffer);
+      res.json({ text: transcript });
+    })
+  );
+
+  // --- Media upload ---
+
+  const MEDIA_MAX_BYTES = parseInt(process.env.HERMES_MEDIA_MAX_BYTES || String(50 * 1024 * 1024), 10);
+
+  const ALLOWED_MEDIA_TYPES = {
+    "image/png": "image", "image/jpeg": "image", "image/gif": "image",
+    "image/webp": "image", "image/bmp": "image", "image/tiff": "image", "image/svg+xml": "image",
+    "audio/mpeg": "audio", "audio/wav": "audio", "audio/ogg": "audio",
+    "audio/mp4": "audio", "audio/opus": "audio", "audio/flac": "audio", "audio/aac": "audio", "audio/webm": "audio",
+    "video/mp4": "video", "video/quicktime": "video", "video/webm": "video", "video/x-matroska": "video", "video/avi": "video", "video/x-msvideo": "video",
+    "application/pdf": "document",
+    "text/plain": "document", "text/markdown": "document", "text/csv": "document",
+    "application/json": "document", "text/xml": "document", "text/html": "document",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "document",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "document",
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation": "document",
+    "application/zip": "document", "application/x-rar-compressed": "document",
+    "application/x-7z-compressed": "document", "application/gzip": "document", "application/x-bzip2": "document",
+  };
+
+  const EXT_TO_MIME = {
+    png: "image/png", jpg: "image/jpeg", jpeg: "image/jpeg", gif: "image/gif",
+    webp: "image/webp", bmp: "image/bmp", tiff: "image/tiff", tif: "image/tiff", svg: "image/svg+xml",
+    mp3: "audio/mpeg", wav: "audio/wav", ogg: "audio/ogg", m4a: "audio/mp4",
+    opus: "audio/opus", flac: "audio/flac", aac: "audio/aac", weba: "audio/webm",
+    mp4: "video/mp4", mov: "video/quicktime", webm: "video/webm", mkv: "video/x-matroska", avi: "video/x-msvideo",
+    pdf: "application/pdf",
+    txt: "text/plain", md: "text/markdown", csv: "text/csv",
+    json: "application/json", xml: "text/xml", html: "text/html", htm: "text/html",
+    docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    zip: "application/zip", rar: "application/x-rar-compressed", "7z": "application/x-7z-compressed",
+    tar: "application/x-tar", gz: "application/gzip", bz2: "application/x-bzip2",
+    epub: "application/epub+zip", apk: "application/vnd.android.package-archive", ipa: "application/octet-stream",
+  };
+
+  function getProfilesRoot() {
+    return process.env.HERMES_PROFILES_ROOT || path.join(process.env.HERMES_HOME || path.join(process.cwd(), ".hermes-home"), "profiles");
+  }
+
+  function classifyMedia(mimeType, ext) {
+    if (ALLOWED_MEDIA_TYPES[mimeType]) return ALLOWED_MEDIA_TYPES[mimeType];
+    const fallbackMime = EXT_TO_MIME[ext];
+    if (fallbackMime && ALLOWED_MEDIA_TYPES[fallbackMime]) return ALLOWED_MEDIA_TYPES[fallbackMime];
+    return null;
+  }
+
+  function sanitizeFilename(name) {
+    return name.replace(/[^a-zA-Z0-9._-]/g, "_").replace(/\.\./g, "").slice(0, 255);
+  }
+
+  const mediaUpload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: MEDIA_MAX_BYTES },
+  });
+
+  router.post(
+    "/:profileName/media",
+    mediaUpload.single("file"),
+    asyncRoute(async (req, res) => {
+      const { profileName } = req.params;
+      const auth = resolveAuth(req);
+      const expectedProfile = `${auth.tenantId}_${auth.userId}`;
+      if (profileName !== expectedProfile) {
+        return res.status(403).json({ error: "profile ownership mismatch" });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ error: "file field required" });
+      }
+
+      const originalName = req.file.originalname || "unnamed";
+      const ext = path.extname(originalName).replace(/^\./, "").toLowerCase();
+      const mimeType = req.file.mimetype || EXT_TO_MIME[ext] || "application/octet-stream";
+      const kind = classifyMedia(mimeType, ext);
+      if (!kind) {
+        return res.status(415).json({ error: `unsupported media type: ${mimeType} (${ext})` });
+      }
+
+      const profilesRoot = getProfilesRoot();
+      const profileDir = path.join(profilesRoot, profileName);
+      const cacheDir = path.join(profileDir, "cache", "media");
+      await mkdir(cacheDir, { recursive: true });
+
+      const attachmentId = `att_${crypto.randomUUID()}`;
+      const safeName = sanitizeFilename(originalName) || `unnamed.${ext}`;
+      const storedName = `${attachmentId}.${ext}`;
+      const filePath = path.join(cacheDir, storedName);
+      await writeFile(filePath, req.file.buffer);
+
+      const attachment = {
+        id: attachmentId,
+        kind,
+        name: safeName,
+        contentType: mimeType,
+        size: req.file.size,
+        profileName,
+        agentPath: filePath,
+        url: `/api/hades/hermes/${profileName}/media/${attachmentId}`,
+      };
+
+      const metaPath = path.join(cacheDir, `${attachmentId}.meta.json`);
+      await writeFile(metaPath, JSON.stringify(attachment, null, 2));
+
+      let extractedText = "";
+      if (kind === "document" && mimeType === "text/plain" || mimeType === "text/markdown" || mimeType === "text/csv" || mimeType === "application/json") {
+        extractedText = req.file.buffer.toString("utf8").slice(0, 10000);
+      } else if (kind === "document" && mimeType === "application/pdf") {
+        try {
+          const pdfParse = (await import("pdf-parse")).default;
+          const pdfData = await pdfParse(req.file.buffer);
+          extractedText = pdfData.text.slice(0, 10000);
+        } catch {
+          extractedText = "[PDF text extraction unavailable]";
+        }
+      }
+
+      const promptPart = `User attached ${safeName} (${kind}, ${(req.file.size / 1024).toFixed(1)} KB)`;
+      attachment.extractedText = extractedText;
+      attachment.promptPart = extractedText ? `${promptPart}; extracted text: ${extractedText.slice(0, 500)}` : promptPart;
+
+      res.status(201).json({ attachment });
+    })
+  );
+
+  // --- Media resolver (normalizes assistant MEDIA tags into attachments) ---
+
+  function parseMediaTags(text) {
+    const tags = [];
+    if (!text) return tags;
+    const re = /MEDIA:([^\s\n]+)/g;
+    let match;
+    while ((match = re.exec(text)) !== null) {
+      tags.push(match[1]);
+    }
+    return tags;
+  }
+
+  router.get(
+    "/:profileName/media/:attachmentId",
+    asyncRoute(async (req, res) => {
+      const { profileName, attachmentId } = req.params;
+      const auth = resolveAuth(req);
+      const expectedProfile = `${auth.tenantId}_${auth.userId}`;
+      if (profileName !== expectedProfile) {
+        return res.status(403).json({ error: "profile ownership mismatch" });
+      }
+
+      if (attachmentId.includes("..") || attachmentId.includes("/") || attachmentId.includes("\\")) {
+        return res.status(400).json({ error: "invalid attachment id" });
+      }
+
+      const profilesRoot = getProfilesRoot();
+      const cacheDir = path.join(profilesRoot, profileName, "cache", "media");
+      const dir = await mkdir(cacheDir, { recursive: true }).then(() => cacheDir);
+
+      const allFiles = fs.readdirSync(dir);
+      const metaFile = allFiles.find((f) => f.startsWith(attachmentId) && f.endsWith(".meta.json"));
+      if (!metaFile) {
+        return res.status(404).json({ error: "attachment not found" });
+      }
+
+      const meta = JSON.parse(fs.readFileSync(path.join(dir, metaFile), "utf8"));
+      const ext = path.extname(meta.name || "").replace(/^\./, "").toLowerCase() || "bin";
+      const dataFile = allFiles.find((f) => f.startsWith(attachmentId) && f !== metaFile);
+      if (!dataFile) {
+        return res.status(404).json({ error: "attachment data not found" });
+      }
+
+      const filePath = path.join(dir, dataFile);
+      const resolved = path.resolve(filePath);
+      const allowedRoot = path.resolve(profilesRoot);
+      if (!resolved.startsWith(allowedRoot)) {
+        return res.status(403).json({ error: "path traversal detected" });
+      }
+
+      const contentType = meta.contentType || EXT_TO_MIME[ext] || "application/octet-stream";
+      const disposition = meta.kind === "image" || meta.kind === "video" || meta.kind === "audio" ? "inline" : "attachment";
+      res.set("Content-Type", contentType);
+      res.set("Content-Disposition", `${disposition}; filename="${meta.name || "download"}"`);
+      res.set("Content-Length", String(fs.statSync(filePath).size));
+      fs.createReadStream(filePath).pipe(res);
     })
   );
 

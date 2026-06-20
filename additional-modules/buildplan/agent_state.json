@@ -105,6 +105,22 @@
                "base64ImageExtraction":  {
                                              "status":  "completed",
                                              "summary":  "Extracted 3 base64 PNGs (bg-frame-0, bg-frame-1, bg-frame-2) from loginTemplate.html to frontend/public/assets/ as static files. Updated HTML src to /assets/bg-frame-{0,1,2}.png. Fixed loginTemplateParts.js regex to match any src (not just data:image). Bundle dropped from 10.9 MB to 474 KB (96% reduction). Build succeeds. All 391 tests pass."
-                                         }
-               }
+                                         },
+               "hadesHermesMediaFrontendHandoff":  {
+                                             "status":  "handoff_ready",
+                                             "summary":  "Created Hades/Hermes media frontend planning packet after reading Hermes docs. Added docs/hades/HERMES_MEDIA_FRONTEND_INTEGRATION.md, study log 006, plan log 013, handoff 022, scoped red contract tests, and env-gated media E2E proof. Red command npm run test:hades-hermes-media-red fails 7/7 as intended until profile media config, media upload/resolver routes, frontend Hermes media client, composer, app wiring, and attachment rendering exist. E2E command npm run test:hades-hermes-media-e2e skips unless HADES_HERMES_MEDIA_E2E=1."
+                                         },
+                "hadesHermesMediaFixtures": {
+                                              "status":  "completed",
+                                              "summary":  "Added permanent tracked fixtures under file-exchange/hermes-media-fixtures: sample-image.png, sample-audio.wav, sample-video.avi, sample-document.pdf, plus README.md warning not to delete as cleanup. Added scripts/generate-hermes-media-fixtures.mjs and npm run generate:hades-media-fixtures; generator is deterministic and does not remove neighboring files. Updated media E2E proof to default to these fixtures, including PDF and video upload coverage."
+                                          },
+                "hadesHermesMediaFrontend": {
+                                              "status":  "completed",
+                                              "summary":  "Implemented full media frontend integration. Backend: profile config (GROQ_API_KEY, STT_GROQ_MODEL, stt/tts/vision/openrouter, media toolsets), POST /:profileName/media upload route with multer (MIME/extension validation, path traversal guard, text/PDF extraction), GET /:profileName/media/:attachmentId resolver (MEDIA tag parser, stream download, cross-profile protection). Frontend: hermesMediaClient.js (startHermesSession, sendHermesResponse, uploadHermesMedia, transcribeHermesAudio, synthesizeHermesSpeech, buildHermesInputFromComposer), HermesMediaComposer.jsx (attach/drop/paste files, mic recording, attachment chips, transcript preview), ChatBubble.js attachment rendering (image/video/audio inline, document download cards, legacy mediaUrl preservation), HadesPrototypeApp.jsx Hermes session bootstrap, Hermes /v1/responses send path with attachment upload before send, TTS playback. All 7/7 contract tests passing, 11/11 media verification tests passing, 18/18 peer-model tests passing, E2E skips cleanly."
+                                          },
+                "hadesHermesNoLegacyFallbackGateway": {
+                                              "status":  "completed",
+                                              "summary":  "Removed silent legacy chat fallback from frontend Hermes chat path: HadesPrototypeApp no longer imports/calls sendGeneralChat or local draft fallback on Hermes errors; UI returns explicit Hermes-unavailable/error message. Added no-fallback contract to scripts/hades-hermes-media-contract.tdd.test.mjs. Added createHermesProfileGatewayProcessManager with bearer-capable health check + spawn of `hermes -p <profileName> gateway`, wired into createHermesProfileSessionBroker and index.js so session bootstrap verifies/starts the profile gateway before returning hermesApiBaseUrl. Provisioner now exposes raw API_SERVER_KEY only as a non-enumerable server-side property so registry/vault can inject it while JSON responses stay secret-free. Edge auth proxy now fails closed with 503 instead of fake 200 edge_ready when upstream Hermes is down. Added unit tests for no-spawn when healthy, spawn+health wait, broker gateway readiness, non-serialized API key access, and edge proxy fail-closed behavior."
+                                          }
+                }
 }

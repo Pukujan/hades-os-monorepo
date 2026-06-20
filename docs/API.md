@@ -67,3 +67,5 @@
 | POST | `/api/hades/proof/snapshot` | hades | Admin-only: trigger profile state snapshot and return metadata |
 | POST | `/api/hades/proof/restart` | hades | Admin-only: trigger service restart (Docker proof) |
 | GET | `/api/hades/state` | hades | List Hermes workspace state objects |
+| POST | `/api/hades/speak` | hades | Text-to-speech: synthesize speech from text via edge-tts |
+| POST | `/api/hades/transcribe` | hades | Speech-to-text: transcribe audio via Groq Whisper API |
