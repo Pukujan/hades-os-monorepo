@@ -1,14 +1,14 @@
 {
   "hardLimit": 64000,
-  "currentUsage": 5400,
-  "remaining": 58600,
+  "currentUsage": 2500,
+  "remaining": 61500,
   "warningAt": 51200,
   "compactAt": 57600,
   "stopAt": 62400,
   "lastCompactedAt": null,
   "compactionStrategy": "summarize completed work, preserve current phase, target files, failing tests, blockers",
-  "sessionStart": "2026-06-19T22:48:40.246+00:00",
-  "sessionEnd": "2026-06-20T06:30:17.858+00:00",
+  "sessionStart": "2026-06-20T08:00:12.082+00:00",
+  "sessionEnd": "2026-06-20T08:23:57.351+00:00",
   "history": [
     {
       "endedAt": "2026-06-12T16:33:56.160+00:00",
@@ -597,6 +597,24 @@
       "peakUsage": 5400,
       "reason": "archive_session",
       "slug": "telegram-token-wired-session-broker"
+    },
+    {
+      "endedAt": "2026-06-20T08:10:40.932+00:00",
+      "peakUsage": 0,
+      "reason": "archive_session",
+      "slug": "hermes-profile-soul-isolation-fix"
+    },
+    {
+      "endedAt": "2026-06-20T08:13:13.521+00:00",
+      "peakUsage": 0,
+      "reason": "archive_session",
+      "slug": "hermes-profile-soul-isolation-fix"
+    },
+    {
+      "endedAt": "2026-06-20T08:23:57.351+00:00",
+      "peakUsage": 2500,
+      "reason": "archive_session",
+      "slug": "daytona-modal-fastapi-study-plan"
     }
   ]
 }

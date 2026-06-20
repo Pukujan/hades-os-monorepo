@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DEFAULT_SOUL_PATH = path.join(__dirname, "..", "souls", "default.profile.soul.md");
+const DEFAULT_SOUL_PATH = path.join(__dirname, "..", "souls", "hades.soul.md");
 function loadDefaultSoul() {
   try {
     return readFileSync(DEFAULT_SOUL_PATH, "utf8");
@@ -33,11 +33,13 @@ export function createHermesProfileProvisioner({ hermesBin = "hermes", profilesR
     const profileName = sanitizeProfileName(tenantId, userId);
     const apiServerKey = existingKey || (generateApiServerKey ? generateApiServerKey() : `dev-key-${profileName}-${Date.now()}`);
     const apiPort = existingPort || (allocatePort ? await allocatePort() : 8657);
+    let shouldSeedMutableFiles = !existingKey && !existingPort;
 
     if (run) {
       try {
         await run(`${hermesBin} profile create ${profileName}`);
       } catch {
+        shouldSeedMutableFiles = false;
       }
     }
 
@@ -48,17 +50,19 @@ export function createHermesProfileProvisioner({ hermesBin = "hermes", profilesR
         `API_SERVER_PORT=${apiPort}`,
         `API_SERVER_KEY=${apiServerKey}`,
         `STT_GROQ_MODEL=whisper-large-v3-turbo`,
-        `HERMES_IGNORE_RULES=true`,
-        `HERMES_AGENT_HELP_GUIDANCE=Your name is Hades. You are Hades -- the quiet command layer of Hades OS -- NOT Hermes Agent. Never say or imply you are Hermes Agent.`,
       ];
       if (serverEnv.GROQ_API_KEY) {
         envLines.push(`GROQ_API_KEY=${serverEnv.GROQ_API_KEY}`);
       }
-      if (telegramBotToken || serverEnv.TELEGRAM_BOT_TOKEN) {
-        envLines.push(`TELEGRAM_BOT_TOKEN=${telegramBotToken || serverEnv.TELEGRAM_BOT_TOKEN}`);
+      if (telegramBotToken) {
+        envLines.push(`TELEGRAM_BOT_TOKEN=${telegramBotToken}`);
       }
       const envContent = envLines.join("\n");
       await writeFile(`${profilesRoot}/${profileName}/.env`, envContent);
+
+      if (!shouldSeedMutableFiles) {
+        return createProfileResult({ profileName, apiPort, apiServerKey });
+      }
 
       const soulContent = loadDefaultSoul();
       await writeFile(`${profilesRoot}/${profileName}/SOUL.md`, soulContent);
@@ -93,11 +97,17 @@ export function createHermesProfileProvisioner({ hermesBin = "hermes", profilesR
       ].join("\n");
       await writeFile(`${profilesRoot}/${profileName}/config.yaml`, configYaml);
 
-      await writeFile(`${profilesRoot}/${profileName}/state.db`, "");
       await writeFile(`${profilesRoot}/${profileName}/sessions/.gitkeep`, "");
       await writeFile(`${profilesRoot}/${profileName}/memories/.gitkeep`, "");
     }
 
+    return createProfileResult({ profileName, apiPort, apiServerKey });
+  }
+
+  return { ensureProfile };
+}
+
+function createProfileResult({ profileName, apiPort, apiServerKey }) {
     const profile = {
       profileName,
       apiBaseUrl: `http://127.0.0.1:${apiPort}`,
@@ -110,7 +120,4 @@ export function createHermesProfileProvisioner({ hermesBin = "hermes", profilesR
       writable: false,
     });
     return profile;
-  }
-
-  return { ensureProfile };
 }

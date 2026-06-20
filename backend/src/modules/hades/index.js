@@ -139,7 +139,6 @@ export async function register(app, context) {
       HERMES_DEFAULT_MODEL: process.env.HERMES_DEFAULT_MODEL,
       HERMES_DEFAULT_PROVIDER: process.env.HERMES_DEFAULT_PROVIDER,
       OPENROUTER_MODEL: process.env.OPENROUTER_MODEL,
-      TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
     },
     run: async (command) => {
       const { execSync } = await import("node:child_process");
@@ -462,7 +461,7 @@ export async function register(app, context) {
       const { existsSync } = await import("node:fs");
       const { fileURLToPath } = await import("node:url");
       const dirname = path.dirname(fileURLToPath(import.meta.url));
-      const defaultSoulPath = path.join(dirname, "souls", "default.profile.soul.md");
+      const defaultSoulPath = path.join(dirname, "souls", "hades.soul.md");
       if (!existsSync(defaultSoulPath)) return;
       const newSoul = await readFile2(defaultSoulPath, "utf8");
       const entries = await listDir(profilesRoot, { withFileTypes: true }).catch(() => []);

@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { AppError } from "../../../shared/http/errors.js";
 
 export function createHermesProfileSessionBroker({ auth, profileRegistry, profileRouter, routingToken, profileGatewayManager, logger = console } = {}) {
   async function startSession({ supabaseJwt, origin } = {}) {
@@ -6,6 +7,9 @@ export function createHermesProfileSessionBroker({ auth, profileRegistry, profil
     const identity = proofToken && supabaseJwt === proofToken
       ? { userId: "edge-user", tenantId: "edge-tenant" }
       : await auth.verifySupabaseJwt(supabaseJwt);
+    if (!identity?.userId || identity.userId === "anonymous" || !identity?.tenantId || identity.tenantId === "anonymous") {
+      throw new AppError("Missing authentication", 401, "missing_auth");
+    }
     const profile = await profileRegistry.ensureProfile({
       userId: identity.userId,
       tenantId: identity.tenantId,

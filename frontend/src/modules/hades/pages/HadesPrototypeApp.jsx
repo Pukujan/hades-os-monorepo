@@ -28,6 +28,7 @@ import {
 } from "../utils/hadesData.js";
 import { saveTelegramToken, saveDiscordToken, saveGitHubToken, getSocialConnections, createInstagramAuthLink, saveInstagramConnection, deleteInstagramConnection, deleteTelegramToken, deleteDiscordToken } from "../services/hadesApi.js";
 import { getPendingCopy } from "../utils/chatPendingCopy.js";
+import { createHadesStorageKey } from "../utils/persistentStateKeys.js";
 import { TelegramSetupCard } from "../components/TelegramSetupCard.jsx";
 import { DiscordSetupCard } from "../components/DiscordSetupCard.jsx";
 import { GitHubSetupCard } from "../components/GitHubSetupCard.jsx";
@@ -112,8 +113,14 @@ function writeJson(key, value) {
 
 function usePersistentState(key, fallback) {
   const [value, setValue] = React.useState(() => readJson(key, fallback));
+  const storageKeyRef = React.useRef(key);
 
   React.useEffect(() => {
+    if (storageKeyRef.current !== key) {
+      storageKeyRef.current = key;
+      setValue(readJson(key, fallback));
+      return;
+    }
     writeJson(key, value);
   }, [key, value]);
 
@@ -220,29 +227,37 @@ function getScreenTitle(screen) {
 }
 
 function HadesProvider({ children }) {
+  const { session, signOut } = useAuth();
+  const accessToken = session?.access_token;
+  const userStorageId = session?.user?.id || "signed-out";
+  const scopedStorageKey = React.useCallback(
+    (key) => createHadesStorageKey(key, { userId: userStorageId }),
+    [userStorageId],
+  );
   const [theme, setThemeState] = usePersistentState("hades.theme", "ember");
-  const [messages, setMessages] = usePersistentState("hades.chatMessages", createInitialMessages());
-  const [draft, setDraft] = usePersistentState("hades.draft", createEmptyDraft());
-  const [minions, setMinions] = usePersistentState("hades.minions", []);
-  const [inbox, setInbox] = usePersistentState("hades.inboxAlerts", createInitialInbox());
-  const [assignments, setAssignments] = usePersistentState("hades.assignments", []);
-  const [levelState, setLevelState] = usePersistentState("hades.levelState", null);
-  const [conversationId, setConversationId] = usePersistentState("hades.conversationId", null);
+  const [messages, setMessages] = usePersistentState(scopedStorageKey("hades.chatMessages"), createInitialMessages());
+  const [draft, setDraft] = usePersistentState(scopedStorageKey("hades.draft"), createEmptyDraft());
+  const [minions, setMinions] = usePersistentState(scopedStorageKey("hades.minions"), []);
+  const [inbox, setInbox] = usePersistentState(scopedStorageKey("hades.inboxAlerts"), createInitialInbox());
+  const [assignments, setAssignments] = usePersistentState(scopedStorageKey("hades.assignments"), []);
+  const [levelState, setLevelState] = usePersistentState(scopedStorageKey("hades.levelState"), null);
+  const [conversationId, setConversationId] = usePersistentState(scopedStorageKey("hades.conversationId"), null);
   const [toast, setToast] = React.useState(null);
   const maxSlots = 4;
   const [composerText, setComposerText] = React.useState("");
   const [hermesSession, setHermesSession] = React.useState(null);
   const [hermesApiBaseUrl, setHermesApiBaseUrl] = React.useState("");
   const [profileName, setProfileName] = React.useState("");
-  const [previousResponseId, setPreviousResponseId] = React.useState(null);
+  const [previousResponseId, setPreviousResponseId] = usePersistentState(scopedStorageKey("hades.previousResponseId"), null);
+  const [hermesConversationKey, setHermesConversationKey] = usePersistentState(scopedStorageKey("hades.hermesConversationKey"), null);
   const [attachments, setAttachments] = React.useState([]);
   const [isRecording, setIsRecording] = React.useState(false);
   const [transcript, setTranscript] = React.useState("");
   const [isUploading, setIsUploading] = React.useState(false);
-  const [selectedMinionId, setSelectedMinionId] = usePersistentState("hades.selectedMinionId", "");
-  const [selectedSocialId, setSelectedSocialId] = usePersistentState("hades.selectedSocialId", "discord");
-  const [assignmentCommand, setAssignmentCommand] = usePersistentState("hades.assignmentCommand", "");
-  const [futurePlanCache, setFuturePlanCache] = usePersistentState("hades.futurePlanCache", [
+  const [selectedMinionId, setSelectedMinionId] = usePersistentState(scopedStorageKey("hades.selectedMinionId"), "");
+  const [selectedSocialId, setSelectedSocialId] = usePersistentState(scopedStorageKey("hades.selectedSocialId"), "discord");
+  const [assignmentCommand, setAssignmentCommand] = usePersistentState(scopedStorageKey("hades.assignmentCommand"), "");
+  const [futurePlanCache, setFuturePlanCache] = usePersistentState(scopedStorageKey("hades.futurePlanCache"), [
     {
       id: "plan-auth",
       title: "Wire backend auth verification",
@@ -259,11 +274,11 @@ function HadesProvider({ children }) {
   const defaultConnection = (provider) => ({
     status: SOCIAL_LINKS.find((s) => s.provider === provider)?.status || "disconnected",
   });
-  const [telegramConnection, setTelegramConnection] = usePersistentState("hades.telegramConnection", defaultConnection("telegram"));
-  const [discordConnection, setDiscordConnection] = usePersistentState("hades.discordConnection", defaultConnection("discord"));
-  const [githubConnection, setGithubConnection] = usePersistentState("hades.githubConnection", defaultConnection("github"));
-  const [instagramConnection, setInstagramConnection] = usePersistentState("hades.instagramConnection", defaultConnection("instagram"));
-  const [notifications, setNotifications] = usePersistentState("hades.notifications", [
+  const [telegramConnection, setTelegramConnection] = usePersistentState(scopedStorageKey("hades.telegramConnection"), defaultConnection("telegram"));
+  const [discordConnection, setDiscordConnection] = usePersistentState(scopedStorageKey("hades.discordConnection"), defaultConnection("discord"));
+  const [githubConnection, setGithubConnection] = usePersistentState(scopedStorageKey("hades.githubConnection"), defaultConnection("github"));
+  const [instagramConnection, setInstagramConnection] = usePersistentState(scopedStorageKey("hades.instagramConnection"), defaultConnection("instagram"));
+  const [notifications, setNotifications] = usePersistentState(scopedStorageKey("hades.notifications"), [
     {
       id: "note-discord",
       mode: "manual",
@@ -288,16 +303,13 @@ function HadesProvider({ children }) {
     }
   ]);
   const [detailMinionId, setDetailMinionId] = React.useState(null);
-  const [forgeEditMinionId, setForgeEditMinionId] = usePersistentState("hades.forgeEditMinionId", null);
+  const [forgeEditMinionId, setForgeEditMinionId] = usePersistentState(scopedStorageKey("hades.forgeEditMinionId"), null);
   const [sending, setSending] = React.useState(false);
   const [pendingCopy, setPendingCopy] = React.useState("Hades is thinking.");
   const [notificationOpen, setNotificationOpen] = React.useState(false);
   const timersRef = React.useRef([]);
   const toastTimerRef = React.useRef(null);
   const hydratedRef = React.useRef(false);
-  const { session, signOut } = useAuth();
-  const accessToken = session?.access_token;
-
   React.useEffect(() => {
     document.documentElement.dataset.theme = theme;
     writeJson("hades.theme", theme);
@@ -668,10 +680,14 @@ function HadesProvider({ children }) {
       }
 
       const input = await buildHermesInputFromComposer({ text, attachments: currentAttachments });
+      const activeHermesConversationKey = hermesConversationKey || conversationId || `hades-web-${context}-${userStorageId}`;
+      if (!hermesConversationKey) {
+        setHermesConversationKey(activeHermesConversationKey);
+      }
       response = await sendHermesResponse({
         hermesApiBaseUrl,
         input,
-        conversation: null,
+        conversation: activeHermesConversationKey,
         previousResponseId,
       }, accessToken);
       if (response.id) setPreviousResponseId(response.id);
@@ -749,6 +765,8 @@ function HadesProvider({ children }) {
       } catch { /* best effort */ }
     }
     setMessages([]);
+    setPreviousResponseId(null);
+    setHermesConversationKey(createId("hermes-conv"));
   }
 
   async function runDraftTest() {

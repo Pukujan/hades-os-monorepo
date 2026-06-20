@@ -40,6 +40,7 @@ export function createHermesProfileGatewayProcessManager({
   hermesHome = "",
   env = process.env,
   spawn,
+  fetch: fetcher,
   healthTimeoutMs = 30000,
   healthPollMs = 500,
   logger = console,
@@ -50,7 +51,14 @@ export function createHermesProfileGatewayProcessManager({
 
   async function isHealthy(apiBaseUrl, apiServerKey) {
     try {
-      const result = await httpGet(`${normalizeBaseUrl(apiBaseUrl)}/health`);
+      const healthUrl = `${normalizeBaseUrl(apiBaseUrl)}/health`;
+      if (typeof fetcher === "function") {
+        const result = await fetcher(healthUrl, {
+          headers: apiServerKey ? { authorization: `Bearer ${apiServerKey}` } : {},
+        });
+        return result?.ok === true;
+      }
+      const result = await httpGet(healthUrl);
       return result?.ok === true;
     } catch {
       return false;

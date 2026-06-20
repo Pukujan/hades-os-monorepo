@@ -38,12 +38,12 @@ export function getPendingCopy(message, conversationType) {
     return "Checking the wire...";
   }
 
-  return "Hermes is thinking.";
+  return "Hades is thinking.";
 }
 
 export function getFallbackPendingCopy(conversationType) {
   if (conversationType === "forge") {
     return "Heating the forge.";
   }
-  return "Hermes is thinking.";
+  return "Hades is thinking.";
 }

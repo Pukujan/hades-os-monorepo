@@ -157,6 +157,14 @@
                      "telegramTokenWiredSessionBroker": {
                          "status": "completed",
                          "summary": "Wired per-user Telegram bot token from Supabase telegram_connections into provisioner ensureProfile. Added findRuntimeTokenByUserId() to telegramConnectionRepository. profileRegistry.ensureProfile in index.js now looks up Telegram token by userId+tenantId before calling provisioner, passes telegramBotToken. Provisioner writes TELEGRAM_BOT_TOKEN to profile .env. Hades remains the token loader — Hermes handles Telegram natively via polling once token is in profile env. All 19 peer-model + 10 telegram repo tests pass. Deployed and E2E verified."
+                     },
+                     "hadesHermesProfileSoulIsolationFix": {
+                         "status": "completed",
+                         "summary": "Fixed Hermes profile soul/history/account isolation issues after reading Hermes profile/session docs. Provisioner now seeds new profiles from backend/src/modules/hades/souls/hades.soul.md, writes .env on refresh only, never creates/clobbers state.db, preserves existing SOUL.md/config.yaml, and refuses to copy server-level TELEGRAM_BOT_TOKEN into user profiles without a user-owned token. Session broker now fails closed on anonymous/missing auth instead of creating shared anonymous_anonymous profile. Frontend Hades localStorage keys for chat/social/user state are scoped by session.user.id; previousResponseId and a stable Hermes conversation key are persisted so refresh can continue a Responses API thread; pending copy now says 'Hades is thinking.' Gateway manager health checks restored fetch DI for fast bearer-aware unit tests. Added focused backend/frontend TDD tests; focused suites and frontend build pass. lint:architecture boundaries/layers pass but API docs registry still has pre-existing Hades endpoint gaps."
+                     },
+                     "daytonaModalFastApiMigrationStudy": {
+                         "status": "completed",
+                         "summary": "Created docs/hades/DAYTONA_MODAL_FASTAPI_MIGRATION_STUDY.md and work-log/planning/014_2026-06-20_daytona-modal-fastapi-migration-plan.md after reading local Hermes profile/API-server/Docker/session docs and checking official current FastAPI, Daytona, Modal, and Railway docs/pricing. Recommendation: FastAPI as Hades control plane, Daytona for persistent workspaces/dev runtime, Modal for bursty media/OCR/STT/video jobs, and durable Hermes profile storage with exactly one active owner process per profile. Docs-only planning; no implementation code."
                      }
                 }
 }
