@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 
-function sanitizeProfileName(tenantId, userId) {
+export function sanitizeProfileName(tenantId, userId) {
   const raw = `${tenantId}_${userId}`;
   let name = raw.replace(/[^a-zA-Z0-9_]/g, "_").replace(/_+/g, "_").replace(/^_|_$/g, "").toLowerCase() || "unknown";
   const dangerous = ["whoami", "rm", "sudo", "su", "exec", "eval", "chmod", "chown", "kill", "pkill", "shutdown", "reboot", "init", "dd", "mkfs"];

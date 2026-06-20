@@ -4,6 +4,7 @@ import path from "node:path";
 import crypto from "node:crypto";
 import { mkdir, writeFile, readFile } from "node:fs/promises";
 import multer from "multer";
+import { sanitizeProfileName } from "../runtime/hermesProfileProvisioner.js";
 
 function asyncRoute(handler) {
   return (req, res, next) => {
@@ -49,9 +50,10 @@ export function createHermesSessionRoutes({
       }
 
       const { userId, tenantId } = resolveAuth(req);
+      const name = sanitizeProfileName(tenantId, userId);
       res.status(200).json({
-        profileName: `${tenantId}_${userId}`,
-        hermesApiBaseUrl: `/api/hades/hermes/${tenantId}_${userId}/v1`,
+        profileName: name,
+        hermesApiBaseUrl: `/api/hades/hermes/${name}/v1`,
         authMode: "edge_injected",
         routingToken: null,
       });
@@ -434,7 +436,7 @@ export function createHermesSessionRoutes({
     asyncRoute(async (req, res) => {
       const { profileName } = req.params;
       const auth = resolveAuth(req);
-      const expectedProfile = `${auth.tenantId}_${auth.userId}`;
+      const expectedProfile = sanitizeProfileName(auth.tenantId, auth.userId);
       if (profileName !== expectedProfile) {
         return res.status(403).json({ error: "profile ownership mismatch" });
       }
@@ -515,7 +517,7 @@ export function createHermesSessionRoutes({
     asyncRoute(async (req, res) => {
       const { profileName, attachmentId } = req.params;
       const auth = resolveAuth(req);
-      const expectedProfile = `${auth.tenantId}_${auth.userId}`;
+      const expectedProfile = sanitizeProfileName(auth.tenantId, auth.userId);
       if (profileName !== expectedProfile) {
         return res.status(403).json({ error: "profile ownership mismatch" });
       }
