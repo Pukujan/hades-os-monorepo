@@ -173,36 +173,54 @@ export async function register(app, context) {
     hermesBin: process.env.HERMES_BIN_PATH || "hermes",
     hermesHome: hermesHomeDir,
     env: process.env,
-    fetch: globalThis.fetch?.bind(globalThis),
     spawn,
-    healthTimeoutMs: process.env.HERMES_PROFILE_GATEWAY_HEALTH_TIMEOUT_MS || 15000,
-    healthPollMs: process.env.HERMES_PROFILE_GATEWAY_HEALTH_POLL_MS || 250,
+    healthTimeoutMs: process.env.HERMES_PROFILE_GATEWAY_HEALTH_TIMEOUT_MS,
+    healthPollMs: process.env.HERMES_PROFILE_GATEWAY_HEALTH_POLL_MS,
   });
   const hermesProfileSessionBroker = overrides.hermesProfileSessionBroker || createHermesProfileSessionBroker({
     auth: hermesAuth,
-    profileRegistry: {
-      ensureProfile: async ({ userId, tenantId, model, provider }) => {
-        const provisioned = await hermesProfileProvisioner.ensureProfile({ userId, tenantId, model, provider });
-        const registered = await hermesProfileRegistry.upsertProfile({
-          tenantId,
-          userId,
-          profileName: provisioned.profileName,
-          apiHost: "127.0.0.1",
-          apiPort: parseInt(provisioned.apiBaseUrl.split(":")[2], 10) || 8657,
-          edgeBaseUrl: `${process.env.HERMES_PUBLIC_BASE_URL || "/api/hades/hermes"}/${provisioned.profileName}/v1`,
-          apiServerKey: provisioned.apiServerKey,
-          gatewayStatus: "provisioned",
-        });
-        const profile = { ...provisioned, ...registered, profileName: provisioned.profileName };
-        Object.defineProperty(profile, "apiServerKey", {
-          value: provisioned.apiServerKey,
-          enumerable: false,
-          configurable: false,
-          writable: false,
-        });
-        return profile;
-      },
-    },
+    profileRegistry: (() => {
+      const profileCache = new Map();
+      return {
+        ensureProfile: async ({ userId, tenantId, model, provider }) => {
+          const cacheKey = `${tenantId}_${userId}`;
+          const cached = profileCache.get(cacheKey);
+          if (cached) return cached;
+
+          const existing = await hermesProfileRegistry.findProfile({ tenantId, userId });
+          if (existing) {
+            const apiServerKey = await hermesProfileRegistry.getApiServerKey({ profileName: existing.profileName });
+            if (apiServerKey) {
+              const profile = {
+                ...existing,
+                apiBaseUrl: `http://${existing.apiHost}:${existing.apiPort}`,
+                profileName: existing.profileName,
+                gatewayStatus: "registered",
+              };
+              Object.defineProperty(profile, "apiServerKey", { value: apiServerKey, enumerable: false, configurable: false, writable: false });
+              profileCache.set(cacheKey, profile);
+              return profile;
+            }
+          }
+
+          const provisioned = await hermesProfileProvisioner.ensureProfile({ userId, tenantId, model, provider });
+          const registered = await hermesProfileRegistry.upsertProfile({
+            tenantId,
+            userId,
+            profileName: provisioned.profileName,
+            apiHost: "127.0.0.1",
+            apiPort: parseInt(provisioned.apiBaseUrl.split(":")[2], 10) || 8657,
+            edgeBaseUrl: `${process.env.HERMES_PUBLIC_BASE_URL || "/api/hades/hermes"}/${provisioned.profileName}/v1`,
+            apiServerKey: provisioned.apiServerKey,
+            gatewayStatus: "provisioned",
+          });
+          const profile = { ...provisioned, ...registered, profileName: provisioned.profileName };
+          Object.defineProperty(profile, "apiServerKey", { value: provisioned.apiServerKey, enumerable: false, configurable: false, writable: false });
+          profileCache.set(cacheKey, profile);
+          return profile;
+        },
+      };
+    })(),
     profileRouter: hermesProfileRouter,
     routingToken: hermesRoutingTokenService,
     profileGatewayManager: hermesProfileGatewayProcessManager,

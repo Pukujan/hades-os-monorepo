@@ -14,6 +14,7 @@
                     "test:hades-chat-media-ui":  "node --import ./test-hooks/register.mjs --test src/modules/hades/tests/unit/ChatBubble.test.js src/modules/hades/tests/unit/hadesViewModel.logic.test.js src/modules/hades/tests/unit/sendChat.test.js",
                     "test:hades-instagram-social-ui":  "node --import ./test-hooks/register.mjs --test src/modules/hades/tests/unit/instagramSocial.tdd.test.js",
                     "test:hades-inline-gif-media-ui":  "node --import ./test-hooks/register.mjs --test src/modules/hades/tests/unit/inlineGifResponseMapping.tdd.test.js src/modules/hades/tests/unit/ChatBubble.test.js",
+                    "test:hades-hermes-routing-ui":  "node --import ./test-hooks/register.mjs --test src/modules/hades/tests/unit/hermesMediaClient.routing.test.js",
                     "analyze":  "set ANALYZE=true^&^& vite build"
                 },
     "dependencies":  {

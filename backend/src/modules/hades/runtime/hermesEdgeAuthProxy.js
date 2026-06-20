@@ -35,8 +35,8 @@ export function createHermesEdgeAuthProxy({ auth, profileRouter, apiServerKeyVau
 
       return {
         status: upstreamResponse.status,
-        headers: upstreamResponse.headers instanceof Map
-          ? Object.fromEntries(upstreamResponse.headers)
+        headers: typeof upstreamResponse.headers?.entries === "function"
+          ? Object.fromEntries(upstreamResponse.headers.entries())
           : upstreamResponse.headers,
         body: bodyText,
       };

@@ -56,6 +56,7 @@
     "test:hades-hermes-peer-docker-proof": "node --test scripts/hades-hermes-peer-docker-proof.e2e.test.mjs",
     "test:hades-hermes-media-red": "node --test scripts/hades-hermes-media-contract.tdd.test.mjs",
     "test:hades-hermes-media-e2e": "node --test scripts/hades-hermes-media-e2e.tdd.test.mjs",
+    "test:hades-hermes-routing-ui": "npm --prefix frontend run test:hades-hermes-routing-ui",
     "generate:hades-media-fixtures": "node scripts/generate-hermes-media-fixtures.mjs",
     "test:auth-discord-connection-contract": "node --test backend/src/modules/auth/tests/unit/auth.discord.connection.contract.test.js",
     "test:hades-discord-bot-runtime-contract": "node --test backend/src/modules/hades/tests/contracts/hades.discord-bot-runtime.contract.mjs",
