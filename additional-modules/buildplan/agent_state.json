@@ -138,9 +138,25 @@
                       "status": "completed",
                       "summary": "Fixed 4 bugs found via full request-flow audit: (B1) ensureProfile was non-idempotent — regenerated API key + port on every session boot, breaking 2nd+ sessions with 401/503. Fixed by caching profiles in composite closure, checking registry first. (B2) Edge proxy Headers instanceof Map check wrong — real fetch() returns Headers object, not Map; switched to .entries() check. (B7) Removed dead fetch param passed to gateway manager. (B8) Fixed healthTimeoutMs default mismatch (15000 index vs 30000 gateway) by removing default override. Branch: master, commit 732d45a."
                   },
-                  "hadesHermesProofTokenSessionFixes": {
-                      "status": "completed",
-                      "summary": "Fixed 3 proof-token auth path bugs: (1) session broker now checks HADES_E2E_AUTH_TOKEN before calling verifySupabaseJwt (edge proxy had this, session broker didn't). (2) resolveAuth in hermes.routes.js now checks Authorization for proof token before falling back to x-user-id/x-tenant-id headers. (3) Media route ownership checks use sanitizeProfileName() to match provisioner's sanitized profile names (edge-tenant becomes edge_tenant). E2E proof test passes 1/1 against Railway production. Commits: 693c630, 406dad3, 26201cd."
-                  }
-             }
+               "hadesHermesProofTokenSessionFixes": {
+                       "status": "completed",
+                       "summary": "Fixed 3 proof-token auth path bugs: (1) session broker now checks HADES_E2E_AUTH_TOKEN before calling verifySupabaseJwt (edge proxy had this, session broker didn't). (2) resolveAuth in hermes.routes.js now checks Authorization for proof token before falling back to x-user-id/x-tenant-id headers. (3) Media route ownership checks use sanitizeProfileName() to match provisioner's sanitized profile names (edge-tenant becomes edge_tenant). E2E proof test passes 1/1 against Railway production. Commits: 693c630, 406dad3, 26201cd."
+                   },
+                "hadesHermesGatewayCrashFix": {
+                        "status": "completed",
+                        "summary": "Fixed gateway crash caused by stale model config (HERMES_DEFAULT_MODEL=deepseek/deepseek-v4-flash) baked into profile .env/config.yaml from earlier provisioning. Fix: provisioner now always rewrites config files even for cached/existing profiles; Railway env vars HERMES_DEFAULT_MODEL and HERMES_DEFAULT_PROVIDER deleted. Verified with real Supabase JWT via test-hermes.mjs — session boot 200 (gateway: running), message send 200 (status: completed). No more 503 profile_api_unavailable."
+                    },
+                    "hadesHermesEdge403OriginHeader": {
+                        "status": "completed",
+                        "summary": "Fixed browser 403 on /v1/responses. Root cause: edge proxy forwarded Origin, Referer, sec-* browser headers to Hermes gateway, which rejected cross-origin requests with 403 (empty body). Fix: strip Origin, Referer, and sec-* headers from upstream request in hermesEdgeAuthProxy.js forward(). All 19 tests pass re-deploy to Railway. Verified E2E with full browser header set — 200 with completed response."
+                    },
+                     "hadesHermesProviderModelConfig": {
+                         "status": "completed",
+                         "summary": "Fixed 'HTTP 400: No models provided' after deleting HERMES_DEFAULT_MODEL/_PROVIDER in gateway crash fix. Provisioner had no fallback — config.yaml got no model/provider lines. Fix: provisioner now defaults to provider=openrouter, model=OPENROUTER_MODEL env var or 'deepseek/deepseek-v4-flash'. Also passes OPENROUTER_MODEL through serverEnv. Verified: session 200, response 200 with output and token counts."
+                     },
+                     "telegramTokenWiredSessionBroker": {
+                         "status": "completed",
+                         "summary": "Wired per-user Telegram bot token from Supabase telegram_connections into provisioner ensureProfile. Added findRuntimeTokenByUserId() to telegramConnectionRepository. profileRegistry.ensureProfile in index.js now looks up Telegram token by userId+tenantId before calling provisioner, passes telegramBotToken. Provisioner writes TELEGRAM_BOT_TOKEN to profile .env. Hades remains the token loader — Hermes handles Telegram natively via polling once token is in profile env. All 19 peer-model + 10 telegram repo tests pass. Deployed and E2E verified."
+                     }
+                }
 }

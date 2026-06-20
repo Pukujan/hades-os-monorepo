@@ -50,7 +50,7 @@ export function createDiscordConnectionRepository({ storage = "memory", supabase
     return record;
   }
 
-  async function saveToken({ userId, tenantId, token, botUsername }) {
+  async function saveToken({ userId, tenantId, token, discordUserId, botUsername }) {
     await hydrate();
     if (!crypto || typeof crypto.encrypt !== "function") {
       throw Object.assign(
@@ -58,7 +58,7 @@ export function createDiscordConnectionRepository({ storage = "memory", supabase
         { code: "missing_crypto" }
       );
     }
-    const existing = findByUserId({ userId, tenantId });
+    const existing = await findByUserId({ userId, tenantId });
     const id = existing?.id || randomUUID();
     const encrypted = crypto.encrypt(token);
 
@@ -66,6 +66,7 @@ export function createDiscordConnectionRepository({ storage = "memory", supabase
       id,
       user_id: userId,
       tenant_id: tenantId,
+      discord_user_id: discordUserId ?? existing?.discord_user_id ?? null,
       encrypted_bot_token: encrypted,
       token_last4: last4(token),
       bot_username: botUsername || null,

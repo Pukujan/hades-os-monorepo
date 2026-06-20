@@ -138,6 +138,8 @@ export async function register(app, context) {
       GROQ_API_KEY: process.env.GROQ_API_KEY,
       HERMES_DEFAULT_MODEL: process.env.HERMES_DEFAULT_MODEL,
       HERMES_DEFAULT_PROVIDER: process.env.HERMES_DEFAULT_PROVIDER,
+      OPENROUTER_MODEL: process.env.OPENROUTER_MODEL,
+      TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
     },
     run: async (command) => {
       const { execSync } = await import("node:child_process");
@@ -181,6 +183,7 @@ export async function register(app, context) {
     healthTimeoutMs: process.env.HERMES_PROFILE_GATEWAY_HEALTH_TIMEOUT_MS,
     healthPollMs: process.env.HERMES_PROFILE_GATEWAY_HEALTH_POLL_MS,
   });
+  const _tgConn = { value: null };
   const hermesProfileSessionBroker = overrides.hermesProfileSessionBroker || createHermesProfileSessionBroker({
     auth: hermesAuth,
     profileRegistry: (() => {
@@ -191,6 +194,10 @@ export async function register(app, context) {
           const cached = profileCache.get(cacheKey);
           if (cached) return cached;
 
+          const telegramToken = _tgConn.value
+            ? (await _tgConn.value.findRuntimeTokenByUserId({ userId, tenantId }).catch(() => null))?.botToken
+            : null;
+
           const existing = await hermesProfileRegistry.findProfile({ tenantId, userId });
           if (existing) {
             const apiServerKey = await hermesProfileRegistry.getApiServerKey({ profileName: existing.profileName });
@@ -199,6 +206,7 @@ export async function register(app, context) {
                 userId, tenantId, model, provider,
                 apiServerKey,
                 apiPort: existing.apiPort,
+                telegramBotToken: telegramToken,
               });
               const profile = {
                 ...existing,
@@ -212,7 +220,7 @@ export async function register(app, context) {
             }
           }
 
-          const provisioned = await hermesProfileProvisioner.ensureProfile({ userId, tenantId, model, provider });
+          const provisioned = await hermesProfileProvisioner.ensureProfile({ userId, tenantId, model, provider, telegramBotToken: telegramToken });
           const registered = await hermesProfileRegistry.upsertProfile({
             tenantId,
             userId,
@@ -274,6 +282,7 @@ export async function register(app, context) {
   const assignments = overrides.assignments || createAssignmentRepository({ storage: storageMode, supabaseClient });
   const conversations = overrides.conversations || createConversationRepository({ storage: storageMode, supabaseClient });
   const telegramConnections = overrides.telegramConnections || createTelegramConnectionRepository({ storage: storageMode, supabaseClient, crypto: tokenCrypto });
+  _tgConn.value = telegramConnections;
   const discordConnections = overrides.discordConnections || createDiscordConnectionRepository({ storage: storageMode, supabaseClient, crypto: tokenCrypto });
   const gitHubConnections = overrides.gitHubConnections || createGitHubConnectionRepository({ storage: storageMode, supabaseClient, crypto: tokenCrypto });
   const slackConnections = overrides.slackConnections || createSlackConnectionRepository({ storage: storageMode, supabaseClient, crypto: tokenCrypto });

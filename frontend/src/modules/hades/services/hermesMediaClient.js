@@ -19,7 +19,7 @@ export async function sendHermesResponse({ hermesApiBaseUrl, input, conversation
   const base = hermesApiBaseUrl.startsWith("/") ? `${getApiBaseUrl()}${hermesApiBaseUrl}` : hermesApiBaseUrl;
   const url = base.endsWith("/v1") ? `${base}/responses` : base;
   const body = {
-    input: typeof input === "string" ? input : input,
+    input: Array.isArray(input) ? [{ role: "user", content: input }] : input,
     ...(previousResponseId ? { previous_response_id: previousResponseId } : {}),
     ...(conversation ? { conversation } : {}),
   };
@@ -98,7 +98,7 @@ export async function synthesizeHermesSpeech({ text, voice = "en-US-JennyNeural"
 export async function buildHermesInputFromComposer({ text, attachments = [] }) {
   const parts = [];
   if (text) {
-    parts.push({ type: "text", text });
+    parts.push({ type: "input_text", text });
   }
   for (const att of attachments) {
     if (att.kind === "image" && att.dataUrl) {
@@ -107,11 +107,11 @@ export async function buildHermesInputFromComposer({ text, attachments = [] }) {
       parts.push({ type: "input_image", image_url: att.url });
     } else if (att.kind === "document" || att.kind === "video") {
       const note = att.promptPart || `User attached ${att.name} (${att.kind})`;
-      parts.push({ type: "text", text: note });
+      parts.push({ type: "input_text", text: note });
     }
   }
   if (parts.length === 0) {
-    parts.push({ type: "text", text: "" });
+    parts.push({ type: "input_text", text: "" });
   }
   return parts.length === 1 ? parts[0].text : parts;
 }

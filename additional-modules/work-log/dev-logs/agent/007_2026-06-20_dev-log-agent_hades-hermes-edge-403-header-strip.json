@@ -1,0 +1,62 @@
+{
+  "meta": {
+    "schemaVersion": "1.0.0",
+    "entryId": "007",
+    "slug": "hades-hermes-edge-403-header-strip",
+    "generatedAt": "2026-06-20T06:00:00.000Z",
+    "audience": "agent",
+    "filledBy": "agent"
+  },
+  "summary": "Fixed browser 403 on /v1/responses. Root cause: edge proxy forwarded Origin, Referer, sec-* browser headers to Hermes gateway. Hermes rejected cross-origin requests with 403 (empty body). Fix: strip these headers in hermesEdgeAuthProxy.js forward(). Commands run: railway up. All 19 tests pass + E2E verified with full browser header set → 200 completed response.",
+  "git": {
+    "branch": "master",
+    "changedFiles": [
+      "backend/src/modules/hades/runtime/hermesEdgeAuthProxy.js"
+    ]
+  },
+  "tests": {
+    "ran": true,
+    "exitCode": 0,
+    "summary": "19/19 tests pass (npm run test:hades-hermes-peer-model)"
+  },
+  "changes": {
+    "modified": [
+      "backend/src/modules/hades/runtime/hermesEdgeAuthProxy.js"
+    ],
+    "narrative": [
+      "Added header stripping in forward(): delete upstreamHeaders.origin, Origin, referer, Referer, and any key starting with sec- or Sec-"
+    ]
+  },
+  "debuggingNarrative": {
+    "bug": "Browser POST to /api/hades/hermes/{profileName}/v1/responses returns 403 with empty body (x-powered-by: Express, content-length: 0). Same token+body from CLI (Invoke-WebRequest, Node.js without extra headers) works fine (200).",
+    "reproductionSteps": [
+      "1. Open browser devtools, send any chat message → 403 empty body response",
+      "2. Replicate with Node.js using ALL browser headers (Origin, Referer, sec-*) → 403",
+      "3. Replicate with Node.js WITHOUT browser headers → 200",
+      "4. Isolate: Origin header alone triggers 403"
+    ],
+    "whatWeTried": {
+      "1. CORS check": "Verified CORS middleware is configured correctly (applies before route handler). Origin is allowed. CORS middleware adds headers. The 403 response has x-powered-by: Express but no CORS headers, suggesting it happens AFTER CORS handling or is not a CORS issue.",
+      "2. Auth token check": "Verified JWT is valid (same token works from CLI). The 403 happens AFTER verifyEdgeRequest passes (which validates the JWT).",
+      "3. Profile existence check": "Profile exists and gateway is running (session returns 200 with gatewayStatus: running). The 403 happens in the /v1/responses handler, not in session creation.",
+      "4. Body content check": "Body is valid JSON ({input: 'hello'}). Same body works from CLI.",
+      "5. Headers replication": "Created Node.js script replicating ALL browser headers exactly → reproduced 403. Removed headers one by one → Origin header alone causes 403.",
+      "6. Direct Hermes check": "Sent request directly to Hermes gateway (localhost:8657) from test-hermes.mjs without Origin → 200. Adding Origin → 403. Confirmed Hermes HTTP server rejects cross-origin requests."
+    },
+    "rootCause": "The forward() function in hermesEdgeAuthProxy.js spreads all req.headers into upstreamHeaders and passes them to fetch(). This includes Origin, Referer, and sec-* headers from the browser. When forwarded to Hermes' internal API server (listening on 127.0.0.1:8657), Hermes sees a cross-origin Origin header (https://hades-os-monorepo.vercel.app) and rejects the request with 403.",
+    "fix": "In forward(), strip browser-specific headers (origin, referer, sec-*) before constructing the upstream request. Only keep essential HTTP headers (content-type, content-length, accept, etc.) and the authorization header (replaced with API server key).",
+    "filesChanged": [
+      {
+        "path": "backend/src/modules/hades/runtime/hermesEdgeAuthProxy.js",
+        "lines": "15-27",
+        "change": "Added deletion of upstreamHeaders.origin, .Origin, .referer, .Referer, and loop to delete sec-*/Sec-* prefixed headers"
+      }
+    ],
+    "verification": "Full E2E test with browser header set (Origin, Referer, User-Agent, Accept, Accept-Language, Sec-Fetch-Dest, Sec-Fetch-Mode, Sec-Fetch-Site) → POST /responses returns 200 with completed response object.",
+    "remainingRisks": [
+      "If Hermes adds CORS validation in the future, the header strip may need to be maintained or updated.",
+      "Other browser-specific headers (e.g., sec-ch-ua, sec-ch-ua-platform) are also stripped — no known impact.",
+      "The 'No models provided' response is a separate Hermes gateway issue (client needs to specify model in request body), not related to this fix."
+    ]
+  }
+}

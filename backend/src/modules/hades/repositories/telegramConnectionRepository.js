@@ -96,6 +96,22 @@ export function createTelegramConnectionRepository({ storage = "memory", supabas
     return null;
   }
 
+  async function findRuntimeTokenByUserId({ userId, tenantId }) {
+    await hydrate();
+    for (const record of connections.values()) {
+      if (record.user_id === userId && record.tenant_id === tenantId) {
+        if (!crypto || typeof crypto.decrypt !== "function") {
+          throw Object.assign(
+            new Error("Crypto dependency is required to decrypt Telegram bot tokens"),
+            { code: "missing_crypto" }
+          );
+        }
+        return { botToken: crypto.decrypt(record.encrypted_bot_token) };
+      }
+    }
+    return null;
+  }
+
   async function listByUser({ userId, tenantId }) {
     await hydrate();
     return [...connections.values()].filter(
@@ -117,5 +133,5 @@ export function createTelegramConnectionRepository({ storage = "memory", supabas
     return record;
   }
 
-  return { createOrUpdate, findPublicByUser, findRuntimeTokenByTelegramUserId, findByTelegramUserId, findByUserId, listByUser, delete: deleteRecord };
+  return { createOrUpdate, findPublicByUser, findRuntimeTokenByTelegramUserId, findRuntimeTokenByUserId, findByTelegramUserId, findByUserId, listByUser, delete: deleteRecord };
 }

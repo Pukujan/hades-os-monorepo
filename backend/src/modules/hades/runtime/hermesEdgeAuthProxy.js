@@ -13,8 +13,18 @@ export function createHermesEdgeAuthProxy({ auth, profileRouter, apiServerKeyVau
     }
 
     const upstreamHeaders = { ...headers };
+    // Strip browser-specific headers that Hermes rejects
     delete upstreamHeaders.authorization;
     delete upstreamHeaders.Authorization;
+    delete upstreamHeaders.origin;
+    delete upstreamHeaders.Origin;
+    delete upstreamHeaders.referer;
+    delete upstreamHeaders.Referer;
+    for (const key of Object.keys(upstreamHeaders)) {
+      if (key.startsWith("sec-") || key.startsWith("Sec-")) {
+        delete upstreamHeaders[key];
+      }
+    }
 
     upstreamHeaders.authorization = `Bearer ${apiServerKey}`;
 

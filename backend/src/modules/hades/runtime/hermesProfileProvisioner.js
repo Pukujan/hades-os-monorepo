@@ -1,4 +1,17 @@
 import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const DEFAULT_SOUL_PATH = path.join(__dirname, "..", "souls", "default.profile.soul.md");
+function loadDefaultSoul() {
+  try {
+    return readFileSync(DEFAULT_SOUL_PATH, "utf8");
+  } catch {
+    return "# Hades Soul\n\nHades is the quiet command layer of Hades OS.\n";
+  }
+}
 
 export function sanitizeProfileName(tenantId, userId) {
   const raw = `${tenantId}_${userId}`;
@@ -16,7 +29,7 @@ function hashKey(key) {
 }
 
 export function createHermesProfileProvisioner({ hermesBin = "hermes", profilesRoot = "", run, writeFile, mkdir, allocatePort, generateApiServerKey, serverEnv = {} } = {}) {
-  async function ensureProfile({ userId, tenantId, model = serverEnv.HERMES_DEFAULT_MODEL, provider = serverEnv.HERMES_DEFAULT_PROVIDER, apiServerKey: existingKey, apiPort: existingPort } = {}) {
+  async function ensureProfile({ userId, tenantId, model = serverEnv.HERMES_DEFAULT_MODEL || serverEnv.OPENROUTER_MODEL || "deepseek/deepseek-v4-flash", provider = serverEnv.HERMES_DEFAULT_PROVIDER || "openrouter", telegramBotToken, apiServerKey: existingKey, apiPort: existingPort } = {}) {
     const profileName = sanitizeProfileName(tenantId, userId);
     const apiServerKey = existingKey || (generateApiServerKey ? generateApiServerKey() : `dev-key-${profileName}-${Date.now()}`);
     const apiPort = existingPort || (allocatePort ? await allocatePort() : 8657);
@@ -38,6 +51,9 @@ export function createHermesProfileProvisioner({ hermesBin = "hermes", profilesR
       ];
       if (serverEnv.GROQ_API_KEY) {
         envLines.push(`GROQ_API_KEY=${serverEnv.GROQ_API_KEY}`);
+      }
+      if (telegramBotToken || serverEnv.TELEGRAM_BOT_TOKEN) {
+        envLines.push(`TELEGRAM_BOT_TOKEN=${telegramBotToken || serverEnv.TELEGRAM_BOT_TOKEN}`);
       }
       const envContent = envLines.join("\n");
       await writeFile(`${profilesRoot}/${profileName}/.env`, envContent);
@@ -69,6 +85,8 @@ export function createHermesProfileProvisioner({ hermesBin = "hermes", profilesR
       await writeFile(`${profilesRoot}/${profileName}/state.db`, "");
       await writeFile(`${profilesRoot}/${profileName}/sessions/.gitkeep`, "");
       await writeFile(`${profilesRoot}/${profileName}/memories/.gitkeep`, "");
+      const soulContent = loadDefaultSoul();
+      await writeFile(`${profilesRoot}/${profileName}/SOUL.md`, soulContent);
     }
 
     const profile = {

@@ -112,4 +112,114 @@ describe("Instagram auth link generation", () => {
       globalThis.fetch = originalFetch;
     }
   });
+
+  test("callback_url falls back to CORS_ORIGIN when APP_URL is not set", async () => {
+    const calls = [];
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = async (url, options) => {
+      calls.push({ url, options });
+      return new Response(
+        JSON.stringify({
+          redirect_url: "https://connect.composio.dev/link/abc",
+          connected_account_id: "ca_abc",
+        }),
+        { status: 201, headers: { "content-type": "application/json" } }
+      );
+    };
+
+    try {
+      await withEnv(
+        {
+          COMPOSIO_API_KEY: "key",
+          COMPOSIO_INSTAGRAM_AUTH_CONFIG_ID: "cfg",
+          APP_URL: undefined,
+          CORS_ORIGIN: "https://myapp.vercel.app",
+        },
+        async () => {
+          const service = createHadesService({ repository: {}, hermes: {} });
+          await service.createInstagramAuthLink(
+            { connector: "composio" },
+            { userId: "u1", tenantId: "t1" }
+          );
+
+          const body = JSON.parse(calls[0].options.body);
+          assert.equal(body.callback_url, "https://myapp.vercel.app/app/socials?provider=instagram");
+        }
+      );
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
+  test("callback_url defaults to localhost:5173 when no APP_URL or CORS_ORIGIN is set", async () => {
+    const calls = [];
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = async (url, options) => {
+      calls.push({ url, options });
+      return new Response(
+        JSON.stringify({
+          redirect_url: "https://connect.composio.dev/link/def",
+          connected_account_id: "ca_def",
+        }),
+        { status: 201, headers: { "content-type": "application/json" } }
+      );
+    };
+
+    try {
+      await withEnv(
+        {
+          COMPOSIO_API_KEY: "key",
+          COMPOSIO_INSTAGRAM_AUTH_CONFIG_ID: "cfg",
+          APP_URL: undefined,
+          CORS_ORIGIN: undefined,
+        },
+        async () => {
+          const service = createHadesService({ repository: {}, hermes: {} });
+          await service.createInstagramAuthLink(
+            { connector: "composio" },
+            { userId: "u2", tenantId: "t2" }
+          );
+
+          const body = JSON.parse(calls[0].options.body);
+          assert.equal(body.callback_url, "http://localhost:5173/app/socials?provider=instagram");
+        }
+      );
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
+  test("saveInstagramConnection persists to instagramConnections repository", async () => {
+    const saved = [];
+    const scopedRepos = {
+      instagramConnections: {
+        createOrUpdate: async (data) => { saved.push(data); },
+      },
+    };
+
+    const service = createHadesService({ repository: {}, hermes: {}, scopedRepos });
+
+    const result = await service.saveInstagramConnection(
+      {
+        connector: "composio",
+        externalConnectionId: "ca_composio_789",
+        instagramBusinessAccountId: "ig_biz_123",
+        handle: "my_instagram",
+      },
+      { userId: "user_save", tenantId: "tenant_save" }
+    );
+
+    assert.equal(result.provider, "instagram");
+    assert.equal(result.status, "connected");
+    assert.equal(result.handle, "my_instagram");
+
+    assert.equal(saved.length, 1);
+    assert.equal(saved[0].userId, "user_save");
+    assert.equal(saved[0].tenantId, "tenant_save");
+    assert.equal(saved[0].externalConnectionId, "ca_composio_789");
+    assert.equal(saved[0].instagramBusinessAccountId, "ig_biz_123");
+    assert.equal(saved[0].handle, "my_instagram");
+    assert.equal(saved[0].capabilities.length, 2);
+    assert.ok(saved[0].capabilities.includes("dm.read"));
+  });
 });

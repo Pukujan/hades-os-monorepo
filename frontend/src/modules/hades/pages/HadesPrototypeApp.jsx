@@ -1723,6 +1723,21 @@ function SocialsScreen() {
     handleDeleteInstagramConnection,
   } = useHades();
 
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const provider = params.get("provider");
+    const status = params.get("status");
+    const connectedAccountId = params.get("connected_account_id");
+    if (provider === "instagram" && status === "success" && connectedAccountId) {
+      handleSaveInstagramConnection({
+        connector: "composio",
+        externalConnectionId: connectedAccountId,
+      }).then(() => {
+        window.history.replaceState({}, "", window.location.pathname);
+      });
+    }
+  }, []);
+
   return (
     <>
       <ScreenHead title="Socials" subtitle="Connect channels only when minions need them." />

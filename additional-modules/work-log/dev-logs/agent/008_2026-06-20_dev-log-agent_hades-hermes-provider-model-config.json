@@ -1,0 +1,52 @@
+{
+  "meta": {
+    "schemaVersion": "1.0.0",
+    "entryId": "008",
+    "slug": "hades-hermes-provider-model-config",
+    "generatedAt": "2026-06-20T06:30:00.000Z",
+    "audience": "agent",
+    "filledBy": "agent"
+  },
+  "summary": "Fixed HTTP 200 with 'No models provided' response text. Provisioner had no fallback defaults for model/provider after HERMES_DEFAULT_MODEL/PROVIDER were deleted from Railway. Made provisioner fall back to OPENROUTER_MODEL env var or 'deepseek/deepseek-v4-flash' with provider='openrouter'. All 19 tests pass, E2E verified.",
+  "git": {
+    "branch": "master",
+    "changedFiles": [
+      "backend/src/modules/hades/runtime/hermesProfileProvisioner.js",
+      "backend/src/modules/hades/index.js"
+    ]
+  },
+  "tests": {
+    "ran": true,
+    "exitCode": 0,
+    "summary": "19/19 tests pass (npm run test:hades-hermes-peer-model)"
+  },
+  "changes": {
+    "modified": [
+      "backend/src/modules/hades/runtime/hermesProfileProvisioner.js",
+      "backend/src/modules/hades/index.js"
+    ],
+    "narrative": [
+      "Provisioner line 19: changed defaults to fall back to serverEnv.OPENROUTER_MODEL then 'deepseek/deepseek-v4-flash' for model, and 'openrouter' for provider",
+      "index.js line 141: added OPENROUTER_MODEL to serverEnv passed to provisioner"
+    ]
+  },
+  "debuggingNarrative": {
+    "bug": "Session returns 200 gateway:running, message returns 200 but output says 'HTTP 400: No models provided'. Hermes gateway is running but has no model configured.",
+    "whatWeTried": {
+      "1. Check Railway env": "HERMES_DEFAULT_MODEL and HERMES_DEFAULT_PROVIDER were deleted during the gateway crash fix. They no longer exist in Railway variables.",
+      "2. Check provisioner output": "Provisioner writes model/provider to config.yaml only if truthy. With undefined values, these lines were omitted → Hermes had zero models.",
+      "3. Try explicit model in body": "Specifying model in request body returns same error. Hermes needs model configured in config.yaml AND a working provider with API key.",
+      "4. Check models endpoint": "GET /v1/models returned 1 model (profile name) but no provider backend → model exists as name but can't generate."
+    },
+    "rootCause": "Gateway crash fix deleted HERMES_DEFAULT_MODEL and HERMES_DEFAULT_PROVIDER from Railway env vars (they had stale values that crashed the gateway). But the provisioner had no fallback — when both env vars are undefined, config.yaml gets no model/provider lines → Hermes starts but has no model configured.",
+    "fix": {
+      "index.js": "Add OPENROUTER_MODEL to serverEnv passed to provisioner",
+      "provisioner.js": "Change default model from 'serverEnv.HERMES_DEFAULT_MODEL' (could be undefined) to 'serverEnv.HERMES_DEFAULT_MODEL || serverEnv.OPENROUTER_MODEL || \"deepseek/deepseek-v4-flash\"'. Change default provider from 'serverEnv.HERMES_DEFAULT_PROVIDER' (could be undefined) to 'serverEnv.HERMES_DEFAULT_PROVIDER || \"openrouter\"'"
+    },
+    "verification": "Session 200, models list 200 (1 model), message 200 with actual AI response and token counts (11526 in / 35 out tokens).",
+    "remainingRisks": [
+      "Hardcoded 'deepseek/deepseek-v4-flash' fallback may not exist on OpenRouter yet — will return error if OPENROUTER_MODEL env var also unset.",
+      "OPENROUTER_API_KEY inherited from process.env by gateway subprocess — if this fails, Hermes can't call the API."
+    ]
+  }
+}

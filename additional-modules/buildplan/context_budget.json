@@ -1,14 +1,14 @@
 {
   "hardLimit": 64000,
-  "currentUsage": 4000,
-  "remaining": 60000,
+  "currentUsage": 5400,
+  "remaining": 58600,
   "warningAt": 51200,
   "compactAt": 57600,
   "stopAt": 62400,
   "lastCompactedAt": null,
   "compactionStrategy": "summarize completed work, preserve current phase, target files, failing tests, blockers",
   "sessionStart": "2026-06-19T22:48:40.246+00:00",
-  "sessionEnd": "2026-06-20T05:23:49.607+00:00",
+  "sessionEnd": "2026-06-20T06:30:17.858+00:00",
   "history": [
     {
       "endedAt": "2026-06-12T16:33:56.160+00:00",
@@ -579,6 +579,24 @@
       "peakUsage": 4000,
       "reason": "archive_session",
       "slug": "hades-hermes-proof-token-fixes"
+    },
+    {
+      "endedAt": "2026-06-20T06:01:44.559+00:00",
+      "peakUsage": 0,
+      "reason": "archive_session",
+      "slug": "hermes-edge-403-origin-header"
+    },
+    {
+      "endedAt": "2026-06-20T06:13:28.408+00:00",
+      "peakUsage": 0,
+      "reason": "archive_session",
+      "slug": "hermes-model-config-fix"
+    },
+    {
+      "endedAt": "2026-06-20T06:30:17.858+00:00",
+      "peakUsage": 5400,
+      "reason": "archive_session",
+      "slug": "telegram-token-wired-session-broker"
     }
   ]
 }
