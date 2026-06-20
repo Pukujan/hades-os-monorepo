@@ -29,7 +29,7 @@ import { createHermesProfileStatePersistence } from "./runtime/hermesProfileStat
 import net from "node:net";
 import crypto from "node:crypto";
 import { spawn } from "node:child_process";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, writeFile, readFile, readdir } from "node:fs/promises";
 import { createDiscordHermesCommandFlow } from "./services/discordHermesCommandFlow.service.js";
 import { createMinionAssignmentRuntime } from "./services/minionAssignmentRuntime.service.js";
 import { createGiphyProvider } from "./services/giphyProvider.service.js";
@@ -452,6 +452,32 @@ export async function register(app, context) {
 
   const hermesMountPath = "/api/hades/hermes";
   app.use(hermesMountPath, hermesMgrRouter);
+
+  // Startup: refresh SOUL.md for all existing profiles on disk
+  (async () => {
+    try {
+      const profilesRoot = hermesProfilesRoot;
+      if (!profilesRoot) return;
+      const { readdir: listDir, readFile: readFile2, writeFile: writeFile2 } = await import("node:fs/promises");
+      const { existsSync } = await import("node:fs");
+      const { fileURLToPath } = await import("node:url");
+      const dirname = path.dirname(fileURLToPath(import.meta.url));
+      const defaultSoulPath = path.join(dirname, "souls", "default.profile.soul.md");
+      if (!existsSync(defaultSoulPath)) return;
+      const newSoul = await readFile2(defaultSoulPath, "utf8");
+      const entries = await listDir(profilesRoot, { withFileTypes: true }).catch(() => []);
+      for (const entry of entries) {
+        if (!entry.isDirectory()) continue;
+        const soulPath = path.join(profilesRoot, entry.name, "SOUL.md");
+        if (!existsSync(soulPath)) continue;
+        try {
+          const existing = await readFile2(soulPath, "utf8");
+          if (existing.includes("Hades Soul") && existing.includes("quiet command layer")) continue;
+        } catch { }
+        await writeFile2(soulPath, newSoul, "utf8");
+      }
+    } catch {}
+  })();
 
   return {
     detail: "→ /api/hades",
