@@ -48,7 +48,6 @@ export function createHermesProfileProvisioner({ hermesBin = "hermes", profilesR
         `API_SERVER_PORT=${apiPort}`,
         `API_SERVER_KEY=${apiServerKey}`,
         `STT_GROQ_MODEL=whisper-large-v3-turbo`,
-        `HERMES_IGNORE_RULES=true`,
       ];
       if (serverEnv.GROQ_API_KEY) {
         envLines.push(`GROQ_API_KEY=${serverEnv.GROQ_API_KEY}`);
@@ -59,11 +58,19 @@ export function createHermesProfileProvisioner({ hermesBin = "hermes", profilesR
       const envContent = envLines.join("\n");
       await writeFile(`${profilesRoot}/${profileName}/.env`, envContent);
 
+      const soulContent = loadDefaultSoul();
+      await writeFile(`${profilesRoot}/${profileName}/SOUL.md`, soulContent);
       const configYaml = [
         `terminal:`,
         `  home_mode: profile`,
         ...(model ? [`model: ${model}`] : []),
         ...(provider ? [`provider: ${provider}`] : []),
+        `personality: hades`,
+        ``,
+        `personalities:`,
+        `  hades:`,
+        `    system_prompt: |`,
+        ...soulContent.split("\n").map(line => `      ${line}`),
         ``,
         `stt:`,
         `  provider: groq`,
@@ -86,8 +93,6 @@ export function createHermesProfileProvisioner({ hermesBin = "hermes", profilesR
       await writeFile(`${profilesRoot}/${profileName}/state.db`, "");
       await writeFile(`${profilesRoot}/${profileName}/sessions/.gitkeep`, "");
       await writeFile(`${profilesRoot}/${profileName}/memories/.gitkeep`, "");
-      const soulContent = loadDefaultSoul();
-      await writeFile(`${profilesRoot}/${profileName}/SOUL.md`, soulContent);
     }
 
     const profile = {
