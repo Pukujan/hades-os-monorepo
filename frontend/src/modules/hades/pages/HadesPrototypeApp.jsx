@@ -464,14 +464,24 @@ function HadesProvider({ children }) {
   }, [accessToken]);
 
   const handleDeleteTelegramToken = React.useCallback(async () => {
-    await deleteTelegramToken(accessToken);
-    setTelegramConnection({ status: "disconnected" });
-  }, [accessToken]);
+    try {
+      await deleteTelegramToken(accessToken);
+      setTelegramConnection({ status: "disconnected" });
+      showToast("Telegram disconnected");
+    } catch {
+      showToast("Failed to disconnect Telegram");
+    }
+  }, [accessToken, showToast]);
 
   const handleDeleteDiscordToken = React.useCallback(async () => {
-    await deleteDiscordToken(accessToken);
-    setDiscordConnection({ status: "disconnected" });
-  }, [accessToken]);
+    try {
+      await deleteDiscordToken(accessToken);
+      setDiscordConnection({ status: "disconnected" });
+      showToast("Discord disconnected");
+    } catch {
+      showToast("Failed to disconnect Discord");
+    }
+  }, [accessToken, showToast]);
 
   const handleSaveGithubToken = React.useCallback(async ({ token }) => {
     const result = await saveGitHubToken({ token }, accessToken);

@@ -748,3 +748,60 @@ describe("Boundary action resilience when Hades is down", () => {
     assert.ok(queued.some((entry) => entry.action?.type === "telegram.send"));
   });
 });
+
+describe("Session boot triggers profile snapshot", () => {
+  test("POST /sessions calls snapshotProfile after session creation", async () => {
+    const express = (await import("express")).default;
+    const { createHermesSessionRoutes } = await import("../../routes/hermes.routes.js");
+    const { invokeApp } = await import("../../../../shared/testing/invoke-app.js");
+
+    const snapshotCalls = [];
+
+    const app = express();
+    const router = createHermesSessionRoutes({
+      profileSessionBroker: {
+        startSession: async ({ supabaseJwt }) => ({
+          sessionId: "sess_123",
+          profileName: "tenant_a_user_a",
+          hermesApiBaseUrl: "https://app.test/hermes/tenant_a_user_a/v1",
+          authMode: "edge_injected",
+          routingToken: "rt_abc",
+          gatewayStatus: "running",
+        }),
+      },
+      profileRegistry: {
+        findProfile: async ({ profileName }) => ({
+          tenantId: "tenant_a",
+          userId: "user_a",
+          profileName: "tenant_a_user_a",
+        }),
+      },
+      profileStatePersistence: {
+        snapshotProfile: async (params) => {
+          snapshotCalls.push(params);
+          return { objectKey: `profiles/${params.tenantId}/users/${params.userId}/${params.profileName}/snapshot.json`, secretStripped: true };
+        },
+      },
+    });
+    app.use(router);
+
+    const { status, body } = await invokeApp(app, {
+      method: "POST",
+      path: "/sessions",
+      headers: {
+        authorization: "Bearer some-jwt",
+        "x-forwarded-proto": "https",
+      },
+    });
+
+    const data = JSON.parse(body);
+    assert.equal(status, 200);
+    assert.equal(data.profileName, "tenant_a_user_a");
+
+    assert.equal(snapshotCalls.length, 1, "snapshotProfile should be called once");
+    assert.equal(snapshotCalls[0].tenantId, "tenant_a");
+    assert.equal(snapshotCalls[0].userId, "user_a");
+    assert.equal(snapshotCalls[0].profileName, "tenant_a_user_a");
+    assert.equal(snapshotCalls[0].reason, "session_start");
+  });
+});

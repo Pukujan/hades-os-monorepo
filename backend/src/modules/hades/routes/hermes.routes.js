@@ -46,6 +46,22 @@ export function createHermesSessionRoutes({
         const proto = req.get("x-forwarded-proto") || req.protocol;
         const origin = `${proto}://${req.hostname}`;
         const session = await profileSessionBroker.startSession({ supabaseJwt, origin });
+
+        if (profileStatePersistence && profileRegistry) {
+          profileRegistry.findProfile({ profileName: session.profileName })
+            .then(profile => {
+              if (profile) {
+                profileStatePersistence.snapshotProfile({
+                  tenantId: profile.tenantId,
+                  userId: profile.userId,
+                  profileName: session.profileName,
+                  reason: "session_start",
+                }).catch(err => console.warn("[snapshot] session boot:", err.message));
+              }
+            })
+            .catch(() => {});
+        }
+
         return res.status(200).json(session);
       }
 
