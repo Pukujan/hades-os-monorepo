@@ -149,11 +149,50 @@ function createAvi() {
   return riff("AVI ", Buffer.concat([hdrl, movi, chunk("idx1", idx1)]));
 }
 
+// WebM fixture for upload/MIME validation. Structurally valid EBML+Matroska.
+// For true playback, replace with a real .webm (see comment in createWebm).
+function createWebm() {
+  function vint(val, pad) {
+    let len = pad || 1;
+    if (!pad) {
+      let m = (1 << 7) - 1;
+      while (val >= m) { len++; m = (1 << (7 * len)) - 1; }
+    }
+    const b = Buffer.alloc(len);
+    for (let i = len - 1; i >= 0; i--) { b[i] = val & 0xFF; val >>= 8; }
+    b[0] |= 0x80 >> (len - 1);
+    return b;
+  }
+  function el(id, data) {
+    const d = Buffer.isBuffer(data) ? data : Buffer.from(data);
+    return Buffer.concat([vint(id, 0), vint(d.length, 0), d]);
+  }
+  function master(id, kids) { return el(id, Buffer.concat(kids)); }
+  const u8 = (v) => Buffer.from([v]);
+  const u16 = (v) => { const b = Buffer.alloc(2); b.writeUInt16BE(v); return b; };
+  const u32 = (v) => { const b = Buffer.alloc(4); b.writeUInt32BE(v); return b; };
+  const s = (x) => Buffer.from(x, "utf8");
+  const ebml = master(0x1A45DFA3, [
+    el(0x4286, u8(1)), el(0x42F7, u8(1)), el(0x42F2, u8(4)), el(0x42F3, u8(8)),
+    el(0x4282, s("webm")), el(0x4287, u8(4)), el(0x4285, u8(2)),
+  ]);
+  const seg = Buffer.concat([
+    vint(0x18538067, 0), vint(0x01FFFFFF, 0),
+    master(0x1549A966, [el(0x2AD7B1, u32(1000000)), el(0x4D80, s("fixture")), el(0x5741, s("fixture"))]),
+    master(0x1654AE6B, [master(0xAE, [
+      el(0xD7, u8(1)), el(0x73C5, u8(1)), el(0x83, u8(1)), el(0x86, s("V_VP8")),
+      master(0xE0, [el(0xB0, u16(160)), el(0xBA, u16(120))]),
+    ])]),
+  ]);
+  return Buffer.concat([ebml, seg]);
+}
+
 const files = [
   write("sample-image.png", createPng()),
   write("sample-audio.wav", createWav()),
   write("sample-video.avi", createAvi()),
   write("sample-document.pdf", createPdf()),
+  write("sample-video.webm", createWebm()),
 ];
 
 for (const filePath of files) {

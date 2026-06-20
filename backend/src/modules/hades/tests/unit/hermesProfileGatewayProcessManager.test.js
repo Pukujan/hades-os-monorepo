@@ -55,7 +55,7 @@ describe("Hermes profile gateway process manager", () => {
     assert.equal(result.gatewayStatus, "running");
     assert.equal(result.spawned, true);
     assert.equal(spawns[0].command, "hermes-test");
-    assert.deepEqual(spawns[0].args, ["-p", "tenant_user", "gateway"]);
+    assert.deepEqual(spawns[0].args, ["-p", "tenant_user", "gateway", "run"]);
     assert.equal(spawns[0].options.env.HERMES_HOME, "/tmp/hades-hermes");
     assert.equal(spawns[0].options.detached, true);
   });

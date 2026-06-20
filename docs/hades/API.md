@@ -317,6 +317,76 @@ Speech-to-text endpoint. Transcribes audio using Groq Whisper API.
 | 400 | Missing `audio` field |
 | 503 | Voice service not configured |
 
+### POST /:profileName/media
+
+Upload a media file to attach to a Hermes conversation. Creates an attachment record, stores the file, and returns a browser-safe Hades media URL plus an agent prompt fragment.
+
+**Request headers:**
+```
+Authorization: Bearer <supabase-jwt> (for auth context)
+x-user-id: string (optional, used when auth context unavailable)
+x-tenant-id: string (optional, used when auth context unavailable)
+```
+
+**Request body:** `multipart/form-data`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `file` | file | The media file (max 50 MB) |
+| `purpose` | string | One of: `image`, `video`, `audio`, `document` |
+
+**Allowed MIME types:**
+
+| Category | MIME types |
+|----------|------------|
+| Image | `image/png`, `image/jpeg`, `image/gif`, `image/webp` |
+| Video | `video/mp4`, `video/webm`, `video/x-msvideo` |
+| Audio | `audio/wav`, `audio/mpeg`, `audio/ogg`, `audio/webm` |
+| Document | `application/pdf`, `text/plain`, `text/csv`, `text/markdown` |
+
+**Response (201):**
+
+```json
+{
+  "attachment": {
+    "id": "uuid",
+    "contentType": "string",
+    "url": "string — browser-safe Hades media download URL",
+    "promptPart": "string — reusable agent prompt fragment",
+    "extractedText": "string | null — text content for PDF/txt files"
+  }
+}
+```
+
+**Status codes:**
+
+| Code | Description |
+|------|-------------|
+| 201 | Upload successful |
+| 400 | Missing file, unsupported MIME type, or invalid purpose |
+| 403 | Profile ownership mismatch |
+| 413 | File exceeds 50 MB limit |
+
+### GET /:profileName/media/:attachmentId
+
+Download (resolve) a previously uploaded media attachment. Authenticated against the profile to enforce cross-profile isolation.
+
+**Request headers:**
+```
+x-user-id: string (required)
+x-tenant-id: string (required)
+```
+
+**Response (200):** Binary stream with the attachment's original `content-type`.
+
+**Status codes:**
+
+| Code | Description |
+|------|-------------|
+| 200 | Binary file stream |
+| 403 | Profile ownership mismatch or invalid auth |
+| 404 | Attachment not found |
+
 ### POST /sessions
 
 Create a new Hermes profile session. Returns a scoped edge route for the Hermes profile API server.

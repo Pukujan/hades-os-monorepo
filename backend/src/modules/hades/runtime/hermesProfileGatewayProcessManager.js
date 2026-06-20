@@ -60,7 +60,7 @@ export function createHermesProfileGatewayProcessManager({
     }
 
     const stderrChunks = [];
-    const child = await spawn(hermesBin, ["-p", profileName, "gateway"], {
+    const child = await spawn(hermesBin, ["-p", profileName, "gateway", "run"], {
       detached: true,
       stdio: ["ignore", "ignore", "pipe"],
       env: {
