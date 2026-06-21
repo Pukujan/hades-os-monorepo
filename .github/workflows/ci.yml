@@ -34,6 +34,9 @@ jobs:
       - name: Lint repo artifacts
         run: npm run lint:repo-artifacts
 
+      - name: Agent workflow contract
+        run: npm run test:agent-workflow
+
       - name: Lint architecture
         run: npm run lint:architecture
 
