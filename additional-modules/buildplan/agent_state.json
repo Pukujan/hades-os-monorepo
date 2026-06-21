@@ -1,8 +1,8 @@
 {
     "phase":  "implementation-complete",
-    "module":  "hades-hermes-profile",
+    "module":  "hades-hermes-frontend-chat",
     "branch":  "master",
-    "task":  "Fixed Hermes profile identity and registry persistence. Existing profiles now get Hades SOUL.md repaired on ensure/startup; Hermes profile registry persists profile route metadata and encrypted API_SERVER_KEY to Supabase. Focused tests pass; lint:architecture still fails on pre-existing API docs registry gaps.",
+    "task":  "Fixed frontend Hermes /v1/responses request shape. sendHermesResponse no longer sends both conversation and previous_response_id; named conversation wins and previous_response_id is only used for manual chaining when no conversation key is present. Focused routing/continuity tests and frontend build pass.",
     "state":  {
                   "hermesRailwayProbe":  {
                                              "status":  "completed",
@@ -177,6 +177,14 @@
                      "hadesHermesSoulRepairExistingProfiles": {
                          "status": "completed",
                          "summary": "Fixed Hermes returning default Hermes Agent persona for existing profiles. Hermes docs confirm SOUL.md is loaded only from HERMES_HOME/profile home and fallback identity is used if missing, empty, or unreadable. Provisioner now writes backend/src/modules/hades/souls/hades.soul.md to SOUL.md even for existing profiles before gateway startup, and backend startup repair no longer skips profile folders with missing SOUL.md. Added regression test in hades.hermes-peer-model.tdd.test.js."
+                     },
+                     "agentWorkflowContractDocs": {
+                         "status": "completed",
+                         "summary": "Expanded root AGENTS.md with user context packet, evidence log, glue-code-first, reproduce-before-fix, command discovery, dependency docs, Supabase/schema, secrets, small-diff, hosted verification, phase gates, legacy-code, OpenCode boundary, definition-of-done, and handoff rules. Added root CODE_IMPLEMENTATION.md with stack-specific Hades OS topology and integration rules for Supabase, Hades, Hermes, Vercel, Railway, OAuth, media, and frontend routing."
+                     },
+                     "hadesHermesResponseConversationConflictFix": {
+                         "status": "completed",
+                         "summary": "Fixed production 400 from Hermes: Cannot use both conversation and previous_response_id. Hermes docs define named conversation and previous_response_id as alternative chaining mechanisms. frontend/src/modules/hades/services/hermesMediaClient.js now omits previous_response_id whenever conversation is present. Added regression coverage to hermesMediaClient.routing.test.js. npm.cmd --prefix frontend run test:hades-hermes-routing-ui, hermesConversationContinuity.tdd.test.js, and frontend build pass."
                      }
                 }
 }

@@ -128,6 +128,21 @@ test("sendHermesResponse leaves absolute backend profile edge routes untouched",
   assert.equal(fetchCalls[0].url, `${absoluteRoute}/responses`);
 });
 
+test("sendHermesResponse never sends both named conversation and previous_response_id", async () => {
+  const { sendHermesResponse } = await loadClient();
+
+  await sendHermesResponse({
+    hermesApiBaseUrl: "/api/hades/hermes/tenant_user/v1",
+    input: "who are you",
+    conversation: "hades-web-minions-user-1",
+    previousResponseId: "resp_previous",
+  }, "test-access-token");
+
+  assert.equal(fetchCalls.length, 1);
+  const body = JSON.parse(fetchCalls[0].options.body);
+  assert.equal(body.conversation, "hades-web-minions-user-1");
+  assert.equal(Object.hasOwn(body, "previous_response_id"), false);
+});
 test("hermesMediaClient source must route through shared apiUrl instead of hardcoded same-origin API base", () => {
   const source = readFileSync(resolve(DIR, "../../services/hermesMediaClient.js"), "utf8");
 

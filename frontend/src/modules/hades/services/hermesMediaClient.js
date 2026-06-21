@@ -20,8 +20,8 @@ export async function sendHermesResponse({ hermesApiBaseUrl, input, conversation
   const url = base.endsWith("/v1") ? `${base}/responses` : base;
   const body = {
     input: Array.isArray(input) ? [{ role: "user", content: input }] : input,
-    ...(previousResponseId ? { previous_response_id: previousResponseId } : {}),
     ...(conversation ? { conversation } : {}),
+    ...(!conversation && previousResponseId ? { previous_response_id: previousResponseId } : {}),
   };
   const res = await fetch(url, {
     method: "POST",
