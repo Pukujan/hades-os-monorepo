@@ -278,6 +278,36 @@ describe("Hermes profile API session routing and auth translation", () => {
     assert.equal(Object.keys(profile).includes("apiServerKey"), false);
   });
 
+  test("profile provisioner repairs Hades SOUL for existing profiles", async () => {
+    const { createHermesProfileProvisioner } = await loadProfileProvisioner();
+    const files = new Map();
+    const provisioner = createHermesProfileProvisioner({
+      hermesBin: "hermes",
+      profilesRoot: "/srv/hermes/profiles",
+      run: async () => {
+        throw new Error("profile already exists");
+      },
+      writeFile: async (filePath, content) => files.set(filePath.replace(/\\/g, "/"), content),
+      allocatePort: async () => {
+        throw new Error("existing profile should reuse its known port");
+      },
+      generateApiServerKey: () => {
+        throw new Error("existing profile should reuse its known API key");
+      },
+    });
+
+    await provisioner.ensureProfile({
+      userId: "user_a",
+      tenantId: "tenant_a",
+      apiServerKey: "profile-static-secret",
+      apiPort: 8657,
+    });
+
+    const soul = files.get("/srv/hermes/profiles/tenant_a_user_a/SOUL.md") || "";
+    assert.match(soul, /Hades is the quiet command layer/);
+    assert.doesNotMatch(soul, /You are Hermes Agent|created by Nous Research/i);
+  });
+
   test("profile provisioner sanitizes tenant/user identifiers before CLI and filesystem use", async () => {
     const { createHermesProfileProvisioner } = await loadProfileProvisioner();
     const commands = [];
@@ -556,7 +586,7 @@ describe("Hermes per-user profile state persistence", () => {
     await persistence.snapshotProfile({ tenantId: "t", userId: "u", profileName: "p" });
     await persistence.snapshotProfile({ tenantId: "t", userId: "u", profileName: "p" });
 
-    // Only one key stored — second overwrites the first
+    // Only one key stored - second overwrites the first
     assert.equal(storedKeys.length, 2);
     assert.equal(storedKeys[0], storedKeys[1]);
     assert.equal(storedKeys[0], "profiles/t/users/u/p/snapshot.json");

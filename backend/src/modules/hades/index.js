@@ -106,6 +106,15 @@ export async function register(app, context) {
   const supabaseClient = overrides.supabaseClient || (supabaseConfigured ? createSupabaseClient() : null);
   const storageMode = supabaseClient ? "supabase" : "memory";
 
+  let tokenCrypto = null;
+  if (overrides.crypto) {
+    tokenCrypto = overrides.crypto;
+  } else if (process.env.ENCRYPTION_KEY) {
+    try {
+      tokenCrypto = createTokenCrypto({ encryptionKey: process.env.ENCRYPTION_KEY });
+    } catch { tokenCrypto = null; }
+  }
+
   const hermesHomeDir = process.env.HERMES_HOME || path.join(process.cwd(), ".hermes-home");
   const hermesWorkspace = createHermesWorkspaceService({ homeDir: hermesHomeDir });
   const hermesStateRepository = overrides.hermesStateRepository || createHermesStateRepository({ storage: storageMode, supabaseClient });
@@ -125,6 +134,7 @@ export async function register(app, context) {
   const hermesProfileRegistry = overrides.hermesProfileRegistry || createHermesProfileRegistry({
     storage: storageMode,
     supabaseClient,
+    crypto: tokenCrypto,
   });
   const hermesProfileRouter = overrides.hermesProfileRouter || createHermesProfileRouter({
     publicBaseUrl: process.env.HERMES_PUBLIC_BASE_URL || "/api/hades/hermes",
@@ -256,15 +266,6 @@ export async function register(app, context) {
     spawnRuntime: hermesRuntimeSpawner.spawnRuntime,
     artifactStore: hermesArtifactStore,
   });
-
-  let tokenCrypto = null;
-  if (overrides.crypto) {
-    tokenCrypto = overrides.crypto;
-  } else if (process.env.ENCRYPTION_KEY) {
-    try {
-      tokenCrypto = createTokenCrypto({ encryptionKey: process.env.ENCRYPTION_KEY });
-    } catch { tokenCrypto = null; }
-  }
 
   let giphyProvider = null;
   try {
@@ -468,9 +469,8 @@ export async function register(app, context) {
       for (const entry of entries) {
         if (!entry.isDirectory()) continue;
         const soulPath = path.join(profilesRoot, entry.name, "SOUL.md");
-        if (!existsSync(soulPath)) continue;
         try {
-          const existing = await readFile2(soulPath, "utf8");
+          const existing = existsSync(soulPath) ? await readFile2(soulPath, "utf8") : "";
           if (existing.includes("Hades Soul") && existing.includes("quiet command layer")) continue;
         } catch { }
         await writeFile2(soulPath, newSoul, "utf8");
@@ -479,7 +479,7 @@ export async function register(app, context) {
   })();
 
   return {
-    detail: "→ /api/hades",
+    detail: "-> /api/hades",
     children: [
       { id: "hades", role: "api", mount: "/api/hades" },
     ]

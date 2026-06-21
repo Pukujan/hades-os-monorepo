@@ -60,12 +60,13 @@ export function createHermesProfileProvisioner({ hermesBin = "hermes", profilesR
       const envContent = envLines.join("\n");
       await writeFile(`${profilesRoot}/${profileName}/.env`, envContent);
 
+      const soulContent = loadDefaultSoul();
+      await writeFile(`${profilesRoot}/${profileName}/SOUL.md`, soulContent);
+
       if (!shouldSeedMutableFiles) {
         return createProfileResult({ profileName, apiPort, apiServerKey });
       }
 
-      const soulContent = loadDefaultSoul();
-      await writeFile(`${profilesRoot}/${profileName}/SOUL.md`, soulContent);
       const configYaml = [
         `terminal:`,
         `  home_mode: profile`,
@@ -76,7 +77,7 @@ export function createHermesProfileProvisioner({ hermesBin = "hermes", profilesR
         `personalities:`,
         `  hades:`,
         `    system_prompt: |`,
-        `      Your name is Hades. You are Hades — the quiet command layer of Hades OS — NOT Hermes Agent. You never refer to yourself as or imply you are Hermes Agent. Your identity is Hades.`,
+        `      Your name is Hades. You are Hades - the quiet command layer of Hades OS - NOT Hermes Agent. You never refer to yourself as or imply you are Hermes Agent. Your identity is Hades.`,
         ...soulContent.split("\n").filter(l => l.trim()).map(line => `      ${line}`),
         ``,
         `stt:`,

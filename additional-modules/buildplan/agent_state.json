@@ -1,8 +1,8 @@
 {
     "phase":  "implementation-complete",
-    "module":  "hades-worker-pool",
+    "module":  "hades-hermes-profile",
     "branch":  "master",
-    "task":  "Worker pool implemented and integrated. Pool wraps runCommand with task queue, per-user concurrency cap, idle timeout, shutdown. All 29 tests pass. Ready to check gate, commit, deploy.",
+    "task":  "Fixed Hermes profile identity and registry persistence. Existing profiles now get Hades SOUL.md repaired on ensure/startup; Hermes profile registry persists profile route metadata and encrypted API_SERVER_KEY to Supabase. Focused tests pass; lint:architecture still fails on pre-existing API docs registry gaps.",
     "state":  {
                   "hermesRailwayProbe":  {
                                              "status":  "completed",
@@ -169,6 +169,14 @@
                      "fastApiModularContractMigrationPacket": {
                          "status": "handoff_ready",
                          "summary": "Created FastAPI modular-contract migration packet for OpenCode. Added scripts/hades-fastapi-modular-contract.red.test.mjs (static red suite against HADES_FASTAPI_REPO), scripts/hades-fastapi-migration-e2e.tdd.test.mjs (env-gated running API proof), package scripts test:fastapi-migration-red and test:fastapi-migration-e2e, plan log 015, and handoff 024. Plan maps Express modular contracts to FastAPI APIRouter/Depends/Pydantic/ModuleManifest/OpenAPI contracts and preserves Hades/Hermes auth/profile/media invariants. Red suite currently fails 9/9 because ../hades-os-fastapi does not exist; E2E skips 5/5 without HADES_FASTAPI_BASE_URL."
+                     },
+                     "hadesHermesProfileRegistrySupabasePersistence": {
+                         "status": "completed",
+                         "summary": "createHermesProfileRegistry now supports Supabase-backed profile metadata persistence in hades_hermes_profiles with encrypted API_SERVER_KEY custody via existing token crypto, decrypted server-side only for edge proxy use. Added migration 015_hades_hermes_profiles.sql and focused TDD coverage proving encrypted persistence across registry instances and missing_crypto failure without crypto."
+                     },
+                     "hadesHermesSoulRepairExistingProfiles": {
+                         "status": "completed",
+                         "summary": "Fixed Hermes returning default Hermes Agent persona for existing profiles. Hermes docs confirm SOUL.md is loaded only from HERMES_HOME/profile home and fallback identity is used if missing, empty, or unreadable. Provisioner now writes backend/src/modules/hades/souls/hades.soul.md to SOUL.md even for existing profiles before gateway startup, and backend startup repair no longer skips profile folders with missing SOUL.md. Added regression test in hades.hermes-peer-model.tdd.test.js."
                      }
                 }
 }
