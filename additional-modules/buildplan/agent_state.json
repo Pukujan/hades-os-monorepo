@@ -186,7 +186,11 @@
                          "status": "completed",
                          "summary": "Implemented study 008 as enforceable repo guardrails: OpenCode Plan/Build permissions, root/canonical opencode config sync, Codex/OpenCode workflow docs and templates, contract test, package scripts, and CI gate."
                      },
-                      "hadesHermesResponseConversationConflictFix": {
+                      "frontendPlaywrightSmokeE2e": {
+                         "status": "completed",
+                         "summary": "Added frontend Playwright e2e scaffold with config, Chromium smoke test for unauthenticated Hades login shell, ignored Playwright output artifacts, installed local Chromium browser, and verified npm.cmd --prefix frontend run test:e2e plus frontend build."
+                     },
+                     "hadesHermesResponseConversationConflictFix": {
                           "status": "completed",
                           "summary": "Fixed production 400 from Hermes: Cannot use both conversation and previous_response_id. Hermes docs define named conversation and previous_response_id as alternative chaining mechanisms. frontend/src/modules/hades/services/hermesMediaClient.js now omits previous_response_id whenever conversation is present. Added regression coverage to hermesMediaClient.routing.test.js. npm.cmd --prefix frontend run test:hades-hermes-routing-ui, hermesConversationContinuity.tdd.test.js, and frontend build pass."
                       },
