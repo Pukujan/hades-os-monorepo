@@ -9,12 +9,14 @@ on:
 jobs:
   quality-gate:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: npm
           cache-dependency-path: |
             backend/package-lock.json
@@ -28,20 +30,48 @@ jobs:
         run: npm ci
         working-directory: frontend
 
-      - name: Lint contracts
-        run: npm run lint:contracts
+      - name: Run CI checks
+        run: npm run test:ci
 
-      - name: Lint repo artifacts
-        run: npm run lint:repo-artifacts
+      - name: Build frontend
+        run: npm run build
 
-      - name: Agent workflow contract
-        run: npm run test:agent-workflow
+  frontend-unit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
 
-      - name: Lint architecture
-        run: npm run lint:architecture
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
 
-      - name: Unit tests
-        run: npm test
+      - name: Install frontend
+        run: npm ci
+        working-directory: frontend
 
-      - name: Golden regression evals
-        run: npm run test:evals
+      - name: Vitest unit tests
+        run: npx vitest run
+        working-directory: frontend
+
+  codex-review:
+    if: github.event_name == 'pull_request'
+    needs: quality-gate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Codex review
+        id: codex
+        uses: openai/codex-action@v1
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          prompt: |
+            Review this change for glue-code risk, test gaps, and contract drift.
+            Focus on backend/src/modules/hades, backend/src/modules/auth, frontend/src/api, and frontend/src/core.

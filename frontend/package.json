@@ -1,35 +1,39 @@
 {
-    "name":  "modular-monolith-frontend",
-    "private":  true,
-    "version":  "1.0.0",
-    "type":  "module",
-    "scripts":  {
-                    "dev":  "vite",
-                    "build":  "vite build",
-                    "preview":  "vite preview",
-                    "test":  "node --import ./test-hooks/register.mjs --test",
-                    "test:hades-workflow-ui":  "node --import ./test-hooks/register.mjs --test src/modules/hades/tests/unit/workflowExplanation.tdd.test.js",
-                    "test:hades-workflow-build-phases-ui":  "node --import ./test-hooks/register.mjs --test src/modules/hades/tests/unit/workflowBuildPhases.tdd.test.js",
-                    "test:hades-extension-install-ui":  "node --import ./test-hooks/register.mjs --test src/modules/hades/tests/unit/extensionInstallModule.tdd.test.js",
-                    "test:hades-chat-media-ui":  "node --import ./test-hooks/register.mjs --test src/modules/hades/tests/unit/ChatBubble.test.js src/modules/hades/tests/unit/hadesViewModel.logic.test.js src/modules/hades/tests/unit/sendChat.test.js",
-                    "test:hades-instagram-social-ui":  "node --import ./test-hooks/register.mjs --test src/modules/hades/tests/unit/instagramSocial.tdd.test.js",
-                    "test:hades-inline-gif-media-ui":  "node --import ./test-hooks/register.mjs --test src/modules/hades/tests/unit/inlineGifResponseMapping.tdd.test.js src/modules/hades/tests/unit/ChatBubble.test.js",
-                    "test:hades-hermes-routing-ui":  "node --import ./test-hooks/register.mjs --test src/modules/hades/tests/unit/hermesMediaClient.routing.test.js",
-                    "analyze":  "set ANALYZE=true^&^& vite build"
-                },
-    "dependencies":  {
-                         "@supabase/supabase-js":  "^2.108.1",
-                         "lucide-react":  "^1.17.0",
-                         "react":  "^18.3.1",
-                         "react-dom":  "^18.3.1",
-                         "react-router-dom":  "^6.30.0"
-                     },
-    "devDependencies":  {
-                            "@vitejs/plugin-react":  "^4.3.1",
-                            "jsdom":  "^29.1.1",
-                            "playwright":  "^1.60.0",
-                            "rollup-plugin-visualizer":  "^7.0.1",
-                            "vite":  "^5.4.10"
-                        }
+    "name": "modular-monolith-frontend",
+    "private": true,
+    "version": "1.0.0",
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "preview": "vite preview",
+        "test": "npm run test:unit",
+        "test:unit": "vitest run",
+        "test:watch": "vitest",
+        "test:e2e": "playwright test",
+        "test:hades-workflow-ui": "vitest run src/modules/hades/tests/unit/workflowExplanation.tdd.test.js",
+        "test:hades-workflow-build-phases-ui": "vitest run src/modules/hades/tests/unit/workflowBuildPhases.tdd.test.js",
+        "test:hades-extension-install-ui": "vitest run src/modules/hades/tests/unit/extensionInstallModule.tdd.test.js",
+        "test:hades-chat-media-ui": "vitest run src/modules/hades/tests/unit/ChatBubble.test.js src/modules/hades/tests/unit/hadesViewModel.logic.test.js src/modules/hades/tests/unit/sendChat.test.js",
+        "test:hades-instagram-social-ui": "vitest run src/modules/hades/tests/unit/instagramSocial.tdd.test.js",
+        "test:hades-inline-gif-media-ui": "vitest run src/modules/hades/tests/unit/inlineGifResponseMapping.tdd.test.js src/modules/hades/tests/unit/ChatBubble.test.js",
+        "test:hades-hermes-routing-ui": "vitest run src/modules/hades/tests/unit/hermesMediaClient.routing.test.js",
+        "analyze": "set ANALYZE=true^&^& vite build"
+    },
+    "dependencies": {
+        "@supabase/supabase-js": "^2.108.1",
+        "lucide-react": "^1.17.0",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1",
+        "react-router-dom": "^6.30.0"
+    },
+    "devDependencies": {
+        "@testing-library/react": "^16.3.2",
+        "@vitejs/plugin-react": "^4.3.1",
+        "jsdom": "^29.1.1",
+        "playwright": "^1.60.0",
+        "rollup-plugin-visualizer": "^7.0.1",
+        "vite": "^5.4.10",
+        "vitest": "^3.2.6"
+    }
 }
-

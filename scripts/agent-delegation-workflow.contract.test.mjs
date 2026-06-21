@@ -98,6 +98,5 @@ test("repo exposes a dedicated agent workflow contract command", () => {
   assert.match(pkg.scripts?.["test:ci"] ?? "", /npm run test:agent-workflow/);
 
   const ci = readText(".github/workflows/ci.yml");
-  assert.match(ci, /Agent workflow contract/);
-  assert.match(ci, /npm run test:agent-workflow/);
+  assert.match(ci, /npm run test:ci/);
 });
